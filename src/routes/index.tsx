@@ -14,7 +14,9 @@ function Home() {
     <button
       type="button"
       onClick={() => {
-        countDto.updateCount({ data: 2 }).then(() => router.invalidate())
+        countDto
+          .updateCount({ data: { count: 'hello' as unknown as number } })
+          .then(() => router.invalidate())
       }}
       className="cursor-pointer rounded-md px-4 py-2 outline hover:bg-slate-200/50"
     >

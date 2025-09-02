@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import { createServerFn } from '@tanstack/react-start'
+import { countSchema } from '~/features/root/types/schemas/count-schema'
 
 const filePath = './src/count.txt'
 
@@ -12,10 +13,10 @@ const getCount = createServerFn({ method: 'GET' }).handler(async (): Promise<num
 })
 
 const updateCount = createServerFn({ method: 'POST' })
-  .validator((d: number) => d)
+  .validator(countSchema)
   .handler(async ({ data }) => {
     const count = await readCount()
-    await fs.promises.writeFile(filePath, `${count + data}`)
+    await fs.promises.writeFile(filePath, `${count + data.count}`)
   })
 
 export const countDto = {
