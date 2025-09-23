@@ -19,10 +19,8 @@ describe('Database Migration', () => {
   })
 
   test('should run migrations successfully', async () => {
-    // Migration should create tables without errors
-    await expect(async () => {
-      await migrate(db, { migrationsFolder: './drizzle/migrations' })
-    }).not.toThrow()
+    // drizzle.config.ts で out: './drizzle' のため直接 './drizzle' を指定
+    await expect(migrate(db, { migrationsFolder: './drizzle' })).resolves.not.toThrow()
   })
 
   test('should create habits table with correct structure', async () => {
@@ -65,12 +63,15 @@ describe('Database Migration', () => {
     })
 
     // Attempt to insert second habit with same name should fail
-    await expect(async () => {
-      await db.insert(habits).values({
-        id: 'test-habit-2',
-        name: 'Unique Habit', // Same name
-        description: 'Second habit',
-      })
-    }).rejects.toThrow()
+    await expect(
+      db
+        .insert(habits)
+        .values({
+          id: 'test-habit-2',
+          name: 'Unique Habit', // Same name
+          description: 'Second habit',
+        })
+        .returning(),
+    ).rejects.toThrow()
   })
 })

@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { int, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { int, integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
   id: int().primaryKey({ autoIncrement: true }),
@@ -27,7 +27,10 @@ export const records = sqliteTable('records', {
   completed: integer({ mode: 'boolean' }).default(false),
   duration_minutes: integer().default(0),
   created_at: text().default(sql`CURRENT_TIMESTAMP`),
-})
+}, (table) => [
+  // Unique constraint to prevent duplicate records for the same habit on the same date
+  unique().on(table.habit_id, table.date),
+])
 
 // Settings table for user preferences
 export const settings = sqliteTable('settings', {
