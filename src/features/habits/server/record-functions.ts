@@ -40,6 +40,7 @@ const createRecord = createServerFn({ method: 'POST' })
           date: data.date,
           completed: data.completed,
           duration_minutes: data.durationMinutes,
+          notes: data.notes,
           created_at: now,
         })
         .returning()
@@ -97,6 +98,10 @@ const updateRecord = createServerFn({ method: 'POST' })
 
       if (data.durationMinutes !== undefined) {
         updateData.duration_minutes = data.durationMinutes
+      }
+
+      if (data.notes !== undefined) {
+        updateData.notes = data.notes
       }
 
       // 記録を更新

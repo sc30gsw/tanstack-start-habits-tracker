@@ -44,6 +44,11 @@ export const createRecordSchema = z.object({
     .min(0, '実行時間は0分以上で入力してください')
     .max(1440, '実行時間は1440分（24時間）以下で入力してください')
     .default(0),
+  notes: z
+    .string()
+    .max(500, 'メモは500文字以内で入力してください')
+    .optional()
+    .transform((val) => val?.trim() || undefined),
 })
 
 /**
@@ -70,6 +75,11 @@ export const updateRecordSchema = z.object({
     .min(0, '実行時間は0分以上で入力してください')
     .max(1440, '実行時間は1440分（24時間）以下で入力してください')
     .optional(),
+  notes: z
+    .string()
+    .max(500, 'メモは500文字以内で入力してください')
+    .optional()
+    .transform((val) => val?.trim() || undefined),
 })
 
 /**
@@ -83,6 +93,7 @@ export const recordSchema = z.object({
   date: z.string(),
   completed: z.boolean(),
   durationMinutes: z.number(),
+  notes: z.string().optional(),
   createdAt: z.string(),
 })
 

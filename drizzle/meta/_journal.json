@@ -15,6 +15,13 @@
       "when": 1758594431324,
       "tag": "0001_wandering_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1758613031950,
+      "tag": "0002_brown_cassandra_nova",
+      "breakpoints": true
     }
   ]
 }
