@@ -1,0 +1,87 @@
+import { Box, Card, Fieldset, Group, Radio, Stack, Text } from '@mantine/core'
+import { IconChartBar, IconCheckbox, IconClock } from '@tabler/icons-react'
+import dayjs from 'dayjs'
+import { HabitHeatmap } from '~/features/habits/components/habit-heatmap'
+import type { RecordEntity } from '~/features/habits/types/habit'
+
+type HeatmapSectionProps = {
+  records: RecordEntity[]
+  selectedDate: Date | null
+  metric: 'duration' | 'completion'
+  onMetricChange: (metric: 'duration' | 'completion') => void
+  onSelectDate: (date: Date) => void
+}
+
+export function HeatmapSection({
+  records,
+  selectedDate,
+  metric,
+  onMetricChange,
+  onSelectDate,
+}: HeatmapSectionProps) {
+  return (
+    <Card withBorder padding="lg" radius="md" shadow="sm">
+      <Stack gap="md">
+        <Group gap="xs" align="center">
+          <IconChartBar size={24} color="var(--mantine-color-blue-6)" />
+          <Text size="lg" fw={600} c="dark.7">
+            年間ヒートマップ
+          </Text>
+        </Group>
+
+        <Fieldset
+          legend="表示指標"
+          style={{
+            border: '1px solid var(--mantine-color-gray-3)',
+            borderRadius: '8px',
+            padding: '12px',
+          }}
+        >
+          <Radio.Group value={metric} onChange={(v: any) => onMetricChange(v)}>
+            <Group gap="lg">
+              <Radio
+                value="duration"
+                label={
+                  <Group gap="xs" align="center">
+                    <IconClock size={16} color="var(--mantine-color-blue-5)" />
+                    <Text size="sm">時間 (分)</Text>
+                  </Group>
+                }
+              />
+              <Radio
+                value="completion"
+                label={
+                  <Group gap="xs" align="center">
+                    <IconCheckbox size={16} color="var(--mantine-color-green-5)" />
+                    <Text size="sm">達成状況</Text>
+                  </Group>
+                }
+              />
+            </Group>
+          </Radio.Group>
+        </Fieldset>
+
+        <Box
+          p="xs"
+          style={{
+            borderRadius: '8px',
+            backgroundColor: 'var(--mantine-color-gray-0)',
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            overflow: 'auto',
+          }}
+        >
+          <HabitHeatmap
+            records={records}
+            onSelectDate={(date) => {
+              onSelectDate(dayjs(date).toDate())
+            }}
+            selectedDate={selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : null}
+            metric={metric}
+          />
+        </Box>
+      </Stack>
+    </Card>
+  )
+}

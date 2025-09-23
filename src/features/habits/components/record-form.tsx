@@ -1,38 +1,50 @@
-import { Alert, Button, Group, NumberInput, Stack, Switch } from '@mantine/core'
+import { Alert, Button, Group, NumberInput, Stack, Switch, Text } from '@mantine/core'
 import { useForm } from '@mantine/form'
+import { notifications } from '@mantine/notifications'
+import { IconAlertTriangle } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
-import { createRecord } from '~/features/habits/server/record-functions'
-import { createRecordSchema } from '../types/schemas/record-schemas'
+import { useTransition } from 'react'
+import { recordDto } from '~/features/habits/server/record-functions'
+import type { RecordEntity } from '~/features/habits/types/habit'
+import { createRecordSchema } from '~/features/habits/types/schemas/record-schemas'
 
 type RecordFormProps = {
   habitId: string
   date: string
   onSuccess: () => void
   onCancel: () => void
+  existingRecord?: RecordEntity
 }
 
-export function RecordForm({ habitId, date, onSuccess, onCancel }: RecordFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+type FormValues = {
+  completed: boolean
+  durationMinutes: number | ''
+}
+
+export function RecordForm({
+  habitId,
+  date,
+  onSuccess,
+  onCancel,
+  existingRecord,
+}: RecordFormProps) {
+  const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  interface FormValues {
-    completed: boolean
-    duration_minutes: number | ''
-  }
   const form = useForm<FormValues>({
-    initialValues: { completed: false, duration_minutes: 0 },
+    initialValues: {
+      completed: existingRecord?.completed ?? false,
+      durationMinutes: existingRecord?.duration_minutes ?? 0,
+    },
     validate: (values) => {
-      // duration_minutes が '' のときは 0 として扱う
+      // durationMinutes が '' のときは 0 として扱う
       const parsed = createRecordSchema
-        .pick({ completed: true, duration_minutes: true, habit_id: true, date: true })
+        .pick({ completed: true, durationMinutes: true, habitId: true, date: true })
         .safeParse({
-          habit_id: habitId,
+          habitId: habitId,
           date,
           completed: values.completed,
-          duration_minutes:
-            typeof values.duration_minutes === 'number' ? values.duration_minutes : 0,
+          durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
         })
       if (parsed.success) return {}
       const fieldErrors: Record<string, string> = {}
@@ -44,40 +56,69 @@ export function RecordForm({ habitId, date, onSuccess, onCancel }: RecordFormPro
     },
     transformValues: (values) => ({
       completed: values.completed,
-      duration_minutes: typeof values.duration_minutes === 'number' ? values.duration_minutes : 0,
+      durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
     }),
   })
 
-  const handleSubmit = async (values: FormValues) => {
-    setIsSubmitting(true)
-    setError(null)
-    try {
-      const result = await createRecord({
-        habit_id: habitId,
-        date,
-        completed: values.completed,
-        duration_minutes: typeof values.duration_minutes === 'number' ? values.duration_minutes : 0,
-      })
-      if (result.success) {
-        router.invalidate()
-        onSuccess()
-        form.reset()
-      } else {
-        setError(result.error || '記録の作成に失敗しました')
+  const handleSubmit = (values: FormValues) => {
+    startTransition(async () => {
+      form.clearErrors()
+
+      try {
+        const durationMinutes =
+          typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
+
+        const result = existingRecord
+          ? await recordDto.updateRecord({
+              data: {
+                id: existingRecord.id,
+                completed: values.completed,
+                durationMinutes,
+              },
+            })
+          : await recordDto.createRecord({
+              data: {
+                habitId,
+                date,
+                completed: values.completed,
+                durationMinutes,
+              },
+            })
+
+        if (result.success) {
+          router.invalidate()
+          onSuccess()
+          form.reset()
+          notifications.show({
+            title: '成功',
+            message: existingRecord ? '記録が更新されました' : '記録が作成されました',
+            color: 'green',
+          })
+        } else {
+          notifications.show({
+            title: 'エラー',
+            message: result.error || `記録の${existingRecord ? '更新' : '作成'}に失敗しました`,
+            color: 'red',
+          })
+          form.setErrors({ durationMinutes: result.error || '記録の保存に失敗しました' })
+        }
+      } catch (_err) {
+        notifications.show({
+          title: 'エラー',
+          message: '予期しないエラーが発生しました',
+          color: 'red',
+        })
+        form.setErrors({ durationMinutes: '予期しないエラーが発生しました' })
       }
-    } catch (_err) {
-      setError('予期しないエラーが発生しました')
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
       <Stack gap="md">
-        {error && (
-          <Alert color="red" title="エラー">
-            {error}
+        {form.errors.durationMinutes && (
+          <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
+            <Text c="red">{form.errors.durationMinutes}</Text>
           </Alert>
         )}
         <Switch
@@ -91,18 +132,18 @@ export function RecordForm({ habitId, date, onSuccess, onCancel }: RecordFormPro
           placeholder="0"
           min={0}
           max={1440}
-          key={form.key('duration_minutes')}
-          value={form.values.duration_minutes}
+          key={form.key('durationMinutes')}
+          value={form.values.durationMinutes}
           onChange={(value) =>
-            form.setFieldValue('duration_minutes', typeof value === 'string' ? '' : (value ?? 0))
+            form.setFieldValue('durationMinutes', typeof value === 'string' ? '' : (value ?? 0))
           }
-          error={form.errors.duration_minutes}
+          error={form.errors.durationMinutes}
         />
         <Group gap="sm">
-          <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>
-            記録を保存
+          <Button type="submit" loading={isPending} disabled={isPending}>
+            {existingRecord ? '記録を更新' : '記録を保存'}
           </Button>
-          <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
+          <Button variant="outline" onClick={onCancel} disabled={isPending}>
             キャンセル
           </Button>
         </Group>
