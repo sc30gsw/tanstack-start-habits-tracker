@@ -44,7 +44,9 @@ function HabitDetailPage() {
   return (
     <Container size="lg" py="xl">
       <Stack gap="md">
-        <Title order={1} c={titleColor}>{habit.data?.name}</Title>
+        <Title order={1} c={titleColor}>
+          {habit.data?.name}
+        </Title>
         <HabitDetail
           habit={habit.data!}
           records={records.success ? records.data || [] : []}

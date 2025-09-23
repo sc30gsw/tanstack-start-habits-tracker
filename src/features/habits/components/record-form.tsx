@@ -1,4 +1,14 @@
-import { Alert, Button, Group, NumberInput, Stack, Switch, Text, Textarea, useComputedColorScheme } from '@mantine/core'
+import {
+  Alert,
+  Button,
+  Group,
+  NumberInput,
+  Stack,
+  Switch,
+  Text,
+  Textarea,
+  useComputedColorScheme,
+} from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconAlertTriangle } from '@tabler/icons-react'
@@ -202,15 +212,18 @@ export function RecordForm({
           description={`${form.values.notes.length}/500文字`}
           styles={{
             input: {
-              backgroundColor: computedColorScheme === 'dark'
-                ? 'var(--mantine-color-dark-6)'
-                : 'var(--mantine-color-white)',
-              color: computedColorScheme === 'dark'
-                ? 'var(--mantine-color-gray-1)'
-                : 'var(--mantine-color-dark-8)',
-              border: computedColorScheme === 'dark'
-                ? '1px solid var(--mantine-color-dark-4)'
-                : '1px solid var(--mantine-color-gray-3)',
+              backgroundColor:
+                computedColorScheme === 'dark'
+                  ? 'var(--mantine-color-dark-6)'
+                  : 'var(--mantine-color-white)',
+              color:
+                computedColorScheme === 'dark'
+                  ? 'var(--mantine-color-gray-1)'
+                  : 'var(--mantine-color-dark-8)',
+              border:
+                computedColorScheme === 'dark'
+                  ? '1px solid var(--mantine-color-dark-4)'
+                  : '1px solid var(--mantine-color-gray-3)',
             },
           }}
         />
