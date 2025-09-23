@@ -61,7 +61,17 @@ export function HeatmapSection({
           </Radio.Group>
         </Fieldset>
 
-        <Box p="xs" style={{ borderRadius: '8px', backgroundColor: 'var(--mantine-color-gray-0)' }}>
+        <Box
+          p="xs"
+          style={{
+            borderRadius: '8px',
+            backgroundColor: 'var(--mantine-color-gray-0)',
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            overflow: 'auto',
+          }}
+        >
           <HabitHeatmap
             records={records}
             onSelectDate={(date) => {

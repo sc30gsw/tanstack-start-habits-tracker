@@ -131,27 +131,73 @@ export function HabitHeatmap({
       </Box>
 
       {/* 凡例 */}
-      <Group gap="lg" justify="center">
-        <Text size="xs" c="dimmed">
-          記録なし
-        </Text>
-        <Group gap="xs" align="center">
-          {['#ebedf0', ...colors].map((color, index) => (
+      {metric === 'duration' ? (
+        // 時間の場合は段階的なグラデーション
+        <Group gap="lg" justify="center">
+          <Text size="xs" c="dimmed">
+            記録なし
+          </Text>
+          <Group gap="xs" align="center">
+            {['#ebedf0', ...colors].map((color, index) => (
+              <Box
+                key={index}
+                style={{
+                  width: 12,
+                  height: 12,
+                  backgroundColor: color,
+                  borderRadius: 2,
+                }}
+              />
+            ))}
+          </Group>
+          <Text size="xs" c="dimmed">
+            高活動
+          </Text>
+        </Group>
+      ) : (
+        // 完了状況の場合は未完了・完了の明確な3段階
+        <Group gap="sm" justify="center" wrap="nowrap">
+          <Group gap="xs" align="center">
             <Box
-              key={index}
               style={{
                 width: 12,
                 height: 12,
-                backgroundColor: color,
+                backgroundColor: '#ebedf0',
                 borderRadius: 2,
               }}
             />
-          ))}
+            <Text size="xs" c="dimmed">
+              記録なし
+            </Text>
+          </Group>
+          <Group gap="xs" align="center">
+            <Box
+              style={{
+                width: 12,
+                height: 12,
+                backgroundColor: colors[1], // 未完了用の薄い色
+                borderRadius: 2,
+              }}
+            />
+            <Text size="xs" c="dimmed">
+              未完了
+            </Text>
+          </Group>
+          <Group gap="xs" align="center">
+            <Box
+              style={{
+                width: 12,
+                height: 12,
+                backgroundColor: colors[3], // 完了用の濃い色
+                borderRadius: 2,
+              }}
+            />
+            <Text size="xs" c="dimmed">
+              完了
+            </Text>
+          </Group>
         </Group>
-        <Text size="xs" c="dimmed">
-          {metric === 'duration' ? '高活動' : '完了'}
-        </Text>
-      </Group>
+      )}
     </Stack>
   )
 }
