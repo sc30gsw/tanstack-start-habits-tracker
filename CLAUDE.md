@@ -4,6 +4,12 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 
 ## Project Context
 
+### Project Information
+- **Project Name**: trak-daily-habits-app
+- **Description**: Comprehensive habit tracking application with time recording and visualization
+- **Target Platform**: MacBook-optimized desktop application with responsive design
+- **Core Features**: Daily habit tracking, duration recording, calendar/heatmap visualization, minimal UI
+
 ### Paths
 - Steering: `.kiro/steering/`
 - Specs: `.kiro/specs/`
@@ -18,8 +24,99 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - Check `.kiro/specs/` for active specifications
 - Use `/kiro:spec-status [feature-name]` to check progress
 
+## Technology Stack
+
+### Frontend Framework
+- **TanStack Start**: SSR-enabled modern React framework
+- **React 19**: Latest React with concurrent features
+- **TypeScript 5.7**: Type-safe development with latest features
+
+### UI Framework
+- **Mantine UI 8.x**: Primary component library
+  - `@mantine/core`: Core components and theme system
+  - `@mantine/charts`: Data visualization components
+  - `@mantine/dates`: Calendar and date picker components
+  - `@mantine/hooks`: Utility hooks
+  - `@mantine/modals`: Modal management
+- **Tailwind CSS 4.0**: Utility-first CSS framework
+- **PostCSS**: CSS processing with Mantine preset
+
+### Backend & Database
+- **TanStack Router**: File-based routing with type safety
+- **Server Functions**: Server-side operations with validation
+- **Drizzle ORM**: Type-safe database operations
+- **libSQL (Turso)**: SQLite-compatible cloud database
+- **Zod**: Schema validation library
+
+### Development Tools
+- **Vite**: Fast build tool and development server
+- **Bun**: Package manager and runtime
+- **Biome**: Code formatting and linting
+- **Vitest**: Unit testing framework
+- **Testing Library**: Component testing utilities
+
+### Additional Libraries
+- **dayjs**: Date manipulation library
+- **recharts**: Additional charting capabilities
+- **web-vitals**: Performance monitoring
+
 ## Development Guidelines
-- Think in English, generate responses in English
+
+### TanStack Start Best Practices
+- Use file-based routing in `src/routes/`
+- Implement Server Functions with `createServerFn`
+- Leverage route loaders for SSR data fetching
+- Use type-safe navigation with `Link` and `useNavigate`
+- Configure selective SSR per route as needed
+
+### Mantine UI Integration
+- Configure MantineProvider with consistent theme
+- Use theme tokens for colors, spacing, and typography
+- Leverage Styles API for component customization
+- Follow Mantine component patterns and conventions
+- Use CSS Modules or @mantine/emotion for custom styling
+
+### Database & Validation
+- Always validate Server Function inputs with Zod schemas
+- Use Drizzle ORM for type-safe database operations
+- Implement proper error handling and boundaries
+- Follow database schema design patterns
+
+### Code Organization
+- Feature-based directory structure
+- Colocation of related components, hooks, and utilities
+- Consistent naming conventions (kebab-case files, PascalCase components)
+- Proper TypeScript typing throughout
+
+## Development Commands
+
+### Development Server
+```bash
+bun run dev          # Start development server on port 3000
+```
+
+### Build & Production
+```bash
+bun run build        # Build for production
+bun run start        # Start production server
+bun run serve        # Preview production build
+```
+
+### Code Quality
+```bash
+bun run test         # Run Vitest unit tests
+bun run tsc          # TypeScript type checking
+bun run lint         # Biome linting with auto-fix
+bun run format       # Biome code formatting
+bun run check        # Biome comprehensive check
+```
+
+### Package Management
+```bash
+bun install         # Install dependencies
+bun add <package>    # Add new dependency
+bun add -d <package> # Add development dependency
+```
 
 ## Workflow
 
@@ -70,7 +167,6 @@ Managed by `/kiro:steering` command. Updates here reflect command changes.
 - **Conditional**: Loaded for specific file patterns (e.g., "*.test.js")
 - **Manual**: Reference with `@filename.md` syntax
 
-
 ## AI Operation Principles (Highest Priority)
 
 1. **Pre-execution Confirmation**: AI must always report its work plan before file generation, updates, or program execution, obtain y/n user confirmation, and halt all execution until receiving 'y'.
@@ -85,10 +181,47 @@ Managed by `/kiro:steering` command. Updates here reflect command changes.
 
 6. **Mandatory Principle Display**: AI must verbatim output these 6 principles at the beginning of every chat before responding.
 
+## Project Architecture
+
+### Directory Structure
+Follow TanStack Start conventions with feature-based organization:
+
+```
+src/
+├── routes/                 # TanStack Router file-based routes
+│   ├── __root.tsx         # Root layout with providers
+│   ├── index.tsx          # Home page
+│   └── api/               # Server-side API routes
+├── features/              # Feature-based modules
+│   ├── habits/            # Habit tracking feature
+│   │   ├── components/    # Feature components
+│   │   ├── server/        # Server functions
+│   │   ├── types/         # Type definitions and schemas
+│   │   └── hooks/         # Feature-specific hooks
+│   └── calendar/          # Calendar visualization feature
+├── components/            # Shared components
+│   ├── ui/                # Reusable UI components
+│   └── providers/         # Context providers
+├── hooks/                 # Global custom hooks
+├── theme/                 # Mantine theme configuration
+├── types/                 # Global type definitions
+├── utils/                 # Utility functions
+└── constants/             # Application constants
+```
+
+### Data Models
+Based on REQUIREMENTS.md specifications:
+
+- **Habits**: Core habit definitions with metadata
+- **Records**: Daily habit execution records with duration
+- **Settings**: User preferences and configuration
+- **Calendar Data**: Aggregated view data for visualization
+
 ## Additional Information Files
-- @REQUIREMENTS.md.md - Project requirements document
+- @REQUIREMENTS.md - Project requirements document with user stories
+- @CODING-STANDARDS.md - Project coding conventions, directory structure, prohibitions
+- `package.json` - Dependencies and development scripts
 - `.claude/architecture.md` - Project architecture document
-- @CODING-STANDARDS.md  - Project coding conventions, directory structure, prohibitions
 
 ## Prohibited Items (Highest Priority)
 - Excessive use of `any` type (use TypeScript Utility types whenever possible)
