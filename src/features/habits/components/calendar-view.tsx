@@ -8,6 +8,7 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core'
+import { IconCalendar } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
@@ -37,12 +38,15 @@ export function CalendarView({
   const weekDates = Array.from({ length: 7 }).map((_, i) => startOfWeek.add(i, 'day'))
 
   return (
-    <Card withBorder padding="lg">
+    <Card withBorder padding="lg" radius="md" shadow="sm">
       <Stack gap="sm">
         <Group justify="space-between" align="center">
-          <Text size="lg" fw={500}>
-            カレンダー
-          </Text>
+          <Group gap="xs" align="center">
+            <IconCalendar size={24} color="var(--mantine-color-blue-6)" />
+            <Text size="lg" fw={600} c="dark.7">
+              カレンダー
+            </Text>
+          </Group>
           <SegmentedControl
             size="xs"
             value={calendarView}
