@@ -13,7 +13,7 @@ describe('Record Server Functions', () => {
     test('should create record with valid data', async () => {
       // まず習慣を作成
       const habitResult = await createHabit({
-        name: 'テスト習慣',
+        name: `テスト習慣_${Date.now()}_${Math.random()}`,
         description: 'テスト用の習慣',
       })
 
@@ -57,7 +57,7 @@ describe('Record Server Functions', () => {
     test('should prevent future date records', async () => {
       // 習慣を作成
       const habitResult = await createHabit({
-        name: '未来日付テスト習慣',
+        name: `未来日付テスト習慣_${Date.now()}_${Math.random()}`,
         description: 'テスト用',
       })
 
@@ -82,7 +82,7 @@ describe('Record Server Functions', () => {
     test('should prevent duplicate records for same habit and date', async () => {
       // 習慣を作成
       const habitResult = await createHabit({
-        name: '重複テスト習慣',
+        name: `重複テスト習慣_${Date.now()}_${Math.random()}`,
         description: 'テスト用',
       })
 
@@ -110,7 +110,7 @@ describe('Record Server Functions', () => {
     test('should update existing record', async () => {
       // 習慣と記録を作成
       const habitResult = await createHabit({
-        name: '更新テスト習慣',
+        name: `更新テスト習慣_${Date.now()}_${Math.random()}`,
         description: 'テスト用',
       })
 
@@ -145,7 +145,7 @@ describe('Record Server Functions', () => {
     test('should handle partial updates', async () => {
       // 習慣と記録を作成
       const habitResult = await createHabit({
-        name: '部分更新テスト習慣',
+        name: `部分更新テスト習慣_${Date.now()}_${Math.random()}`,
         description: 'テスト用',
       })
 
@@ -186,7 +186,7 @@ describe('Record Server Functions', () => {
     test('should delete existing record', async () => {
       // 習慣と記録を作成
       const habitResult = await createHabit({
-        name: '削除テスト習慣',
+        name: `削除テスト習慣_${Date.now()}_${Math.random()}`,
         description: 'テスト用',
       })
 
@@ -224,7 +224,7 @@ describe('Record Server Functions', () => {
     test('should return all records', async () => {
       // 習慣を作成
       const habitResult = await createHabit({
-        name: '一覧テスト習慣',
+        name: `一覧テスト習慣_${Date.now()}_${Math.random()}`,
         description: 'テスト用',
       })
 
@@ -257,12 +257,12 @@ describe('Record Server Functions', () => {
     test('should filter records by habit_id', async () => {
       // 複数の習慣を作成
       const habit1Result = await createHabit({
-        name: 'フィルターテスト習慣1',
+        name: `フィルターテスト習慣1_${Date.now()}_${Math.random()}`,
         description: 'テスト用',
       })
 
       const habit2Result = await createHabit({
-        name: 'フィルターテスト習慣2',
+        name: `フィルターテスト習慣2_${Date.now()}_${Math.random()}`,
         description: 'テスト用',
       })
 
@@ -297,7 +297,7 @@ describe('Record Server Functions', () => {
     test('should return specific record', async () => {
       // 習慣と記録を作成
       const habitResult = await createHabit({
-        name: '特定記録テスト習慣',
+        name: `特定記録テスト習慣_${Date.now()}_${Math.random()}`,
         description: 'テスト用',
       })
 
