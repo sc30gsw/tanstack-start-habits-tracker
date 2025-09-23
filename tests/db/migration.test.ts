@@ -1,21 +1,21 @@
 import { migrate } from 'drizzle-orm/libsql/migrator'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { db } from '~/db'
-import { habitsTable, recordsTable, settingsTable } from '~/db/schema'
+import { habits, records, settings } from '~/db/schema'
 
 describe('Database Migration', () => {
   beforeEach(async () => {
     // Clean up before each test
-    await db.delete(recordsTable)
-    await db.delete(habitsTable)
-    await db.delete(settingsTable)
+    await db.delete(records)
+    await db.delete(habits)
+    await db.delete(settings)
   })
 
   afterEach(async () => {
     // Clean up after each test
-    await db.delete(recordsTable)
-    await db.delete(habitsTable)
-    await db.delete(settingsTable)
+    await db.delete(records)
+    await db.delete(habits)
+    await db.delete(settings)
   })
 
   test('should run migrations successfully', async () => {
@@ -26,14 +26,14 @@ describe('Database Migration', () => {
   })
 
   test('should create habits table with correct structure', async () => {
-    const result = await db.select().from(habitsTable).limit(1)
+    const result = await db.select().from(habits).limit(1)
     expect(Array.isArray(result)).toBe(true)
   })
 
   test('should create records table with foreign key constraints', async () => {
     // Insert a test habit first
     const [habit] = await db
-      .insert(habitsTable)
+      .insert(habits)
       .values({
         id: 'test-habit-1',
         name: 'Test Habit',
@@ -43,7 +43,7 @@ describe('Database Migration', () => {
 
     // Insert a record referencing the habit
     const [record] = await db
-      .insert(recordsTable)
+      .insert(records)
       .values({
         id: 'test-record-1',
         habit_id: habit.id,
@@ -58,7 +58,7 @@ describe('Database Migration', () => {
 
   test('should enforce unique constraint on habit names', async () => {
     // Insert first habit
-    await db.insert(habitsTable).values({
+    await db.insert(habits).values({
       id: 'test-habit-1',
       name: 'Unique Habit',
       description: 'First habit',
@@ -66,7 +66,7 @@ describe('Database Migration', () => {
 
     // Attempt to insert second habit with same name should fail
     await expect(async () => {
-      await db.insert(habitsTable).values({
+      await db.insert(habits).values({
         id: 'test-habit-2',
         name: 'Unique Habit', // Same name
         description: 'Second habit',

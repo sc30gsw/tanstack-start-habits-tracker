@@ -1,57 +1,57 @@
 import { describe, expect, test } from 'vitest'
-import { habitsTable, recordsTable, settingsTable } from '~/db/schema'
+import { habits, records, settings } from '~/db/schema'
 
 describe('Database Schema', () => {
   describe('Habits Table', () => {
     test('should have correct table structure', () => {
-      expect(habitsTable).toBeDefined()
+      expect(habits).toBeDefined()
 
       // Primary key field
-      expect(habitsTable.id).toBeDefined()
+      expect(habits.id).toBeDefined()
 
       // Required fields
-      expect(habitsTable.name).toBeDefined()
-      expect(habitsTable.description).toBeDefined()
+      expect(habits.name).toBeDefined()
+      expect(habits.description).toBeDefined()
 
       // Timestamp fields
-      expect(habitsTable.created_at).toBeDefined()
-      expect(habitsTable.updated_at).toBeDefined()
+      expect(habits.created_at).toBeDefined()
+      expect(habits.updated_at).toBeDefined()
     })
   })
 
   describe('Records Table', () => {
     test('should have correct table structure', () => {
-      expect(recordsTable).toBeDefined()
+      expect(records).toBeDefined()
 
       // Primary key
-      expect(recordsTable.id).toBeDefined()
+      expect(records.id).toBeDefined()
 
       // Foreign key reference
-      expect(recordsTable.habit_id).toBeDefined()
+      expect(records.habit_id).toBeDefined()
 
       // Core fields
-      expect(recordsTable.date).toBeDefined()
-      expect(recordsTable.completed).toBeDefined()
-      expect(recordsTable.duration_minutes).toBeDefined()
+      expect(records.date).toBeDefined()
+      expect(records.completed).toBeDefined()
+      expect(records.duration_minutes).toBeDefined()
 
       // Timestamp
-      expect(recordsTable.created_at).toBeDefined()
+      expect(records.created_at).toBeDefined()
     })
   })
 
   describe('Settings Table', () => {
     test('should have correct table structure', () => {
-      expect(settingsTable).toBeDefined()
+      expect(settings).toBeDefined()
 
       // Primary key
-      expect(settingsTable.id).toBeDefined()
+      expect(settings.id).toBeDefined()
 
       // Configuration fields
-      expect(settingsTable.theme).toBeDefined()
-      expect(settingsTable.default_view).toBeDefined()
+      expect(settings.theme).toBeDefined()
+      expect(settings.default_view).toBeDefined()
 
       // Timestamp
-      expect(settingsTable.created_at).toBeDefined()
+      expect(settings.created_at).toBeDefined()
     })
   })
 })
