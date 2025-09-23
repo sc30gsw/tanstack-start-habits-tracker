@@ -22,6 +22,13 @@
       "when": 1758613031950,
       "tag": "0002_brown_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1758629591003,
+      "tag": "0003_glossy_zzzax",
+      "breakpoints": true
     }
   ]
 }

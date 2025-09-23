@@ -5,11 +5,13 @@ import { IconAlertTriangle } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { habitDto } from '~/features/habits/server/habit-functions'
-import { createHabitSchema } from '~/features/habits/types/schemas/habit-schemas'
+import { createHabitSchema, type HabitColor } from '~/features/habits/types/schemas/habit-schemas'
+import { HabitColorPicker } from './habit-color-picker'
 
 type FormValues = {
   name: string
   description?: string
+  color: HabitColor
 }
 
 type HabitCreateFormProps = {
@@ -25,6 +27,7 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
     initialValues: {
       name: '',
       description: '',
+      color: 'blue' as HabitColor,
     },
     validate: (values) => {
       const result = createHabitSchema.safeParse(values)
@@ -42,6 +45,7 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
     transformValues: (values: FormValues) => ({
       name: values.name.trim(),
       description: values.description ? values.description.trim() : undefined,
+      color: values.color,
     }),
   })
 
@@ -54,6 +58,7 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
           data: {
             name: values.name,
             description: values.description || undefined,
+            color: values.color,
           },
         })
 
@@ -86,9 +91,11 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
         <Stack gap="md">
           <Title order={3}>新しい習慣を作成</Title>
 
-          {(form.errors.name || form.errors.description) && (
+          {(form.errors.name || form.errors.description || form.errors.color) && (
             <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
-              <Text c="red">{form.errors.name || form.errors.description}</Text>
+              <Text c="red">
+                {form.errors.name || form.errors.description || form.errors.color}
+              </Text>
             </Alert>
           )}
 
@@ -112,6 +119,12 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
             disabled={isPending}
             aria-invalid={!!form.errors.description}
             error={form.errors.description}
+          />
+
+          <HabitColorPicker
+            value={form.values.color}
+            onChange={(color) => form.setFieldValue('color', color)}
+            error={form.errors.color}
           />
 
           <Group gap="sm" wrap="nowrap">

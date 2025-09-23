@@ -1,4 +1,4 @@
-import { Badge, Card, Group, Select, Stack, Text } from '@mantine/core'
+import { Badge, Card, Group, Select, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconChartLine, IconClock, IconTarget, IconTrophy } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
@@ -12,6 +12,8 @@ type HabitInfoCardProps = {
 
 export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCardProps) {
   const navigate = useNavigate({ from: '/habits/$habitId' })
+  const computedColorScheme = useComputedColorScheme('light')
+  const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
   // 統計情報の計算
   const totalRecords = records.length
@@ -24,7 +26,7 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
       <Stack gap="md">
         <Group gap="xs" align="center">
           <IconTarget size={24} color="var(--mantine-color-blue-6)" />
-          <Text size="lg" fw={600} c="dark.7">
+          <Text size="lg" fw={600} c={titleColor}>
             習慣詳細
           </Text>
         </Group>

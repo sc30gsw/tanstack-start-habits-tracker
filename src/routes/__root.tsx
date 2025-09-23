@@ -6,9 +6,10 @@ import appCss from '../styles.css?url'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 
-import { AppShell, Button, Group, MantineProvider, Text } from '@mantine/core'
+import { AppShell, Button, ColorSchemeScript, Group, MantineProvider, Text } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { Link } from '@tanstack/react-router'
+import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { theme } from '~/theme'
 
 export const Route = createRootRoute({
@@ -52,6 +53,7 @@ function RootComponent() {
             <Button component={Link} to="/habits" variant="subtle" size="sm">
               習慣管理
             </Button>
+            <ThemeToggle />
           </Group>
         </Group>
       </AppShell.Header>
@@ -68,6 +70,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="ja">
       <head>
         <HeadContent />
+        <ColorSchemeScript />
       </head>
       <body>
         <MantineProvider theme={theme}>
