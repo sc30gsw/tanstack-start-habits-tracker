@@ -38,10 +38,6 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
     ? records.find((record) => dayjs(record.date).isSame(dayjs(selectedDate), 'day'))
     : null
 
-  const handleSuccess = () => {
-    // 成功時の処理（必要に応じて追加）
-  }
-
   return (
     <Stack gap="lg">
       {/* 習慣情報カード */}
@@ -71,7 +67,6 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
             editingRecord={editingRecord}
             onShowRecordForm={setShowRecordForm}
             onEditingRecord={setEditingRecord}
-            onSuccess={handleSuccess}
           />
         </Grid.Col>
       </Grid>

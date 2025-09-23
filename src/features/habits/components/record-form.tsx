@@ -28,7 +28,6 @@ export function RecordForm({
   onCancel,
   existingRecord,
 }: RecordFormProps) {
-  console.log('🚀 ~ RecordForm ~ existingRecord:', existingRecord)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -65,11 +64,6 @@ export function RecordForm({
     startTransition(async () => {
       form.clearErrors()
 
-      notifications.show({
-        title: '成功',
-        message: existingRecord ? '記録が更新されました' : '記録が作成されました',
-        color: 'green',
-      })
       try {
         const durationMinutes =
           typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
@@ -80,7 +74,7 @@ export function RecordForm({
                 id: existingRecord.id,
                 completed: values.completed,
                 durationMinutes,
-              }
+              },
             })
           : await recordDto.createRecord({
               data: {
@@ -88,7 +82,7 @@ export function RecordForm({
                 date,
                 completed: values.completed,
                 durationMinutes,
-              }
+              },
             })
 
         if (result.success) {

@@ -13,7 +13,6 @@ type DateDetailProps = {
   editingRecord: RecordEntity | null
   onShowRecordForm: (show: boolean) => void
   onEditingRecord: (record: RecordEntity | null) => void
-  onSuccess: () => void
 }
 
 export function DateDetail({
@@ -24,7 +23,6 @@ export function DateDetail({
   editingRecord,
   onShowRecordForm,
   onEditingRecord,
-  onSuccess,
 }: DateDetailProps) {
   const router = useRouter()
 
@@ -49,14 +47,7 @@ export function DateDetail({
               >
                 編集
               </Button>
-              <RecordDeleteButton
-                recordId={selectedDateRecord.id}
-                onSuccess={() => {
-                  router.invalidate()
-                  onSuccess()
-                }}
-                variant="button"
-              />
+              <RecordDeleteButton recordId={selectedDateRecord.id} variant="button" />
             </Group>
           )}
         </Group>
@@ -89,7 +80,6 @@ export function DateDetail({
               onShowRecordForm(false)
               onEditingRecord(null)
               router.invalidate()
-              onSuccess()
             }}
             onCancel={() => {
               onShowRecordForm(false)
