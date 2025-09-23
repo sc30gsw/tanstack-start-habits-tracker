@@ -3,12 +3,12 @@ import { createFileRoute, Outlet, useMatches } from '@tanstack/react-router'
 import { useState } from 'react'
 import { HabitCreateForm } from '~/features/habits/components/habit-create-form'
 import { HabitList } from '~/features/habits/components/habit-list'
-import { getHabits } from '~/features/habits/server/habit-functions'
+import { habitDto } from '~/features/habits/server/habit-functions'
 
 export const Route = createFileRoute('/habits')({
   component: HabitsPage,
   loader: async () => {
-    const habitsResult = await getHabits()
+    const habitsResult = await habitDto.getHabits()
     return habitsResult
   },
 })

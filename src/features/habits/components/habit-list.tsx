@@ -10,9 +10,10 @@ import {
   TextInput,
   Tooltip,
 } from '@mantine/core'
+import { IconEdit, IconTrash } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { deleteHabit, updateHabit } from '~/features/habits/server/habit-functions'
+import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
 
 export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
@@ -36,7 +37,13 @@ export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
   const saveEdit = async (id: string) => {
     setLoadingId(id)
     try {
-      await updateHabit({ id, name: editName.trim(), description: editDesc.trim() || undefined })
+      await habitDto.updateHabit({ 
+        data: { 
+          id, 
+          name: editName.trim(), 
+          description: editDesc.trim() || undefined 
+        } 
+      })
       cancelEdit()
       // ルートの再フェッチ（全体データ更新）
       // tanstack router の invalidate を利用 (Link 上位で使用想定) -> window.location.reload fallback
@@ -50,7 +57,7 @@ export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
     if (!confirm('本当に削除しますか？この習慣の記録も削除されます。')) return
     setLoadingId(id)
     try {
-      await deleteHabit(id)
+      await habitDto.deleteHabit({ data: { id } })
       ;(window as any).__TSR__?.router?.invalidate?.() ?? window.location.reload()
     } finally {
       setLoadingId(null)
@@ -133,7 +140,7 @@ export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
                   <Group gap={4} wrap="nowrap">
                     <Tooltip label="編集">
                       <ActionIcon variant="subtle" size="sm" onClick={() => startEdit(habit)}>
-                        ✏️
+                        <IconEdit stroke={2} />
                       </ActionIcon>
                     </Tooltip>
                     <Tooltip label="削除">
@@ -144,7 +151,7 @@ export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
                         loading={loadingId === habit.id}
                         onClick={() => removeHabit(habit.id)}
                       >
-                        🗑️
+                        <IconTrash stroke={2} />
                       </ActionIcon>
                     </Tooltip>
                     <Button

@@ -1,9 +1,15 @@
-import { Alert, Button, Card, Stack, Textarea, TextInput, Title, Group } from '@mantine/core'
+import { Alert, Button, Card, Group, Stack, Text, Textarea, TextInput, Title } from '@mantine/core'
 import { useForm } from '@mantine/form'
+import { IconAlertTriangle } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useTransition } from 'react'
+import { habitDto } from '~/features/habits/server/habit-functions'
 import { createHabitSchema } from '~/features/habits/types/schemas/habit-schemas'
-import { createHabit } from '../server/habit-functions'
+
+type FormValues = {
+  name: string
+  description?: string
+}
 
 type HabitCreateFormProps = {
   onSuccess?: () => void
@@ -11,15 +17,9 @@ type HabitCreateFormProps = {
 }
 
 export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
-  // 旧ローカル state は Mantine Form に置換
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  interface FormValues {
-    name: string
-    description?: string
-  }
   const form = useForm<FormValues>({
     initialValues: {
       name: '',
@@ -44,28 +44,29 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
     }),
   })
 
-  const handleSubmit = async (values: typeof form.values) => {
-    setIsSubmitting(true)
-    setError(null)
+  const handleSubmit = (values: typeof form.values) => {
+    startTransition(async () => {
+      form.clearErrors()
 
-    try {
-      const result = await createHabit({
-        name: values.name,
-        description: values.description || undefined,
-      })
+      try {
+        const result = await habitDto.createHabit({
+          data: {
+            name: values.name,
+            description: values.description || undefined,
+          }
+        })
 
-      if (result.success) {
-        router.invalidate()
-        onSuccess?.()
-        form.reset()
-      } else {
-        setError(result.error || '習慣の作成に失敗しました')
+        if (result.success) {
+          router.invalidate()
+          onSuccess?.()
+          form.reset()
+        } else {
+          form.setErrors({ name: result.error || '習慣の作成に失敗しました' })
+        }
+      } catch (_err) {
+        form.setErrors({ name: '習慣の作成に失敗しました' })
       }
-    } catch (_err) {
-      setError('予期しないエラーが発生しました')
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   return (
@@ -74,9 +75,9 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
         <Stack gap="md">
           <Title order={3}>新しい習慣を作成</Title>
 
-          {error && (
-            <Alert color="red" title="エラー">
-              {error}
+          {(form.errors.name || form.errors.description) && (
+            <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
+              <Text c="red">{form.errors.name || form.errors.description}</Text>
             </Alert>
           )}
 
@@ -86,7 +87,7 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
             key={form.key('name')}
             {...form.getInputProps('name')}
             required
-            disabled={isSubmitting}
+            disabled={isPending}
             aria-invalid={!!form.errors.name}
             error={form.errors.name}
           />
@@ -97,17 +98,17 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
             key={form.key('description')}
             {...form.getInputProps('description')}
             minRows={3}
-            disabled={isSubmitting}
+            disabled={isPending}
             aria-invalid={!!form.errors.description}
             error={form.errors.description}
           />
 
           <Group gap="sm" wrap="nowrap">
-            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} color="habit">
+            <Button type="submit" loading={isPending} disabled={isPending} color="habit">
               習慣を作成
             </Button>
             {onCancel && (
-              <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
+              <Button variant="outline" onClick={onCancel} disabled={isPending}>
                 キャンセル
               </Button>
             )}
