@@ -7,7 +7,10 @@ import { recordDto } from '~/features/habits/server/record-functions'
 export const Route = createFileRoute('/')({
   component: Home,
   loader: async () => {
-    const [habitsResult, recordsResult] = await Promise.all([habitDto.getHabits(), recordDto.getRecords()])
+    const [habitsResult, recordsResult] = await Promise.all([
+      habitDto.getHabits(),
+      recordDto.getRecords(),
+    ])
 
     return {
       habits: habitsResult,
