@@ -1,4 +1,4 @@
-import { Alert, Button, Group, NumberInput, Stack, Switch, Text } from '@mantine/core'
+import { Alert, Button, Group, NumberInput, Stack, Switch, Text, Textarea } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconAlertTriangle } from '@tabler/icons-react'
@@ -19,6 +19,7 @@ type RecordFormProps = {
 type FormValues = {
   completed: boolean
   durationMinutes: number | ''
+  notes: string
 }
 
 export function RecordForm({
@@ -35,16 +36,18 @@ export function RecordForm({
     initialValues: {
       completed: existingRecord?.completed ?? false,
       durationMinutes: existingRecord?.duration_minutes ?? 0,
+      notes: existingRecord?.notes ?? '',
     },
     validate: (values) => {
       // durationMinutes が '' のときは 0 として扱う
       const parsed = createRecordSchema
-        .pick({ completed: true, durationMinutes: true, habitId: true, date: true })
+        .pick({ completed: true, durationMinutes: true, habitId: true, date: true, notes: true })
         .safeParse({
           habitId: habitId,
           date,
           completed: values.completed,
           durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
+          notes: values.notes,
         })
       if (parsed.success) return {}
       const fieldErrors: Record<string, string> = {}
@@ -57,6 +60,7 @@ export function RecordForm({
     transformValues: (values) => ({
       completed: values.completed,
       durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
+      notes: values.notes,
     }),
   })
 
@@ -74,6 +78,7 @@ export function RecordForm({
                 id: existingRecord.id,
                 completed: values.completed,
                 durationMinutes,
+                notes: values.notes,
               },
             })
           : await recordDto.createRecord({
@@ -82,6 +87,7 @@ export function RecordForm({
                 date,
                 completed: values.completed,
                 durationMinutes,
+                notes: values.notes,
               },
             })
 
@@ -138,6 +144,17 @@ export function RecordForm({
             form.setFieldValue('durationMinutes', typeof value === 'string' ? '' : (value ?? 0))
           }
           error={form.errors.durationMinutes}
+        />
+        <Textarea
+          label="メモ・感想"
+          placeholder="今日の感想や具体的に何をやったかを記録..."
+          rows={4}
+          maxLength={500}
+          key={form.key('notes')}
+          value={form.values.notes}
+          onChange={(e) => form.setFieldValue('notes', e.currentTarget.value)}
+          error={form.errors.notes}
+          description={`${form.values.notes.length}/500文字`}
         />
         <Group gap="sm">
           <Button type="submit" loading={isPending} disabled={isPending}>

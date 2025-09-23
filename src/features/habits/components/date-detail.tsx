@@ -79,6 +79,26 @@ export function DateDetail({
                 </Badge>
               )}
             </Group>
+            {selectedDateRecord.notes && (
+              <Stack gap="xs">
+                <Text size="sm" fw={500} c="dark.6">
+                  メモ・感想
+                </Text>
+                <Text
+                  size="sm"
+                  c="dark.7"
+                  style={{
+                    whiteSpace: 'pre-wrap',
+                    backgroundColor: 'var(--mantine-color-gray-0)',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--mantine-color-gray-2)',
+                  }}
+                >
+                  {selectedDateRecord.notes}
+                </Text>
+              </Stack>
+            )}
           </Stack>
         ) : selectedDate && !editingRecord && !showRecordForm ? (
           <Text c="dimmed" fs="italic">
