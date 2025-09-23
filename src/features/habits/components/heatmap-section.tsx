@@ -3,6 +3,7 @@ import { IconChartBar, IconCheckbox, IconClock } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { HabitHeatmap } from '~/features/habits/components/habit-heatmap'
 import type { RecordEntity } from '~/features/habits/types/habit'
+import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 
 type HeatmapSectionProps = {
   records: RecordEntity[]
@@ -10,6 +11,7 @@ type HeatmapSectionProps = {
   metric: 'duration' | 'completion'
   onMetricChange: (metric: 'duration' | 'completion') => void
   onSelectDate: (date: Date) => void
+  habitColor?: HabitColor
 }
 
 export function HeatmapSection({
@@ -18,6 +20,7 @@ export function HeatmapSection({
   metric,
   onMetricChange,
   onSelectDate,
+  habitColor = 'blue',
 }: HeatmapSectionProps) {
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
@@ -82,6 +85,7 @@ export function HeatmapSection({
             }}
             selectedDate={selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : null}
             metric={metric}
+            habitColor={habitColor}
           />
         </Box>
       </Stack>

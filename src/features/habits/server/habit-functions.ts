@@ -5,7 +5,11 @@ import { z } from 'zod/v4'
 import { db } from '~/db'
 import { habits } from '~/db/schema'
 import type { HabitEntity, HabitResponse, HabitsListResponse } from '~/features/habits/types/habit'
-import { createHabitSchema, updateHabitSchema } from '~/features/habits/types/schemas/habit-schemas'
+import {
+  createHabitSchema,
+  habitSchema,
+  updateHabitSchema,
+} from '~/features/habits/types/schemas/habit-schemas'
 
 /**
  * 新しい習慣を作成する
@@ -38,16 +42,23 @@ const createHabit = createServerFn({ method: 'POST' })
           id: habitId,
           name: data.name,
           description: data.description || null,
+          color: data.color || 'blue',
           created_at: now,
           updated_at: now,
         })
         .returning()
 
       // HabitEntityに変換
-      const habitEntity = {
+      const habitData = {
         ...habit,
-        created_at: new Date(habit.created_at!),
-        updated_at: new Date(habit.updated_at!),
+        created_at: habit.created_at!,
+        updated_at: habit.updated_at!,
+      }
+      const parsedHabit = habitSchema.parse(habitData)
+      const habitEntity = {
+        ...parsedHabit,
+        created_at: new Date(parsedHabit.created_at),
+        updated_at: new Date(parsedHabit.updated_at),
       } as const satisfies HabitEntity
 
       return {
@@ -117,6 +128,10 @@ const updateHabit = createServerFn({ method: 'POST' })
         updateData.description = data.description
       }
 
+      if (data.color !== undefined) {
+        updateData.color = data.color
+      }
+
       // 習慣を更新
       const [updatedHabit] = await db
         .update(habits)
@@ -125,10 +140,16 @@ const updateHabit = createServerFn({ method: 'POST' })
         .returning()
 
       // HabitEntityに変換
-      const habitEntity = {
+      const habitData = {
         ...updatedHabit,
-        created_at: new Date(updatedHabit.created_at!),
-        updated_at: new Date(updatedHabit.updated_at!),
+        created_at: updatedHabit.created_at!,
+        updated_at: updatedHabit.updated_at!,
+      }
+      const parsedHabit = habitSchema.parse(habitData)
+      const habitEntity = {
+        ...parsedHabit,
+        created_at: new Date(parsedHabit.created_at),
+        updated_at: new Date(parsedHabit.updated_at),
       } as const satisfies HabitEntity
 
       return {
@@ -194,11 +215,21 @@ const getHabits = createServerFn({ method: 'GET' }).handler(
       const allHabits = await db.select().from(habits).orderBy(habits.created_at)
 
       // HabitEntityに変換
-      const habitEntities: HabitEntity[] = allHabits.map((habit) => ({
-        ...habit,
-        created_at: new Date(habit.created_at!),
-        updated_at: new Date(habit.updated_at!),
-      }))
+      const habitEntities: HabitEntity[] = allHabits.map((habit) => {
+        const habitData = {
+          ...habit,
+          created_at: habit.created_at!,
+          updated_at: habit.updated_at!,
+        }
+
+        const parsedHabit = habitSchema.parse(habitData)
+
+        return {
+          ...parsedHabit,
+          created_at: new Date(parsedHabit.created_at),
+          updated_at: new Date(parsedHabit.updated_at),
+        }
+      })
 
       return {
         success: true,
@@ -233,10 +264,16 @@ const getHabitById = createServerFn({ method: 'GET' })
       }
 
       // HabitEntityに変換
-      const habitEntity = {
+      const habitData = {
         ...habit[0],
-        created_at: new Date(habit[0].created_at!),
-        updated_at: new Date(habit[0].updated_at!),
+        created_at: habit[0].created_at!,
+        updated_at: habit[0].updated_at!,
+      }
+      const parsedHabit = habitSchema.parse(habitData)
+      const habitEntity = {
+        ...parsedHabit,
+        created_at: new Date(parsedHabit.created_at),
+        updated_at: new Date(parsedHabit.updated_at),
       } as const satisfies HabitEntity
 
       return {

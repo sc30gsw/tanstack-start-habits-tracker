@@ -3,6 +3,7 @@ import { Box, Group, Stack, Text, useMantineTheme } from '@mantine/core'
 import dayjs from 'dayjs'
 import { useMemo } from 'react'
 import type { RecordEntity } from '~/features/habits/types/habit'
+import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
 type Metric = 'completion' | 'duration'
@@ -12,6 +13,7 @@ type HabitHeatmapProps = {
   onSelectDate?: (date: string) => void
   metric?: Metric
   selectedDate?: string | null
+  habitColor?: HabitColor
 }
 
 // Mantine Heatmap は { date: string, value: number }[] を受け取り内部でスケール化
@@ -20,6 +22,7 @@ export function HabitHeatmap({
   onSelectDate,
   metric = 'duration',
   selectedDate,
+  habitColor = 'blue',
 }: HabitHeatmapProps) {
   const theme = useMantineTheme()
 
@@ -39,16 +42,33 @@ export function HabitHeatmap({
     return map
   }, [records, metric])
 
-  // GitHub風ブルー基調の4段階カラーパレット
+  // 選択されたカラーに基づく4段階カラーパレット
   const colors = useMemo(() => {
-    const baseBlue = theme.colors.blue || []
-    return [
-      baseBlue[1] || '#e3f2fd', // レベル1（最も薄い青）
-      baseBlue[3] || '#90caf9', // レベル2
-      baseBlue[5] || '#2196f3', // レベル3
-      baseBlue[7] || '#1565c0', // レベル4（最も濃い青）
-    ]
-  }, [theme.colors.blue])
+    const baseColors = theme.colors[habitColor] || theme.colors.blue || []
+
+    // フォールバック色の定義
+    const fallbackColors = {
+      blue: ['#e3f2fd', '#90caf9', '#2196f3', '#1565c0'],
+      green: ['#e8f5e9', '#a5d6a7', '#4caf50', '#2e7d32'],
+      purple: ['#f3e5f5', '#ce93d8', '#9c27b0', '#6a1b9a'],
+      red: ['#ffebee', '#ef9a9a', '#f44336', '#c62828'],
+      orange: ['#fff3e0', '#ffcc80', '#ff9800', '#e65100'],
+      pink: ['#fce4ec', '#f48fb1', '#e91e63', '#ad1457'],
+      cyan: ['#e0f2f1', '#80cbc4', '#00bcd4', '#00695c'],
+      teal: ['#e0f2f1', '#80cbc4', '#009688', '#004d40'],
+    } as const satisfies Record<HabitColor, string[]>
+
+    if (baseColors.length >= 8) {
+      return [
+        baseColors[1], // レベル1（最も薄い）
+        baseColors[3], // レベル2
+        baseColors[5], // レベル3
+        baseColors[7], // レベル4（最も濃い）
+      ]
+    }
+
+    return fallbackColors[habitColor] || fallbackColors.blue
+  }, [theme.colors, habitColor])
 
   // データの最大値を計算
   const maxValue = useMemo(() => {
