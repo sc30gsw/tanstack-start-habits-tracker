@@ -1,5 +1,6 @@
 import { Alert, Button, Card, Group, Stack, Text, Textarea, TextInput, Title } from '@mantine/core'
 import { useForm } from '@mantine/form'
+import { notifications } from '@mantine/notifications'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import { useTransition } from 'react'
@@ -12,8 +13,8 @@ type FormValues = {
 }
 
 type HabitCreateFormProps = {
-  onSuccess?: () => void
-  onCancel?: () => void
+  onSuccess: () => void
+  onCancel: () => void
 }
 
 export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
@@ -53,18 +54,28 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
           data: {
             name: values.name,
             description: values.description || undefined,
-          }
+          },
         })
 
         if (result.success) {
           router.invalidate()
-          onSuccess?.()
+          onSuccess()
           form.reset()
+          notifications.show({
+            title: '成功',
+            message: '習慣が作成されました',
+            color: 'green',
+          })
         } else {
           form.setErrors({ name: result.error || '習慣の作成に失敗しました' })
         }
       } catch (_err) {
         form.setErrors({ name: '習慣の作成に失敗しました' })
+        notifications.show({
+          title: 'エラー',
+          message: '習慣の作成中に予期しないエラーが発生しました',
+          color: 'red',
+        })
       }
     })
   }

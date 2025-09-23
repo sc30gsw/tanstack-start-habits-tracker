@@ -4,11 +4,7 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
 import { records } from '~/db/schema'
-import type {
-  RecordEntity,
-  RecordResponse,
-  RecordsListResponse,
-} from '../types/habit'
+import type { RecordEntity, RecordResponse, RecordsListResponse } from '../types/habit'
 import { createRecordSchema, updateRecordSchema } from '../types/schemas/record-schemas'
 
 /**
@@ -83,11 +79,7 @@ const updateRecord = createServerFn({ method: 'POST' })
   .handler(async ({ data }): Promise<RecordResponse> => {
     try {
       // 記録の存在確認
-      const existingRecord = await db
-        .select()
-        .from(records)
-        .where(eq(records.id, data.id))
-        .limit(1)
+      const existingRecord = await db.select().from(records).where(eq(records.id, data.id)).limit(1)
 
       if (existingRecord.length === 0) {
         return {
@@ -178,11 +170,15 @@ const deleteRecord = createServerFn({ method: 'POST' })
  * 記録を取得する（フィルタリング対応）
  */
 const getRecords = createServerFn({ method: 'GET' })
-  .validator(z.object({
-    habit_id: z.string().optional(),
-    date_from: z.string().optional(),
-    completed: z.boolean().optional(),
-  }).optional())
+  .validator(
+    z
+      .object({
+        habit_id: z.string().optional(),
+        date_from: z.string().optional(),
+        completed: z.boolean().optional(),
+      })
+      .optional(),
+  )
   .handler(async ({ data: filters }): Promise<RecordsListResponse> => {
     try {
       // フィルタリング条件を準備
