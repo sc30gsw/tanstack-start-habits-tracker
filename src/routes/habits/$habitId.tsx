@@ -1,4 +1,4 @@
-import { Alert, Container, Stack, Text, Title } from '@mantine/core'
+import { Alert, Container, Stack, Text, Title, useComputedColorScheme } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
@@ -28,6 +28,8 @@ export const Route = createFileRoute('/habits/$habitId')({
 function HabitDetailPage() {
   const { habit, records, habits } = Route.useLoaderData()
   const search = Route.useSearch()
+  const computedColorScheme = useComputedColorScheme('light')
+  const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
   if (!habit.success) {
     return (
@@ -42,7 +44,9 @@ function HabitDetailPage() {
   return (
     <Container size="lg" py="xl">
       <Stack gap="md">
-        <Title order={1}>{habit.data?.name}</Title>
+        <Title order={1} c={titleColor}>
+          {habit.data?.name}
+        </Title>
         <HabitDetail
           habit={habit.data!}
           records={records.success ? records.data || [] : []}

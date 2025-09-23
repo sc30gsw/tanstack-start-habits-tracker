@@ -1,4 +1,11 @@
-import { ColorSwatch, Group, Stack, Text, useMantineTheme } from '@mantine/core'
+import {
+  ColorSwatch,
+  Group,
+  Stack,
+  Text,
+  useComputedColorScheme,
+  useMantineTheme,
+} from '@mantine/core'
 import type { ReactNode } from 'react'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 import { HABIT_COLOR_OPTIONS } from '~/features/habits/types/schemas/habit-schemas'
@@ -17,6 +24,7 @@ export function HabitColorPicker({
   error,
 }: HabitColorPickerProps) {
   const theme = useMantineTheme()
+  const computedColorScheme = useComputedColorScheme('light')
 
   const getColorValue = (colorName: HabitColor) => {
     // Mantine theme colors or fallback colors
@@ -56,8 +64,18 @@ export function HabitColorPicker({
                 value === option.value
                   ? `3px solid ${theme.colors.blue[6]}`
                   : '3px solid transparent',
-              outline: value === option.value ? `2px solid white` : 'none',
-              boxShadow: value === option.value ? `0 0 0 1px ${theme.colors.gray[3]}` : 'none',
+              outline:
+                value === option.value
+                  ? computedColorScheme === 'dark'
+                    ? `2px solid var(--mantine-color-dark-4)`
+                    : `2px solid white`
+                  : 'none',
+              boxShadow:
+                value === option.value
+                  ? computedColorScheme === 'dark'
+                    ? `0 0 0 1px var(--mantine-color-gray-6)`
+                    : `0 0 0 1px ${theme.colors.gray[3]}`
+                  : 'none',
               transform: value === option.value ? 'scale(1.1)' : 'scale(1)',
               transition: 'all 0.2s ease',
             }}

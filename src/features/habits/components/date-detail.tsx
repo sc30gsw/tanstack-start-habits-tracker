@@ -93,10 +93,16 @@ export function DateDetail({
                   c={titleColor}
                   style={{
                     whiteSpace: 'pre-wrap',
-                    backgroundColor: 'var(--mantine-color-gray-0)',
+                    backgroundColor:
+                      computedColorScheme === 'dark'
+                        ? 'var(--mantine-color-dark-6)'
+                        : 'var(--mantine-color-gray-0)',
                     padding: '8px 12px',
                     borderRadius: '6px',
-                    border: '1px solid var(--mantine-color-gray-2)',
+                    border:
+                      computedColorScheme === 'dark'
+                        ? '1px solid var(--mantine-color-dark-4)'
+                        : '1px solid var(--mantine-color-gray-2)',
                   }}
                 >
                   {selectedDateRecord.notes}

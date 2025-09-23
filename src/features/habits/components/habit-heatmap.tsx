@@ -1,5 +1,5 @@
 import { Heatmap } from '@mantine/charts'
-import { Box, Group, Stack, Text, useMantineTheme } from '@mantine/core'
+import { Box, Group, Stack, Text } from '@mantine/core'
 import dayjs from 'dayjs'
 import { useMemo } from 'react'
 import type { RecordEntity } from '~/features/habits/types/habit'
@@ -24,8 +24,6 @@ export function HabitHeatmap({
   selectedDate,
   habitColor = 'blue',
 }: HabitHeatmapProps) {
-  const theme = useMantineTheme()
-
   const dataMap = useMemo(() => {
     const map: Record<string, number> = {}
 
@@ -44,9 +42,7 @@ export function HabitHeatmap({
 
   // 選択されたカラーに基づく4段階カラーパレット
   const colors = useMemo(() => {
-    const baseColors = theme.colors[habitColor] || theme.colors.blue || []
-
-    // フォールバック色の定義
+    // フォールバック色の定義（各色に対応した4段階グラデーション）
     const fallbackColors = {
       blue: ['#e3f2fd', '#90caf9', '#2196f3', '#1565c0'],
       green: ['#e8f5e9', '#a5d6a7', '#4caf50', '#2e7d32'],
@@ -54,21 +50,14 @@ export function HabitHeatmap({
       red: ['#ffebee', '#ef9a9a', '#f44336', '#c62828'],
       orange: ['#fff3e0', '#ffcc80', '#ff9800', '#e65100'],
       pink: ['#fce4ec', '#f48fb1', '#e91e63', '#ad1457'],
-      cyan: ['#e0f2f1', '#80cbc4', '#00bcd4', '#00695c'],
-      teal: ['#e0f2f1', '#80cbc4', '#009688', '#004d40'],
+      cyan: ['#e0f7fa', '#80deea', '#00bcd4', '#00838f'],
+      teal: ['#e0f2f1', '#80cbc4', '#009688', '#00695c'],
     } as const satisfies Record<HabitColor, string[]>
 
-    if (baseColors.length >= 8) {
-      return [
-        baseColors[1], // レベル1（最も薄い）
-        baseColors[3], // レベル2
-        baseColors[5], // レベル3
-        baseColors[7], // レベル4（最も濃い）
-      ]
-    }
-
-    return fallbackColors[habitColor] || fallbackColors.blue
-  }, [theme.colors, habitColor])
+    // 常にフォールバック色を使用して一貫性を保つ
+    // これにより、すべての色が期待通りに表示されることを保証
+    return fallbackColors[habitColor] ?? fallbackColors.blue
+  }, [habitColor])
 
   // データの最大値を計算
   const maxValue = useMemo(() => {

@@ -63,7 +63,10 @@ export const habitSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().nullable(),
-  color: z.string().nullable().transform((val) => val ?? 'blue'),
+  color: z
+    .string()
+    .nullable()
+    .transform((val) => val ?? 'blue'),
   created_at: z.string(),
   updated_at: z.string(),
 })
