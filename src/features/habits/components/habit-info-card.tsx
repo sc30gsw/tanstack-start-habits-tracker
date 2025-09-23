@@ -1,4 +1,5 @@
 import { Badge, Card, Group, Select, Stack, Text } from '@mantine/core'
+import { IconChartLine, IconClock, IconTarget, IconTrophy } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 
@@ -18,11 +19,15 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
   const totalDuration = records.reduce((sum, r) => sum + (r.duration_minutes || 0), 0)
 
   return (
-    <Card withBorder padding="lg">
-      <Stack gap="sm">
-        <Text size="lg" fw={500}>
-          習慣詳細
-        </Text>
+    <Card withBorder padding="lg" radius="md" shadow="sm">
+      <Stack gap="md">
+        <Group gap="xs" align="center">
+          <IconTarget size={24} color="var(--mantine-color-blue-6)" />
+          <Text size="lg" fw={600} c="dark.7">
+            習慣詳細
+          </Text>
+        </Group>
+
         {habitsList.length > 1 && (
           <Select
             label="習慣を切り替える"
@@ -37,15 +42,21 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
             data={habitsList.map((h) => ({ value: h.id, label: h.name }))}
           />
         )}
-        {habit.description && <Text c="dimmed">{habit.description}</Text>}
-        <Group gap="md">
-          <Badge variant="light" color="habit">
+
+        {habit.description && (
+          <Text c="dimmed" fs="italic" size="sm">
+            {habit.description}
+          </Text>
+        )}
+
+        <Group gap="md" wrap="wrap">
+          <Badge variant="light" color="blue" size="md" leftSection={<IconChartLine size={14} />}>
             総記録数: {totalRecords}
           </Badge>
-          <Badge variant="light" color="success">
+          <Badge variant="light" color="green" size="md" leftSection={<IconTrophy size={14} />}>
             達成率: {Math.round(completionRate * 100)}%
           </Badge>
-          <Badge variant="light" color="duration">
+          <Badge variant="light" color="orange" size="md" leftSection={<IconClock size={14} />}>
             総時間: {totalDuration}分
           </Badge>
         </Group>
