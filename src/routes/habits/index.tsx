@@ -5,7 +5,7 @@ import { HabitCreateForm } from '~/features/habits/components/habit-create-form'
 import { HabitList } from '~/features/habits/components/habit-list'
 import { habitDto } from '~/features/habits/server/habit-functions'
 
-export const Route = createFileRoute('/habits')({
+export const Route = createFileRoute('/habits/')({
   component: HabitsPage,
   loader: async () => {
     const habitsResult = await habitDto.getHabits()
@@ -18,7 +18,7 @@ function HabitsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const matches = useMatches()
   const last = matches[matches.length - 1]
-  const isList = last.routeId === '/habits'
+  const isList = last.routeId === '/habits/'
 
   if (!isList) {
     // 子ルート（詳細など）を表示

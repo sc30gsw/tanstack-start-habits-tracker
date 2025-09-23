@@ -1,4 +1,5 @@
 import { Grid, Stack } from '@mantine/core'
+import { useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { CalendarView } from '~/features/habits/components/calendar-view'
@@ -7,25 +8,79 @@ import { HabitInfoCard } from '~/features/habits/components/habit-info-card'
 import { HeatmapSection } from '~/features/habits/components/heatmap-section'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 
+type SearchParams = {
+  selectedDate?: string
+  calendarView?: 'month' | 'week' | 'day'
+  metric?: 'duration' | 'completion'
+}
+
 type HabitDetailProps = {
   habit: HabitEntity
   records: RecordEntity[]
   habitsList?: HabitEntity[]
+  searchParams?: SearchParams
 }
 
-export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+export function HabitDetail({ habit, records, habitsList = [], searchParams }: HabitDetailProps) {
+  const navigate = useNavigate()
+
+  // URLパラメータから初期値を取得
+  const initialSelectedDate = searchParams?.selectedDate
+    ? dayjs(searchParams.selectedDate).toDate()
+    : new Date()
+  const initialCalendarView = searchParams?.calendarView || 'month'
+  const initialMetric = searchParams?.metric || 'duration'
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(initialSelectedDate)
   const [showRecordForm, setShowRecordForm] = useState(false)
   const [editingRecord, setEditingRecord] = useState<RecordEntity | null>(null)
-  const [calendarView, setCalendarView] = useState<'month' | 'week' | 'day'>('month')
-  const [currentMonth, setCurrentMonth] = useState(dayjs().startOf('month'))
-  const [metric, setMetric] = useState<'duration' | 'completion'>('duration')
+  const [calendarView, setCalendarView] = useState<'month' | 'week' | 'day'>(initialCalendarView)
+  const [currentMonth, setCurrentMonth] = useState(dayjs(initialSelectedDate).startOf('month'))
+  const [metric, setMetric] = useState<'duration' | 'completion'>(initialMetric)
 
-  // 日付が変更されたときにフォームの状態をリセット
+  // URLパラメータを更新する関数
+  const updateSearchParams = (updates: Partial<SearchParams>) => {
+    const newParams = {
+      selectedDate: selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : undefined,
+      calendarView,
+      metric,
+      ...updates,
+    }
+
+    // undefinedの値を除去
+    const cleanParams = Object.fromEntries(
+      Object.entries(newParams).filter(([_, value]) => value !== undefined),
+    )
+
+    navigate({
+      search: cleanParams as any,
+      replace: true,
+    })
+  }
+
+  // 日付が変更されたときにフォームの状態をリセットし、URLを更新
   useEffect(() => {
     setShowRecordForm(false)
     setEditingRecord(null)
   }, [selectedDate])
+
+  // selectedDate変更時にURLパラメータを更新
+  const handleSelectedDateChange = (date: Date) => {
+    setSelectedDate(date)
+    updateSearchParams({ selectedDate: dayjs(date).format('YYYY-MM-DD') })
+  }
+
+  // calendarView変更時にURLパラメータを更新
+  const handleCalendarViewChange = (view: 'month' | 'week' | 'day') => {
+    setCalendarView(view)
+    updateSearchParams({ calendarView: view })
+  }
+
+  // metric変更時にURLパラメータを更新
+  const handleMetricChange = (newMetric: 'duration' | 'completion') => {
+    setMetric(newMetric)
+    updateSearchParams({ metric: newMetric })
+  }
 
   // 日付 -> record 集計マップ
   const recordMap = records.reduce<Record<string, RecordEntity>>((acc, r) => {
@@ -47,11 +102,11 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
         <Grid.Col span={{ base: 12, md: 6 }}>
           <CalendarView
             calendarView={calendarView}
-            onCalendarViewChange={setCalendarView}
+            onCalendarViewChange={handleCalendarViewChange}
             currentMonth={currentMonth}
             onCurrentMonthChange={setCurrentMonth}
             selectedDate={selectedDate}
-            onSelectedDateChange={setSelectedDate}
+            onSelectedDateChange={handleSelectedDateChange}
             selectedDateRecord={selectedDateRecord || null}
             recordMap={recordMap}
           />
@@ -76,8 +131,8 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
         records={records}
         selectedDate={selectedDate}
         metric={metric}
-        onMetricChange={setMetric}
-        onSelectDate={setSelectedDate}
+        onMetricChange={handleMetricChange}
+        onSelectDate={handleSelectedDateChange}
       />
     </Stack>
   )

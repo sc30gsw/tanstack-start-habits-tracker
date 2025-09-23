@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 import { RecordDeleteButton } from '~/features/habits/components/record-delete-button'
 import { RecordForm } from '~/features/habits/components/record-form'
 import type { RecordEntity } from '~/features/habits/types/habit'
+import { formatDuration } from '~/features/habits/utils/time-utils'
 
 type DateDetailProps = {
   selectedDate: Date | null
@@ -75,7 +76,7 @@ export function DateDetail({
               </Badge>
               {(selectedDateRecord.duration_minutes || 0) > 0 && (
                 <Badge variant="light" color="blue">
-                  {selectedDateRecord.duration_minutes}分
+                  {formatDuration(selectedDateRecord.duration_minutes || 0)}
                 </Badge>
               )}
             </Group>

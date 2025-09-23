@@ -3,6 +3,7 @@ import { Box, Group, Stack, Text, useMantineTheme } from '@mantine/core'
 import dayjs from 'dayjs'
 import { useMemo } from 'react'
 import type { RecordEntity } from '~/features/habits/types/habit'
+import { formatDuration } from '~/features/habits/utils/time-utils'
 
 type Metric = 'completion' | 'duration'
 
@@ -83,7 +84,7 @@ export function HabitHeatmap({
           withTooltip
           getTooltipLabel={({ date, value }) => {
             if (metric === 'duration') {
-              return `${date} – ${value == null || value === 0 ? '記録なし' : `${value} 分`}`
+              return `${date} – ${value == null || value === 0 ? '記録なし' : formatDuration(value)}`
             }
             return `${date} – ${value == null ? '記録なし' : value === 1 ? '完了' : value === 0.5 ? '未完了' : '記録なし'}`
           }}
@@ -113,7 +114,7 @@ export function HabitHeatmap({
                 metric === 'duration'
                   ? value == null || value === 0
                     ? '記録なし'
-                    : `${value} 分`
+                    : formatDuration(value)
                   : value == null
                     ? '記録なし'
                     : value === 1

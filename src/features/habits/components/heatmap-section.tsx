@@ -37,7 +37,10 @@ export function HeatmapSection({
             padding: '12px',
           }}
         >
-          <Radio.Group value={metric} onChange={(v: any) => onMetricChange(v)}>
+          <Radio.Group
+            value={metric}
+            onChange={(v) => onMetricChange(v as 'duration' | 'completion')}
+          >
             <Group gap="lg">
               <Radio
                 value="duration"

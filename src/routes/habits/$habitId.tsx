@@ -1,12 +1,20 @@
 import { Alert, Container, Stack, Text, Title } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
 import { HabitDetail } from '~/features/habits/components/habit-detail'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
 
+const searchSchema = z.object({
+  selectedDate: z.string().optional(),
+  calendarView: z.enum(['month', 'week', 'day']).optional(),
+  metric: z.enum(['duration', 'completion']).optional(),
+})
+
 export const Route = createFileRoute('/habits/$habitId')({
   component: HabitDetailPage,
+  validateSearch: searchSchema,
   loader: async ({ params }) => {
     const [habitResult, recordsResult, habitsResult] = await Promise.all([
       habitDto.getHabitById({ data: { id: params.habitId } }),
@@ -19,6 +27,7 @@ export const Route = createFileRoute('/habits/$habitId')({
 
 function HabitDetailPage() {
   const { habit, records, habits } = Route.useLoaderData() as any
+  const search = Route.useSearch()
 
   if (!habit.success) {
     return (
@@ -38,6 +47,7 @@ function HabitDetailPage() {
           habit={habit.data!}
           records={records.success ? records.data || [] : []}
           habitsList={habits.success ? habits.data || [] : []}
+          searchParams={search}
         />
       </Stack>
     </Container>

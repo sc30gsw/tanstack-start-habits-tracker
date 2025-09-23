@@ -2,6 +2,7 @@ import { Badge, Card, Group, Select, Stack, Text } from '@mantine/core'
 import { IconChartLine, IconClock, IconTarget, IconTrophy } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
+import { formatTotalDuration } from '~/features/habits/utils/time-utils'
 
 type HabitInfoCardProps = {
   habit: HabitEntity
@@ -57,7 +58,7 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
             達成率: {Math.round(completionRate * 100)}%
           </Badge>
           <Badge variant="light" color="orange" size="md" leftSection={<IconClock size={14} />}>
-            総時間: {totalDuration}分
+            {formatTotalDuration(totalDuration)}
           </Badge>
         </Group>
       </Stack>
