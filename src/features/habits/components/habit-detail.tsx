@@ -66,7 +66,9 @@ export function HabitDetail({ habit, records, habitsList = [], searchParams }: H
       search: searchObject,
       replace: true,
     } as Parameters<typeof navigate>[0])
-  } // 日付が変更されたときにフォームの状態をリセットし、URLを更新
+  }
+
+  // 日付が変更されたときにフォームの状態をリセットし、URLを更新
   useEffect(() => {
     setShowRecordForm(false)
     setEditingRecord(null)
