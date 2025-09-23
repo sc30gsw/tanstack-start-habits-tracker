@@ -12,6 +12,7 @@ import { IconCalendar } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
+import { formatDuration } from '~/features/habits/utils/time-utils'
 
 type CalendarViewProps = {
   calendarView: 'month' | 'week' | 'day'
@@ -188,7 +189,7 @@ function MonthView({
                   withinPortal
                   label={
                     rec
-                      ? `${rec.completed ? '完了' : '未完了'} / ${rec.duration_minutes}分`
+                      ? `${rec.completed ? '完了' : '未完了'} / ${formatDuration(rec.duration_minutes || 0)}`
                       : '記録なし'
                   }
                 >
@@ -270,7 +271,7 @@ function WeekView({ weekDates, onSelectedDateChange, recordMap }: WeekViewProps)
               <Text fw={500}>{d.date()}</Text>
               {rec && (
                 <Badge size="xs" color={rec.completed ? 'green' : 'yellow'} variant="filled" mt={4}>
-                  {rec.duration_minutes || 0}分
+                  {formatDuration(rec.duration_minutes || 0)}
                 </Badge>
               )}
             </Card>
@@ -296,7 +297,7 @@ function DayView({ selectedDate, selectedDateRecord }: DayViewProps) {
         {selectedDateRecord ? (
           <Stack gap={4}>
             <Text size="sm">状態: {selectedDateRecord.completed ? '完了' : '未完了'}</Text>
-            <Text size="sm">時間: {selectedDateRecord.duration_minutes}分</Text>
+            <Text size="sm">時間: {formatDuration(selectedDateRecord.duration_minutes || 0)}</Text>
             <Text size="sm">作成: {dayjs(selectedDateRecord.created_at).format('HH:mm')}</Text>
           </Stack>
         ) : (

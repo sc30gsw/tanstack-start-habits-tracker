@@ -7,6 +7,7 @@ import { useTransition } from 'react'
 import { recordDto } from '~/features/habits/server/record-functions'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import { createRecordSchema } from '~/features/habits/types/schemas/record-schemas'
+import { hoursToMinutes, minutesToHours } from '~/features/habits/utils/time-utils'
 
 type RecordFormProps = {
   habitId: string
@@ -19,6 +20,7 @@ type RecordFormProps = {
 type FormValues = {
   completed: boolean
   durationMinutes: number | ''
+  durationHours: number | ''
   notes: string
 }
 
@@ -36,6 +38,9 @@ export function RecordForm({
     initialValues: {
       completed: existingRecord?.completed ?? false,
       durationMinutes: existingRecord?.duration_minutes ?? 0,
+      durationHours: existingRecord?.duration_minutes
+        ? minutesToHours(existingRecord.duration_minutes)
+        : 0,
       notes: existingRecord?.notes ?? '',
     },
     validate: (values) => {
@@ -60,6 +65,7 @@ export function RecordForm({
     transformValues: (values) => ({
       completed: values.completed,
       durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
+      durationHours: typeof values.durationHours === 'number' ? values.durationHours : 0,
       notes: values.notes,
     }),
   })
@@ -119,8 +125,32 @@ export function RecordForm({
     })
   }
 
+  // 分入力変更時に時間入力を同期
+  const handleMinutesChange = (value: string | number) => {
+    const minutes = typeof value === 'string' ? '' : (value ?? 0)
+    form.setFieldValue('durationMinutes', minutes)
+
+    if (typeof minutes === 'number') {
+      form.setFieldValue('durationHours', minutesToHours(minutes))
+    } else {
+      form.setFieldValue('durationHours', '')
+    }
+  }
+
+  // 時間入力変更時に分入力を同期
+  const handleHoursChange = (value: string | number) => {
+    const hours = typeof value === 'string' ? '' : (value ?? 0)
+    form.setFieldValue('durationHours', hours)
+
+    if (typeof hours === 'number') {
+      form.setFieldValue('durationMinutes', hoursToMinutes(hours))
+    } else {
+      form.setFieldValue('durationMinutes', '')
+    }
+  }
+
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
+    <form onSubmit={form.onSubmit((values: FormValues) => handleSubmit(values))} noValidate>
       <Stack gap="md">
         {form.errors.durationMinutes && (
           <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
@@ -133,18 +163,32 @@ export function RecordForm({
           checked={form.values.completed}
           onChange={(e) => form.setFieldValue('completed', e.currentTarget.checked)}
         />
-        <NumberInput
-          label="実行時間（分）"
-          placeholder="0"
-          min={0}
-          max={1440}
-          key={form.key('durationMinutes')}
-          value={form.values.durationMinutes}
-          onChange={(value) =>
-            form.setFieldValue('durationMinutes', typeof value === 'string' ? '' : (value ?? 0))
-          }
-          error={form.errors.durationMinutes}
-        />
+        <Group gap="md">
+          <NumberInput
+            label="実行時間（時間）"
+            placeholder="0"
+            min={0}
+            max={24}
+            step={0.25}
+            decimalScale={2}
+            key={form.key('durationHours')}
+            value={form.values.durationHours}
+            onChange={handleHoursChange}
+            error={form.errors.durationMinutes}
+            style={{ flex: 1 }}
+          />
+          <NumberInput
+            label="実行時間（分）"
+            placeholder="0"
+            min={0}
+            max={1440}
+            key={form.key('durationMinutes')}
+            value={form.values.durationMinutes}
+            onChange={handleMinutesChange}
+            error={form.errors.durationMinutes}
+            style={{ flex: 1 }}
+          />
+        </Group>
         <Textarea
           label="メモ・感想"
           placeholder="今日の感想や具体的に何をやったかを記録..."
