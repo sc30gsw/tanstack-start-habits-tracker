@@ -4,6 +4,7 @@ import { useRouter } from '@tanstack/react-router'
 import { useState, useTransition } from 'react'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
+import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 import { HabitDisplay } from './habit-display'
 import { HabitEditForm } from './habit-edit-form'
 
@@ -11,6 +12,7 @@ export function HabitCard({ habit }: Record<'habit', HabitEntity>) {
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState('')
   const [editDesc, setEditDesc] = useState('')
+  const [editColor, setEditColor] = useState<HabitColor>('blue')
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -18,12 +20,14 @@ export function HabitCard({ habit }: Record<'habit', HabitEntity>) {
     setIsEditing(true)
     setEditName(habit.name)
     setEditDesc(habit.description ?? '')
+    setEditColor((habit.color as HabitColor) ?? 'blue')
   }
 
   const cancelEdit = () => {
     setIsEditing(false)
     setEditName('')
     setEditDesc('')
+    setEditColor('blue')
   }
 
   const saveEdit = async () => {
@@ -34,6 +38,7 @@ export function HabitCard({ habit }: Record<'habit', HabitEntity>) {
             id: habit.id,
             name: editName.trim(),
             description: editDesc.trim() || undefined,
+            color: editColor,
           },
         })
 
@@ -100,9 +105,11 @@ export function HabitCard({ habit }: Record<'habit', HabitEntity>) {
           <HabitEditForm
             name={editName}
             description={editDesc}
+            color={editColor}
             isLoading={isPending}
             onNameChange={setEditName}
             onDescriptionChange={setEditDesc}
+            onColorChange={setEditColor}
             onSave={saveEdit}
             onCancel={cancelEdit}
           />

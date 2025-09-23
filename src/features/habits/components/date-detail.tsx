@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Group, Stack, Text } from '@mantine/core'
+import { Badge, Button, Card, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconCalendarEvent, IconCheck, IconEdit, IconPlus, IconX } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -27,6 +27,9 @@ export function DateDetail({
   onEditingRecord,
 }: DateDetailProps) {
   const router = useRouter()
+  const computedColorScheme = useComputedColorScheme('light')
+  const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
+  const textColor = 'gray.6' // ユニバーサルカラー（light/dark両対応）
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
@@ -34,7 +37,7 @@ export function DateDetail({
         <Group justify="space-between">
           <Group gap="xs" align="center">
             <IconCalendarEvent size={24} color="var(--mantine-color-blue-6)" />
-            <Text size="lg" fw={600} c="dark.7">
+            <Text size="lg" fw={600} c={titleColor}>
               {selectedDate ? dayjs(selectedDate).format('YYYY年MM月DD日') : '日付を選択'}
             </Text>
           </Group>
@@ -82,12 +85,12 @@ export function DateDetail({
             </Group>
             {selectedDateRecord.notes && (
               <Stack gap="xs">
-                <Text size="sm" fw={500} c="dark.6">
+                <Text size="sm" fw={500} c={textColor}>
                   メモ・感想
                 </Text>
                 <Text
                   size="sm"
-                  c="dark.7"
+                  c={titleColor}
                   style={{
                     whiteSpace: 'pre-wrap',
                     backgroundColor: 'var(--mantine-color-gray-0)',

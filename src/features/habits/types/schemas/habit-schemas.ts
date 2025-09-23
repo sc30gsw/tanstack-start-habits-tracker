@@ -1,5 +1,9 @@
 import { z } from 'zod/v4'
 
+// Available habit colors
+const HABIT_COLORS = ['blue', 'green', 'purple', 'red', 'orange', 'pink', 'cyan', 'teal'] as const
+export const habitColorSchema = z.enum(HABIT_COLORS)
+
 /**
  * 習慣作成用のZodスキーマ
  *
@@ -21,6 +25,7 @@ export const createHabitSchema = z.object({
     .min(1, '習慣名を入力してください')
     .max(100, '習慣名は100文字以内で入力してください'),
   description: z.string().trim().max(500, '説明は500文字以内で入力してください').optional(),
+  color: habitColorSchema.default('blue'),
 })
 
 /**
@@ -46,6 +51,7 @@ export const updateHabitSchema = z.object({
     .max(100, '習慣名は100文字以内で入力してください')
     .optional(),
   description: z.string().trim().max(500, '説明は500文字以内で入力してください').optional(),
+  color: habitColorSchema.optional(),
 })
 
 /**
@@ -57,6 +63,7 @@ export const habitSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().nullable(),
+  color: z.string().nullable().transform((val) => val ?? 'blue'),
   created_at: z.string(),
   updated_at: z.string(),
 })
@@ -67,3 +74,10 @@ export const habitSchema = z.object({
 export type CreateHabitInput = z.infer<typeof createHabitSchema>
 export type UpdateHabitInput = z.infer<typeof updateHabitSchema>
 export type Habit = z.infer<typeof habitSchema>
+export type HabitColor = z.infer<typeof habitColorSchema>
+
+// Available colors for UI components
+export const HABIT_COLOR_OPTIONS = HABIT_COLORS.map((color) => ({
+  value: color,
+  label: color.charAt(0).toUpperCase() + color.slice(1),
+}))

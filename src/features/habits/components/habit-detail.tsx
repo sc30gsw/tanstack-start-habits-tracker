@@ -7,6 +7,7 @@ import { DateDetail } from '~/features/habits/components/date-detail'
 import { HabitInfoCard } from '~/features/habits/components/habit-info-card'
 import { HeatmapSection } from '~/features/habits/components/heatmap-section'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
+import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 
 type SearchParams = {
   selectedDate?: string
@@ -140,6 +141,7 @@ export function HabitDetail({ habit, records, habitsList = [], searchParams }: H
         metric={metric}
         onMetricChange={handleMetricChange}
         onSelectDate={handleSelectedDateChange}
+        habitColor={habit.color as HabitColor}
       />
     </Stack>
   )

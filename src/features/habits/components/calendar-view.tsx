@@ -7,6 +7,7 @@ import {
   Stack,
   Text,
   Tooltip,
+  useComputedColorScheme,
 } from '@mantine/core'
 import { IconCalendar } from '@tabler/icons-react'
 import dayjs from 'dayjs'
@@ -37,6 +38,8 @@ export function CalendarView({
 }: CalendarViewProps) {
   const startOfWeek = selectedDate ? dayjs(selectedDate).startOf('week') : dayjs().startOf('week')
   const weekDates = Array.from({ length: 7 }).map((_, i) => startOfWeek.add(i, 'day'))
+  const computedColorScheme = useComputedColorScheme('light')
+  const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
@@ -44,7 +47,7 @@ export function CalendarView({
         <Group justify="space-between" align="center">
           <Group gap="xs" align="center">
             <IconCalendar size={24} color="var(--mantine-color-blue-6)" />
-            <Text size="lg" fw={600} c="dark.7">
+            <Text size="lg" fw={600} c={titleColor}>
               カレンダー
             </Text>
           </Group>
