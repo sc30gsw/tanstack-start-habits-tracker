@@ -45,20 +45,27 @@ export function HabitDetail({ habit, records, habitsList = [], searchParams }: H
       calendarView,
       metric,
       ...updates,
+    } as const satisfies SearchParams
+
+    // SearchParams型を使って適切なオブジェクトを作成
+    const searchObject: SearchParams = {}
+
+    // 各フィールドを条件付きで追加（undefinedを除外）
+    if (newParams.selectedDate) {
+      searchObject.selectedDate = newParams.selectedDate
+    }
+    if (newParams.calendarView) {
+      searchObject.calendarView = newParams.calendarView
+    }
+    if (newParams.metric) {
+      searchObject.metric = newParams.metric
     }
 
-    // undefinedの値を除去
-    const cleanParams = Object.fromEntries(
-      Object.entries(newParams).filter(([_, value]) => value !== undefined),
-    )
-
     navigate({
-      search: cleanParams as any,
+      search: searchObject,
       replace: true,
-    })
-  }
-
-  // 日付が変更されたときにフォームの状態をリセットし、URLを更新
+    } as Parameters<typeof navigate>[0])
+  } // 日付が変更されたときにフォームの状態をリセットし、URLを更新
   useEffect(() => {
     setShowRecordForm(false)
     setEditingRecord(null)

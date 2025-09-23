@@ -26,7 +26,7 @@ export const Route = createFileRoute('/habits/$habitId')({
 })
 
 function HabitDetailPage() {
-  const { habit, records, habits } = Route.useLoaderData() as any
+  const { habit, records, habits } = Route.useLoaderData()
   const search = Route.useSearch()
 
   if (!habit.success) {

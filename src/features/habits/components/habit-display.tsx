@@ -46,14 +46,10 @@ export function HabitDisplay({ habit, isLoading, onEdit, onDelete }: HabitDispla
             <IconTrash stroke={2} />
           </ActionIcon>
         </Tooltip>
-        <Button
-          component={Link}
-          to="/habits/$habitId"
-          params={{ habitId: habit.id } as any}
-          variant="light"
-          size="xs"
-        >
-          詳細
+        <Button variant="light" size="xs">
+          <Link to="/habits/$habitId" params={{ habitId: habit.id }}>
+            詳細
+          </Link>
         </Button>
       </Group>
     </Group>
