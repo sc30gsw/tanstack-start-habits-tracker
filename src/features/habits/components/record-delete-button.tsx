@@ -8,15 +8,10 @@ import { recordDto } from '~/features/habits/server/record-functions'
 
 type RecordDeleteButtonProps = {
   recordId: string
-  onSuccess?: () => void
   variant?: 'icon' | 'button'
 }
 
-export function RecordDeleteButton({
-  recordId,
-  onSuccess,
-  variant = 'icon',
-}: RecordDeleteButtonProps) {
+export function RecordDeleteButton({ recordId, variant = 'icon' }: RecordDeleteButtonProps) {
   const [opened, { open, close }] = useDisclosure(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -27,7 +22,6 @@ export function RecordDeleteButton({
         const result = await recordDto.deleteRecord({ data: { id: recordId } })
         if (result.success) {
           router.invalidate()
-          onSuccess?.()
           close()
           notifications.show({
             title: '成功',
