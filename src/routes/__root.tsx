@@ -1,11 +1,13 @@
 import { TanstackDevtools } from '@tanstack/react-devtools'
-import { createRootRoute, HeadContent, Scripts, Outlet } from '@tanstack/react-router'
+import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 import appCss from '../styles.css?url'
 import '@mantine/core/styles.css'
+import '@mantine/notifications/styles.css'
 
-import { MantineProvider, AppShell, Group, Text, Button } from '@mantine/core'
+import { AppShell, Button, Group, MantineProvider, Text } from '@mantine/core'
+import { Notifications } from '@mantine/notifications'
 import { Link } from '@tanstack/react-router'
 import { theme } from '~/theme'
 
@@ -44,20 +46,10 @@ function RootComponent() {
             Trak
           </Text>
           <Group gap="md">
-            <Button
-              component={Link}
-              to="/"
-              variant="subtle"
-              size="sm"
-            >
+            <Button component={Link} to="/" variant="subtle" size="sm">
               ホーム
             </Button>
-            <Button
-              component={Link}
-              to="/habits"
-              variant="subtle"
-              size="sm"
-            >
+            <Button component={Link} to="/habits" variant="subtle" size="sm">
               習慣管理
             </Button>
           </Group>
@@ -78,7 +70,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <MantineProvider theme={theme}>{children}</MantineProvider>
+        <MantineProvider theme={theme}>
+          <Notifications />
+          {children}
+        </MantineProvider>
         <TanstackDevtools
           config={{
             position: 'bottom-left',
