@@ -1,4 +1,4 @@
-import { Box, Card, Fieldset, Group, Radio, Stack, Text } from '@mantine/core'
+import { Box, Card, Fieldset, Group, Radio, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconChartBar, IconCheckbox, IconClock } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { HabitHeatmap } from '~/features/habits/components/habit-heatmap'
@@ -22,12 +22,15 @@ export function HeatmapSection({
   onSelectDate,
   habitColor = 'blue',
 }: HeatmapSectionProps) {
+  const computedColorScheme = useComputedColorScheme('light')
+  const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
+
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
       <Stack gap="md">
         <Group gap="xs" align="center">
           <IconChartBar size={24} color="var(--mantine-color-blue-6)" />
-          <Text size="lg" fw={600} c="dark.7">
+          <Text size="lg" fw={600} c={titleColor}>
             年間ヒートマップ
           </Text>
         </Group>
