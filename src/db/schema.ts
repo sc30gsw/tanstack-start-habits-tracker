@@ -13,6 +13,7 @@ export const habits = sqliteTable('habits', {
   id: text().primaryKey(),
   name: text().notNull().unique(),
   description: text(),
+  color: text().default('blue'),
   created_at: text().default(sql`CURRENT_TIMESTAMP`),
   updated_at: text().default(sql`CURRENT_TIMESTAMP`),
 })
@@ -40,7 +41,7 @@ export const records = sqliteTable(
 // Settings table for user preferences
 export const settings = sqliteTable('settings', {
   id: text().primaryKey(),
-  theme: text().default('light'),
+  theme: text().default('auto'),
   default_view: text().default('calendar'),
   created_at: text().default(sql`CURRENT_TIMESTAMP`),
 })
