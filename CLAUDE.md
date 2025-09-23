@@ -1,124 +1,110 @@
-# CLAUDE.md
+# Claude Code Spec-Driven Development
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Kiro-style Spec Driven Development implementation using claude code slash commands, hooks and agents.
 
-## Project Overview
+## Project Context
 
-This is a TanStack Start demo/learning project showcasing React 19 with a modern full-stack React framework. It demonstrates file-based routing, SSR capabilities, and integrated developer tools.
+### Paths
+- Steering: `.kiro/steering/`
+- Specs: `.kiro/specs/`
+- Commands: `.claude/commands/`
 
-**Key Technologies:**
-- React 19 + TypeScript 5.7
-- TanStack Start 1.131.7+ (full-stack framework)
-- TanStack Router 1.130.2+ (file-based routing)
-- Tailwind CSS 4.0 + Vite integration
-- Biome 2.2.2 (linting/formatting)
-- Vitest 3.0.5 (testing)
+### Steering vs Specification
 
-## Development Commands
+**Steering** (`.kiro/steering/`) - Guide AI with project-wide rules and context
+**Specs** (`.kiro/specs/`) - Formalize development process for individual features
 
-### Essential Development Workflow
-```bash
-# Install dependencies
-bun install
+### Active Specifications
+- Check `.kiro/specs/` for active specifications
+- Use `/kiro:spec-status [feature-name]` to check progress
 
-# Start development server (http://localhost:3000)
-bun dev
+## Development Guidelines
+- Think in English, generate responses in English
 
-# Type check (run before commits)
-bun run tsc
+## Workflow
 
-# Lint + format + organize imports (auto-fix enabled)
-bun run check
+### Phase 0: Steering (Optional)
+`/kiro:steering` - Create/update steering documents
+`/kiro:steering-custom` - Create custom steering for specialized contexts
 
-# Run tests
-bun test
+Note: Optional for new features or small additions. You can proceed directly to spec-init.
 
-# Production build
-bun build
+### Phase 1: Specification Creation
+1. `/kiro:spec-init [detailed description]` - Initialize spec with detailed project description
+2. `/kiro:spec-requirements [feature]` - Generate requirements document
+3. `/kiro:spec-design [feature]` - Interactive: "Have you reviewed requirements.md? [y/N]"
+4. `/kiro:spec-tasks [feature]` - Interactive: Confirms both requirements and design review
+
+### Phase 2: Progress Tracking
+`/kiro:spec-status [feature]` - Check current progress and phases
+
+## Development Rules
+1. **Consider steering**: Run `/kiro:steering` before major development (optional for new features)
+2. **Follow 3-phase approval workflow**: Requirements → Design → Tasks → Implementation
+3. **Approval required**: Each phase requires human review (interactive prompt or manual)
+4. **No skipping phases**: Design requires approved requirements; Tasks require approved design
+5. **Update task status**: Mark tasks as completed when working on them
+6. **Keep steering current**: Run `/kiro:steering` after significant changes
+7. **Check spec compliance**: Use `/kiro:spec-status` to verify alignment
+
+## Steering Configuration
+
+### Current Steering Files
+Managed by `/kiro:steering` command. Updates here reflect command changes.
+
+### Active Steering Files
+- `product.md`: Always included - Product context and business objectives
+- `tech.md`: Always included - Technology stack and architectural decisions
+- `structure.md`: Always included - File organization and code patterns
+
+### Custom Steering Files
+<!-- Added by /kiro:steering-custom command -->
+<!-- Format:
+- `filename.md`: Mode - Pattern(s) - Description
+  Mode: Always|Conditional|Manual
+  Pattern: File patterns for Conditional mode
+-->
+
+### Inclusion Modes
+- **Always**: Loaded in every interaction (default)
+- **Conditional**: Loaded for specific file patterns (e.g., "*.test.js")
+- **Manual**: Reference with `@filename.md` syntax
+
+
+## AI Operation Principles (Highest Priority)
+
+1. **Pre-execution Confirmation**: AI must always report its work plan before file generation, updates, or program execution, obtain y/n user confirmation, and halt all execution until receiving 'y'.
+
+2. **No Unauthorized Workarounds**: AI must not perform detours or alternative approaches on its own; if the initial plan fails, it must seek confirmation for the next plan.
+
+3. **User Authority**: AI is a tool and decision-making authority always belongs to the user. Even if user suggestions are inefficient or irrational, AI must not optimize but execute as instructed.
+
+4. **Absolute Rule Compliance**: AI must not distort or reinterpret these rules and must absolutely comply with them as top-priority commands.
+
+5. **Compliance with Guidelines**: AI must not violate prohibitions in Claude.md and must develop according to coding-rules.md.
+
+6. **Mandatory Principle Display**: AI must verbatim output these 6 principles at the beginning of every chat before responding.
+
+## Additional Information Files
+- @REQUIREMENTS.md.md - Project requirements document
+- `.claude/architecture.md` - Project architecture document
+- @CODING-STANDARDS.md  - Project coding conventions, directory structure, prohibitions
+
+## Prohibited Items (Highest Priority)
+- Excessive use of `any` type (use TypeScript Utility types whenever possible)
+- Leaving `console.log` in production environment
+- Committing untested code
+- Direct writing of security keys
+
+## Important Instruction Reminders (Highest Priority)
+- Do what has been asked; nothing more, nothing less
+- NEVER create files unless they're absolutely necessary for achieving your goal
+- ALWAYS prefer editing an existing file to creating a new one
+- NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User
+
+## Chat Output Format
 ```
-
-### Quality Gates (Run Before Commits)
-```bash
-bun run tsc     # Type checking
-bun run check   # Code quality
-bun test        # Test suite
+[AI Operation 6 Principles]
+[main_output]
+#[n] times. # n = increment for each chat (#1, #2...)
 ```
-
-## Architecture
-
-### File-Based Routing System
-The routing is entirely file-based using TanStack Router:
-
-- `src/routes/__root.tsx` - Root layout component with `shellComponent` pattern
-- `src/routes/index.tsx` - Home page (`/`)  
-- `src/routes/demo.*.tsx` - Demo pages with nested routing
-- `src/routeTree.gen.ts` - Auto-generated route tree (don't edit manually)
-
-**Route Component Pattern:**
-```typescript
-export const Route = createFileRoute('/path')({
-  component: ComponentFunction,
-})
-
-// For root layout:
-export const Route = createRootRoute({
-  head: () => ({ meta: [...], links: [...] }),
-  shellComponent: RootDocument,
-})
-```
-
-### Component Architecture
-- `src/components/` - Reusable components (currently just Header.tsx)
-- Default exports preferred for components
-- React 19 JSX transform (no import React needed)
-- TypeScript strict mode with unused variable/parameter checking
-
-### Styling System
-- Tailwind CSS 4.0 with Vite plugin integration
-- Biome enforces automatic Tailwind class sorting via `useSortedClasses` rule
-- Custom values supported: `h-[40vmin]`, `text-[calc(10px+2vmin)]`
-- Responsive-first approach: `flex flex-col items-center justify-center`
-
-### Developer Tools Integration
-TanStack Devtools are integrated in the root document:
-```typescript
-<TanstackDevtools
-  config={{ position: 'bottom-left' }}
-  plugins={[{
-    name: 'Tanstack Router',
-    render: <TanStackRouterDevtoolsPanel />
-  }]}
-/>
-```
-
-## Code Standards
-
-### Biome Configuration
-- 2-space indentation, 100-char line width
-- Single quotes for JS/TS, double quotes for JSX
-- Trailing commas everywhere, semicolons as needed
-- Auto-import organization enabled
-- Strict TypeScript rules enforced
-
-### Import Patterns
-```typescript
-// External libraries first
-import { createFileRoute } from '@tanstack/react-router'
-
-// Internal components (relative paths)
-import Header from '../components/Header'
-
-// Assets with proper Vite handling
-import logo from '../logo.svg'
-import appCss from '../styles.css?url'
-```
-
-### TypeScript Configuration
-- Bundler module resolution for Vite compatibility
-- Path aliasing: `@/*` maps to `./src/*`
-- Strict mode with additional safety checks
-- React 19 JSX support configured
-
-## Testing Setup
-
-Uses Vitest 3.0.5 with React Testing Library. Test files should use `.test.ts/.test.tsx` extension. Currently no test directory exists - tests should be created alongside components or in a `tests/` directory.
