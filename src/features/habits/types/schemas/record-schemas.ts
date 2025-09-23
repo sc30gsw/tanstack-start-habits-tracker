@@ -31,14 +31,14 @@ const isValidDate = (dateString: string): boolean => {
  * ```
  */
 export const createRecordSchema = z.object({
-  habit_id: z.string({ message: '習慣IDは必須です' }).min(1, '習慣IDを指定してください'),
+  habitId: z.string({ message: '習慣IDは必須です' }).min(1, '習慣IDを指定してください'),
   date: z
     .string({ message: '日付は必須です' })
     .regex(DATE_REGEX, '日付はYYYY-MM-DD形式で入力してください')
     .refine(isValidDate, '有効な日付を入力してください')
     .refine((date) => new Date(date) <= new Date(), '未来の日付は記録できません'),
   completed: z.boolean({ message: '完了状態はtrue/falseで指定してください' }).default(false),
-  duration_minutes: z
+  durationMinutes: z
     .number({ message: '実行時間は数値で入力してください' })
     .int('実行時間は整数で入力してください')
     .min(0, '実行時間は0分以上で入力してください')
@@ -64,7 +64,7 @@ export const createRecordSchema = z.object({
 export const updateRecordSchema = z.object({
   id: z.string({ message: '記録IDは必須です' }).min(1, '記録IDを指定してください'),
   completed: z.boolean({ message: '完了状態はtrue/falseで指定してください' }).optional(),
-  duration_minutes: z
+  durationMinutes: z
     .number({ message: '実行時間は数値で入力してください' })
     .int('実行時間は整数で入力してください')
     .min(0, '実行時間は0分以上で入力してください')
@@ -82,8 +82,8 @@ export const recordSchema = z.object({
   habit_id: z.string(),
   date: z.string(),
   completed: z.boolean(),
-  duration_minutes: z.number(),
-  created_at: z.string(),
+  durationMinutes: z.number(),
+  createdAt: z.string(),
 })
 
 /**
