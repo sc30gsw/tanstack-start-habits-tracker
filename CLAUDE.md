@@ -21,7 +21,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 **Specs** (`.kiro/specs/`) - Formalize development process for individual features
 
 ### Active Specifications
-- Check `.kiro/specs/` for active specifications
+- `habit-tracking-system`: 習慣追跡システムの包括的な実装
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Technology Stack
@@ -177,7 +177,7 @@ Managed by `/kiro:steering` command. Updates here reflect command changes.
 
 4. **Absolute Rule Compliance**: AI must not distort or reinterpret these rules and must absolutely comply with them as top-priority commands.
 
-5. **Compliance with Guidelines**: AI must not violate prohibitions in Claude.md and must develop according to coding-rules.md.
+5. **Compliance with Guidelines**: AI must not violate prohibitions in Claude.md and must develop according to CODING-STANDARDS.md.
 
 6. **Mandatory Principle Display**: AI must verbatim output these 6 principles at the beginning of every chat before responding.
 
