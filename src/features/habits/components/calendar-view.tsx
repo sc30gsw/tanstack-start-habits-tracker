@@ -10,6 +10,7 @@ import {
 } from '@mantine/core'
 import dayjs from 'dayjs'
 import type { RecordEntity } from '~/features/habits/types/habit'
+import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
 
 type CalendarViewProps = {
   calendarView: 'month' | 'week' | 'day'
@@ -45,7 +46,7 @@ export function CalendarView({
           <SegmentedControl
             size="xs"
             value={calendarView}
-            onChange={(v: any) => onCalendarViewChange(v)}
+            onChange={(v) => onCalendarViewChange(v as 'month' | 'week' | 'day')}
             data={[
               { label: '月', value: 'month' },
               { label: '週', value: 'week' },
@@ -138,8 +139,17 @@ function MonthView({
       </Group>
 
       <Group gap={4} justify="space-between" wrap="nowrap">
-        {['日', '月', '火', '水', '木', '金', '土'].map((d) => (
-          <Text key={d} size="xs" c="dimmed" style={{ flex: 1, textAlign: 'center' }}>
+        {['日', '月', '火', '水', '木', '金', '土'].map((d, index) => (
+          <Text
+            key={d}
+            size="xs"
+            c={index === 0 ? 'red.7' : index === 6 ? 'blue.7' : 'dimmed'}
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              fontWeight: index === 0 || index === 6 ? 600 : 400,
+            }}
+          >
             {d}
           </Text>
         ))}
@@ -152,15 +162,21 @@ function MonthView({
               const iso = d.format('YYYY-MM-DD')
               const rec = recordMap[iso]
               const isCurrentMonth = d.month() === currentMonth.month()
-              const isSelected = selectedDate && d.isSame(selectedDate, 'day')
+              const isSelected = !!(selectedDate && d.isSame(selectedDate, 'day'))
               const isFuture = d.isAfter(dayjs(), 'day')
-              const bg = rec
+              const dateType = getDateType(d)
+              const hasRecord = !!rec
+
+              // 記録がある場合は記録の状態に応じた色、そうでなければ日付タイプに応じた色
+              const backgroundColor = rec
                 ? rec.completed
                   ? 'var(--mantine-color-green-6)'
                   : 'var(--mantine-color-yellow-5)'
                 : isSelected
                   ? 'var(--mantine-color-blue-6)'
-                  : 'var(--mantine-color-dark-4)'
+                  : getDateColor(dateType, isSelected, hasRecord)
+
+              const textColor = getDateTextColor(dateType, isSelected, hasRecord, isFuture)
 
               return (
                 <Tooltip
@@ -181,13 +197,8 @@ function MonthView({
                       textAlign: 'center',
                       cursor: isFuture ? 'not-allowed' : 'pointer',
                       opacity: isCurrentMonth ? (isFuture ? 0.3 : 1) : 0.35,
-                      backgroundColor: isSelected || rec ? bg : undefined,
-                      color:
-                        isSelected || rec
-                          ? '#fff'
-                          : isFuture
-                            ? 'var(--mantine-color-gray-5)'
-                            : undefined,
+                      backgroundColor,
+                      color: textColor,
                       minWidth: 34,
                     }}
                   >
@@ -219,6 +230,17 @@ function WeekView({ weekDates, onSelectedDateChange, recordMap }: WeekViewProps)
           const iso = d.format('YYYY-MM-DD')
           const rec = recordMap[iso]
           const isFuture = d.isAfter(dayjs(), 'day')
+          const dateType = getDateType(d)
+          const hasRecord = !!rec
+
+          // 記録がある場合は記録の状態に応じた色、そうでなければ日付タイプに応じた色
+          const backgroundColor = rec
+            ? rec.completed
+              ? 'var(--mantine-color-green-6)'
+              : 'var(--mantine-color-yellow-5)'
+            : getDateColor(dateType, false, hasRecord)
+
+          const textColor = getDateTextColor(dateType, false, hasRecord, isFuture)
 
           return (
             <Card
@@ -230,11 +252,15 @@ function WeekView({ weekDates, onSelectedDateChange, recordMap }: WeekViewProps)
                 textAlign: 'center',
                 cursor: isFuture ? 'not-allowed' : 'pointer',
                 opacity: isFuture ? 0.5 : 1,
-                color: isFuture ? 'var(--mantine-color-gray-5)' : undefined,
+                backgroundColor,
+                color: textColor,
               }}
               onClick={() => !isFuture && onSelectedDateChange(d.toDate())}
             >
-              <Text size="xs" c="dimmed">
+              <Text
+                size="xs"
+                c={dateType === 'sunday' ? 'red.7' : dateType === 'saturday' ? 'blue.7' : 'dimmed'}
+              >
                 {d.format('dd')}
               </Text>
               <Text fw={500}>{d.date()}</Text>
