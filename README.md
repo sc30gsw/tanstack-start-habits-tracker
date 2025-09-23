@@ -27,7 +27,7 @@ bunx --bun run test
 
 ## Styling
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+This project uses [Mantine UI](https://mantine.dev/) for styling.
 
 
 

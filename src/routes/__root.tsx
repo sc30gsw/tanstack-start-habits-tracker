@@ -1,8 +1,13 @@
 import { TanstackDevtools } from '@tanstack/react-devtools'
-import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
+import { createRootRoute, HeadContent, Scripts, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 import appCss from '../styles.css?url'
+import '@mantine/core/styles.css'
+
+import { MantineProvider, AppShell, Group, Text, Button } from '@mantine/core'
+import { Link } from '@tanstack/react-router'
+import { theme } from '~/theme'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -15,7 +20,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Trak - 習慣追跡アプリ',
       },
     ],
     links: [
@@ -26,8 +31,45 @@ export const Route = createRootRoute({
     ],
   }),
 
+  component: RootComponent,
   shellComponent: RootDocument,
 })
+
+function RootComponent() {
+  return (
+    <AppShell header={{ height: 60 }} padding="md">
+      <AppShell.Header>
+        <Group h="100%" px="md" justify="space-between">
+          <Text size="xl" fw={700} c="blue">
+            Trak
+          </Text>
+          <Group gap="md">
+            <Button
+              component={Link}
+              to="/"
+              variant="subtle"
+              size="sm"
+            >
+              ホーム
+            </Button>
+            <Button
+              component={Link}
+              to="/habits"
+              variant="subtle"
+              size="sm"
+            >
+              習慣管理
+            </Button>
+          </Group>
+        </Group>
+      </AppShell.Header>
+
+      <AppShell.Main>
+        <Outlet />
+      </AppShell.Main>
+    </AppShell>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -36,7 +78,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <MantineProvider theme={theme}>{children}</MantineProvider>
         <TanstackDevtools
           config={{
             position: 'bottom-left',
