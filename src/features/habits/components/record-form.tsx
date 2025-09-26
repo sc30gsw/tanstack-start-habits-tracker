@@ -107,14 +107,16 @@ export function RecordForm({
         labels: { confirm: 'メモを記入する', cancel: 'このまま保存' },
         confirmProps: { color: 'blue' },
         onConfirm: () => {
-          // メモ欄にフォーカスを当てる
-          const textarea = document.querySelector(
-            'textarea[placeholder*="今日の感想"]',
-          ) as HTMLTextAreaElement
-          if (textarea) {
-            textarea.focus()
-            textarea.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          }
+          // メモ欄にフォーカスを当てる（モーダルが閉じてからフォーカス）
+          setTimeout(() => {
+            const textarea = document.querySelector(
+              'textarea[placeholder*="今日の感想"]',
+            ) as HTMLTextAreaElement
+            if (textarea) {
+              textarea.focus()
+              textarea.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+          }, 100)
         },
         onCancel: () => {
           // そのまま保存処理を実行
@@ -291,6 +293,7 @@ export function RecordForm({
           error={form.errors.notes}
           disabled={isPending}
           description={`${form.values.notes.length}/500文字`}
+          data-autofocus
           styles={{
             input: {
               backgroundColor:
