@@ -1,8 +1,12 @@
 import { Badge, Button, Card, Container, Group, Stack, Text, Title } from '@mantine/core'
 import { IconChartLine, IconCheck, IconCloudUpload, IconEdit } from '@tabler/icons-react'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import dayjs from 'dayjs'
+import 'dayjs/locale/ja'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
+
+dayjs.locale('ja')
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -24,9 +28,9 @@ function Home() {
 
   const totalHabits = habits.success ? habits.data?.length || 0 : 0
   const totalRecords = records.success ? records.data?.length || 0 : 0
+  const today = dayjs().format('YYYY-MM-DD')
   const completedToday = records.success
-    ? records.data?.filter((r) => r.date === new Date().toISOString().slice(0, 10) && r.completed)
-        .length || 0
+    ? records.data?.filter((r) => r.date === today && r.completed).length || 0
     : 0
 
   return (
