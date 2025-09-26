@@ -30,7 +30,6 @@ const createRecord = createServerFn({ method: 'POST' })
 
       // 新しい記録を作成
       const recordId = nanoid()
-      const now = new Date().toISOString()
 
       const [record] = await db
         .insert(records)
@@ -41,7 +40,6 @@ const createRecord = createServerFn({ method: 'POST' })
           completed: data.completed,
           duration_minutes: data.durationMinutes,
           notes: data.notes,
-          created_at: now,
         })
         .returning()
 
@@ -187,7 +185,7 @@ const getRecords = createServerFn({ method: 'GET' })
   .handler(async ({ data: filters }): Promise<RecordsListResponse> => {
     try {
       // フィルタリング条件を準備
-      const conditions = []
+      const conditions: ReturnType<typeof eq>[] = []
 
       if (filters?.habit_id) {
         conditions.push(eq(records.habit_id, filters.habit_id))
@@ -212,7 +210,7 @@ const getRecords = createServerFn({ method: 'GET' })
           : await db.select().from(records).orderBy(records.created_at)
 
       // RecordEntityに変換
-      const recordEntities: RecordEntity[] = allRecords.map((record) => ({
+      const recordEntities = allRecords.map((record) => ({
         ...record,
         created_at: new Date(record.created_at!),
       }))
@@ -248,10 +246,16 @@ const getRecordById = createServerFn({ method: 'GET' })
         }
       }
 
+      console.log(
+        '🚀 ~ record:',
+        record,
+        new Date(record[0].created_at ?? new Date().toISOString()),
+      )
+
       // RecordEntityに変換
       const recordEntity = {
         ...record[0],
-        created_at: new Date(record[0].created_at!),
+        created_at: new Date(record[0].created_at ?? new Date().toISOString()),
       } as const satisfies RecordEntity
 
       return {

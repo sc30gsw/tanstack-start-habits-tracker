@@ -34,7 +34,6 @@ const createHabit = createServerFn({ method: 'POST' })
 
       // 新しい習慣を作成
       const habitId = nanoid()
-      const now = new Date().toISOString()
 
       const [habit] = await db
         .insert(habits)
@@ -43,20 +42,20 @@ const createHabit = createServerFn({ method: 'POST' })
           name: data.name,
           description: data.description || null,
           color: data.color || 'blue',
-          created_at: now,
-          updated_at: now,
         })
         .returning()
 
-      // HabitEntityに変換
-      const habitData = {
+      // スキーマ検証用のデータ準備（string型のタイムスタンプ）
+      const parsedHabit = habitSchema.parse({
         ...habit,
-        created_at: habit.created_at!,
-        updated_at: habit.updated_at!,
-      }
-      const parsedHabit = habitSchema.parse(habitData)
+        created_at: habit.created_at ?? new Date().toISOString(),
+        updated_at: habit.updated_at ?? new Date().toISOString(),
+      })
+
+      // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
       const habitEntity = {
         ...parsedHabit,
+        color: parsedHabit.color || 'blue', // nullの場合デフォルト値を設定
         created_at: new Date(parsedHabit.created_at),
         updated_at: new Date(parsedHabit.updated_at),
       } as const satisfies HabitEntity
@@ -139,15 +138,17 @@ const updateHabit = createServerFn({ method: 'POST' })
         .where(eq(habits.id, data.id))
         .returning()
 
-      // HabitEntityに変換
-      const habitData = {
+      // スキーマ検証用のデータ準備（string型のタイムスタンプ）
+      const parsedHabit = habitSchema.parse({
         ...updatedHabit,
-        created_at: updatedHabit.created_at!,
-        updated_at: updatedHabit.updated_at!,
-      }
-      const parsedHabit = habitSchema.parse(habitData)
+        created_at: updatedHabit.created_at ?? new Date().toISOString(),
+        updated_at: updatedHabit.updated_at ?? new Date().toISOString(),
+      })
+
+      // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
       const habitEntity = {
         ...parsedHabit,
+        color: parsedHabit.color || 'blue', // nullの場合デフォルト値を設定
         created_at: new Date(parsedHabit.created_at),
         updated_at: new Date(parsedHabit.updated_at),
       } as const satisfies HabitEntity
@@ -216,19 +217,20 @@ const getHabits = createServerFn({ method: 'GET' }).handler(
 
       // HabitEntityに変換
       const habitEntities: HabitEntity[] = allHabits.map((habit) => {
-        const habitData = {
+        // スキーマ検証用のデータ準備（string型のタイムスタンプ）
+        const parsedHabit = habitSchema.parse({
           ...habit,
-          created_at: habit.created_at!,
-          updated_at: habit.updated_at!,
-        }
+          created_at: habit.created_at ?? new Date().toISOString(),
+          updated_at: habit.updated_at ?? new Date().toISOString(),
+        })
 
-        const parsedHabit = habitSchema.parse(habitData)
-
+        // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
         return {
           ...parsedHabit,
+          color: parsedHabit.color || 'blue', // nullの場合デフォルト値を設定
           created_at: new Date(parsedHabit.created_at),
           updated_at: new Date(parsedHabit.updated_at),
-        }
+        } as const satisfies HabitEntity
       })
 
       return {
@@ -263,15 +265,17 @@ const getHabitById = createServerFn({ method: 'GET' })
         }
       }
 
-      // HabitEntityに変換
-      const habitData = {
+      // スキーマ検証用のデータ準備（string型のタイムスタンプ）
+      const parsedHabit = habitSchema.parse({
         ...habit[0],
-        created_at: habit[0].created_at!,
-        updated_at: habit[0].updated_at!,
-      }
-      const parsedHabit = habitSchema.parse(habitData)
+        created_at: habit[0].created_at ?? new Date().toISOString(),
+        updated_at: habit[0].updated_at ?? new Date().toISOString(),
+      })
+
+      // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
       const habitEntity = {
         ...parsedHabit,
+        color: parsedHabit.color || 'blue', // nullの場合デフォルト値を設定
         created_at: new Date(parsedHabit.created_at),
         updated_at: new Date(parsedHabit.updated_at),
       } as const satisfies HabitEntity
