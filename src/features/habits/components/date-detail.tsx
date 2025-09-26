@@ -1,4 +1,13 @@
-import { Badge, Button, Card, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Card,
+  Group,
+  Stack,
+  Text,
+  useComputedColorScheme,
+} from '@mantine/core'
 import { IconCalendarEvent, IconCheck, IconEdit, IconPlus, IconX } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -41,27 +50,44 @@ export function DateDetail({
               {selectedDate ? dayjs(selectedDate).format('YYYY年MM月DD日') : '日付を選択'}
             </Text>
           </Group>
-          {selectedDate && !selectedDateRecord && !editingRecord && (
-            <Button
+          {showRecordForm || editingRecord ? (
+            <ActionIcon
               size="sm"
-              leftSection={<IconPlus size={16} />}
-              onClick={() => onShowRecordForm(true)}
+              variant="transparent"
+              radius="xl"
+              color="gray"
+              onClick={() => {
+                onShowRecordForm(false)
+                onEditingRecord(null)
+              }}
             >
-              記録追加
-            </Button>
-          )}
-          {selectedDateRecord && !editingRecord && !showRecordForm && (
-            <Group gap="xs">
-              <Button
-                size="sm"
-                variant="outline"
-                leftSection={<IconEdit size={16} />}
-                onClick={() => onEditingRecord(selectedDateRecord)}
-              >
-                編集
-              </Button>
-              <RecordDeleteButton recordId={selectedDateRecord.id} variant="button" />
-            </Group>
+              <IconX size={18} />
+            </ActionIcon>
+          ) : (
+            <>
+              {selectedDate && !selectedDateRecord && (
+                <Button
+                  size="sm"
+                  leftSection={<IconPlus size={16} />}
+                  onClick={() => onShowRecordForm(true)}
+                >
+                  記録追加
+                </Button>
+              )}
+              {selectedDateRecord && (
+                <Group gap="xs">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    leftSection={<IconEdit size={16} />}
+                    onClick={() => onEditingRecord(selectedDateRecord)}
+                  >
+                    編集
+                  </Button>
+                  <RecordDeleteButton recordId={selectedDateRecord.id} variant="button" />
+                </Group>
+              )}
+            </>
           )}
         </Group>
 
