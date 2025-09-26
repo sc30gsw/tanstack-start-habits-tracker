@@ -1,5 +1,5 @@
 import { Grid, Stack } from '@mantine/core'
-import { useNavigate } from '@tanstack/react-router'
+import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { CalendarView } from '~/features/habits/components/calendar-view'
@@ -8,22 +8,19 @@ import { HabitInfoCard } from '~/features/habits/components/habit-info-card'
 import { HeatmapSection } from '~/features/habits/components/heatmap-section'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
-
-type SearchParams = {
-  selectedDate?: string
-  calendarView?: 'month' | 'week' | 'day'
-  metric?: 'duration' | 'completion'
-}
+import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 
 type HabitDetailProps = {
   habit: HabitEntity
   records: RecordEntity[]
   habitsList?: HabitEntity[]
-  searchParams?: SearchParams
 }
 
-export function HabitDetail({ habit, records, habitsList = [], searchParams }: HabitDetailProps) {
-  const navigate = useNavigate()
+export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProps) {
+  const apiRoute = getRouteApi('/habits/$habitId')
+  const searchParams = apiRoute.useSearch()
+
+  const navigate = apiRoute.useNavigate()
 
   // URLパラメータから初期値を取得
   const initialSelectedDate = searchParams?.selectedDate
@@ -40,7 +37,7 @@ export function HabitDetail({ habit, records, habitsList = [], searchParams }: H
   const [metric, setMetric] = useState<'duration' | 'completion'>(initialMetric)
 
   // URLパラメータを更新する関数
-  const updateSearchParams = (updates: Partial<SearchParams>) => {
+  const updateSearchParams = (updates: SearchParams) => {
     const newParams = {
       selectedDate: selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : undefined,
       calendarView,

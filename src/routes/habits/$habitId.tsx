@@ -1,16 +1,10 @@
 import { Alert, Container, Stack, Text, Title, useComputedColorScheme } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
 import { HabitDetail } from '~/features/habits/components/habit-detail'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
-
-const searchSchema = z.object({
-  selectedDate: z.string().optional(),
-  calendarView: z.enum(['month', 'week', 'day']).optional(),
-  metric: z.enum(['duration', 'completion']).optional(),
-})
+import { searchSchema } from '~/features/habits/types/schemas/search-params'
 
 export const Route = createFileRoute('/habits/$habitId')({
   component: HabitDetailPage,
@@ -27,7 +21,6 @@ export const Route = createFileRoute('/habits/$habitId')({
 
 function HabitDetailPage() {
   const { habit, records, habits } = Route.useLoaderData()
-  const search = Route.useSearch()
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
@@ -51,7 +44,6 @@ function HabitDetailPage() {
           habit={habit.data!}
           records={records.success ? records.data || [] : []}
           habitsList={habits.success ? habits.data || [] : []}
-          searchParams={search}
         />
       </Stack>
     </Container>
