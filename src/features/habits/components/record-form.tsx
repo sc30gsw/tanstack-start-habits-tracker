@@ -163,9 +163,11 @@ export function RecordForm({
   return (
     <form onSubmit={form.onSubmit((values: FormValues) => handleSubmit(values))} noValidate>
       <Stack gap="md">
-        {form.errors.durationMinutes && (
+        {(form.errors.completed || form.errors.durationMinutes || form.errors.notes) && (
           <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
-            <Text c="red">{form.errors.durationMinutes}</Text>
+            <Text c="red">
+              {form.errors.completed || form.errors.durationMinutes || form.errors.notes}
+            </Text>
           </Alert>
         )}
         <Switch
@@ -173,6 +175,8 @@ export function RecordForm({
           key={form.key('completed')}
           checked={form.values.completed}
           onChange={(e) => form.setFieldValue('completed', e.currentTarget.checked)}
+          disabled={isPending}
+          error={form.errors.completed}
         />
         <Group gap="md">
           <NumberInput
@@ -186,6 +190,7 @@ export function RecordForm({
             value={form.values.durationHours}
             onChange={handleHoursChange}
             error={form.errors.durationMinutes}
+            disabled={isPending}
             style={{ flex: 1 }}
           />
           <NumberInput
@@ -197,6 +202,7 @@ export function RecordForm({
             value={form.values.durationMinutes}
             onChange={handleMinutesChange}
             error={form.errors.durationMinutes}
+            disabled={isPending}
             style={{ flex: 1 }}
           />
         </Group>
@@ -209,6 +215,7 @@ export function RecordForm({
           value={form.values.notes}
           onChange={(e) => form.setFieldValue('notes', e.currentTarget.value)}
           error={form.errors.notes}
+          disabled={isPending}
           description={`${form.values.notes.length}/500文字`}
           styles={{
             input: {

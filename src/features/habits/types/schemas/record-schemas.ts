@@ -1,4 +1,11 @@
+import dayjs from 'dayjs'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import { z } from 'zod/v4'
+import 'dayjs/locale/ja'
+
+// プラグインと日本のロケールを設定
+dayjs.extend(isSameOrBefore)
+dayjs.locale('ja')
 
 /**
  * 日付文字列の検証用正規表現
@@ -10,8 +17,8 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/
  */
 const isValidDate = (dateString: string): boolean => {
   if (!DATE_REGEX.test(dateString)) return false
-  const date = new Date(dateString)
-  return date.toISOString().slice(0, 10) === dateString
+  const date = dayjs(dateString)
+  return date.isValid() && date.format('YYYY-MM-DD') === dateString
 }
 
 /**
@@ -36,7 +43,7 @@ export const createRecordSchema = z.object({
     .string({ message: '日付は必須です' })
     .regex(DATE_REGEX, '日付はYYYY-MM-DD形式で入力してください')
     .refine(isValidDate, '有効な日付を入力してください')
-    .refine((date) => new Date(date) <= new Date(), '未来の日付は記録できません'),
+    .refine((date) => dayjs(date).isSameOrBefore(dayjs(), 'day'), '未来の日付は記録できません'),
   completed: z.boolean({ message: '完了状態はtrue/falseで指定してください' }).default(false),
   durationMinutes: z
     .number({ message: '実行時間は数値で入力してください' })
@@ -49,7 +56,19 @@ export const createRecordSchema = z.object({
     .max(500, 'メモは500文字以内で入力してください')
     .optional()
     .transform((val) => val?.trim() || undefined),
-})
+}).refine(
+  (data) => {
+    // 完了状態がtrueの場合、実行時間が0より大きい必要がある
+    if (data.completed && data.durationMinutes === 0) {
+      return false
+    }
+    return true
+  },
+  {
+    message: '習慣を完了した場合は、実行時間を入力してください',
+    path: ['durationMinutes'], // エラーをdurationMinutesフィールドに関連付け
+  }
+)
 
 /**
  * 記録更新用のZodスキーマ
