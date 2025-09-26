@@ -7,6 +7,7 @@ import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 
 import { AppShell, Button, ColorSchemeScript, Group, MantineProvider, Text } from '@mantine/core'
+import { ModalsProvider } from '@mantine/modals'
 import { Notifications } from '@mantine/notifications'
 import { Link } from '@tanstack/react-router'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
@@ -74,8 +75,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <MantineProvider theme={theme}>
-          <Notifications />
-          {children}
+          <ModalsProvider>
+            <Notifications />
+            {children}
+          </ModalsProvider>
         </MantineProvider>
         <TanstackDevtools
           config={{
