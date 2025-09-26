@@ -44,11 +44,13 @@ export function HabitCard({ habit }: Record<'habit', HabitEntity>) {
 
         if (result.success) {
           cancelEdit()
+
           notifications.show({
             title: '成功',
             message: '習慣が更新されました',
             color: 'green',
           })
+
           router.invalidate()
         } else {
           notifications.show({

@@ -27,19 +27,26 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
     initialValues: {
       name: '',
       description: '',
-      color: 'blue' as HabitColor,
+      color: 'blue',
     },
     validate: (values) => {
       const result = createHabitSchema.safeParse(values)
-      if (result.success) return {}
+
+      if (result.success) {
+        return {}
+      }
+
       // convert Zod issues into Mantine field errors map
       const fieldErrors: Record<string, string> = {}
+
       for (const issue of result.error.issues) {
         const path = issue.path[0]
+
         if (typeof path === 'string' && !fieldErrors[path]) {
           fieldErrors[path] = issue.message
         }
       }
+
       return fieldErrors
     },
     transformValues: (values: FormValues) => ({
@@ -64,8 +71,10 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
 
         if (result.success) {
           router.invalidate()
+
           onSuccess()
           form.reset()
+
           notifications.show({
             title: '成功',
             message: '習慣が作成されました',
@@ -76,6 +85,7 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
         }
       } catch (_err) {
         form.setErrors({ name: '習慣の作成に失敗しました' })
+
         notifications.show({
           title: 'エラー',
           message: '習慣の作成中に予期しないエラーが発生しました',

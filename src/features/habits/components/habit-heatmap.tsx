@@ -68,9 +68,13 @@ export function HabitHeatmap({
 
   // 値に基づいてcolorsから適切な色を選択する関数
   const getColorForValue = (value: number) => {
-    if (value === 0) return '#f0f0f0' // 値が0の場合は薄いグレー
+    if (value === 0) {
+      return '#f0f0f0'
+    }
+
     const ratio = value / maxValue
     const colorIndex = Math.min(Math.floor(ratio * colors.length), colors.length - 1)
+
     return colors[colorIndex]
   }
 
