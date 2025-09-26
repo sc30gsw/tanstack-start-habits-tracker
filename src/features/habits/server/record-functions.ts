@@ -246,12 +246,6 @@ const getRecordById = createServerFn({ method: 'GET' })
         }
       }
 
-      console.log(
-        '🚀 ~ record:',
-        record,
-        new Date(record[0].created_at ?? new Date().toISOString()),
-      )
-
       // RecordEntityに変換
       const recordEntity = {
         ...record[0],
