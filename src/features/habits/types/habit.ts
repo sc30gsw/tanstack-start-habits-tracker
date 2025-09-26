@@ -6,17 +6,7 @@
  */
 
 import type { habits, records, settings } from '~/db/schema'
-import type {
-  CreateHabitInput,
-  CreateRecordInput,
-  Habit,
-  RecordSchema,
-  Settings,
-  SettingsInput,
-  UpdateHabitInput,
-  UpdateRecordInput,
-  UpdateSettingsInput,
-} from '~/features/habits/types/schemas'
+import type { Habit } from '~/features/habits/types/schemas/habit-schemas'
 
 /**
  * データベーステーブルの型定義（Drizzle ORM生成）
@@ -145,19 +135,4 @@ export type CalendarData = {
     completed: boolean
     duration: number
   }>
-}
-
-/**
- * エクスポート用のZodスキーマ型（再エクスポート）
- */
-export type {
-  CreateHabitInput,
-  UpdateHabitInput,
-  Habit,
-  CreateRecordInput,
-  UpdateRecordInput,
-  RecordSchema,
-  SettingsInput,
-  UpdateSettingsInput,
-  Settings,
 }
