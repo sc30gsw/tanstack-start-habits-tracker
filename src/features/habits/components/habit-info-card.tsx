@@ -1,6 +1,6 @@
 import { Badge, Card, Group, Select, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconChartLine, IconClock, IconTarget, IconTrophy } from '@tabler/icons-react'
-import { useNavigate } from '@tanstack/react-router'
+import { getRouteApi } from '@tanstack/react-router'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import { formatTotalDuration } from '~/features/habits/utils/time-utils'
 
@@ -11,7 +11,8 @@ type HabitInfoCardProps = {
 }
 
 export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCardProps) {
-  const navigate = useNavigate({ from: '/habits/$habitId' })
+  const apiRoute = getRouteApi('/habits/$habitId')
+  const navigate = apiRoute.useNavigate()
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
