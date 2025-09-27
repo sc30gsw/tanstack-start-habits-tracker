@@ -6,6 +6,7 @@ import { CalendarView } from '~/features/habits/components/calendar-view'
 import { DateDetail } from '~/features/habits/components/date-detail'
 import { HabitInfoCard } from '~/features/habits/components/habit-info-card'
 import { HeatmapSection } from '~/features/habits/components/heatmap-section'
+import { TrendsChart } from '~/features/habits/components/trends-chart'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
@@ -132,6 +133,14 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
           />
         </Grid.Col>
       </Grid>
+
+      {/* トレンドチャート */}
+      <TrendsChart
+        records={records}
+        calendarView={calendarView}
+        currentMonth={currentMonth}
+        habitColor={habit.color as HabitColor}
+      />
 
       {/* ヒートマップ */}
       <HeatmapSection
