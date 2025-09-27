@@ -287,7 +287,6 @@ export function TrendsChart({
             ticks: yAxisTicks,
           }}
           tickLine="none"
-          gridAxis="y"
         />
       </Stack>
     </Card>
