@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Badge,
   Card,
+  type CSSProperties,
   Group,
   SegmentedControl,
   Stack,
@@ -184,14 +185,34 @@ function MonthView({
               const dateType = getDateType(d)
               const hasRecord = !!rec
 
-              // 記録がある場合は記録の状態に応じた色、そうでなければ日付タイプに応じた色
-              const backgroundColor = rec
-                ? rec.completed
-                  ? 'var(--mantine-color-green-6)'
-                  : 'var(--mantine-color-yellow-5)'
-                : isSelected
-                  ? 'var(--mantine-color-blue-6)'
-                  : getDateColor(dateType, isSelected, hasRecord)
+              // 背景色とボーダーを分けて管理
+              let backgroundColor: string
+              let borderColor: string = 'transparent'
+              const borderWidth: string = '2px'
+
+              if (rec) {
+                // 記録がある場合
+                backgroundColor = rec.completed
+                  ? isSelected
+                    ? 'var(--mantine-color-green-7)' // 選択された完了日は濃い緑
+                    : 'var(--mantine-color-green-6)' // 通常の完了日
+                  : isSelected
+                    ? 'var(--mantine-color-yellow-6)' // 選択された未完了日は濃い黄
+                    : 'var(--mantine-color-yellow-5)' // 通常の未完了日
+
+                // 選択時は青いボーダーを追加
+                if (isSelected) {
+                  borderColor = 'var(--mantine-color-blue-6)'
+                }
+              } else {
+                // 記録がない場合
+                if (isSelected) {
+                  backgroundColor = 'var(--mantine-color-blue-6)'
+                  borderColor = 'var(--mantine-color-blue-8)'
+                } else {
+                  backgroundColor = getDateColor(dateType, false, hasRecord)
+                }
+              }
 
               const textColor = getDateTextColor(dateType, isSelected, hasRecord, isFuture)
 
@@ -217,6 +238,8 @@ function MonthView({
                       backgroundColor,
                       color: textColor,
                       minWidth: 34,
+                      border: `${borderWidth} solid ${borderColor}`,
+                      boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
                     }}
                   >
                     <Text size="sm" fw={500}>
@@ -250,14 +273,39 @@ function WeekView({ weekDates, onSelectedDateChange, recordMap }: WeekViewProps)
           const dateType = getDateType(d)
           const hasRecord = !!rec
 
-          // 記録がある場合は記録の状態に応じた色、そうでなければ日付タイプに応じた色
-          const backgroundColor = rec
-            ? rec.completed
-              ? 'var(--mantine-color-green-6)'
-              : 'var(--mantine-color-yellow-5)'
-            : getDateColor(dateType, false, hasRecord)
+          // 選択状態の判定（週表示では現在日付をベースに判定）
+          const isSelected = d.isSame(dayjs().tz('Asia/Tokyo'), 'day')
 
-          const textColor = getDateTextColor(dateType, false, hasRecord, isFuture)
+          // 背景色とボーダーを分けて管理
+          let backgroundColor: CSSProperties['backgroundColor']
+          let borderColor: CSSProperties['borderColor'] = 'transparent'
+          const borderWidth: CSSProperties['borderWidth'] = '2px'
+
+          if (rec) {
+            // 記録がある場合
+            backgroundColor = rec.completed
+              ? isSelected
+                ? 'var(--mantine-color-green-7)' // 選択された完了日は濃い緑
+                : 'var(--mantine-color-green-6)' // 通常の完了日
+              : isSelected
+                ? 'var(--mantine-color-yellow-6)' // 選択された未完了日は濃い黄
+                : 'var(--mantine-color-yellow-5)' // 通常の未完了日
+
+            // 選択時は青いボーダーを追加
+            if (isSelected) {
+              borderColor = 'var(--mantine-color-blue-6)'
+            }
+          } else {
+            // 記録がない場合
+            if (isSelected) {
+              backgroundColor = 'var(--mantine-color-blue-6)'
+              borderColor = 'var(--mantine-color-blue-8)'
+            } else {
+              backgroundColor = getDateColor(dateType, false, hasRecord)
+            }
+          }
+
+          const textColor = getDateTextColor(dateType, isSelected, hasRecord, isFuture)
 
           return (
             <Card
@@ -271,6 +319,8 @@ function WeekView({ weekDates, onSelectedDateChange, recordMap }: WeekViewProps)
                 opacity: isFuture ? 0.5 : 1,
                 backgroundColor,
                 color: textColor,
+                border: `${borderWidth} solid ${borderColor}`,
+                boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
               }}
               onClick={() => !isFuture && onSelectedDateChange(d.toDate())}
             >
