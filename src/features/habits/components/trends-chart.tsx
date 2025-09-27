@@ -152,61 +152,20 @@ export function TrendsChart({
     )
   }
 
-  // 色の定義
-  const getChartColors = () => {
-    const colorMap = {
-      blue: {
-        duration: 'rgba(18, 120, 255, 0.3)',
-        completion: 'var(--mantine-color-green-6)',
-        cumulative: 'rgba(18, 120, 255, 0.1)',
-      },
-      green: {
-        duration: 'rgba(64, 192, 87, 0.3)',
-        completion: 'var(--mantine-color-blue-6)',
-        cumulative: 'rgba(64, 192, 87, 0.1)',
-      },
-      red: {
-        duration: 'rgba(250, 82, 82, 0.3)',
-        completion: 'var(--mantine-color-green-6)',
-        cumulative: 'rgba(250, 82, 82, 0.1)',
-      },
-      purple: {
-        duration: 'rgba(156, 39, 176, 0.3)',
-        completion: 'var(--mantine-color-green-6)',
-        cumulative: 'rgba(156, 39, 176, 0.1)',
-      },
-      orange: {
-        duration: 'rgba(255, 146, 43, 0.3)',
-        completion: 'var(--mantine-color-green-6)',
-        cumulative: 'rgba(255, 146, 43, 0.1)',
-      },
-      pink: {
-        duration: 'rgba(245, 101, 101, 0.3)',
-        completion: 'var(--mantine-color-green-6)',
-        cumulative: 'rgba(245, 101, 101, 0.1)',
-      },
-      cyan: {
-        duration: 'rgba(21, 170, 191, 0.3)',
-        completion: 'var(--mantine-color-green-6)',
-        cumulative: 'rgba(21, 170, 191, 0.1)',
-      },
-      teal: {
-        duration: 'rgba(18, 184, 134, 0.3)',
-        completion: 'var(--mantine-color-green-6)',
-        cumulative: 'rgba(18, 184, 134, 0.1)',
-      },
-    } as const satisfies Record<
-      HabitColor,
-      Record<
-        'duration' | 'completion' | 'cumulative',
-        `rgba(${number}, ${number}, ${number}, ${number})` | `var(--mantine-color-${HabitColor}-6)`
-      >
-    >
+  const getBarColor = (color: HabitColor) => {
+    const barColorMap = {
+      blue: 'orange.4', // 青の補色系
+      green: 'red.4', // 緑の補色系
+      red: 'teal.4', // 赤の補色系
+      purple: 'yellow.4', // 紫の補色系
+      orange: 'blue.4', // オレンジの補色系
+      pink: 'green.4', // ピンクの補色系
+      cyan: 'pink.4', // シアンの補色系
+      teal: 'orange.4', // ティールの補色系
+    } as const satisfies Record<HabitColor, `${string}.4`>
 
-    return colorMap[habitColor] || colorMap.blue
+    return barColorMap[color] || 'gray.4'
   }
-
-  const colors = getChartColors()
 
   // Y軸の表示用に最大値を計算
   const maxDuration = Math.max(...chartData.map((d) => d.duration))
@@ -238,19 +197,19 @@ export function TrendsChart({
             {
               name: 'duration',
               label: '実行時間',
-              color: colors.duration,
+              color: getBarColor(habitColor),
               type: 'bar',
             },
             {
               name: 'duration',
               label: '実行時間',
-              color: colors.completion,
+              color: `${habitColor}.8`,
               type: 'line',
             },
             {
               name: 'duration',
               label: '実行時間',
-              color: colors.cumulative,
+              color: `${habitColor}.8`,
               type: 'area',
             },
           ]}
