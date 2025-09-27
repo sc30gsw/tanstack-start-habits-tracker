@@ -180,7 +180,7 @@ function MonthView({
               const rec = recordMap[iso]
               const isCurrentMonth = d.month() === currentMonth.month()
               const isSelected = !!(selectedDate && d.isSame(selectedDate, 'day'))
-              const isFuture = d.isAfter(dayjs(), 'day')
+              const isFuture = d.isAfter(dayjs().tz('Asia/Tokyo'), 'day')
               const dateType = getDateType(d)
               const hasRecord = !!rec
 
@@ -246,7 +246,7 @@ function WeekView({ weekDates, onSelectedDateChange, recordMap }: WeekViewProps)
         {weekDates.map((d) => {
           const iso = d.format('YYYY-MM-DD')
           const rec = recordMap[iso]
-          const isFuture = d.isAfter(dayjs(), 'day')
+          const isFuture = d.isAfter(dayjs().tz('Asia/Tokyo'), 'day')
           const dateType = getDateType(d)
           const hasRecord = !!rec
 
