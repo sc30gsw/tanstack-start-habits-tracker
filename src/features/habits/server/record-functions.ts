@@ -11,7 +11,7 @@ import { createRecordSchema, updateRecordSchema } from '../types/schemas/record-
  * 新しい記録を作成する
  */
 const createRecord = createServerFn({ method: 'POST' })
-  .validator(createRecordSchema)
+  .inputValidator(createRecordSchema)
   .handler(async ({ data }): Promise<RecordResponse> => {
     try {
       // 同一習慣・同一日付の記録の重複チェック
@@ -74,7 +74,7 @@ const createRecord = createServerFn({ method: 'POST' })
  * 既存の記録を更新する
  */
 const updateRecord = createServerFn({ method: 'POST' })
-  .validator(updateRecordSchema)
+  .inputValidator(updateRecordSchema)
   .handler(async ({ data }): Promise<RecordResponse> => {
     try {
       // 記録の存在確認
@@ -140,7 +140,7 @@ const updateRecord = createServerFn({ method: 'POST' })
  * 記録を削除する
  */
 const deleteRecord = createServerFn({ method: 'POST' })
-  .validator(z.object({ id: z.string().min(1) }))
+  .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }): Promise<{ success: boolean; error?: string }> => {
     try {
       // 記録の存在確認
@@ -173,7 +173,7 @@ const deleteRecord = createServerFn({ method: 'POST' })
  * 記録を取得する（フィルタリング対応）
  */
 const getRecords = createServerFn({ method: 'GET' })
-  .validator(
+  .inputValidator(
     z
       .object({
         habit_id: z.string().optional(),
@@ -234,7 +234,7 @@ const getRecords = createServerFn({ method: 'GET' })
  * IDで特定の記録を取得する
  */
 const getRecordById = createServerFn({ method: 'GET' })
-  .validator(z.object({ id: z.string().min(1) }))
+  .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }): Promise<RecordResponse> => {
     try {
       const record = await db.select().from(records).where(eq(records.id, data.id)).limit(1)

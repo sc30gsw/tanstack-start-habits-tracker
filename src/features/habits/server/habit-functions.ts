@@ -15,7 +15,7 @@ import {
  * 新しい習慣を作成する
  */
 const createHabit = createServerFn({ method: 'POST' })
-  .validator(createHabitSchema)
+  .inputValidator(createHabitSchema)
   .handler(async ({ data }): Promise<HabitResponse> => {
     try {
       // 習慣名の重複チェック
@@ -85,7 +85,7 @@ const createHabit = createServerFn({ method: 'POST' })
  * 既存の習慣を更新する
  */
 const updateHabit = createServerFn({ method: 'POST' })
-  .validator(updateHabitSchema)
+  .inputValidator(updateHabitSchema)
   .handler(async ({ data }): Promise<HabitResponse> => {
     try {
       // 習慣の存在確認
@@ -178,7 +178,7 @@ const updateHabit = createServerFn({ method: 'POST' })
  * 習慣を削除する
  */
 const deleteHabit = createServerFn({ method: 'POST' })
-  .validator(z.object({ id: z.string().min(1) }))
+  .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }): Promise<{ success: boolean; error?: string }> => {
     try {
       // 習慣の存在確認
@@ -253,7 +253,7 @@ const getHabits = createServerFn({ method: 'GET' }).handler(
  * IDで特定の習慣を取得する
  */
 const getHabitById = createServerFn({ method: 'GET' })
-  .validator(z.object({ id: z.string().min(1) }))
+  .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }): Promise<HabitResponse> => {
     try {
       const habit = await db.select().from(habits).where(eq(habits.id, data.id)).limit(1)

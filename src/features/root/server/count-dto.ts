@@ -14,7 +14,7 @@ const getCount = createServerFn({ method: 'GET' }).handler(async (): Promise<num
 
 const updateCount = createServerFn({ method: 'POST' })
   // ! We can use any schema libraries if it's standard schema.
-  .validator(countSchema)
+  .inputValidator(countSchema)
   .handler(async ({ data }) => {
     const count = await readCount()
     await fs.promises.writeFile(filePath, `${count + data.count}`)

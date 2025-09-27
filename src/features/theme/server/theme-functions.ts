@@ -55,7 +55,7 @@ const getThemeSettings = createServerFn({ method: 'GET' }).handler(
  * テーマ設定を更新する
  */
 const updateThemeSettings = createServerFn({ method: 'POST' })
-  .validator(updateThemeSchema)
+  .inputValidator(updateThemeSchema)
   .handler(async ({ data }): Promise<{ success: boolean; error?: string }> => {
     try {
       const userSettings = await db.select().from(settings).limit(1)
