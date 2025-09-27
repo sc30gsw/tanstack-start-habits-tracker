@@ -1,6 +1,13 @@
 import { Heatmap } from '@mantine/charts'
 import { Box, Group, Stack, Text } from '@mantine/core'
 import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('Asia/Tokyo')
+
 import { useMemo } from 'react'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
@@ -90,8 +97,8 @@ export function HabitHeatmap({
         <Heatmap
           data={dataMap}
           colors={colors}
-          startDate={dayjs().subtract(365, 'day').toDate()}
-          endDate={dayjs().toDate()}
+          startDate={dayjs().tz('Asia/Tokyo').subtract(365, 'day').toDate()}
+          endDate={dayjs().tz('Asia/Tokyo').toDate()}
           withMonthLabels
           withWeekdayLabels
           withTooltip

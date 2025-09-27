@@ -1,11 +1,18 @@
 import dayjs from 'dayjs'
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
 import { z } from 'zod/v4'
 import 'dayjs/locale/ja'
 
 // プラグインと日本のロケールを設定
 dayjs.extend(isSameOrBefore)
+dayjs.extend(utc)
+dayjs.extend(timezone)
 dayjs.locale('ja')
+
+// 日本のタイムゾーン設定
+dayjs.tz.setDefault('Asia/Tokyo')
 
 /**
  * 日付文字列の検証用正規表現
@@ -44,7 +51,13 @@ export const createRecordSchema = z
       .string({ message: '日付は必須です' })
       .regex(DATE_REGEX, '日付はYYYY-MM-DD形式で入力してください')
       .refine(isValidDate, '有効な日付を入力してください')
-      .refine((date) => dayjs(date).isSameOrBefore(dayjs(), 'day'), '未来の日付は記録できません'),
+      .refine((date) => {
+        // 日本時間（JST）で日付を比較
+        const inputDate = date
+        const todayJST = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
+
+        return inputDate <= todayJST
+      }, '未来の日付は記録できません'),
     completed: z.boolean({ message: '完了状態はtrue/falseで指定してください' }).default(false),
     durationMinutes: z
       .number({ message: '実行時間は数値で入力してください' })

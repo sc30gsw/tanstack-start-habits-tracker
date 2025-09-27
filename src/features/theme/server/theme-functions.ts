@@ -1,9 +1,16 @@
 import { createServerFn } from '@tanstack/react-start'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
 import { settings } from '~/db/schema'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('Asia/Tokyo')
 
 // Theme schemas
 const themeSchema = z.enum(['light', 'dark', 'auto'])
@@ -27,7 +34,7 @@ const getThemeSettings = createServerFn({ method: 'GET' }).handler(
           id: settingsId,
           theme: 'auto',
           default_view: 'calendar',
-          created_at: new Date().toISOString(),
+          created_at: dayjs().tz('Asia/Tokyo').toISOString(),
         })
 
         return {
@@ -67,7 +74,7 @@ const updateThemeSettings = createServerFn({ method: 'POST' })
           id: settingsId,
           theme: data.theme,
           default_view: 'calendar',
-          created_at: new Date().toISOString(),
+          created_at: dayjs().tz('Asia/Tokyo').toISOString(),
         })
       } else {
         // 既存の設定を更新

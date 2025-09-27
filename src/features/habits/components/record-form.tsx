@@ -93,8 +93,8 @@ export function RecordForm({
   const handleSubmit = (values: FormValues) => {
     const durationMinutes = typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
 
-    // 未完了かつ時間が0でメモが空の場合、メモ入力を促す
-    if (!values.completed && durationMinutes === 0 && !values.notes.trim()) {
+    // 未完了かつメモが空の場合、メモ入力を促す
+    if (!values.completed && !values.notes.trim()) {
       modals.openConfirmModal({
         title: '未完了の記録について',
         children: (
@@ -104,7 +104,10 @@ export function RecordForm({
             記録することで習慣の継続に役立ちます。
           </Text>
         ),
-        labels: { confirm: 'メモを記入する', cancel: 'このまま保存' },
+        labels: {
+          confirm: 'メモを記入する',
+          cancel: existingRecord ? 'このまま更新' : 'このまま保存',
+        },
         confirmProps: { color: 'blue' },
         onConfirm: () => {
           // メモ欄にフォーカスを当てる（モーダルが閉じてからフォーカス）

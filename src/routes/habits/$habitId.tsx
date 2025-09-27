@@ -24,7 +24,7 @@ function HabitDetailPage() {
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
-  if (!habit.success) {
+  if (!habit.success || !habit.data) {
     return (
       <Container size="lg" py="xl">
         <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
@@ -38,12 +38,12 @@ function HabitDetailPage() {
     <Container size="lg" py="xl">
       <Stack gap="md">
         <Title order={1} c={titleColor}>
-          {habit.data?.name}
+          {habit.data.name}
         </Title>
         <HabitDetail
-          habit={habit.data!}
-          records={records.success ? records.data || [] : []}
-          habitsList={habits.success ? habits.data || [] : []}
+          habit={habit.data}
+          records={records.success && records.data ? records.data : []}
+          habitsList={habits.success && habits.data ? habits.data : []}
         />
       </Stack>
     </Container>

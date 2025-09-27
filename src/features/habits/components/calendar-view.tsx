@@ -11,6 +11,13 @@ import {
 } from '@mantine/core'
 import { IconCalendar } from '@tabler/icons-react'
 import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('Asia/Tokyo')
+
 import type { RecordEntity } from '~/features/habits/types/habit'
 import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
 import { formatDuration } from '~/features/habits/utils/time-utils'
@@ -36,7 +43,9 @@ export function CalendarView({
   selectedDateRecord,
   recordMap,
 }: CalendarViewProps) {
-  const startOfWeek = selectedDate ? dayjs(selectedDate).startOf('week') : dayjs().startOf('week')
+  const startOfWeek = selectedDate
+    ? dayjs(selectedDate).tz('Asia/Tokyo').startOf('week')
+    : dayjs().tz('Asia/Tokyo').startOf('week')
   const weekDates = Array.from({ length: 7 }).map((_, i) => startOfWeek.add(i, 'day'))
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'

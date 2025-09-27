@@ -1,4 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
 import { and, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
@@ -6,6 +9,10 @@ import { db } from '~/db'
 import { records } from '~/db/schema'
 import type { RecordEntity, RecordResponse, RecordsListResponse } from '../types/habit'
 import { createRecordSchema, updateRecordSchema } from '../types/schemas/record-schemas'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('Asia/Tokyo')
 
 /**
  * 新しい記録を作成する
@@ -249,7 +256,7 @@ const getRecordById = createServerFn({ method: 'GET' })
       // RecordEntityに変換
       const recordEntity = {
         ...record[0],
-        created_at: new Date(record[0].created_at ?? new Date().toISOString()),
+        created_at: new Date(record[0].created_at ?? dayjs().tz('Asia/Tokyo').toISOString()),
       } as const satisfies RecordEntity
 
       return {

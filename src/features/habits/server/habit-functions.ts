@@ -1,4 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
@@ -10,6 +13,10 @@ import {
   habitSchema,
   updateHabitSchema,
 } from '~/features/habits/types/schemas/habit-schemas'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('Asia/Tokyo')
 
 /**
  * 新しい習慣を作成する
@@ -48,8 +55,8 @@ const createHabit = createServerFn({ method: 'POST' })
       // スキーマ検証用のデータ準備（string型のタイムスタンプ）
       const parsedHabit = habitSchema.parse({
         ...habit,
-        created_at: habit.created_at ?? new Date().toISOString(),
-        updated_at: habit.updated_at ?? new Date().toISOString(),
+        created_at: habit.created_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        updated_at: habit.updated_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
       })
 
       // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
@@ -116,7 +123,7 @@ const updateHabit = createServerFn({ method: 'POST' })
 
       // 更新データの準備
       const updateData: Partial<typeof habits.$inferInsert> = {
-        updated_at: new Date().toISOString(),
+        updated_at: dayjs().tz('Asia/Tokyo').toISOString(),
       }
 
       if (data.name !== undefined) {
@@ -141,8 +148,8 @@ const updateHabit = createServerFn({ method: 'POST' })
       // スキーマ検証用のデータ準備（string型のタイムスタンプ）
       const parsedHabit = habitSchema.parse({
         ...updatedHabit,
-        created_at: updatedHabit.created_at ?? new Date().toISOString(),
-        updated_at: updatedHabit.updated_at ?? new Date().toISOString(),
+        created_at: updatedHabit.created_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        updated_at: updatedHabit.updated_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
       })
 
       // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
@@ -220,8 +227,8 @@ const getHabits = createServerFn({ method: 'GET' }).handler(
         // スキーマ検証用のデータ準備（string型のタイムスタンプ）
         const parsedHabit = habitSchema.parse({
           ...habit,
-          created_at: habit.created_at ?? new Date().toISOString(),
-          updated_at: habit.updated_at ?? new Date().toISOString(),
+          created_at: habit.created_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
+          updated_at: habit.updated_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
         })
 
         // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
@@ -268,8 +275,8 @@ const getHabitById = createServerFn({ method: 'GET' })
       // スキーマ検証用のデータ準備（string型のタイムスタンプ）
       const parsedHabit = habitSchema.parse({
         ...habit[0],
-        created_at: habit[0].created_at ?? new Date().toISOString(),
-        updated_at: habit[0].updated_at ?? new Date().toISOString(),
+        created_at: habit[0].created_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        updated_at: habit[0].updated_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
       })
 
       // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）

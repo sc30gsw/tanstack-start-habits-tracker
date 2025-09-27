@@ -3,6 +3,13 @@ import { Card, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconTrendingUp } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('Asia/Tokyo')
+
 import { indexBy, map, pipe } from 'remeda'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
@@ -30,7 +37,7 @@ export function TrendsChart({
   const searchParams = routeApi.useSearch()
   const selectedDate = searchParams?.selectedDate
     ? dayjs(searchParams.selectedDate).toDate()
-    : new Date()
+    : dayjs().tz('Asia/Tokyo').toDate()
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
@@ -55,7 +62,7 @@ export function TrendsChart({
 
   // 月別集約（現在表示中の月の日毎データ）
   const aggregateByMonth = () => {
-    const baseMonth = currentMonth || dayjs()
+    const baseMonth = currentMonth || dayjs().tz('Asia/Tokyo')
     const endOfMonth = baseMonth.endOf('month')
 
     const recordMap = pipe(
@@ -83,7 +90,7 @@ export function TrendsChart({
 
   // 週別集約（現在の週を含む7日間）
   const aggregateByWeek = (): ChartData[] => {
-    const baseDate = selectedDate ? dayjs(selectedDate) : dayjs()
+    const baseDate = selectedDate ? dayjs(selectedDate).tz('Asia/Tokyo') : dayjs().tz('Asia/Tokyo')
     const startOfWeek = baseDate.startOf('week')
     const dayNames = ['日', '月', '火', '水', '木', '金', '土']
 
@@ -111,7 +118,7 @@ export function TrendsChart({
 
   // 日別集約（選択された日付の詳細）
   const aggregateByDay = (): ChartData[] => {
-    const baseDate = selectedDate ? dayjs(selectedDate) : dayjs()
+    const baseDate = selectedDate ? dayjs(selectedDate).tz('Asia/Tokyo') : dayjs().tz('Asia/Tokyo')
     const dayKey = baseDate.format('YYYY-MM-DD')
 
     const recordMap = pipe(

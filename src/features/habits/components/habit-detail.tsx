@@ -1,6 +1,13 @@
 import { Grid, Stack } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('Asia/Tokyo')
+
 import { useEffect, useState } from 'react'
 import { CalendarView } from '~/features/habits/components/calendar-view'
 import { DateDetail } from '~/features/habits/components/date-detail'
@@ -26,7 +33,7 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
   // URLパラメータから初期値を取得
   const initialSelectedDate = searchParams?.selectedDate
     ? dayjs(searchParams.selectedDate).toDate()
-    : new Date()
+    : dayjs().tz('Asia/Tokyo').toDate()
   const initialCalendarView = searchParams?.calendarView || 'month'
   const initialMetric = searchParams?.metric || 'duration'
 
