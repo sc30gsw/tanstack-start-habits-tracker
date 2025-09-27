@@ -1,6 +1,4 @@
-import { TanstackDevtools } from '@tanstack/react-devtools'
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 import appCss from '../styles.css?url'
 import '@mantine/core/styles.css'
@@ -80,17 +78,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             {children}
           </ModalsProvider>
         </MantineProvider>
-        <TanstackDevtools
-          config={{
-            position: 'bottom-left',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
+        {/* {(import.meta.env.DEV || process.env.NODE_ENV === 'development') && (
+          <TanstackDevtools
+            config={{
+              position: 'bottom-left',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
+        )} */}
         <Scripts />
       </body>
     </html>

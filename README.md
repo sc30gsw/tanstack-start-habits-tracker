@@ -2,6 +2,34 @@ Welcome to your new TanStack app!
 
 # Getting Started
 
+## Environment Variables
+
+This application uses Turso database. You need to set up the following environment variables:
+
+### For Cloudflare Workers (Production)
+
+Set secrets using Wrangler CLI:
+
+```bash
+# Set Turso connection URL
+echo "your-turso-url" | bun wrangler secret put VITE_TURSO_CONNECTION_URL
+
+# Set Turso auth token  
+echo "your-turso-token" | bun wrangler secret put VITE_TURSO_AUTH_TOKEN
+```
+
+### For Local Development
+
+Create a `.dev.vars` file in the project root:
+
+```bash
+# .dev.vars (for local development only - do not commit to git)
+VITE_TURSO_CONNECTION_URL=your-turso-url
+VITE_TURSO_AUTH_TOKEN=your-turso-token
+```
+
+## Running the Application
+
 To run this application:
 
 ```bash
@@ -15,6 +43,32 @@ To build this application for production:
 
 ```bash
 bunx --bun run build
+```
+
+## Deployment
+
+### Cloudflare Workers
+
+This application is configured for deployment to Cloudflare Workers.
+
+1. Make sure you have set up the environment variables (see above)
+2. Deploy to Cloudflare Workers:
+
+```bash
+# Build and deploy
+bun run cf:build
+
+# Or deploy only (after building)
+bun run deploy
+```
+
+### Local Development with Cloudflare
+
+To test with Cloudflare Workers locally:
+
+```bash
+# Start local development server
+bun run cf:dev
 ```
 
 ## Testing

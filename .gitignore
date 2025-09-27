@@ -5,6 +5,7 @@ dist-ssr
 *.local
 count.txt
 .env
+.dev.vars
 .nitro
 .tanstack
 .output
@@ -12,3 +13,4 @@ count.txt
 todos.json
 /.serena
 /.claude
+.wrangler
