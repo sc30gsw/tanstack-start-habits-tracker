@@ -1,4 +1,5 @@
 import { ActionIcon, Badge, Button, Group, Text, Tooltip } from '@mantine/core'
+import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
 import { Link, useRouter } from '@tanstack/react-router'
@@ -17,36 +18,45 @@ export function HabitDisplay({ habit, onEdit, useTransition }: HabitDisplayProps
   const router = useRouter()
 
   const handleDelete = async () => {
-    if (!confirm('本当に削除しますか？この習慣の記録も削除されます。')) {
-      return
-    }
+    modals.openConfirmModal({
+      title: '習慣の削除',
+      children: (
+        <Text size="sm">
+          本当に削除しますか？ <br />
+          この習慣の記録も削除されます。
+        </Text>
+      ),
+      labels: { confirm: '削除', cancel: 'キャンセル' },
+      confirmProps: { color: 'red' },
+      onConfirm: () => {
+        startTransition(async () => {
+          try {
+            const result = await habitDto.deleteHabit({ data: { id: habit.id } })
 
-    startTransition(async () => {
-      try {
-        const result = await habitDto.deleteHabit({ data: { id: habit.id } })
+            if (result.success) {
+              notifications.show({
+                title: '成功',
+                message: '習慣が削除されました',
+                color: 'green',
+              })
 
-        if (result.success) {
-          notifications.show({
-            title: '成功',
-            message: '習慣が削除されました',
-            color: 'green',
-          })
-
-          router.invalidate()
-        } else {
-          notifications.show({
-            title: 'エラー',
-            message: result.error || '習慣の削除に失敗しました',
-            color: 'red',
-          })
-        }
-      } catch (_error) {
-        notifications.show({
-          title: 'エラー',
-          message: '予期しないエラーが発生しました',
-          color: 'red',
+              router.invalidate()
+            } else {
+              notifications.show({
+                title: 'エラー',
+                message: result.error || '習慣の削除に失敗しました',
+                color: 'red',
+              })
+            }
+          } catch (_error) {
+            notifications.show({
+              title: 'エラー',
+              message: '予期しないエラーが発生しました',
+              color: 'red',
+            })
+          }
         })
-      }
+      },
     })
   }
 
