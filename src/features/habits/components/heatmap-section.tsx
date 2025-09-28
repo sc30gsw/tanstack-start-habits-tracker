@@ -14,24 +14,20 @@ import dayjs from 'dayjs'
 import { HabitHeatmap } from '~/features/habits/components/chart/habit-heatmap'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
+import { getValidatedDate, type SearchParams } from '~/features/habits/types/schemas/search-params'
 
 type HeatmapSectionProps = {
   records: RecordEntity[]
-  onMetricChange: (metric: 'duration' | 'completion') => void
-  onSelectDate: (date: Date) => void
   habitColor?: HabitColor
 }
 
-export function HeatmapSection({
-  records,
-  onMetricChange,
-  onSelectDate,
-  habitColor = 'blue',
-}: HeatmapSectionProps) {
+export function HeatmapSection({ records, habitColor = 'blue' }: HeatmapSectionProps) {
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
-  const selectedDate = searchParams?.selectedDate
+  const selectedDate = getValidatedDate(searchParams?.selectedDate)
   const metric = searchParams.metric ?? 'duration'
+
+  const navigate = apiRoute.useNavigate()
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
@@ -56,7 +52,14 @@ export function HeatmapSection({
         >
           <Radio.Group
             value={metric}
-            onChange={(v) => onMetricChange(v as 'duration' | 'completion')}
+            onChange={(v) => {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  metric: v as SearchParams['metric'],
+                }),
+              })
+            }}
           >
             <Group gap="lg">
               <Radio
@@ -95,7 +98,12 @@ export function HeatmapSection({
           <HabitHeatmap
             records={records}
             onSelectDate={(date) => {
-              onSelectDate(dayjs(date).toDate())
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  selectedDate: dayjs(date).format('YYYY-MM-DD'),
+                }),
+              })
             }}
             selectedDate={selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : null}
             metric={metric}

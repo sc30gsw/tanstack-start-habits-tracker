@@ -65,10 +65,50 @@ const metricValidator = z
     return 'duration'
   })
 
+/**
+ * 記録フォーム表示のバリデーション
+ * - 無効な値の場合はfalseをデフォルトとして返す
+ */
+const showRecordFormValidator = z
+  .boolean()
+  .optional()
+  .catch((_) => {
+    return false
+  })
+
+/**
+ * 現在の月のバリデーション
+ * - YYYY-MM形式の文字列を検証
+ * - 無効な値の場合は現在の月を返す
+ */
+const currentMonthValidator = z
+  .string()
+  .optional()
+  .transform((val) => {
+    if (!val) return undefined
+
+    // YYYY-MM形式かチェック
+    const monthRegex = /^\d{4}-\d{2}$/
+
+    if (!monthRegex.test(val)) {
+      return dayjs().tz('Asia/Tokyo').format('YYYY-MM')
+    }
+
+    // 有効な月かチェック
+    const parsed = dayjs.tz(val, 'Asia/Tokyo')
+
+    if (!parsed.isValid()) {
+      return dayjs().tz('Asia/Tokyo').format('YYYY-MM')
+    }
+
+    return val
+  })
 export const searchSchema = z.object({
   selectedDate: dateStringValidator,
   calendarView: calendarViewValidator,
   metric: metricValidator,
+  showRecordForm: showRecordFormValidator,
+  currentMonth: currentMonthValidator,
 })
 
 export type SearchParams = z.infer<typeof searchSchema>
@@ -76,12 +116,13 @@ export type SearchParams = z.infer<typeof searchSchema>
 /**
  * URLパラメータから安全にDate オブジェクトを取得するヘルパー関数
  */
-export function getValidatedDate(dateString?: string): Date {
+export function getValidatedDate(dateString?: string) {
   if (!dateString) {
     return dayjs().tz('Asia/Tokyo').toDate()
   }
 
   const parsed = dayjs.tz(dateString, 'Asia/Tokyo')
+
   if (!parsed.isValid()) {
     return dayjs().tz('Asia/Tokyo').toDate()
   }
@@ -92,7 +133,7 @@ export function getValidatedDate(dateString?: string): Date {
 /**
  * Date オブジェクトをAsia/Tokyoタイムゾーンで文字列に変換するヘルパー関数
  */
-export function formatDateForUrl(date: Date): string {
+export function formatDateForUrl(date: Date) {
   return dayjs(date).tz('Asia/Tokyo').format('YYYY-MM-DD')
 }
 
@@ -102,7 +143,9 @@ export function formatDateForUrl(date: Date): string {
 export function getDefaultSearchParams(): Required<SearchParams> {
   return {
     selectedDate: dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD'),
-    calendarView: 'month' as const,
-    metric: 'duration' as const,
+    calendarView: 'month',
+    metric: 'duration',
+    showRecordForm: false,
+    currentMonth: dayjs().tz('Asia/Tokyo').format('YYYY-MM'),
   }
 }

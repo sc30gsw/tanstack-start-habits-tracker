@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import type { RecordEntity } from '~/features/habits/types/habit'
+import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
@@ -77,7 +78,6 @@ type CalendarDateCellProps = {
   date: dayjs.Dayjs
   record?: RecordEntity | null
   isCurrentMonth?: boolean
-  onDateChange: (date: Date) => void
   variant: 'month' | 'week'
 }
 
@@ -86,12 +86,13 @@ export function CalendarDateCell({
   date,
   record,
   isCurrentMonth = true,
-  onDateChange,
   variant,
 }: CalendarDateCellProps) {
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
-  const selectedDate = searchParams?.selectedDate
+  const selectedDate = getValidatedDate(searchParams?.selectedDate)
+
+  const navigate = apiRoute.useNavigate()
 
   const isSelected = !!(selectedDate && date.isSame(selectedDate, 'day'))
   const isFuture = date.isAfter(dayjs().tz('Asia/Tokyo'), 'day')
@@ -121,7 +122,10 @@ export function CalendarDateCell({
         }
       >
         <Card
-          onClick={() => !isFuture && onDateChange(date.toDate())}
+          onClick={() =>
+            !isFuture &&
+            navigate({ search: (prev) => ({ ...prev, selectedDate: date.format('YYYY-MM-DD') }) })
+          }
           padding="xs"
           withBorder
           style={{
@@ -159,7 +163,15 @@ export function CalendarDateCell({
         border: `${borderWidth} solid ${borderColor}`,
         boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
       }}
-      onClick={() => !isFuture && onDateChange(date.toDate())}
+      onClick={() =>
+        !isFuture &&
+        navigate({
+          search: (prev) => ({
+            ...prev,
+            selectedDate: date.format('YYYY-MM-DD'),
+          }),
+        })
+      }
     >
       <Text
         size="xs"

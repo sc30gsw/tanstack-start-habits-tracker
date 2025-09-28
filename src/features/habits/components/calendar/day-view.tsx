@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import type { RecordEntity } from '~/features/habits/types/habit'
+import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
 dayjs.extend(utc)
@@ -13,7 +14,7 @@ dayjs.tz.setDefault('Asia/Tokyo')
 export function DayView({ selectedDateRecord }: Record<'selectedDateRecord', RecordEntity | null>) {
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
-  const selectedDate = searchParams?.selectedDate
+  const selectedDate = getValidatedDate(searchParams?.selectedDate)
 
   const formattedDate = selectedDate ? dayjs(selectedDate).format('YYYY/MM/DD (ddd)') : '日付未選択'
 

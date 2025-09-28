@@ -1,10 +1,12 @@
 import { ActionIcon, Group, Stack, Text } from '@mantine/core'
+import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { chunk } from 'remeda'
 import { CalendarDateCell } from '~/features/habits/components/calendar/calendar-date-cell'
 import type { RecordEntity } from '~/features/habits/types/habit'
+import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -42,22 +44,21 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
   return chunk(dates, 7)
 }
 
-type MonthViewProps = {
-  currentMonth: dayjs.Dayjs
-  onCurrentMonthChange: (month: dayjs.Dayjs) => void
-  onSelectedDateChange: (date: Date) => void
-  recordMap: Record<string, RecordEntity>
-}
-
-export function MonthView({
-  currentMonth,
-  onCurrentMonthChange,
-  onSelectedDateChange,
-  recordMap,
-}: MonthViewProps) {
+export function MonthView({ recordMap }: Record<'recordMap', Record<string, RecordEntity>>) {
   // 日付計算ロジックを抽出した関数を使用
+  // URLパラメータから安全に初期値を取得
+  const apiRoute = getRouteApi('/habits/$habitId')
+  const searchParams = apiRoute.useSearch()
+  const selectedDate = getValidatedDate(searchParams?.selectedDate)
+  // currentMonthをsearchParamsから取得し、無効な値の場合はselectedDateの月を使用
+  const currentMonthString = searchParams?.currentMonth || dayjs(selectedDate).format('YYYY-MM')
+  const currentMonth = dayjs.tz(currentMonthString, 'Asia/Tokyo').isValid()
+    ? dayjs.tz(currentMonthString, 'Asia/Tokyo').startOf('month')
+    : dayjs(selectedDate).startOf('month')
   const monthDates = generateMonthDates(currentMonth)
   const weeks = createWeekGroups(monthDates)
+
+  const navigate = apiRoute.useNavigate()
 
   return (
     <Stack gap={4}>
@@ -65,7 +66,14 @@ export function MonthView({
         <ActionIcon
           variant="subtle"
           aria-label="前月"
-          onClick={() => onCurrentMonthChange(currentMonth.subtract(1, 'month'))}
+          onClick={() => {
+            navigate({
+              search: (prev) => ({
+                ...prev,
+                currentMonth: currentMonth.subtract(1, 'month').format('YYYY-MM'),
+              }),
+            })
+          }}
         >
           ‹
         </ActionIcon>
@@ -73,7 +81,14 @@ export function MonthView({
         <ActionIcon
           variant="subtle"
           aria-label="翌月"
-          onClick={() => onCurrentMonthChange(currentMonth.add(1, 'month'))}
+          onClick={() => {
+            navigate({
+              search: (prev) => ({
+                ...prev,
+                currentMonth: currentMonth.add(1, 'month').format('YYYY-MM'),
+              }),
+            })
+          }}
         >
           ›
         </ActionIcon>
@@ -105,7 +120,6 @@ export function MonthView({
                 date={currentDate}
                 record={recordMap[currentDate.format('YYYY-MM-DD')]}
                 isCurrentMonth={currentDate.month() === currentMonth.month()}
-                onDateChange={onSelectedDateChange}
                 variant="month"
               />
             ))}

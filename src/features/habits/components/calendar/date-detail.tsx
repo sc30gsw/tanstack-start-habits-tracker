@@ -14,28 +14,20 @@ import dayjs from 'dayjs'
 import { RecordForm } from '~/features/habits/components/form/record-form'
 import { RecordDeleteButton } from '~/features/habits/components/record-delete-button'
 import type { HabitTable, RecordEntity } from '~/features/habits/types/habit'
+import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
 type DateDetailProps = {
   selectedDateRecord: RecordEntity | null
   habitId: HabitTable['id']
-  showRecordForm: boolean
-  editingRecord: RecordEntity | null
-  onShowRecordForm: (show: boolean) => void
-  onEditingRecord: (record: RecordEntity | null) => void
 }
 
-export function DateDetail({
-  selectedDateRecord,
-  habitId,
-  showRecordForm,
-  editingRecord,
-  onShowRecordForm,
-  onEditingRecord,
-}: DateDetailProps) {
+export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
-  const selectedDate = searchParams?.selectedDate
+  const selectedDate = getValidatedDate(searchParams?.selectedDate)
+  const showRecordForm = searchParams?.showRecordForm
+  const navigate = apiRoute.useNavigate()
 
   const router = useRouter()
   const computedColorScheme = useComputedColorScheme('light')
@@ -52,15 +44,19 @@ export function DateDetail({
               {selectedDate ? dayjs(selectedDate).format('YYYY年MM月DD日') : '日付を選択'}
             </Text>
           </Group>
-          {showRecordForm || editingRecord ? (
+          {showRecordForm ? (
             <ActionIcon
               size="sm"
               variant="transparent"
               radius="xl"
               color="gray"
               onClick={() => {
-                onShowRecordForm(false)
-                onEditingRecord(null)
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    showRecordForm: false,
+                  }),
+                })
               }}
             >
               <IconX size={18} />
@@ -71,7 +67,14 @@ export function DateDetail({
                 <Button
                   size="sm"
                   leftSection={<IconPlus size={16} />}
-                  onClick={() => onShowRecordForm(true)}
+                  onClick={() => {
+                    navigate({
+                      search: (prev) => ({
+                        ...prev,
+                        showRecordForm: true,
+                      }),
+                    })
+                  }}
                 >
                   記録追加
                 </Button>
@@ -82,7 +85,14 @@ export function DateDetail({
                     size="sm"
                     variant="outline"
                     leftSection={<IconEdit size={16} />}
-                    onClick={() => onEditingRecord(selectedDateRecord)}
+                    onClick={() => {
+                      navigate({
+                        search: (prev) => ({
+                          ...prev,
+                          showRecordForm: true,
+                        }),
+                      })
+                    }}
                   >
                     編集
                   </Button>
@@ -93,7 +103,7 @@ export function DateDetail({
           )}
         </Group>
 
-        {selectedDateRecord && !editingRecord && !showRecordForm ? (
+        {selectedDateRecord && !showRecordForm ? (
           <Stack gap="sm">
             <Group gap="sm">
               <Badge
@@ -138,7 +148,7 @@ export function DateDetail({
               </Stack>
             )}
           </Stack>
-        ) : selectedDate && !editingRecord && !showRecordForm ? (
+        ) : selectedDate && !showRecordForm ? (
           <Text c="dimmed" fs="italic">
             この日の記録はありません
           </Text>
@@ -148,19 +158,27 @@ export function DateDetail({
           </Text>
         )}
 
-        {(showRecordForm || editingRecord) && selectedDate && (
+        {showRecordForm && selectedDate && (
           <RecordForm
             habitId={habitId}
             date={dayjs(selectedDate).format('YYYY-MM-DD')}
-            existingRecord={editingRecord || undefined}
+            existingRecord={selectedDateRecord || undefined}
             onSuccess={() => {
-              onShowRecordForm(false)
-              onEditingRecord(null)
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  showRecordForm: false,
+                }),
+              })
               router.invalidate()
             }}
             onCancel={() => {
-              onShowRecordForm(false)
-              onEditingRecord(null)
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  showRecordForm: false,
+                }),
+              })
             }}
           />
         )}

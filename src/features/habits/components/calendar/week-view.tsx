@@ -11,11 +11,10 @@ dayjs.tz.setDefault('Asia/Tokyo')
 
 type WeekViewProps = {
   weekDates: dayjs.Dayjs[]
-  onSelectedDateChange: (date: Date) => void
   recordMap: Record<string, RecordEntity>
 }
 
-export function WeekView({ weekDates, onSelectedDateChange, recordMap }: WeekViewProps) {
+export function WeekView({ weekDates, recordMap }: WeekViewProps) {
   return (
     <Stack gap={4}>
       <Group gap={4} wrap="nowrap" justify="space-between">
@@ -24,7 +23,6 @@ export function WeekView({ weekDates, onSelectedDateChange, recordMap }: WeekVie
             key={currentDate.format('YYYY-MM-DD')}
             date={currentDate}
             record={recordMap[currentDate.format('YYYY-MM-DD')]}
-            onDateChange={onSelectedDateChange}
             variant="week"
           />
         ))}

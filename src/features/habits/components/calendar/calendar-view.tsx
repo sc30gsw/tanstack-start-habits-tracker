@@ -8,33 +8,24 @@ import { DayView } from '~/features/habits/components/calendar/day-view'
 import { MonthView } from '~/features/habits/components/calendar/month-view'
 import { WeekView } from '~/features/habits/components/calendar/week-view'
 import type { RecordEntity } from '~/features/habits/types/habit'
-import type { SearchParams } from '~/features/habits/types/schemas/search-params'
+import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
 type CalendarViewProps = {
-  onCalendarViewChange: (view: NonNullable<SearchParams['calendarView']>) => void
-  currentMonth: dayjs.Dayjs
-  onCurrentMonthChange: (month: dayjs.Dayjs) => void
-  onSelectedDateChange: (date: Date) => void
   selectedDateRecord: RecordEntity | null
   recordMap: Record<string, RecordEntity>
 }
 
-export function CalendarView({
-  onCalendarViewChange,
-  currentMonth,
-  onCurrentMonthChange,
-  onSelectedDateChange,
-  selectedDateRecord,
-  recordMap,
-}: CalendarViewProps) {
+export function CalendarView({ selectedDateRecord, recordMap }: CalendarViewProps) {
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
   const calendarView = searchParams?.calendarView || 'month'
-  const selectedDate = searchParams?.selectedDate
+  const selectedDate = getValidatedDate(searchParams?.selectedDate)
+
+  const navigate = apiRoute.useNavigate()
 
   const startOfWeek = selectedDate
     ? dayjs(selectedDate).tz('Asia/Tokyo').startOf('week')
@@ -56,7 +47,14 @@ export function CalendarView({
           <SegmentedControl
             size="xs"
             value={calendarView}
-            onChange={(v) => onCalendarViewChange(v as NonNullable<SearchParams['calendarView']>)}
+            onChange={(v) =>
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  selectedDate: v,
+                }),
+              })
+            }
             data={[
               { label: '月', value: 'month' },
               { label: '週', value: 'week' },
@@ -69,22 +67,13 @@ export function CalendarView({
           <div
             className={`${calendarView === 'month' ? 'relative z-10' : 'invisible absolute inset-0 z-0'}`}
           >
-            <MonthView
-              currentMonth={currentMonth}
-              onCurrentMonthChange={onCurrentMonthChange}
-              onSelectedDateChange={onSelectedDateChange}
-              recordMap={recordMap}
-            />
+            <MonthView recordMap={recordMap} />
           </div>
 
           <div
             className={`${calendarView === 'week' ? 'relative z-10' : 'invisible absolute inset-0 z-0'}`}
           >
-            <WeekView
-              weekDates={weekDates}
-              onSelectedDateChange={onSelectedDateChange}
-              recordMap={recordMap}
-            />
+            <WeekView weekDates={weekDates} recordMap={recordMap} />
           </div>
 
           <div

@@ -13,10 +13,10 @@ dayjs.tz.setDefault('Asia/Tokyo')
 import { indexBy, map, pipe } from 'remeda'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
+import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 
 type TrendsChartProps = {
   records: RecordEntity[]
-  currentMonth?: dayjs.Dayjs
   selectedDate?: Date | null
   habitColor?: HabitColor
 }
@@ -26,13 +26,15 @@ type ChartData = {
   duration: number
 }
 
-export function TrendsChart({ records, currentMonth, habitColor = 'blue' }: TrendsChartProps) {
+export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) {
   const routeApi = getRouteApi('/habits/$habitId')
   const searchParams = routeApi.useSearch()
-  const selectedDate = searchParams?.selectedDate
-    ? dayjs(searchParams.selectedDate).toDate()
-    : dayjs().tz('Asia/Tokyo').toDate()
+  const selectedDate = getValidatedDate(searchParams?.selectedDate)
   const calendarView = searchParams?.calendarView || 'month'
+  const currentMonthString = searchParams?.currentMonth || dayjs(selectedDate).format('YYYY-MM')
+  const currentMonth = dayjs.tz(currentMonthString, 'Asia/Tokyo').isValid()
+    ? dayjs.tz(currentMonthString, 'Asia/Tokyo').startOf('month')
+    : dayjs(selectedDate).startOf('month')
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
