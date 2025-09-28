@@ -1,16 +1,55 @@
 import { ActionIcon, Badge, Button, Group, Text, Tooltip } from '@mantine/core'
+import { notifications } from '@mantine/notifications'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
+import type { useTransition } from 'react'
+import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
 
 type HabitDisplayProps = {
   habit: HabitEntity
-  isLoading: boolean
   onEdit: () => void
-  onDelete: () => void
+  useTransition: ReturnType<typeof useTransition>
 }
 
-export function HabitDisplay({ habit, isLoading, onEdit, onDelete }: HabitDisplayProps) {
+export function HabitDisplay({ habit, onEdit, useTransition }: HabitDisplayProps) {
+  const [isPending, startTransition] = useTransition
+  const router = useRouter()
+
+  const handleDelete = async () => {
+    if (!confirm('本当に削除しますか？この習慣の記録も削除されます。')) {
+      return
+    }
+
+    startTransition(async () => {
+      try {
+        const result = await habitDto.deleteHabit({ data: { id: habit.id } })
+
+        if (result.success) {
+          notifications.show({
+            title: '成功',
+            message: '習慣が削除されました',
+            color: 'green',
+          })
+
+          router.invalidate()
+        } else {
+          notifications.show({
+            title: 'エラー',
+            message: result.error || '習慣の削除に失敗しました',
+            color: 'red',
+          })
+        }
+      } catch (_error) {
+        notifications.show({
+          title: 'エラー',
+          message: '予期しないエラーが発生しました',
+          color: 'red',
+        })
+      }
+    })
+  }
+
   return (
     <Group justify="space-between" align="flex-start">
       <div style={{ flex: 1 }}>
@@ -42,7 +81,13 @@ export function HabitDisplay({ habit, isLoading, onEdit, onDelete }: HabitDispla
           </ActionIcon>
         </Tooltip>
         <Tooltip label="削除">
-          <ActionIcon color="red" variant="subtle" size="sm" loading={isLoading} onClick={onDelete}>
+          <ActionIcon
+            color="red"
+            variant="subtle"
+            size="sm"
+            loading={isPending}
+            onClick={handleDelete}
+          >
             <IconTrash stroke={2} />
           </ActionIcon>
         </Tooltip>
