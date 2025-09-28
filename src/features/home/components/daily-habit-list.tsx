@@ -1,6 +1,6 @@
-import { Badge, Card, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
+import { Badge, Card, Group, Stack, Text, Tooltip, useComputedColorScheme } from '@mantine/core'
 import { IconCheck, IconClock, IconX } from '@tabler/icons-react'
-import { getRouteApi } from '@tanstack/react-router'
+import { getRouteApi, Link } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
@@ -68,38 +68,57 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
           {completedHabits.length > 0 ? (
             <Stack gap="xs">
               {completedHabits.map(({ habit, record }) => (
-                <Card key={habit.id} withBorder radius="sm" p="sm" bg="green.0">
-                  <Group justify="space-between" align="center">
-                    <Group gap="sm" align="center">
-                      <div
-                        style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: '50%',
-                          backgroundColor: `var(--mantine-color-${habit.color}-6)`,
-                        }}
-                      />
-                      <Text size="sm" fw={500}>
-                        {habit.name}
-                      </Text>
-                    </Group>
-                    <Group gap="xs" align="center">
-                      {record?.duration_minutes && record.duration_minutes > 0 && (
-                        <Badge
-                          variant="light"
-                          color="blue"
-                          size="sm"
-                          leftSection={<IconClock size={12} />}
-                        >
-                          {formatDuration(record.duration_minutes)}
-                        </Badge>
+                <Tooltip
+                  key={habit.id}
+                  label={
+                    <>
+                      <Text size="xs">✅ {habit.name}を完了しました！お疲れ様でした。</Text>
+                      <br />
+                      {record?.duration_minutes && record.duration_minutes > 0 ? (
+                        <Text size="xs">実行時間: {formatDuration(record.duration_minutes)}</Text>
+                      ) : (
+                        ''
                       )}
-                      <Badge variant="filled" color="green" size="sm">
-                        完了
-                      </Badge>
-                    </Group>
-                  </Group>
-                </Card>
+                    </>
+                  }
+                  position="top"
+                  withArrow
+                >
+                  <Link to="/habits/$habitId" params={() => ({ habitId: habit.id })}>
+                    <Card withBorder radius="sm" p="sm" bg="green.0" style={{ cursor: 'pointer' }}>
+                      <Group justify="space-between" align="center">
+                        <Group gap="sm" align="center">
+                          <div
+                            style={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: '50%',
+                              backgroundColor: `var(--mantine-color-${habit.color}-6)`,
+                            }}
+                          />
+                          <Text size="sm" fw={500}>
+                            {habit.name}
+                          </Text>
+                        </Group>
+                        <Group gap="xs" align="center">
+                          {record?.duration_minutes && record.duration_minutes > 0 && (
+                            <Badge
+                              variant="light"
+                              color="blue"
+                              size="sm"
+                              leftSection={<IconClock size={12} />}
+                            >
+                              {formatDuration(record.duration_minutes)}
+                            </Badge>
+                          )}
+                          <Badge variant="filled" color="green" size="sm">
+                            完了
+                          </Badge>
+                        </Group>
+                      </Group>
+                    </Card>
+                  </Link>
+                </Tooltip>
               ))}
             </Stack>
           ) : (
@@ -121,44 +140,61 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
           {incompletedHabits.length > 0 ? (
             <Stack gap="xs">
               {incompletedHabits.map(({ habit, record }) => (
-                <Card key={habit.id} withBorder radius="sm" p="sm" bg="gray.0">
-                  <Group justify="space-between" align="center">
-                    <Group gap="sm" align="center">
-                      <div
-                        style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: '50%',
-                          backgroundColor: `var(--mantine-color-${habit.color}-6)`,
-                          opacity: 0.5,
-                        }}
-                      />
-                      <Text size="sm" fw={500} c="gray.7">
-                        {habit.name}
-                      </Text>
-                    </Group>
-                    <Group gap="xs" align="center">
-                      {record?.duration_minutes && record.duration_minutes > 0 && (
-                        <Badge
-                          variant="light"
-                          color="gray"
-                          size="sm"
-                          leftSection={<IconClock size={12} />}
-                        >
-                          {formatDuration(record.duration_minutes)}
-                        </Badge>
-                      )}
-                      <Badge variant="outline" color="gray" size="sm">
-                        未完了
-                      </Badge>
-                    </Group>
-                  </Group>
-                  {record?.notes && (
-                    <Text size="xs" c="dimmed" mt="xs">
-                      {record.notes}
+                <Tooltip
+                  key={habit.id}
+                  label={
+                    <Text size="xs">
+                      💪 {habit.name}
+                      に取り組んでみませんか？今日はまだ時間があります！
+                      <br />
+                      クリックして詳細を確認できます。
                     </Text>
-                  )}
-                </Card>
+                  }
+                  position="top"
+                  withArrow
+                  color="blue"
+                >
+                  <Link to="/habits/$habitId" params={() => ({ habitId: habit.id })}>
+                    <Card withBorder radius="sm" p="sm" bg="gray.0" style={{ cursor: 'pointer' }}>
+                      <Group justify="space-between" align="center">
+                        <Group gap="sm" align="center">
+                          <div
+                            style={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: '50%',
+                              backgroundColor: `var(--mantine-color-${habit.color}-6)`,
+                              opacity: 0.5,
+                            }}
+                          />
+                          <Text size="sm" fw={500} c="gray.7">
+                            {habit.name}
+                          </Text>
+                        </Group>
+                        <Group gap="xs" align="center">
+                          {record?.duration_minutes && record.duration_minutes > 0 && (
+                            <Badge
+                              variant="light"
+                              color="gray"
+                              size="sm"
+                              leftSection={<IconClock size={12} />}
+                            >
+                              {formatDuration(record.duration_minutes)}
+                            </Badge>
+                          )}
+                          <Badge variant="outline" color="gray" size="sm">
+                            未完了
+                          </Badge>
+                        </Group>
+                      </Group>
+                      {record?.notes && (
+                        <Text size="xs" c="dimmed" mt="xs">
+                          {record.notes}
+                        </Text>
+                      )}
+                    </Card>
+                  </Link>
+                </Tooltip>
               ))}
             </Stack>
           ) : (
