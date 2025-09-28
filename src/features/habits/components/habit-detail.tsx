@@ -1,13 +1,6 @@
 import { Grid, Stack } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
-import timezone from 'dayjs/plugin/timezone'
-import utc from 'dayjs/plugin/utc'
-
-dayjs.extend(utc)
-dayjs.extend(timezone)
-dayjs.tz.setDefault('Asia/Tokyo')
-
 import { useEffect, useState } from 'react'
 import { CalendarView } from '~/features/habits/components/calendar/calendar-view'
 import { DateDetail } from '~/features/habits/components/calendar/date-detail'
@@ -16,7 +9,12 @@ import { HabitInfoCard } from '~/features/habits/components/habit-info-card'
 import { HeatmapSection } from '~/features/habits/components/heatmap-section'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
-import type { SearchParams } from '~/features/habits/types/schemas/search-params'
+import {
+  formatDateForUrl,
+  getDefaultSearchParams,
+  getValidatedDate,
+  type SearchParams,
+} from '~/features/habits/types/schemas/search-params'
 
 type HabitDetailProps = {
   habit: HabitEntity
@@ -27,37 +25,35 @@ type HabitDetailProps = {
 export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProps) {
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
-
   const navigate = apiRoute.useNavigate()
 
-  // URLパラメータから初期値を取得
-  const selectedDate = searchParams?.selectedDate
-    ? dayjs(searchParams.selectedDate).toDate()
-    : dayjs().tz('Asia/Tokyo').toDate()
-  const calendarView = searchParams?.calendarView || 'month'
-  const initialMetric = searchParams?.metric || 'duration'
+  // デフォルト値を取得
+  const defaultParams = getDefaultSearchParams()
+
+  // URLパラメータから安全に初期値を取得
+  const selectedDate = getValidatedDate(searchParams?.selectedDate)
+  const calendarView = searchParams?.calendarView || defaultParams.calendarView
+  const metric = searchParams?.metric || defaultParams.metric
 
   const [showRecordForm, setShowRecordForm] = useState(false)
   const [editingRecord, setEditingRecord] = useState<RecordEntity | null>(null)
   const [currentMonth, setCurrentMonth] = useState(dayjs(selectedDate).startOf('month'))
-  const [metric, setMetric] = useState<'duration' | 'completion'>(initialMetric)
 
   // URLパラメータを更新する関数
-  const updateSearchParams = (updates: SearchParams) => {
+  const updateSearchParams = (updates: Partial<SearchParams>) => {
     const newParams = {
-      selectedDate: selectedDate ? dayjs(selectedDate).format('YYYY-MM-DD') : undefined,
+      selectedDate: selectedDate ? formatDateForUrl(selectedDate) : undefined,
       calendarView,
       metric,
       ...updates,
     } as const satisfies SearchParams
 
     // SearchParams型を使って適切なオブジェクトを作成
-    const searchObject: SearchParams = {}
+    const searchObject: SearchParams = {
+      selectedDate: newParams.selectedDate,
+    }
 
     // 各フィールドを条件付きで追加（undefinedを除外）
-    if (newParams.selectedDate) {
-      searchObject.selectedDate = newParams.selectedDate
-    }
     if (newParams.calendarView) {
       searchObject.calendarView = newParams.calendarView
     }
@@ -68,7 +64,7 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
     navigate({
       search: searchObject,
       replace: true,
-    } as Parameters<typeof navigate>[0])
+    })
   }
 
   // 日付が変更されたときにフォームの状態をリセットし、URLを更新
@@ -79,7 +75,7 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
 
   // selectedDate変更時にURLパラメータを更新
   const handleSelectedDateChange = (date: Date) => {
-    updateSearchParams({ selectedDate: dayjs(date).format('YYYY-MM-DD') })
+    updateSearchParams({ selectedDate: formatDateForUrl(date) })
   }
 
   // calendarView変更時にURLパラメータを更新
@@ -89,7 +85,6 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
 
   // metric変更時にURLパラメータを更新
   const handleMetricChange = (newMetric: 'duration' | 'completion') => {
-    setMetric(newMetric)
     updateSearchParams({ metric: newMetric })
   }
 
@@ -144,7 +139,6 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
       {/* ヒートマップ */}
       <HeatmapSection
         records={records}
-        metric={metric}
         onMetricChange={handleMetricChange}
         onSelectDate={handleSelectedDateChange}
         habitColor={habit.color as HabitColor}

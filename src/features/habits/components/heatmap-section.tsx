@@ -17,7 +17,6 @@ import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 
 type HeatmapSectionProps = {
   records: RecordEntity[]
-  metric: 'duration' | 'completion'
   onMetricChange: (metric: 'duration' | 'completion') => void
   onSelectDate: (date: Date) => void
   habitColor?: HabitColor
@@ -25,7 +24,6 @@ type HeatmapSectionProps = {
 
 export function HeatmapSection({
   records,
-  metric,
   onMetricChange,
   onSelectDate,
   habitColor = 'blue',
@@ -33,6 +31,7 @@ export function HeatmapSection({
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
   const selectedDate = searchParams?.selectedDate
+  const metric = searchParams.metric ?? 'duration'
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
