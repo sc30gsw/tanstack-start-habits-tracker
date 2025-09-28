@@ -77,18 +77,18 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
 
           notifications.show({
             title: '成功',
-            message: '習慣が作成されました',
+            message: `習慣（${values.name}）が作成されました`,
             color: 'green',
           })
         } else {
-          form.setErrors({ name: result.error || '習慣の作成に失敗しました' })
+          form.setErrors({ name: result.error || `習慣（${values.name}）の作成に失敗しました` })
         }
       } catch (_err) {
-        form.setErrors({ name: '習慣の作成に失敗しました' })
+        form.setErrors({ name: `習慣（${values.name}）の作成に失敗しました` })
 
         notifications.show({
           title: 'エラー',
-          message: '習慣の作成中に予期しないエラーが発生しました',
+          message: `習慣（${values.name}）の作成中に予期しないエラーが発生しました`,
           color: 'red',
         })
       }
