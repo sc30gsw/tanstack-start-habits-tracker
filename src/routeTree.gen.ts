@@ -9,10 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as HabitsHabitIdRouteImport } from './routes/habits/$habitId'
-import { Route as HabitsIndexRouteImport } from './routes/habits/index'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as HabitsIndexRouteImport } from './routes/habits/index'
+import { Route as HabitsHabitIdRouteImport } from './routes/habits/$habitId'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -113,7 +113,7 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-
+import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
