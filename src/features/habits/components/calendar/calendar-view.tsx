@@ -8,7 +8,7 @@ import { DayView } from '~/features/habits/components/calendar/day-view'
 import { MonthView } from '~/features/habits/components/calendar/month-view'
 import { WeekView } from '~/features/habits/components/calendar/week-view'
 import type { RecordEntity } from '~/features/habits/types/habit'
-import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
+import { getValidatedDate, type SearchParams } from '~/features/habits/types/schemas/search-params'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -51,7 +51,7 @@ export function CalendarView({ selectedDateRecord, recordMap }: CalendarViewProp
               navigate({
                 search: (prev) => ({
                   ...prev,
-                  selectedDate: v,
+                  calendarView: v as SearchParams['calendarView'],
                 }),
               })
             }
