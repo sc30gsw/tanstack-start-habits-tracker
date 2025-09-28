@@ -16,23 +16,21 @@ import { IconAlertTriangle } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { recordDto } from '~/features/habits/server/record-functions'
-import type { RecordEntity } from '~/features/habits/types/habit'
+import type { HabitTable, RecordEntity, RecordTable } from '~/features/habits/types/habit'
 import { createRecordSchema } from '~/features/habits/types/schemas/record-schemas'
 import { hoursToMinutes, minutesToHours } from '~/features/habits/utils/time-utils'
 
 type RecordFormProps = {
-  habitId: string
-  date: string
+  habitId: HabitTable['id']
+  date: RecordTable['date']
   onSuccess: () => void
   onCancel: () => void
   existingRecord?: RecordEntity
 }
 
-type FormValues = {
-  completed: boolean
-  durationMinutes: number | ''
+type FormValues = Pick<RecordTable, 'completed' | 'notes'> & {
+  durationMinutes: RecordTable['duration_minutes']
   durationHours: number | ''
-  notes: string
 }
 
 export function RecordForm({
@@ -94,7 +92,7 @@ export function RecordForm({
     const durationMinutes = typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
 
     // 未完了かつメモが空の場合、メモ入力を促す
-    if (!values.completed && !values.notes.trim()) {
+    if (!values.completed && !values.notes?.trim()) {
       modals.openConfirmModal({
         title: '未完了の記録について',
         children: (
@@ -168,18 +166,18 @@ export function RecordForm({
           ? await recordDto.updateRecord({
               data: {
                 id: existingRecord.id,
-                completed: values.completed,
+                completed: values.completed ?? false,
                 durationMinutes,
-                notes: values.notes,
+                notes: values.notes ?? '',
               },
             })
           : await recordDto.createRecord({
               data: {
                 habitId,
                 date,
-                completed: values.completed,
+                completed: values.completed ?? false,
                 durationMinutes,
-                notes: values.notes,
+                notes: values.notes ?? '',
               },
             })
 
@@ -217,25 +215,25 @@ export function RecordForm({
 
   // 分入力変更時に時間入力を同期
   const handleMinutesChange = (value: string | number) => {
-    const minutes = typeof value === 'string' ? '' : (value ?? 0)
+    const minutes = typeof value === 'string' ? 0 : (value ?? 0)
     form.setFieldValue('durationMinutes', minutes)
 
     if (typeof minutes === 'number') {
       form.setFieldValue('durationHours', minutesToHours(minutes))
     } else {
-      form.setFieldValue('durationHours', '')
+      form.setFieldValue('durationHours', 0)
     }
   }
 
   // 時間入力変更時に分入力を同期
   const handleHoursChange = (value: string | number) => {
-    const hours = typeof value === 'string' ? '' : (value ?? 0)
+    const hours = typeof value === 'string' ? 0 : (value ?? 0)
     form.setFieldValue('durationHours', hours)
 
     if (typeof hours === 'number') {
       form.setFieldValue('durationMinutes', hoursToMinutes(hours))
     } else {
-      form.setFieldValue('durationMinutes', '')
+      form.setFieldValue('durationMinutes', 0)
     }
   }
 
@@ -252,7 +250,7 @@ export function RecordForm({
         <Switch
           label="習慣を完了しましたか？"
           key={form.key('completed')}
-          checked={form.values.completed}
+          checked={form.values.completed ?? false}
           onChange={(e) => form.setFieldValue('completed', e.currentTarget.checked)}
           disabled={isPending}
           error={form.errors.completed}
@@ -278,7 +276,7 @@ export function RecordForm({
             min={0}
             max={1440}
             key={form.key('durationMinutes')}
-            value={form.values.durationMinutes}
+            value={form.values.durationMinutes ?? 0}
             onChange={handleMinutesChange}
             error={!!form.errors.durationMinutes}
             disabled={isPending}
@@ -291,11 +289,11 @@ export function RecordForm({
           rows={4}
           maxLength={500}
           key={form.key('notes')}
-          value={form.values.notes}
+          value={form.values.notes ?? ''}
           onChange={(e) => form.setFieldValue('notes', e.currentTarget.value)}
           error={form.errors.notes}
           disabled={isPending}
-          description={`${form.values.notes.length}/500文字`}
+          description={`${form.values.notes?.length}/500文字`}
           data-autofocus
           styles={{
             input: {
