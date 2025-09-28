@@ -5,10 +5,15 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/ja'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
+import { searchSchema } from '~/features/habits/types/schemas/search-params'
+import { DailyHabitList } from '~/features/home/components/daily-habit-list'
+import { HomeCalendarView } from '~/features/home/components/home-calendar-view'
+import { HomeHeatmapView } from '~/features/home/components/home-heatmap-view'
 
 dayjs.locale('ja')
 
 export const Route = createFileRoute('/')({
+  validateSearch: searchSchema,
   component: Home,
   loader: async () => {
     const [habitsResult, recordsResult] = await Promise.all([
@@ -32,6 +37,9 @@ function Home() {
   const completedToday = records.success
     ? records.data?.filter((r) => r.date === today && r.completed).length || 0
     : 0
+
+  const allRecords = records.success && records.data ? records.data : []
+  const allHabits = habits.success && habits.data ? habits.data : []
 
   return (
     <Container size="lg" py="xl">
@@ -93,6 +101,15 @@ function Home() {
             </Group>
           </Stack>
         </Card>
+
+        {/* カレンダービュー */}
+        <HomeCalendarView />
+
+        {/* ヒートマップ */}
+        <HomeHeatmapView records={allRecords} habits={allHabits} />
+
+        {/* 選択日付の習慣リスト */}
+        <DailyHabitList habits={allHabits} records={allRecords} />
 
         {/* 説明 */}
         <Card withBorder padding="lg">
