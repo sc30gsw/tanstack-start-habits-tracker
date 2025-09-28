@@ -1,12 +1,15 @@
 import { Button, Container, Group, Stack, Title } from '@mantine/core'
 import { createFileRoute, Outlet, useMatches } from '@tanstack/react-router'
-import { useState } from 'react'
+import { z } from 'zod/v4'
 import { HabitCreateForm } from '~/features/habits/components/form/habit-create-form'
 import { HabitList } from '~/features/habits/components/habit-list'
 import { habitDto } from '~/features/habits/server/habit-functions'
 
 export const Route = createFileRoute('/habits/')({
   component: HabitsPage,
+  validateSearch: z.object({
+    showForm: z.boolean().optional().catch(false),
+  }),
   loader: async () => {
     const habitsResult = await habitDto.getHabits()
     return habitsResult
@@ -15,7 +18,10 @@ export const Route = createFileRoute('/habits/')({
 
 function HabitsPage() {
   const habitsData = Route.useLoaderData()
-  const [showCreateForm, setShowCreateForm] = useState(false)
+
+  const searchParams = Route.useSearch()
+  const navigate = Route.useNavigate()
+
   const matches = useMatches()
   const last = matches[matches.length - 1]
   const isList = last.routeId === '/habits/'
@@ -30,15 +36,18 @@ function HabitsPage() {
       <Stack gap="lg">
         <Group justify="space-between" align="center">
           <Title order={1}>習慣管理</Title>
-          <Button color="habit" onClick={() => setShowCreateForm(!showCreateForm)}>
-            {showCreateForm ? '作成フォームを閉じる' : '新しい習慣を作成'}
+          <Button
+            color="habit"
+            onClick={() => navigate({ search: { showForm: !searchParams.showForm } })}
+          >
+            {searchParams.showForm ? '作成フォームを閉じる' : '新しい習慣を作成'}
           </Button>
         </Group>
 
-        {showCreateForm && (
+        {searchParams.showForm && (
           <HabitCreateForm
-            onSuccess={() => setShowCreateForm(false)}
-            onCancel={() => setShowCreateForm(false)}
+            onSuccess={() => navigate({ search: { showForm: false } })}
+            onCancel={() => navigate({ search: { showForm: false } })}
           />
         )}
 
