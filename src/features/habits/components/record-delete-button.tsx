@@ -20,6 +20,7 @@ export function RecordDeleteButton({ recordId, variant = 'icon' }: RecordDeleteB
     startTransition(async () => {
       try {
         const result = await recordDto.deleteRecord({ data: { id: recordId } })
+
         if (result.success) {
           router.invalidate()
           close()
