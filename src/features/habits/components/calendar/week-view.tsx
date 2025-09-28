@@ -24,7 +24,6 @@ export function WeekView({ weekDates, onSelectedDateChange, recordMap }: WeekVie
             key={currentDate.format('YYYY-MM-DD')}
             date={currentDate}
             record={recordMap[currentDate.format('YYYY-MM-DD')]}
-            selectedDate={dayjs().tz('Asia/Tokyo').toDate()} // 週表示では今日の日付を選択状態とする
             onDateChange={onSelectedDateChange}
             variant="week"
           />

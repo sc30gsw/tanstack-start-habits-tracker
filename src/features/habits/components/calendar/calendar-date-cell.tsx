@@ -1,4 +1,5 @@
 import { Badge, Card, type CSSProperties, Text, Tooltip } from '@mantine/core'
+import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
@@ -76,7 +77,6 @@ type CalendarDateCellProps = {
   date: dayjs.Dayjs
   record?: RecordEntity | null
   isCurrentMonth?: boolean
-  selectedDate?: Date | null
   onDateChange: (date: Date) => void
   variant: 'month' | 'week'
 }
@@ -86,10 +86,13 @@ export function CalendarDateCell({
   date,
   record,
   isCurrentMonth = true,
-  selectedDate,
   onDateChange,
   variant,
 }: CalendarDateCellProps) {
+  const apiRoute = getRouteApi('/habits/$habitId')
+  const searchParams = apiRoute.useSearch()
+  const selectedDate = searchParams?.selectedDate
+
   const isSelected = !!(selectedDate && date.isSame(selectedDate, 'day'))
   const isFuture = date.isAfter(dayjs().tz('Asia/Tokyo'), 'day')
   const dateType = getDateType(date)
@@ -160,7 +163,15 @@ export function CalendarDateCell({
     >
       <Text
         size="xs"
-        c={dateType === 'sunday' ? 'red.7' : dateType === 'saturday' ? 'blue.7' : 'dimmed'}
+        c={
+          isSelected || hasRecord
+            ? 'white' // 選択時や記録がある時は白文字で視認性を確保
+            : dateType === 'sunday'
+              ? 'red.7'
+              : dateType === 'saturday'
+                ? 'blue.7'
+                : 'dimmed'
+        }
       >
         {date.format('dd')}
       </Text>

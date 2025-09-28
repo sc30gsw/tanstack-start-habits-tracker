@@ -45,7 +45,6 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
 type MonthViewProps = {
   currentMonth: dayjs.Dayjs
   onCurrentMonthChange: (month: dayjs.Dayjs) => void
-  selectedDate: Date | null
   onSelectedDateChange: (date: Date) => void
   recordMap: Record<string, RecordEntity>
 }
@@ -53,7 +52,6 @@ type MonthViewProps = {
 export function MonthView({
   currentMonth,
   onCurrentMonthChange,
-  selectedDate,
   onSelectedDateChange,
   recordMap,
 }: MonthViewProps) {
@@ -107,7 +105,6 @@ export function MonthView({
                 date={currentDate}
                 record={recordMap[currentDate.format('YYYY-MM-DD')]}
                 isCurrentMonth={currentDate.month() === currentMonth.month()}
-                selectedDate={selectedDate}
                 onDateChange={onSelectedDateChange}
                 variant="month"
               />

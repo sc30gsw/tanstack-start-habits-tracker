@@ -18,7 +18,6 @@ type CalendarViewProps = {
   onCalendarViewChange: (view: NonNullable<SearchParams['calendarView']>) => void
   currentMonth: dayjs.Dayjs
   onCurrentMonthChange: (month: dayjs.Dayjs) => void
-  selectedDate: Date | null
   onSelectedDateChange: (date: Date) => void
   selectedDateRecord: RecordEntity | null
   recordMap: Record<string, RecordEntity>
@@ -28,7 +27,6 @@ export function CalendarView({
   onCalendarViewChange,
   currentMonth,
   onCurrentMonthChange,
-  selectedDate,
   onSelectedDateChange,
   selectedDateRecord,
   recordMap,
@@ -36,6 +34,7 @@ export function CalendarView({
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
   const calendarView = searchParams?.calendarView || 'month'
+  const selectedDate = searchParams?.selectedDate
 
   const startOfWeek = selectedDate
     ? dayjs(selectedDate).tz('Asia/Tokyo').startOf('week')
@@ -73,7 +72,6 @@ export function CalendarView({
             <MonthView
               currentMonth={currentMonth}
               onCurrentMonthChange={onCurrentMonthChange}
-              selectedDate={selectedDate}
               onSelectedDateChange={onSelectedDateChange}
               recordMap={recordMap}
             />
@@ -92,7 +90,7 @@ export function CalendarView({
           <div
             className={`${calendarView === 'day' ? 'relative z-10' : 'invisible absolute inset-0 z-0'}`}
           >
-            <DayView selectedDate={selectedDate} selectedDateRecord={selectedDateRecord} />
+            <DayView selectedDateRecord={selectedDateRecord} />
           </div>
         </div>
       </Stack>

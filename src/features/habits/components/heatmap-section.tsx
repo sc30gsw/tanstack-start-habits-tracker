@@ -9,6 +9,7 @@ import {
   useComputedColorScheme,
 } from '@mantine/core'
 import { IconChartBar, IconCheckbox, IconClock } from '@tabler/icons-react'
+import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { HabitHeatmap } from '~/features/habits/components/chart/habit-heatmap'
 import type { RecordEntity } from '~/features/habits/types/habit'
@@ -16,7 +17,6 @@ import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 
 type HeatmapSectionProps = {
   records: RecordEntity[]
-  selectedDate: Date | null
   metric: 'duration' | 'completion'
   onMetricChange: (metric: 'duration' | 'completion') => void
   onSelectDate: (date: Date) => void
@@ -25,12 +25,15 @@ type HeatmapSectionProps = {
 
 export function HeatmapSection({
   records,
-  selectedDate,
   metric,
   onMetricChange,
   onSelectDate,
   habitColor = 'blue',
 }: HeatmapSectionProps) {
+  const apiRoute = getRouteApi('/habits/$habitId')
+  const searchParams = apiRoute.useSearch()
+  const selectedDate = searchParams?.selectedDate
+
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 

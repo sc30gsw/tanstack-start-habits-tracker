@@ -115,7 +115,6 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
             onCalendarViewChange={handleCalendarViewChange}
             currentMonth={currentMonth}
             onCurrentMonthChange={setCurrentMonth}
-            selectedDate={selectedDate}
             onSelectedDateChange={handleSelectedDateChange}
             selectedDateRecord={selectedDateRecord || null}
             recordMap={recordMap}
@@ -125,7 +124,6 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
         {/* 選択された日付の詳細 */}
         <Grid.Col span={{ base: 12, md: 6 }}>
           <DateDetail
-            selectedDate={selectedDate}
             selectedDateRecord={selectedDateRecord || null}
             habitId={habit.id}
             showRecordForm={showRecordForm}
@@ -146,7 +144,6 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
       {/* ヒートマップ */}
       <HeatmapSection
         records={records}
-        selectedDate={selectedDate}
         metric={metric}
         onMetricChange={handleMetricChange}
         onSelectDate={handleSelectedDateChange}

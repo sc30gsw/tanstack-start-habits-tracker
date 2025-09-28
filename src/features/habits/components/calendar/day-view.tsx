@@ -1,4 +1,5 @@
 import { Card, Stack, Text } from '@mantine/core'
+import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
@@ -9,12 +10,11 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
-type DayViewProps = {
-  selectedDate: Date | null
-  selectedDateRecord: RecordEntity | null
-}
+export function DayView({ selectedDateRecord }: Record<'selectedDateRecord', RecordEntity | null>) {
+  const apiRoute = getRouteApi('/habits/$habitId')
+  const searchParams = apiRoute.useSearch()
+  const selectedDate = searchParams?.selectedDate
 
-export function DayView({ selectedDate, selectedDateRecord }: DayViewProps) {
   const formattedDate = selectedDate ? dayjs(selectedDate).format('YYYY/MM/DD (ddd)') : '日付未選択'
 
   const recordDetails = selectedDateRecord

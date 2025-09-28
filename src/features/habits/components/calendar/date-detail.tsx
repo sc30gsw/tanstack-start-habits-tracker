@@ -9,17 +9,16 @@ import {
   useComputedColorScheme,
 } from '@mantine/core'
 import { IconCalendarEvent, IconCheck, IconEdit, IconPlus, IconX } from '@tabler/icons-react'
-import { useRouter } from '@tanstack/react-router'
+import { getRouteApi, useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { RecordForm } from '~/features/habits/components/form/record-form'
 import { RecordDeleteButton } from '~/features/habits/components/record-delete-button'
-import type { RecordEntity } from '~/features/habits/types/habit'
+import type { HabitTable, RecordEntity } from '~/features/habits/types/habit'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
 type DateDetailProps = {
-  selectedDate: Date | null
   selectedDateRecord: RecordEntity | null
-  habitId: string
+  habitId: HabitTable['id']
   showRecordForm: boolean
   editingRecord: RecordEntity | null
   onShowRecordForm: (show: boolean) => void
@@ -27,7 +26,6 @@ type DateDetailProps = {
 }
 
 export function DateDetail({
-  selectedDate,
   selectedDateRecord,
   habitId,
   showRecordForm,
@@ -35,6 +33,10 @@ export function DateDetail({
   onShowRecordForm,
   onEditingRecord,
 }: DateDetailProps) {
+  const apiRoute = getRouteApi('/habits/$habitId')
+  const searchParams = apiRoute.useSearch()
+  const selectedDate = searchParams?.selectedDate
+
   const router = useRouter()
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
