@@ -7,7 +7,7 @@
  * @param minutes 分数
  * @returns フォーマットされた文字列
  */
-export function formatDuration(minutes: number): string {
+export function formatDuration(minutes: number) {
   if (minutes <= 0) return '0分'
 
   const hours = Math.floor(minutes / 60)
@@ -29,7 +29,7 @@ export function formatDuration(minutes: number): string {
  * @param hours 時間（小数点可）
  * @returns 分数
  */
-export function hoursToMinutes(hours: number): number {
+export function hoursToMinutes(hours: number) {
   return Math.round(hours * 60)
 }
 
@@ -38,7 +38,7 @@ export function hoursToMinutes(hours: number): number {
  * @param minutes 分数
  * @returns 時間（小数点）
  */
-export function minutesToHours(minutes: number): number {
+export function minutesToHours(minutes: number) {
   return Number((minutes / 60).toFixed(2))
 }
 
@@ -47,7 +47,10 @@ export function minutesToHours(minutes: number): number {
  * @param totalMinutes 合計分数
  * @returns 表示用文字列（例: "合計: 5時間30分（330分）"）
  */
-export function formatTotalDuration(totalMinutes: number): string {
-  if (totalMinutes <= 0) return '合計: 0分'
+export function formatTotalDuration(totalMinutes: number) {
+  if (totalMinutes <= 0) {
+    return '合計: 0分'
+  }
+
   return `合計: ${formatDuration(totalMinutes)}`
 }

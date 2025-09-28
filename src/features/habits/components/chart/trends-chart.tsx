@@ -16,7 +16,6 @@ import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 
 type TrendsChartProps = {
   records: RecordEntity[]
-  calendarView: 'month' | 'week' | 'day'
   currentMonth?: dayjs.Dayjs
   selectedDate?: Date | null
   habitColor?: HabitColor
@@ -27,17 +26,13 @@ type ChartData = {
   duration: number
 }
 
-export function TrendsChart({
-  records,
-  calendarView,
-  currentMonth,
-  habitColor = 'blue',
-}: TrendsChartProps) {
+export function TrendsChart({ records, currentMonth, habitColor = 'blue' }: TrendsChartProps) {
   const routeApi = getRouteApi('/habits/$habitId')
   const searchParams = routeApi.useSearch()
   const selectedDate = searchParams?.selectedDate
     ? dayjs(searchParams.selectedDate).toDate()
     : dayjs().tz('Asia/Tokyo').toDate()
+  const calendarView = searchParams?.calendarView || 'month'
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'

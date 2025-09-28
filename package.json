@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.13.7",
+    "@holiday-jp/holiday_jp": "^2.5.1",
     "@libsql/client": "^0.15.15",
     "@mantine/charts": "^8.3.1",
     "@mantine/core": "^8.3.1",
@@ -31,7 +32,7 @@
     "@mantine/modals": "^8.3.1",
     "@mantine/notifications": "^8.3.1",
     "@tabler/icons-react": "^3.35.0",
-    "@tailwindcss/vite": "^4.0.6",
+    "@tailwindcss/vite": "^4.1.13",
     "@tanstack/react-router": "^1.130.2",
     "@tanstack/react-router-ssr-query": "^1.131.7",
     "@tanstack/react-start": "^1.131.7",

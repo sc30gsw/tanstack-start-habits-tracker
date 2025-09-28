@@ -1,7 +1,7 @@
 import { Button, Container, Group, Stack, Title } from '@mantine/core'
 import { createFileRoute, Outlet, useMatches } from '@tanstack/react-router'
 import { useState } from 'react'
-import { HabitCreateForm } from '~/features/habits/components/habit-create-form'
+import { HabitCreateForm } from '~/features/habits/components/form/habit-create-form'
 import { HabitList } from '~/features/habits/components/habit-list'
 import { habitDto } from '~/features/habits/server/habit-functions'
 

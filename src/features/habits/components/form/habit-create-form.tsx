@@ -6,7 +6,7 @@ import { useRouter } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { createHabitSchema, type HabitColor } from '~/features/habits/types/schemas/habit-schemas'
-import { HabitColorPicker } from './habit-color-picker'
+import { HabitColorPicker } from '../habit-color-picker'
 
 type FormValues = {
   name: string

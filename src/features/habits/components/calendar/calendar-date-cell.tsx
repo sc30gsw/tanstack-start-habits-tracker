@@ -1,0 +1,175 @@
+import { Badge, Card, type CSSProperties, Text, Tooltip } from '@mantine/core'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+import type { RecordEntity } from '~/features/habits/types/habit'
+import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
+import { formatDuration } from '~/features/habits/utils/time-utils'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.tz.setDefault('Asia/Tokyo')
+
+// カレンダーセルの色定数
+const CELL_COLORS = {
+  // 完了状態の色
+  completed: {
+    normal: 'var(--mantine-color-green-6)',
+    selected: 'var(--mantine-color-green-7)',
+  },
+  // 未完了状態の色
+  incomplete: {
+    normal: 'var(--mantine-color-yellow-5)',
+    selected: 'var(--mantine-color-yellow-6)',
+  },
+  // 記録なし状態の色
+  noRecord: {
+    normal: 'transparent', // getDateColorで決定
+    selected: 'var(--mantine-color-blue-6)',
+  },
+  // ボーダー色
+  border: {
+    normal: 'transparent',
+    selected: 'var(--mantine-color-blue-6)',
+    selectedNoRecord: 'var(--mantine-color-blue-8)',
+  },
+} as const satisfies Record<string, Record<string, CSSProperties['color']>>
+
+// セルスタイルの型定義
+type CellStyleState = {
+  hasRecord: boolean
+  isCompleted: boolean
+  isSelected: boolean
+  dateType: ReturnType<typeof getDateType>
+}
+
+// 背景色とボーダー色を決定する純粋関数
+function getCellBackgroundStyle(state: CellStyleState) {
+  const { hasRecord, isCompleted, isSelected, dateType } = state
+
+  // 記録がある場合
+  if (hasRecord) {
+    const colorSet = isCompleted ? CELL_COLORS.completed : CELL_COLORS.incomplete
+    return {
+      backgroundColor: isSelected ? colorSet.selected : colorSet.normal,
+      borderColor: isSelected ? CELL_COLORS.border.selected : CELL_COLORS.border.normal,
+    }
+  }
+
+  // 記録がない場合
+  if (isSelected) {
+    return {
+      backgroundColor: CELL_COLORS.noRecord.selected,
+      borderColor: CELL_COLORS.border.selectedNoRecord,
+    }
+  }
+
+  // デフォルト（記録なし・非選択）
+  return {
+    backgroundColor: getDateColor(dateType, false, hasRecord),
+    borderColor: CELL_COLORS.border.normal,
+  }
+}
+
+// カレンダー日付セルコンポーネントのProps型定義
+type CalendarDateCellProps = {
+  date: dayjs.Dayjs
+  record?: RecordEntity | null
+  isCurrentMonth?: boolean
+  selectedDate?: Date | null
+  onDateChange: (date: Date) => void
+  variant: 'month' | 'week'
+}
+
+// 共通の日付セルコンポーネント
+export function CalendarDateCell({
+  date,
+  record,
+  isCurrentMonth = true,
+  selectedDate,
+  onDateChange,
+  variant,
+}: CalendarDateCellProps) {
+  const isSelected = !!(selectedDate && date.isSame(selectedDate, 'day'))
+  const isFuture = date.isAfter(dayjs().tz('Asia/Tokyo'), 'day')
+  const dateType = getDateType(date)
+  const hasRecord = !!record
+
+  // 背景色とボーダーの設定
+  const borderWidth: CSSProperties['borderWidth'] = '2px'
+  const { backgroundColor, borderColor } = getCellBackgroundStyle({
+    hasRecord,
+    isCompleted: record?.completed ?? false,
+    isSelected,
+    dateType,
+  })
+
+  const textColor = getDateTextColor(dateType, isSelected, hasRecord, isFuture)
+
+  // 月表示用のコンテンツ
+  if (variant === 'month') {
+    return (
+      <Tooltip
+        withinPortal
+        label={
+          record
+            ? `${record.completed ? '完了' : '未完了'} / ${formatDuration(record.duration_minutes || 0)}`
+            : '記録なし'
+        }
+      >
+        <Card
+          onClick={() => !isFuture && onDateChange(date.toDate())}
+          padding="xs"
+          withBorder
+          style={{
+            flex: 1,
+            textAlign: 'center',
+            cursor: isFuture ? 'not-allowed' : 'pointer',
+            opacity: isCurrentMonth ? (isFuture ? 0.3 : 1) : 0.35,
+            backgroundColor,
+            color: textColor,
+            minWidth: 34,
+            border: `${borderWidth} solid ${borderColor}`,
+            boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
+          }}
+        >
+          <Text size="sm" fw={500}>
+            {date.date()}
+          </Text>
+        </Card>
+      </Tooltip>
+    )
+  }
+
+  // 週表示用のコンテンツ
+  return (
+    <Card
+      withBorder
+      padding="xs"
+      style={{
+        flex: 1,
+        textAlign: 'center',
+        cursor: isFuture ? 'not-allowed' : 'pointer',
+        opacity: isFuture ? 0.5 : 1,
+        backgroundColor,
+        color: textColor,
+        border: `${borderWidth} solid ${borderColor}`,
+        boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
+      }}
+      onClick={() => !isFuture && onDateChange(date.toDate())}
+    >
+      <Text
+        size="xs"
+        c={dateType === 'sunday' ? 'red.7' : dateType === 'saturday' ? 'blue.7' : 'dimmed'}
+      >
+        {date.format('dd')}
+      </Text>
+      <Text fw={500}>{date.date()}</Text>
+      {record && (
+        <Badge size="xs" color={record.completed ? 'green' : 'yellow'} variant="filled" mt={4}>
+          {formatDuration(record.duration_minutes || 0)}
+        </Badge>
+      )}
+    </Card>
+  )
+}

@@ -10,7 +10,7 @@ import {
 } from '@mantine/core'
 import { IconChartBar, IconCheckbox, IconClock } from '@tabler/icons-react'
 import dayjs from 'dayjs'
-import { HabitHeatmap } from '~/features/habits/components/habit-heatmap'
+import { HabitHeatmap } from '~/features/habits/components/chart/habit-heatmap'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 

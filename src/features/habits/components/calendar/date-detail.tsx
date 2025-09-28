@@ -11,8 +11,8 @@ import {
 import { IconCalendarEvent, IconCheck, IconEdit, IconPlus, IconX } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import { RecordForm } from '~/features/habits/components/form/record-form'
 import { RecordDeleteButton } from '~/features/habits/components/record-delete-button'
-import { RecordForm } from '~/features/habits/components/record-form'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 

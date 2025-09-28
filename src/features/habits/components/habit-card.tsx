@@ -5,8 +5,8 @@ import { useState, useTransition } from 'react'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
+import { HabitEditForm } from './form/habit-edit-form'
 import { HabitDisplay } from './habit-display'
-import { HabitEditForm } from './habit-edit-form'
 
 export function HabitCard({ habit }: Record<'habit', HabitEntity>) {
   const [isEditing, setIsEditing] = useState(false)

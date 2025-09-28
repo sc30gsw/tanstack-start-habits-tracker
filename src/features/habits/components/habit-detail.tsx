@@ -9,11 +9,11 @@ dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
 import { useEffect, useState } from 'react'
-import { CalendarView } from '~/features/habits/components/calendar-view'
-import { DateDetail } from '~/features/habits/components/date-detail'
+import { CalendarView } from '~/features/habits/components/calendar/calendar-view'
+import { DateDetail } from '~/features/habits/components/calendar/date-detail'
+import { TrendsChart } from '~/features/habits/components/chart/trends-chart'
 import { HabitInfoCard } from '~/features/habits/components/habit-info-card'
 import { HeatmapSection } from '~/features/habits/components/heatmap-section'
-import { TrendsChart } from '~/features/habits/components/trends-chart'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
@@ -31,17 +31,15 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
   const navigate = apiRoute.useNavigate()
 
   // URLパラメータから初期値を取得
-  const initialSelectedDate = searchParams?.selectedDate
+  const selectedDate = searchParams?.selectedDate
     ? dayjs(searchParams.selectedDate).toDate()
     : dayjs().tz('Asia/Tokyo').toDate()
-  const initialCalendarView = searchParams?.calendarView || 'month'
+  const calendarView = searchParams?.calendarView || 'month'
   const initialMetric = searchParams?.metric || 'duration'
 
-  const [selectedDate, setSelectedDate] = useState<Date | null>(initialSelectedDate)
   const [showRecordForm, setShowRecordForm] = useState(false)
   const [editingRecord, setEditingRecord] = useState<RecordEntity | null>(null)
-  const [calendarView, setCalendarView] = useState<'month' | 'week' | 'day'>(initialCalendarView)
-  const [currentMonth, setCurrentMonth] = useState(dayjs(initialSelectedDate).startOf('month'))
+  const [currentMonth, setCurrentMonth] = useState(dayjs(selectedDate).startOf('month'))
   const [metric, setMetric] = useState<'duration' | 'completion'>(initialMetric)
 
   // URLパラメータを更新する関数
@@ -81,13 +79,11 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
 
   // selectedDate変更時にURLパラメータを更新
   const handleSelectedDateChange = (date: Date) => {
-    setSelectedDate(date)
     updateSearchParams({ selectedDate: dayjs(date).format('YYYY-MM-DD') })
   }
 
   // calendarView変更時にURLパラメータを更新
   const handleCalendarViewChange = (view: 'month' | 'week' | 'day') => {
-    setCalendarView(view)
     updateSearchParams({ calendarView: view })
   }
 
@@ -116,7 +112,6 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
       <Grid>
         <Grid.Col span={{ base: 12, md: 6 }}>
           <CalendarView
-            calendarView={calendarView}
             onCalendarViewChange={handleCalendarViewChange}
             currentMonth={currentMonth}
             onCurrentMonthChange={setCurrentMonth}
@@ -144,7 +139,6 @@ export function HabitDetail({ habit, records, habitsList = [] }: HabitDetailProp
       {/* トレンドチャート */}
       <TrendsChart
         records={records}
-        calendarView={calendarView}
         currentMonth={currentMonth}
         habitColor={habit.color as HabitColor}
       />
