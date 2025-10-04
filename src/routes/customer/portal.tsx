@@ -1,62 +1,29 @@
-import { Box, Button, Card, Container, Stack, Text, Title } from '@mantine/core'
-import { IconExternalLink } from '@tabler/icons-react'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { authClient } from '~/lib/auth-client'
+import { Box, Card, Container, Skeleton, Stack, Text, Title } from '@mantine/core'
+import { createFileRoute } from '@tanstack/react-router'
+import { Suspense } from 'react'
+import { PortalButton } from '~/features/auth/components/portal-button'
 
 export const Route = createFileRoute('/customer/portal')({
-  loader: async () => {
-    const result = await authClient.customer.portal()
-
-    if (result.error) {
-      throw new Error(result.error.message || 'Failed to get customer portal URL')
-    }
-
-    return result.data
-  },
   component: CustomerPortalPage,
-  errorComponent: () => {
-    return (
-      <Container size="sm" py="xl">
-        <Card shadow="md" padding="xl" radius="md" withBorder>
-          <Stack align="center" gap="lg">
-            <Box style={{ textAlign: 'center' }}>
-              <Text c="red" size="lg" fw={500}>
-                サブスクリプション管理ページの取得に失敗しました
-              </Text>
-            </Box>
-          </Stack>
-        </Card>
-      </Container>
-    )
-  },
 })
 
 function CustomerPortalPage() {
-  const data = Route.useLoaderData()
-
   return (
     <Container size="sm" py="xl">
       <Card shadow="md" padding="xl" radius="md" withBorder>
         <Stack align="center" gap="lg">
-          <div style={{ textAlign: 'center' }}>
+          <Box style={{ textAlign: 'center' }}>
             <Title order={2} mb="xs">
               サブスクリプション管理
             </Title>
             <Text c="dimmed">
               サブスクリプションの確認、変更、キャンセルはPolar管理画面で行えます。
             </Text>
-          </div>
+          </Box>
 
-          <Button
-            size="lg"
-            leftSection={<IconExternalLink size={20} />}
-            component={Link}
-            to={data?.url || '/'}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Polar管理画面を開く
-          </Button>
+          <Suspense fallback={<Skeleton height={50} />}>
+            <PortalButton />
+          </Suspense>
 
           <Text size="sm" c="dimmed" ta="center" mt="md">
             Polar管理画面では以下の操作が可能です：
