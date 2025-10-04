@@ -45,7 +45,8 @@ function CustomerPortalPage() {
             ・支払い方法の変更
             <br />
             ・プランの変更・キャンセル
-            <br />・請求履歴の確認
+            <br />
+            ・請求履歴の確認
           </Text>
         </Stack>
       </Card>
