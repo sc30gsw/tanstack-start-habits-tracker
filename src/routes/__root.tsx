@@ -93,7 +93,7 @@ function RootComponent() {
       <AppShell header={{ height: 60 }} padding="md">
         <AppShell.Header>
           <Group h="100%" px="md" justify="space-between">
-            <Text size="xl" fw={700} c="blue">
+            <Text component={Link} size="xl" fw={700} c="blue" to="/">
               Track
             </Text>
             <Group gap="md">
