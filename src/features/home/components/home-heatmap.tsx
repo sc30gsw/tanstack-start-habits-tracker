@@ -39,12 +39,15 @@ export function HomeHeatmap({ records }: Record<'records', RecordEntity[]>) {
 
         return {
           id: `aggregated-${dateRecords[0].date}`,
-          habit_id: 'aggregated',
+          habitId: 'aggregated',
           date: dateRecords[0].date,
           completed: metric === 'completion' ? completed > 0 : duration > 0,
           duration_minutes: metric === 'duration' ? duration : completed,
           notes: null,
           created_at: new Date(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          userId: 'aggregated',
         } as const satisfies RecordEntity
       }),
       // オブジェクトから配列に変換

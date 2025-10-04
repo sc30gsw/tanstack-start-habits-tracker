@@ -1,18 +1,53 @@
-import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
+import { createRootRoute, HeadContent, Outlet, redirect, Scripts } from '@tanstack/react-router'
 
 import appCss from '../styles.css?url'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 
-import { AppShell, Button, ColorSchemeScript, Group, MantineProvider, Text } from '@mantine/core'
+import {
+  AppShell,
+  Button,
+  ColorSchemeScript,
+  Group,
+  MantineProvider,
+  Menu,
+  Text,
+} from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications } from '@mantine/notifications'
+import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { ClientOnly } from '~/components/client-only'
+import { getCurrentUser } from '~/features/auth/server-functions'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
+import { authClient } from '~/lib/auth-client'
 import { theme } from '~/theme'
 
 export const Route = createRootRoute({
+  beforeLoad: async ({ location }) => {
+    // 認証が不要なパブリックルート
+    const result = await getCurrentUser()
+
+    const publicRoutes = ['/auth/sign-in', '/auth/sign-up', '/auth/sign-out']
+    const isPublicRoute = publicRoutes.some((route) => location.pathname.startsWith(route))
+
+    if (isPublicRoute) {
+      return { session: result.user }
+    }
+
+    // セッションチェック
+    if (!result.success) {
+      throw redirect({
+        to: '/auth/sign-in',
+        search: {
+          redirect: location.pathname,
+        },
+      })
+    }
+
+    return { session: result.user }
+  },
+
   head: () => ({
     meta: [
       {
@@ -39,6 +74,9 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const { data: session } = authClient.useSession()
+  const navigate = Route.useNavigate()
+
   return (
     <ClientOnly>
       <AppShell header={{ height: 60 }} padding="md">
@@ -48,13 +86,55 @@ function RootComponent() {
               Trak
             </Text>
             <Group gap="md">
-              <Button component={Link} to="/" variant="subtle" size="sm">
-                ホーム
-              </Button>
-              <Button component={Link} to="/habits" variant="subtle" size="sm">
-                習慣管理
-              </Button>
-              <ThemeToggle />
+              {session ? (
+                <>
+                  <Button component={Link} to="/" variant="subtle" size="sm">
+                    ホーム
+                  </Button>
+                  <Button component={Link} to="/habits" variant="subtle" size="sm">
+                    習慣管理
+                  </Button>
+                  <ThemeToggle />
+                  <Menu shadow="md" width={200}>
+                    <Menu.Target>
+                      <Button variant="subtle" size="sm" leftSection={<IconUser size={16} />}>
+                        {session.user.name || session.user.email}
+                      </Button>
+                    </Menu.Target>
+
+                    <Menu.Dropdown>
+                      <Menu.Label>アカウント</Menu.Label>
+                      <Menu.Item
+                        leftSection={<IconSettings size={14} />}
+                        component={Link}
+                        to="/settings"
+                      >
+                        設定
+                      </Menu.Item>
+                      <Menu.Divider />
+                      <Menu.Item
+                        leftSection={<IconLogout size={14} />}
+                        color="red"
+                        onClick={() => {
+                          navigate({ to: '/auth/sign-out' })
+                        }}
+                      >
+                        サインアウト
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                </>
+              ) : (
+                <>
+                  <ThemeToggle />
+                  <Button component={Link} to="/auth/sign-in" variant="subtle" size="sm">
+                    ログイン
+                  </Button>
+                  <Button component={Link} to="/auth/sign-up" size="sm">
+                    新規登録
+                  </Button>
+                </>
+              )}
             </Group>
           </Group>
         </AppShell.Header>

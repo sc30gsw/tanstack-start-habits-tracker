@@ -15,6 +15,7 @@ export const Route = createFileRoute('/habits/$habitId')({
       recordDto.getRecords({ data: { habit_id: params.habitId } }),
       habitDto.getHabits(),
     ])
+
     return { habit: habitResult, records: recordsResult, habits: habitsResult }
   },
 })

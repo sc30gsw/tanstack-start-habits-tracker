@@ -23,7 +23,7 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
   const recordsMap = records.reduce(
     (acc, record) => {
       if (record.date === dayjs(selectedDate).format('YYYY-MM-DD')) {
-        acc[record.habit_id] = record
+        acc[record.habitId] = record
       }
       return acc
     },

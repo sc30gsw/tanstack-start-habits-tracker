@@ -1,5 +1,5 @@
 import { Button, Container, Group, Stack, Title } from '@mantine/core'
-import { createFileRoute, Outlet, useMatches } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useMatches, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod/v4'
 import { HabitCreateForm } from '~/features/habits/components/form/habit-create-form'
 import { HabitList } from '~/features/habits/components/habit-list'
@@ -12,15 +12,15 @@ export const Route = createFileRoute('/habits/')({
   }),
   loader: async () => {
     const habitsResult = await habitDto.getHabits()
+
     return habitsResult
   },
 })
 
 function HabitsPage() {
   const habitsData = Route.useLoaderData()
-
+  const navigate = useNavigate()
   const searchParams = Route.useSearch()
-  const navigate = Route.useNavigate()
 
   const matches = useMatches()
   const last = matches[matches.length - 1]
@@ -38,7 +38,7 @@ function HabitsPage() {
           <Title order={1}>習慣管理</Title>
           <Button
             color="habit"
-            onClick={() => navigate({ search: { showForm: !searchParams.showForm } })}
+            onClick={() => navigate({ to: '.', search: { showForm: !searchParams.showForm } })}
           >
             {searchParams.showForm ? '作成フォームを閉じる' : '新しい習慣を作成'}
           </Button>
@@ -46,8 +46,8 @@ function HabitsPage() {
 
         {searchParams.showForm && (
           <HabitCreateForm
-            onSuccess={() => navigate({ search: { showForm: false } })}
-            onCancel={() => navigate({ search: { showForm: false } })}
+            onSuccess={() => navigate({ to: '.', search: { showForm: false } })}
+            onCancel={() => navigate({ to: '.', search: { showForm: false } })}
           />
         )}
 
