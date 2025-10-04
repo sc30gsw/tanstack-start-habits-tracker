@@ -37,8 +37,8 @@ export type RecordEntity = {
   habit?: HabitEntity
 } & Omit<RecordTable, 'created_at'>
 
-export type SettingsEntity = Omit<SettingsTable, 'created_at'> & {
-  created_at: Date
+export type SettingsEntity = Omit<SettingsTable, 'createdAt'> & {
+  createdAt: Date
 }
 
 /**

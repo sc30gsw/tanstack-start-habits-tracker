@@ -1,16 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
-import dayjs from 'dayjs'
-import timezone from 'dayjs/plugin/timezone'
-import utc from 'dayjs/plugin/utc'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
 import { settings } from '~/db/schema'
-
-dayjs.extend(utc)
-dayjs.extend(timezone)
-dayjs.tz.setDefault('Asia/Tokyo')
 
 // Theme schemas
 const themeSchema = z.enum(['light', 'dark', 'auto'])
@@ -25,18 +18,16 @@ const updateThemeSchema = z.object({
 const getThemeSettings = createServerFn({ method: 'GET' }).handler(
   async (): Promise<{ success: boolean; theme?: string; error?: string }> => {
     try {
-      const userSettings = await db.select().from(settings).limit(1)
+      // TODO: セッションからuserIdを取得
+      const userId = 'temp-user-id'
+
+      const userSettings = await db
+        .select()
+        .from(settings)
+        .where(eq(settings.userId, userId))
+        .limit(1)
 
       if (userSettings.length === 0) {
-        // 設定が存在しない場合はデフォルト設定を作成
-        const settingsId = nanoid()
-        await db.insert(settings).values({
-          id: settingsId,
-          theme: 'auto',
-          default_view: 'calendar',
-          created_at: dayjs().tz('Asia/Tokyo').toISOString(),
-        })
-
         return {
           success: true,
           theme: 'auto',
@@ -45,14 +36,13 @@ const getThemeSettings = createServerFn({ method: 'GET' }).handler(
 
       return {
         success: true,
-        theme: userSettings[0].theme ?? undefined,
+        theme: userSettings[0].theme || 'auto',
       }
     } catch (error) {
-      console.error('Error getting theme settings:', error)
-
+      console.error('Error fetching theme settings:', error)
       return {
         success: false,
-        error: 'Failed to get theme settings',
+        error: 'Failed to fetch theme settings',
       }
     }
   },
@@ -65,25 +55,28 @@ const updateThemeSettings = createServerFn({ method: 'POST' })
   .inputValidator(updateThemeSchema)
   .handler(async ({ data }): Promise<{ success: boolean; error?: string }> => {
     try {
-      const userSettings = await db.select().from(settings).limit(1)
+      // TODO: セッションからuserIdを取得
+      const userId = 'temp-user-id'
 
-      if (userSettings.length === 0) {
-        // 設定が存在しない場合は新規作成
-        const settingsId = nanoid()
+      const existingSettings = await db
+        .select()
+        .from(settings)
+        .where(eq(settings.userId, userId))
+        .limit(1)
+
+      if (existingSettings.length === 0) {
+        // 新規作成
         await db.insert(settings).values({
-          id: settingsId,
+          id: nanoid(),
           theme: data.theme,
-          default_view: 'calendar',
-          created_at: dayjs().tz('Asia/Tokyo').toISOString(),
+          userId: userId,
         })
       } else {
-        // 既存の設定を更新
+        // 更新
         await db
           .update(settings)
-          .set({
-            theme: data.theme,
-          })
-          .where(eq(settings.id, userSettings[0].id))
+          .set({ theme: data.theme })
+          .where(eq(settings.userId, userId))
       }
 
       return {
@@ -91,7 +84,6 @@ const updateThemeSettings = createServerFn({ method: 'POST' })
       }
     } catch (error) {
       console.error('Error updating theme settings:', error)
-
       return {
         success: false,
         error: 'Failed to update theme settings',

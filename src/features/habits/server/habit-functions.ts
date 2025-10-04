@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
-import { habits } from '~/db/schema'
+import { auth } from '~/lib/auth'
 import type { HabitEntity, HabitResponse, HabitsListResponse } from '~/features/habits/types/habit'
 import {
   createHabitSchema,
@@ -25,6 +25,16 @@ const createHabit = createServerFn({ method: 'POST' })
   .inputValidator(createHabitSchema)
   .handler(async ({ data }): Promise<HabitResponse> => {
     try {
+      // TODO: セッションからuserIdを取得
+      // const session = await auth.api.getSession({ headers: new Headers() })
+      // if (!session?.user?.id) {
+      //   return {
+      //     success: false,
+      //     error: 'Unauthorized',
+      //   }
+      // }
+      const userId = 'temp-user-id' // TODO: Get from session
+
       // 習慣名の重複チェック
       const existingHabit = await db
         .select()
@@ -49,14 +59,15 @@ const createHabit = createServerFn({ method: 'POST' })
           name: data.name,
           description: data.description || null,
           color: data.color || 'blue',
+          userId: userId,
         })
         .returning()
 
       // スキーマ検証用のデータ準備（string型のタイムスタンプ）
       const parsedHabit = habitSchema.parse({
         ...habit,
-        created_at: habit.created_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
-        updated_at: habit.updated_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        created_at: habit.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        updated_at: habit.updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
       })
 
       // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
@@ -123,7 +134,7 @@ const updateHabit = createServerFn({ method: 'POST' })
 
       // 更新データの準備
       const updateData: Partial<typeof habits.$inferInsert> = {
-        updated_at: dayjs().tz('Asia/Tokyo').toISOString(),
+        updatedAt: dayjs().tz('Asia/Tokyo').toISOString(),
       }
 
       if (data.name !== undefined) {
@@ -148,8 +159,8 @@ const updateHabit = createServerFn({ method: 'POST' })
       // スキーマ検証用のデータ準備（string型のタイムスタンプ）
       const parsedHabit = habitSchema.parse({
         ...updatedHabit,
-        created_at: updatedHabit.created_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
-        updated_at: updatedHabit.updated_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        created_at: updatedHabit.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        updated_at: updatedHabit.updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
       })
 
       // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
@@ -220,15 +231,15 @@ const deleteHabit = createServerFn({ method: 'POST' })
 const getHabits = createServerFn({ method: 'GET' }).handler(
   async (): Promise<HabitsListResponse> => {
     try {
-      const allHabits = await db.select().from(habits).orderBy(habits.created_at)
+      const allHabits = await db.select().from(habits)
 
       // HabitEntityに変換
       const habitEntities: HabitEntity[] = allHabits.map((habit) => {
         // スキーマ検証用のデータ準備（string型のタイムスタンプ）
         const parsedHabit = habitSchema.parse({
           ...habit,
-          created_at: habit.created_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
-          updated_at: habit.updated_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
+          created_at: habit.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+          updated_at: habit.updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
         })
 
         // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
@@ -275,8 +286,8 @@ const getHabitById = createServerFn({ method: 'GET' })
       // スキーマ検証用のデータ準備（string型のタイムスタンプ）
       const parsedHabit = habitSchema.parse({
         ...habit[0],
-        created_at: habit[0].created_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
-        updated_at: habit[0].updated_at ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        created_at: habit[0].createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        updated_at: habit[0].updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
       })
 
       // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）

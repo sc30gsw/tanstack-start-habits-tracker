@@ -1,14 +1,16 @@
 import { Badge, Button, Card, Container, Group, Stack, Text, Title } from '@mantine/core'
 import { IconChartLine, IconCheck, IconCloudUpload, IconEdit } from '@tabler/icons-react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ja'
+import { useEffect } from 'react'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { DailyHabitList } from '~/features/home/components/daily-habit-list'
 import { HomeCalendarView } from '~/features/home/components/home-calendar-view'
 import { HomeHeatmapView } from '~/features/home/components/home-heatmap-view'
+import { authClient } from '~/lib/auth-client'
 
 dayjs.locale('ja')
 
@@ -30,6 +32,22 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   const { habits, records } = Route.useLoaderData()
+  const navigate = useNavigate()
+  const { data: session, isPending } = authClient.useSession()
+
+  useEffect(() => {
+    if (!isPending && !session) {
+      navigate({ to: '/auth/sign-in' as const })
+    }
+  }, [session, isPending, navigate])
+
+  if (isPending) {
+    return null
+  }
+
+  if (!session) {
+    return null
+  }
 
   const totalHabits = habits.success ? habits.data?.length || 0 : 0
   const totalRecords = records.success ? records.data?.length || 0 : 0

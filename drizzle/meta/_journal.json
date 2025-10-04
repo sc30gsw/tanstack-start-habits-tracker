@@ -29,6 +29,34 @@
       "when": 1758629591003,
       "tag": "0003_glossy_zzzax",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1759533500558,
+      "tag": "0004_add-auth-system",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1759533546915,
+      "tag": "0005_acoustic_timeslip",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1759533706409,
+      "tag": "0006_woozy_ultimo",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1759535832291,
+      "tag": "0007_exotic_hellfire_club",
+      "breakpoints": true
     }
   ]
 }

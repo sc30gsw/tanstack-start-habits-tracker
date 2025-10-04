@@ -100,7 +100,7 @@ export function HomeHeatmap({ records, habits }: HomeHeatmapProps) {
     const detailsArray = habitDetails
       .filter((record) => (record.duration_minutes || 0) > 0)
       .map((record) => {
-        const habitName = habitNameMap[record.habit_id] || `習慣#${record.habit_id}`
+        const habitName = habitNameMap[record.habitId] || `習慣#${record.habitId}`
         return `・${habitName}: ${formatDuration(record.duration_minutes || 0)}`
       })
 

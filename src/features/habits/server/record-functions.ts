@@ -25,7 +25,7 @@ const createRecord = createServerFn({ method: 'POST' })
       const existingRecord = await db
         .select()
         .from(records)
-        .where(and(eq(records.habit_id, data.habitId), eq(records.date, data.date)))
+        .where(and(eq(records.habitId, data.habitId), eq(records.date, data.date)))
         .limit(1)
 
       if (existingRecord.length > 0) {
@@ -42,18 +42,19 @@ const createRecord = createServerFn({ method: 'POST' })
         .insert(records)
         .values({
           id: recordId,
-          habit_id: data.habitId,
+          habitId: data.habitId,
           date: data.date,
           completed: data.completed,
           duration_minutes: data.durationMinutes,
           notes: data.notes,
+          userId: 'temp-user-id', // TODO: Get from session
         })
         .returning()
 
       // RecordEntityに変換
       const recordEntity = {
         ...record,
-        created_at: new Date(record.created_at!),
+        created_at: new Date(record.createdAt!),
       } as const satisfies RecordEntity
 
       return {
@@ -119,7 +120,7 @@ const updateRecord = createServerFn({ method: 'POST' })
       // RecordEntityに変換
       const recordEntity = {
         ...updatedRecord,
-        created_at: new Date(updatedRecord.created_at!),
+        created_at: new Date(updatedRecord.createdAt!),
       } as const satisfies RecordEntity
 
       return {
@@ -195,7 +196,7 @@ const getRecords = createServerFn({ method: 'GET' })
       const conditions: ReturnType<typeof eq>[] = []
 
       if (filters?.habit_id) {
-        conditions.push(eq(records.habit_id, filters.habit_id))
+        conditions.push(eq(records.habitId, filters.habit_id))
       }
 
       if (filters?.date_from) {
@@ -213,13 +214,13 @@ const getRecords = createServerFn({ method: 'GET' })
               .select()
               .from(records)
               .where(and(...conditions))
-              .orderBy(records.created_at)
-          : await db.select().from(records).orderBy(records.created_at)
+              .orderBy(records.createdAt)
+          : await db.select().from(records).orderBy(records.createdAt)
 
       // RecordEntityに変換
       const recordEntities = allRecords.map((record) => ({
         ...record,
-        created_at: new Date(record.created_at!),
+        created_at: new Date(record.createdAt!),
       }))
 
       return {
@@ -256,7 +257,7 @@ const getRecordById = createServerFn({ method: 'GET' })
       // RecordEntityに変換
       const recordEntity = {
         ...record[0],
-        created_at: new Date(record[0].created_at ?? dayjs().tz('Asia/Tokyo').toISOString()),
+        created_at: new Date(record[0].createdAt ?? dayjs().tz('Asia/Tokyo').toISOString()),
       } as const satisfies RecordEntity
 
       return {
