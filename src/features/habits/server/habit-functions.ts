@@ -1,18 +1,20 @@
 import { createServerFn } from '@tanstack/react-start'
+import { getRequest } from '@tanstack/react-start/server'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
-import { auth } from '~/lib/auth'
+import { habits } from '~/db/schema'
 import type { HabitEntity, HabitResponse, HabitsListResponse } from '~/features/habits/types/habit'
 import {
   createHabitSchema,
   habitSchema,
   updateHabitSchema,
 } from '~/features/habits/types/schemas/habit-schemas'
+import { auth } from '~/lib/auth'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -25,21 +27,21 @@ const createHabit = createServerFn({ method: 'POST' })
   .inputValidator(createHabitSchema)
   .handler(async ({ data }): Promise<HabitResponse> => {
     try {
-      // TODO: セッションからuserIdを取得
-      // const session = await auth.api.getSession({ headers: new Headers() })
-      // if (!session?.user?.id) {
-      //   return {
-      //     success: false,
-      //     error: 'Unauthorized',
-      //   }
-      // }
-      const userId = 'temp-user-id' // TODO: Get from session
+      // セッションからuserIdを取得
+      const session = await auth.api.getSession(getRequest())
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
 
-      // 習慣名の重複チェック
+      // 習慣名の重複チェック（同一ユーザー内で）
       const existingHabit = await db
         .select()
         .from(habits)
-        .where(eq(habits.name, data.name))
+        .where(and(eq(habits.name, data.name), eq(habits.userId, userId)))
         .limit(1)
 
       if (existingHabit.length > 0) {
@@ -106,8 +108,22 @@ const updateHabit = createServerFn({ method: 'POST' })
   .inputValidator(updateHabitSchema)
   .handler(async ({ data }): Promise<HabitResponse> => {
     try {
-      // 習慣の存在確認
-      const existingHabit = await db.select().from(habits).where(eq(habits.id, data.id)).limit(1)
+      // セッションからuserIdを取得
+      const session = await auth.api.getSession(getRequest())
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
+
+      // 習慣の存在確認（自分の習慣かどうかもチェック）
+      const existingHabit = await db
+        .select()
+        .from(habits)
+        .where(and(eq(habits.id, data.id), eq(habits.userId, userId)))
+        .limit(1)
 
       if (existingHabit.length === 0) {
         return {
@@ -116,12 +132,12 @@ const updateHabit = createServerFn({ method: 'POST' })
         }
       }
 
-      // 習慣名が変更される場合、重複チェック
+      // 習慣名が変更される場合、重複チェック（同一ユーザー内で）
       if (data.name && data.name !== existingHabit[0].name) {
         const duplicateHabit = await db
           .select()
           .from(habits)
-          .where(eq(habits.name, data.name))
+          .where(and(eq(habits.name, data.name), eq(habits.userId, userId)))
           .limit(1)
 
         if (duplicateHabit.length > 0) {
@@ -199,8 +215,22 @@ const deleteHabit = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }): Promise<{ success: boolean; error?: string }> => {
     try {
-      // 習慣の存在確認
-      const existingHabit = await db.select().from(habits).where(eq(habits.id, data.id)).limit(1)
+      // セッションからuserIdを取得
+      const session = await auth.api.getSession(getRequest())
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
+
+      // 習慣の存在確認（自分の習慣かどうかもチェック）
+      const existingHabit = await db
+        .select()
+        .from(habits)
+        .where(and(eq(habits.id, data.id), eq(habits.userId, userId)))
+        .limit(1)
 
       if (existingHabit.length === 0) {
         return {
@@ -210,7 +240,7 @@ const deleteHabit = createServerFn({ method: 'POST' })
       }
 
       // 習慣を削除
-      await db.delete(habits).where(eq(habits.id, data.id))
+      await db.delete(habits).where(and(eq(habits.id, data.id), eq(habits.userId, userId)))
 
       return {
         success: true,
@@ -231,7 +261,12 @@ const deleteHabit = createServerFn({ method: 'POST' })
 const getHabits = createServerFn({ method: 'GET' }).handler(
   async (): Promise<HabitsListResponse> => {
     try {
-      const allHabits = await db.select().from(habits)
+      const session = await auth.api.getSession(getRequest())
+      if (!session) {
+        return { success: false, error: 'Unauthorized' }
+      }
+
+      const allHabits = await db.select().from(habits).where(eq(habits.userId, session.user.id))
 
       // HabitEntityに変換
       const habitEntities: HabitEntity[] = allHabits.map((habit) => {
@@ -274,7 +309,21 @@ const getHabitById = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }): Promise<HabitResponse> => {
     try {
-      const habit = await db.select().from(habits).where(eq(habits.id, data.id)).limit(1)
+      // セッションからuserIdを取得
+      const session = await auth.api.getSession(getRequest())
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
+
+      const habit = await db
+        .select()
+        .from(habits)
+        .where(and(eq(habits.id, data.id), eq(habits.userId, userId)))
+        .limit(1)
 
       if (habit.length === 0) {
         return {
