@@ -36,7 +36,8 @@ export const Route = createRootRoute({
       '/auth/sign-out',
       '/auth/passkey-setup',
     ] as const satisfies readonly string[]
-    const isPublicRoute = publicRoutes.some((route) => location.pathname.startsWith(route))
+
+    const isPublicRoute = publicRoutes.includes(location.pathname as (typeof publicRoutes)[number])
 
     if (isPublicRoute) {
       return { session: result.user }

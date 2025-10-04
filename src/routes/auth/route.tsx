@@ -7,7 +7,7 @@ export const Route = createFileRoute('/auth')({
       '/auth/passkey-setup',
     ] as const satisfies readonly string[]
 
-    if (noCheckPaths.some((path) => location.pathname.startsWith(path))) {
+    if (noCheckPaths.includes(location.pathname as (typeof noCheckPaths)[number])) {
       return
     }
 
