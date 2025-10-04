@@ -2,7 +2,9 @@ import { Badge, Card, Group, Stack, Text, Tooltip, useComputedColorScheme } from
 import { IconCheck, IconClock, IconX } from '@tabler/icons-react'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import { useHabitColor } from '~/features/habits/hooks/use-habit-color'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
+import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
@@ -18,6 +20,7 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
+  const { getHabitColor } = useHabitColor()
 
   // 選択された日付の記録をマップ化
   const recordsMap = records.reduce(
@@ -93,7 +96,7 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
                               width: 12,
                               height: 12,
                               borderRadius: '50%',
-                              backgroundColor: `var(--mantine-color-${habit.color}-6)`,
+                              backgroundColor: getHabitColor(habit.color as HabitColor),
                             }}
                           />
                           <Text size="sm" fw={500}>
@@ -163,7 +166,7 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
                               width: 12,
                               height: 12,
                               borderRadius: '50%',
-                              backgroundColor: `var(--mantine-color-${habit.color}-6)`,
+                              backgroundColor: getHabitColor(habit.color as any),
                               opacity: 0.5,
                             }}
                           />

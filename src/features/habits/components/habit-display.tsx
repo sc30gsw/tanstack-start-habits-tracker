@@ -4,8 +4,10 @@ import { notifications } from '@mantine/notifications'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
 import { Link, useRouter } from '@tanstack/react-router'
 import type { useTransition } from 'react'
+import { useHabitColor } from '~/features/habits/hooks/use-habit-color'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
+import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 
 type HabitDisplayProps = {
   habit: HabitEntity
@@ -16,6 +18,7 @@ type HabitDisplayProps = {
 export function HabitDisplay({ habit, onEdit, useTransition }: HabitDisplayProps) {
   const [isPending, startTransition] = useTransition
   const router = useRouter()
+  const { getHabitColor } = useHabitColor()
 
   const handleDelete = async () => {
     modals.openConfirmModal({
@@ -63,9 +66,20 @@ export function HabitDisplay({ habit, onEdit, useTransition }: HabitDisplayProps
   return (
     <Group justify="space-between" align="flex-start">
       <div style={{ flex: 1 }}>
-        <Text fw={500} size="lg">
-          {habit.name}
-        </Text>
+        <Group gap="sm" align="center">
+          <div
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: '50%',
+              backgroundColor: getHabitColor(habit.color as HabitColor),
+              border: '2px solid var(--mantine-color-gray-4)',
+            }}
+          />
+          <Text fw={500} size="lg">
+            {habit.name}
+          </Text>
+        </Group>
         {habit.description && (
           <Text c="dimmed" size="sm" mt="xs">
             {habit.description}
