@@ -1,23 +1,38 @@
-import { Button, Card, Container, Stack, Text, Title } from '@mantine/core'
+import { Box, Button, Card, Container, Stack, Text, Title } from '@mantine/core'
 import { IconExternalLink } from '@tabler/icons-react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { authClient } from '~/lib/auth-client'
 
 export const Route = createFileRoute('/customer/portal')({
+  loader: async () => {
+    const result = await authClient.customer.portal()
+
+    if (result.error) {
+      throw new Error(result.error.message || 'Failed to get customer portal URL')
+    }
+
+    return result.data
+  },
   component: CustomerPortalPage,
+  errorComponent: () => {
+    return (
+      <Container size="sm" py="xl">
+        <Card shadow="md" padding="xl" radius="md" withBorder>
+          <Stack align="center" gap="lg">
+            <Box style={{ textAlign: 'center' }}>
+              <Text c="red" size="lg" fw={500}>
+                サブスクリプション管理ページの取得に失敗しました
+              </Text>
+            </Box>
+          </Stack>
+        </Card>
+      </Container>
+    )
+  },
 })
 
 function CustomerPortalPage() {
-  const handleOpenPolarPortal = async () => {
-    try {
-      const result = await authClient.customer.portal()
-      if (result?.data?.url) {
-        open(result.data.url, '_blank', 'noopener,noreferrer')
-      }
-    } catch (error) {
-      console.error('Failed to open portal:', error)
-    }
-  }
+  const data = Route.useLoaderData()
 
   return (
     <Container size="sm" py="xl">
@@ -35,7 +50,10 @@ function CustomerPortalPage() {
           <Button
             size="lg"
             leftSection={<IconExternalLink size={20} />}
-            onClick={handleOpenPolarPortal}
+            component={Link}
+            to={data?.url || '/'}
+            target="_blank"
+            rel="noopener noreferrer"
           >
             Polar管理画面を開く
           </Button>
