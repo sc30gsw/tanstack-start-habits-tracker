@@ -1,11 +1,9 @@
 import { Button, Container, Group, Stack, Title } from '@mantine/core'
 import { createFileRoute, Outlet, useMatches, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
 import { z } from 'zod/v4'
 import { HabitCreateForm } from '~/features/habits/components/form/habit-create-form'
 import { HabitList } from '~/features/habits/components/habit-list'
 import { habitDto } from '~/features/habits/server/habit-functions'
-import { authClient } from '~/lib/auth-client'
 
 export const Route = createFileRoute('/habits/')({
   component: HabitsPage,
@@ -14,6 +12,7 @@ export const Route = createFileRoute('/habits/')({
   }),
   loader: async () => {
     const habitsResult = await habitDto.getHabits()
+
     return habitsResult
   },
 })
@@ -21,27 +20,11 @@ export const Route = createFileRoute('/habits/')({
 function HabitsPage() {
   const habitsData = Route.useLoaderData()
   const navigate = useNavigate()
-  const { data: session, isPending } = authClient.useSession()
-
-  useEffect(() => {
-    if (!isPending && !session) {
-      navigate({ to: '/auth/sign-in' as const })
-    }
-  }, [session, isPending, navigate])
-
   const searchParams = Route.useSearch()
 
   const matches = useMatches()
   const last = matches[matches.length - 1]
   const isList = last.routeId === '/habits/'
-
-  if (isPending) {
-    return null
-  }
-
-  if (!session) {
-    return null
-  }
 
   if (!isList) {
     // 子ルート（詳細など）を表示

@@ -38,13 +38,11 @@ const createHabit = createServerFn({ method: 'POST' })
       const userId = session.user.id
 
       // 習慣名の重複チェック（同一ユーザー内で）
-      const existingHabit = await db
-        .select()
-        .from(habits)
-        .where(and(eq(habits.name, data.name), eq(habits.userId, userId)))
-        .limit(1)
+      const existingHabit = await db.query.habits.findFirst({
+        where: and(eq(habits.name, data.name), eq(habits.userId, userId)),
+      })
 
-      if (existingHabit.length > 0) {
+      if (existingHabit) {
         return {
           success: false,
           error: 'Habit with this name already exists',
@@ -61,7 +59,7 @@ const createHabit = createServerFn({ method: 'POST' })
           name: data.name,
           description: data.description || null,
           color: data.color || 'blue',
-          userId: userId,
+          userId,
         })
         .returning()
 
@@ -119,13 +117,11 @@ const updateHabit = createServerFn({ method: 'POST' })
       const userId = session.user.id
 
       // 習慣の存在確認（自分の習慣かどうかもチェック）
-      const existingHabit = await db
-        .select()
-        .from(habits)
-        .where(and(eq(habits.id, data.id), eq(habits.userId, userId)))
-        .limit(1)
+      const existingHabit = await db.query.habits.findFirst({
+        where: and(eq(habits.id, data.id), eq(habits.userId, userId)),
+      })
 
-      if (existingHabit.length === 0) {
+      if (!existingHabit) {
         return {
           success: false,
           error: 'Habit not found',
@@ -133,14 +129,12 @@ const updateHabit = createServerFn({ method: 'POST' })
       }
 
       // 習慣名が変更される場合、重複チェック（同一ユーザー内で）
-      if (data.name && data.name !== existingHabit[0].name) {
-        const duplicateHabit = await db
-          .select()
-          .from(habits)
-          .where(and(eq(habits.name, data.name), eq(habits.userId, userId)))
-          .limit(1)
+      if (data.name && data.name !== existingHabit.name) {
+        const duplicateHabit = await db.query.habits.findFirst({
+          where: and(eq(habits.name, data.name), eq(habits.userId, userId)),
+        })
 
-        if (duplicateHabit.length > 0) {
+        if (duplicateHabit) {
           return {
             success: false,
             error: 'Habit with this name already exists',
@@ -226,13 +220,11 @@ const deleteHabit = createServerFn({ method: 'POST' })
       const userId = session.user.id
 
       // 習慣の存在確認（自分の習慣かどうかもチェック）
-      const existingHabit = await db
-        .select()
-        .from(habits)
-        .where(and(eq(habits.id, data.id), eq(habits.userId, userId)))
-        .limit(1)
+      const existingHabit = await db.query.habits.findFirst({
+        where: and(eq(habits.id, data.id), eq(habits.userId, userId)),
+      })
 
-      if (existingHabit.length === 0) {
+      if (!existingHabit) {
         return {
           success: false,
           error: 'Habit not found',
@@ -266,7 +258,9 @@ const getHabits = createServerFn({ method: 'GET' }).handler(
         return { success: false, error: 'Unauthorized' }
       }
 
-      const allHabits = await db.select().from(habits).where(eq(habits.userId, session.user.id))
+      const allHabits = await db.query.habits.findMany({
+        where: eq(habits.userId, session.user.id),
+      })
 
       // HabitEntityに変換
       const habitEntities: HabitEntity[] = allHabits.map((habit) => {
@@ -319,13 +313,11 @@ const getHabitById = createServerFn({ method: 'GET' })
       }
       const userId = session.user.id
 
-      const habit = await db
-        .select()
-        .from(habits)
-        .where(and(eq(habits.id, data.id), eq(habits.userId, userId)))
-        .limit(1)
+      const habit = await db.query.habits.findFirst({
+        where: and(eq(habits.id, data.id), eq(habits.userId, userId)),
+      })
 
-      if (habit.length === 0) {
+      if (!habit) {
         return {
           success: false,
           error: 'Habit not found',
@@ -334,9 +326,9 @@ const getHabitById = createServerFn({ method: 'GET' })
 
       // スキーマ検証用のデータ準備（string型のタイムスタンプ）
       const parsedHabit = habitSchema.parse({
-        ...habit[0],
-        created_at: habit[0].createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
-        updated_at: habit[0].updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        ...habit,
+        created_at: habit.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        updated_at: habit.updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
       })
 
       // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）

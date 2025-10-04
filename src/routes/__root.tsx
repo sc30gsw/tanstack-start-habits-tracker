@@ -1,4 +1,4 @@
-import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
+import { createRootRoute, HeadContent, Outlet, redirect, Scripts } from '@tanstack/react-router'
 
 import appCss from '../styles.css?url'
 import '@mantine/core/styles.css'
@@ -18,11 +18,36 @@ import { Notifications } from '@mantine/notifications'
 import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { ClientOnly } from '~/components/client-only'
+import { getCurrentUser } from '~/features/auth/server-functions'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
 import { theme } from '~/theme'
 
 export const Route = createRootRoute({
+  beforeLoad: async ({ location }) => {
+    // 認証が不要なパブリックルート
+    const result = await getCurrentUser()
+
+    const publicRoutes = ['/auth/sign-in', '/auth/sign-up', '/auth/sign-out']
+    const isPublicRoute = publicRoutes.some((route) => location.pathname.startsWith(route))
+
+    if (isPublicRoute) {
+      return { session: result.user }
+    }
+
+    // セッションチェック
+    if (!result.success) {
+      throw redirect({
+        to: '/auth/sign-in',
+        search: {
+          redirect: location.pathname,
+        },
+      })
+    }
+
+    return { session: result.user }
+  },
+
   head: () => ({
     meta: [
       {

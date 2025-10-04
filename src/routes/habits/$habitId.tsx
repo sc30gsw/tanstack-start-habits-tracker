@@ -12,9 +12,10 @@ export const Route = createFileRoute('/habits/$habitId')({
   loader: async ({ params }) => {
     const [habitResult, recordsResult, habitsResult] = await Promise.all([
       habitDto.getHabitById({ data: { id: params.habitId } }),
-      recordDto.getRecords({ data: { habitId: params.habitId } }),
+      recordDto.getRecords({ data: { habit_id: params.habitId } }),
       habitDto.getHabits(),
     ])
+
     return { habit: habitResult, records: recordsResult, habits: habitsResult }
   },
 })

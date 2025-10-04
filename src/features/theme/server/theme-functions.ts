@@ -21,13 +21,11 @@ const getThemeSettings = createServerFn({ method: 'GET' }).handler(
       // TODO: セッションからuserIdを取得
       const userId = 'temp-user-id'
 
-      const userSettings = await db
-        .select()
-        .from(settings)
-        .where(eq(settings.userId, userId))
-        .limit(1)
+      const userSettings = await db.query.settings.findFirst({
+        where: eq(settings.userId, userId),
+      })
 
-      if (userSettings.length === 0) {
+      if (!userSettings) {
         return {
           success: true,
           theme: 'auto',
@@ -36,7 +34,7 @@ const getThemeSettings = createServerFn({ method: 'GET' }).handler(
 
       return {
         success: true,
-        theme: userSettings[0].theme || 'auto',
+        theme: userSettings.theme || 'auto',
       }
     } catch (error) {
       console.error('Error fetching theme settings:', error)
@@ -58,13 +56,11 @@ const updateThemeSettings = createServerFn({ method: 'POST' })
       // TODO: セッションからuserIdを取得
       const userId = 'temp-user-id'
 
-      const existingSettings = await db
-        .select()
-        .from(settings)
-        .where(eq(settings.userId, userId))
-        .limit(1)
+      const existingSettings = await db.query.settings.findFirst({
+        where: eq(settings.userId, userId),
+      })
 
-      if (existingSettings.length === 0) {
+      if (!existingSettings) {
         // 新規作成
         await db.insert(settings).values({
           id: nanoid(),
@@ -73,10 +69,7 @@ const updateThemeSettings = createServerFn({ method: 'POST' })
         })
       } else {
         // 更新
-        await db
-          .update(settings)
-          .set({ theme: data.theme })
-          .where(eq(settings.userId, userId))
+        await db.update(settings).set({ theme: data.theme }).where(eq(settings.userId, userId))
       }
 
       return {

@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
+import { getRequest } from '@tanstack/react-start/server'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
@@ -7,6 +8,7 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
 import { records } from '~/db/schema'
+import { auth } from '~/lib/auth'
 import type { RecordEntity, RecordResponse, RecordsListResponse } from '../types/habit'
 import { createRecordSchema, updateRecordSchema } from '../types/schemas/record-schemas'
 
@@ -21,14 +23,22 @@ const createRecord = createServerFn({ method: 'POST' })
   .inputValidator(createRecordSchema)
   .handler(async ({ data }): Promise<RecordResponse> => {
     try {
-      // 同一習慣・同一日付の記録の重複チェック
-      const existingRecord = await db
-        .select()
-        .from(records)
-        .where(and(eq(records.habitId, data.habitId), eq(records.date, data.date)))
-        .limit(1)
+      // セッションからuserIdを取得
+      const session = await auth.api.getSession(getRequest())
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
 
-      if (existingRecord.length > 0) {
+      // 同一習慣・同一日付の記録の重複チェック
+      const existingRecord = await db.query.records.findFirst({
+        where: and(eq(records.habitId, data.habitId), eq(records.date, data.date)),
+      })
+
+      if (existingRecord) {
         return {
           success: false,
           error: 'Record for this habit and date already exists',
@@ -37,6 +47,7 @@ const createRecord = createServerFn({ method: 'POST' })
 
       // 新しい記録を作成
       const recordId = nanoid()
+      const now = dayjs().tz('Asia/Tokyo').toISOString()
 
       const [record] = await db
         .insert(records)
@@ -47,7 +58,9 @@ const createRecord = createServerFn({ method: 'POST' })
           completed: data.completed,
           duration_minutes: data.durationMinutes,
           notes: data.notes,
-          userId: 'temp-user-id', // TODO: Get from session
+          createdAt: now,
+          updatedAt: now,
+          userId,
         })
         .returning()
 
@@ -85,10 +98,22 @@ const updateRecord = createServerFn({ method: 'POST' })
   .inputValidator(updateRecordSchema)
   .handler(async ({ data }): Promise<RecordResponse> => {
     try {
-      // 記録の存在確認
-      const existingRecord = await db.select().from(records).where(eq(records.id, data.id)).limit(1)
+      // セッションからuserIdを取得
+      const session = await auth.api.getSession(getRequest())
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
 
-      if (existingRecord.length === 0) {
+      // 記録の存在確認（自分の記録かどうかもチェック）
+      const existingRecord = await db.query.records.findFirst({
+        where: and(eq(records.id, data.id), eq(records.userId, userId)),
+      })
+
+      if (!existingRecord) {
         return {
           success: false,
           error: 'Record not found',
@@ -151,10 +176,22 @@ const deleteRecord = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }): Promise<{ success: boolean; error?: string }> => {
     try {
-      // 記録の存在確認
-      const existingRecord = await db.select().from(records).where(eq(records.id, data.id)).limit(1)
+      // セッションからuserIdを取得
+      const session = await auth.api.getSession(getRequest())
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
 
-      if (existingRecord.length === 0) {
+      // 記録の存在確認（自分の記録かどうかもチェック）
+      const existingRecord = await db.query.records.findFirst({
+        where: and(eq(records.id, data.id), eq(records.userId, userId)),
+      })
+
+      if (!existingRecord) {
         return {
           success: false,
           error: 'Record not found',
@@ -162,7 +199,7 @@ const deleteRecord = createServerFn({ method: 'POST' })
       }
 
       // 記録を削除
-      await db.delete(records).where(eq(records.id, data.id))
+      await db.delete(records).where(and(eq(records.id, data.id), eq(records.userId, userId)))
 
       return {
         success: true,
@@ -192,8 +229,18 @@ const getRecords = createServerFn({ method: 'GET' })
   )
   .handler(async ({ data: filters }): Promise<RecordsListResponse> => {
     try {
-      // フィルタリング条件を準備
-      const conditions: ReturnType<typeof eq>[] = []
+      // セッションからuserIdを取得
+      const session = await auth.api.getSession(getRequest())
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
+
+      // フィルタリング条件を準備（自分の記録のみ）
+      const conditions: ReturnType<typeof eq>[] = [eq(records.userId, userId)]
 
       if (filters?.habit_id) {
         conditions.push(eq(records.habitId, filters.habit_id))
@@ -210,12 +257,13 @@ const getRecords = createServerFn({ method: 'GET' })
       // クエリを実行
       const allRecords =
         conditions.length > 0
-          ? await db
-              .select()
-              .from(records)
-              .where(and(...conditions))
-              .orderBy(records.createdAt)
-          : await db.select().from(records).orderBy(records.createdAt)
+          ? await db.query.records.findMany({
+              where: and(...conditions),
+              orderBy: records.createdAt,
+            })
+          : await db.query.records.findMany({
+              orderBy: records.createdAt,
+            })
 
       // RecordEntityに変換
       const recordEntities = allRecords.map((record) => ({
@@ -245,9 +293,21 @@ const getRecordById = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }): Promise<RecordResponse> => {
     try {
-      const record = await db.select().from(records).where(eq(records.id, data.id)).limit(1)
+      // セッションからuserIdを取得
+      const session = await auth.api.getSession(getRequest())
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
 
-      if (record.length === 0) {
+      const record = await db.query.records.findFirst({
+        where: and(eq(records.id, data.id), eq(records.userId, userId)),
+      })
+
+      if (!record) {
         return {
           success: false,
           error: 'Record not found',
@@ -256,8 +316,8 @@ const getRecordById = createServerFn({ method: 'GET' })
 
       // RecordEntityに変換
       const recordEntity = {
-        ...record[0],
-        created_at: new Date(record[0].createdAt ?? dayjs().tz('Asia/Tokyo').toISOString()),
+        ...record,
+        created_at: new Date(record.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString()),
       } as const satisfies RecordEntity
 
       return {

@@ -1,20 +1,18 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { useEffect } from 'react'
-import { authClient } from '~/lib/auth-client'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/auth')({
+  beforeLoad: async ({ context, location }) => {
+    if (location.pathname === '/auth/sign-out') {
+      return
+    }
+
+    if (context.session) {
+      throw redirect({ to: '/' })
+    }
+  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { data: session, isPending } = authClient.useSession()
-  const navigate = Route.useNavigate()
-
-  useEffect(() => {
-    if (!isPending && session) {
-      navigate({ to: '/' as const })
-    }
-  }, [session, isPending, navigate])
-
   return <Outlet />
 }
