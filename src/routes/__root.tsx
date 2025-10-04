@@ -19,6 +19,7 @@ import { Notifications } from '@mantine/notifications'
 import { IconLogout, IconSettings } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { ClientOnly } from '~/components/client-only'
+import { QueryProvider } from '~/components/providers/query-provider'
 import { getCurrentUser, getCurrentUserPasskey } from '~/features/auth/server/server-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
@@ -191,12 +192,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <ColorSchemeScript />
       </head>
       <body>
-        <MantineProvider theme={theme}>
-          <ModalsProvider>
-            <Notifications />
-            {children}
-          </ModalsProvider>
-        </MantineProvider>
+        <QueryProvider>
+          <MantineProvider theme={theme}>
+            <ModalsProvider>
+              <Notifications />
+              {children}
+            </ModalsProvider>
+          </MantineProvider>
+        </QueryProvider>
         {/* {(import.meta.env.DEV || process.env.NODE_ENV === 'development') && (
           <TanstackDevtools
             config={{
