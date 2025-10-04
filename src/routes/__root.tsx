@@ -30,7 +30,12 @@ export const Route = createRootRoute({
     // 認証が不要なパブリックルート
     const result = await getCurrentUser()
 
-    const publicRoutes = ['/auth/sign-in', '/auth/sign-up', '/auth/sign-out', '/auth/passkey-setup']
+    const publicRoutes = [
+      '/auth/sign-in',
+      '/auth/sign-up',
+      '/auth/sign-out',
+      '/auth/passkey-setup',
+    ] as const satisfies readonly string[]
     const isPublicRoute = publicRoutes.some((route) => location.pathname.startsWith(route))
 
     if (isPublicRoute) {
