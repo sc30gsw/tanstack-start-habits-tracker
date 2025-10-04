@@ -12,7 +12,7 @@ import {
 } from '@mantine/core'
 import { type UseFormReturnType, useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
-import { IconBrandGithub } from '@tabler/icons-react'
+import { IconBrandGithub, IconFingerprint } from '@tabler/icons-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { authClient } from '~/lib/auth-client'
@@ -25,6 +25,8 @@ function SignInPage() {
   const navigate = useNavigate()
 
   const [isPending, startTransition] = useTransition()
+  const [isGitHubPending, startGitHubTransition] = useTransition()
+  const [isPasskeyPending, startPasskeyTransition] = useTransition()
 
   const form = useForm({
     initialValues: {
@@ -62,7 +64,7 @@ function SignInPage() {
   }
 
   async function handleGitHubSignIn() {
-    startTransition(async () => {
+    startGitHubTransition(async () => {
       try {
         await authClient.signIn.social({
           provider: 'github',
@@ -77,6 +79,23 @@ function SignInPage() {
       }
     })
   }
+
+  async function handlePasskeySignIn() {
+    startPasskeyTransition(async () => {
+      try {
+        await authClient.signIn.passkey()
+        navigate({ to: '/' })
+      } catch (error) {
+        notifications.show({
+          title: 'エラー',
+          message: error instanceof Error ? error.message : 'Passkeyサインインに失敗しました',
+          color: 'red',
+        })
+      }
+    })
+  }
+
+  const isLoading = isPending || isGitHubPending || isPasskeyPending
 
   return (
     <Container size={420} my={40}>
@@ -97,7 +116,7 @@ function SignInPage() {
               label="メールアドレス"
               placeholder="your@email.com"
               required
-              disabled={isPending}
+              disabled={isLoading}
               {...form.getInputProps('email')}
             />
 
@@ -105,7 +124,7 @@ function SignInPage() {
               label="パスワード"
               placeholder="パスワードを入力"
               required
-              disabled={isPending}
+              disabled={isLoading}
               {...form.getInputProps('password')}
             />
 
@@ -117,15 +136,29 @@ function SignInPage() {
 
         <Divider label="または" labelPosition="center" my="lg" />
 
-        <Button
-          fullWidth
-          leftSection={<IconBrandGithub size={16} />}
-          variant="default"
-          onClick={handleGitHubSignIn}
-          loading={isPending}
-        >
-          GitHubでログイン
-        </Button>
+        <Stack gap="sm">
+          <Button
+            fullWidth
+            leftSection={<IconFingerprint size={16} />}
+            variant="light"
+            disabled={isLoading}
+            onClick={handlePasskeySignIn}
+            loading={isPasskeyPending}
+          >
+            Passkeyでサインイン
+          </Button>
+
+          <Button
+            fullWidth
+            leftSection={<IconBrandGithub size={16} />}
+            variant="default"
+            disabled={isLoading}
+            onClick={handleGitHubSignIn}
+            loading={isGitHubPending}
+          >
+            GitHubでログイン
+          </Button>
+        </Stack>
       </Paper>
     </Container>
   )

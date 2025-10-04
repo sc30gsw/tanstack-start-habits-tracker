@@ -32,3 +32,29 @@ export const getCurrentUser = createServerFn({ method: 'GET' }).handler(async ()
     }
   }
 })
+
+export const getCurrentUserPasskey = createServerFn({ method: 'GET' }).handler(async () => {
+  try {
+    const session = await auth.api.getSession(getRequest())
+
+    if (!session?.user) {
+      return { success: false, error: 'Unauthorized' }
+    }
+
+    const passkey = await db.query.passkeys.findFirst({
+      where: (passkeys, { eq }) => eq(passkeys.userId, session.user.id),
+    })
+
+    return {
+      success: true,
+      passkey,
+    }
+  } catch (error) {
+    console.error('Error fetching passkeys:', error)
+
+    return {
+      success: false,
+      error: 'Failed to fetch passkeys',
+    }
+  }
+})

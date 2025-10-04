@@ -13,6 +13,8 @@ interface ImportMetaEnv {
   readonly VITE_BETTER_AUTH_SECRET: string
   readonly VITE_GITHUB_CLIENT_ID: string
   readonly VITE_GITHUB_CLIENT_SECRET: string
+  readonly VITE_PASSKEY_RP_ID: string
+  readonly VITE_PASSKEY_RP_NAME: string
   // more env variables...
 }
 
