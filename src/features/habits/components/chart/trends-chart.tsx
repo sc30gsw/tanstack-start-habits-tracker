@@ -165,7 +165,7 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
       orange: 'blue.4', // オレンジの補色系
       yellow: 'violet.4', // イエローの補色系（紫）
       indigo: 'orange.4', // インディゴの補色系（オレンジ）
-      lime: 'pink.4', // ライムの補色系（ピンク）
+      pink: 'teal.4', // ピンクの補色系（ティール）
     } as const satisfies Record<HabitColor, `${string}.4`>
 
     return barColorMap[color] || 'gray.4'

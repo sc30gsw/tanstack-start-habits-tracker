@@ -19,7 +19,7 @@ export function useHabitColor() {
       orange: '#ff9800',
       yellow: '#ffd700', // 明るく目立つゴールドイエロー
       indigo: '#3f51b5', // 深い藍色（ブルーとパープルの中間）
-      lime: '#32cd32', // 鮮やかなライムグリーン
+      pink: 'oklch(71.8% 0.202 349.761)', // 鮮やかなピンク（OKLCH色空間）
     } as const satisfies Record<HabitColor, string>
 
     return fallbackColors[colorName]

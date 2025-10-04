@@ -58,7 +58,7 @@ export function HabitHeatmap({
       orange: ['#fff3e0', '#ffcc80', '#ff9800', '#e65100'],
       yellow: ['#fffde7', '#fff176', '#ffd700', '#f57f17'],
       indigo: ['#e8eaf6', '#9fa8da', '#3f51b5', '#1a237e'],
-      lime: ['#f1f8e9', '#aed581', '#32cd32', '#33691e'],
+      pink: ['#fce4ec', '#f48fb1', '#e91e63', '#ad1457'],
     } as const satisfies Record<HabitColor, string[]>
 
     // 常にフォールバック色を使用して一貫性を保つ

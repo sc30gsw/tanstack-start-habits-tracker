@@ -1,4 +1,4 @@
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 // Available habit colors
 const HABIT_COLORS = [
@@ -9,8 +9,9 @@ const HABIT_COLORS = [
   'orange',
   'yellow',
   'indigo',
-  'lime',
+  'pink',
 ] as const satisfies readonly string[]
+
 export const habitColorSchema = z.enum(HABIT_COLORS)
 
 /**
