@@ -17,9 +17,9 @@ export function useHabitColor() {
       purple: '#9c27b0',
       red: '#f44336',
       orange: '#ff9800',
-      pink: '#e91e63',
-      cyan: '#00bcd4',
-      teal: '#009688',
+      yellow: '#ffd700', // 明るく目立つゴールドイエロー
+      indigo: '#3f51b5', // 深い藍色（ブルーとパープルの中間）
+      lime: '#32cd32', // 鮮やかなライムグリーン
     } as const satisfies Record<HabitColor, string>
 
     return fallbackColors[colorName]

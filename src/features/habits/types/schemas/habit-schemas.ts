@@ -1,7 +1,16 @@
 import { z } from 'zod/v4'
 
 // Available habit colors
-const HABIT_COLORS = ['blue', 'green', 'purple', 'red', 'orange', 'pink', 'cyan', 'teal'] as const
+const HABIT_COLORS = [
+  'blue',
+  'green',
+  'purple',
+  'red',
+  'orange',
+  'yellow',
+  'indigo',
+  'lime',
+] as const satisfies readonly string[]
 export const habitColorSchema = z.enum(HABIT_COLORS)
 
 /**
