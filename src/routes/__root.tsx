@@ -16,7 +16,7 @@ import {
 } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications } from '@mantine/notifications'
-import { IconLogout, IconSettings } from '@tabler/icons-react'
+import { IconCreditCard, IconLogout, IconSettings } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { ClientOnly } from '~/components/client-only'
 import { QueryProvider } from '~/components/providers/query-provider'
@@ -142,7 +142,7 @@ function RootComponent() {
                         設定
                       </Menu.Item>
                       <Menu.Item
-                        leftSection={<IconSettings size={14} />}
+                        leftSection={<IconCreditCard size={14} />}
                         component={Link}
                         to="/customer/portal"
                       >
