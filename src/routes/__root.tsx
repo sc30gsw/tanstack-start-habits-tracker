@@ -146,7 +146,7 @@ function RootComponent() {
                         component={Link}
                         to="/customer/portal"
                       >
-                        サブスクリプション管理
+                        サブスクリプション
                       </Menu.Item>
                       <Menu.Divider />
                       <Menu.Item
