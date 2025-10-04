@@ -6,6 +6,7 @@ import '@mantine/notifications/styles.css'
 
 import {
   AppShell,
+  Avatar,
   Button,
   ColorSchemeScript,
   Group,
@@ -15,7 +16,7 @@ import {
 } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications } from '@mantine/notifications'
-import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react'
+import { IconLogout, IconSettings } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { ClientOnly } from '~/components/client-only'
 import { getCurrentUser, getCurrentUserPasskey } from '~/features/auth/server/server-functions'
@@ -108,9 +109,16 @@ function RootComponent() {
                   <ThemeToggle />
                   <Menu shadow="md" width={200}>
                     <Menu.Target>
-                      <Button variant="subtle" size="sm" leftSection={<IconUser size={16} />}>
-                        {session.user.name || session.user.email}
-                      </Button>
+                      <Avatar
+                        src={session.user.image}
+                        alt={session.user.name}
+                        name={session.user.name}
+                        color="initials"
+                        allowedInitialsColors={['blue']}
+                        size={32}
+                        radius="xl"
+                        style={{ cursor: 'pointer' }}
+                      />
                     </Menu.Target>
 
                     <Menu.Dropdown>
