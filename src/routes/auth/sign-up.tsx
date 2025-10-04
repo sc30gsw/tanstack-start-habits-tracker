@@ -13,7 +13,7 @@ import {
 import { type UseFormReturnType, useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconBrandGithub } from '@tabler/icons-react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { authClient } from '~/lib/auth-client'
 
@@ -22,9 +22,10 @@ export const Route = createFileRoute('/auth/sign-up')({
 })
 
 function SignUpPage() {
-  const navigate = useNavigate()
+  const navigate = Route.useNavigate()
 
   const [isPending, startTransition] = useTransition()
+  const [isGitHubPending, startGitHubTransition] = useTransition()
 
   const form = useForm({
     initialValues: {
@@ -46,14 +47,15 @@ function SignUpPage() {
           name: values.name,
           email: values.email,
           password: values.password,
-          callbackURL: '/',
         })
 
         if (error) {
           notifications.show({ color: 'red', message: error.message || '登録に失敗しました' })
-        } else {
-          navigate({ to: '/' })
+
+          return
         }
+
+        navigate({ to: '/auth/passkey-setup' })
       } catch {
         notifications.show({ color: 'red', message: '登録に失敗しました' })
       }
@@ -61,17 +63,19 @@ function SignUpPage() {
   }
 
   async function handleGitHubSignUp() {
-    startTransition(async () => {
+    startGitHubTransition(async () => {
       try {
         await authClient.signIn.social({
           provider: 'github',
-          callbackURL: '/',
+          callbackURL: '/auth/passkey-setup',
         })
       } catch {
         notifications.show({ color: 'red', message: '登録に失敗しました' })
       }
     })
   }
+
+  const isLoading = isPending || isGitHubPending
 
   return (
     <Container size={420} my={40}>
@@ -92,7 +96,7 @@ function SignUpPage() {
               label="名前"
               placeholder="山田太郎"
               required
-              disabled={isPending}
+              disabled={isLoading}
               {...form.getInputProps('name')}
             />
 
@@ -101,7 +105,7 @@ function SignUpPage() {
               placeholder="your@email.com"
               required
               type="email"
-              disabled={isPending}
+              disabled={isLoading}
               {...form.getInputProps('email')}
             />
 
@@ -109,11 +113,11 @@ function SignUpPage() {
               label="パスワード"
               placeholder="パスワードを入力"
               required
-              disabled={isPending}
+              disabled={isLoading}
               {...form.getInputProps('password')}
             />
 
-            <Button type="submit" fullWidth loading={isPending}>
+            <Button type="submit" fullWidth disabled={isLoading} loading={isPending}>
               アカウント作成
             </Button>
           </Stack>
@@ -125,8 +129,9 @@ function SignUpPage() {
           fullWidth
           leftSection={<IconBrandGithub size={16} />}
           variant="default"
+          disabled={isLoading}
           onClick={handleGitHubSignUp}
-          loading={isPending}
+          loading={isGitHubPending}
         >
           GitHubで登録
         </Button>

@@ -18,17 +18,19 @@ import { Notifications } from '@mantine/notifications'
 import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { ClientOnly } from '~/components/client-only'
-import { getCurrentUser } from '~/features/auth/server/server-functions'
+import { getCurrentUser, getCurrentUserPasskey } from '~/features/auth/server/server-functions'
+import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
 import { theme } from '~/theme'
 
 export const Route = createRootRoute({
-  beforeLoad: async ({ location }) => {
+  validateSearch: searchSchema.pick({ skip: true }),
+  beforeLoad: async ({ location, search }) => {
     // 認証が不要なパブリックルート
     const result = await getCurrentUser()
 
-    const publicRoutes = ['/auth/sign-in', '/auth/sign-up', '/auth/sign-out']
+    const publicRoutes = ['/auth/sign-in', '/auth/sign-up', '/auth/sign-out', '/auth/passkey-setup']
     const isPublicRoute = publicRoutes.some((route) => location.pathname.startsWith(route))
 
     if (isPublicRoute) {
@@ -39,10 +41,13 @@ export const Route = createRootRoute({
     if (!result.success) {
       throw redirect({
         to: '/auth/sign-in',
-        search: {
-          redirect: location.pathname,
-        },
       })
+    }
+
+    const { success, passkey } = await getCurrentUserPasskey()
+
+    if (success && !passkey && !search.skip) {
+      throw redirect({ to: '/auth/passkey-setup' })
     }
 
     return { session: result.user }
