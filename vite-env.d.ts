@@ -15,6 +15,10 @@ interface ImportMetaEnv {
   readonly VITE_GITHUB_CLIENT_SECRET: string
   readonly VITE_PASSKEY_RP_ID: string
   readonly VITE_PASSKEY_RP_NAME: string
+  readonly VITE_POLAR_ACCESS_TOKEN: string
+  readonly VITE_POLAR_SERVER: 'sandbox' | 'production'
+  readonly VITE_POLAR_WEBHOOK_SECRET: string
+  readonly VITE_POLAR_PRODUCT_ID: string
   // more env variables...
 }
 
