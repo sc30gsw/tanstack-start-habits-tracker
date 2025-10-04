@@ -58,7 +58,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Trak - 習慣追跡アプリ',
+        title: 'Track - 習慣追跡アプリ',
       },
     ],
     links: [
@@ -83,7 +83,7 @@ function RootComponent() {
         <AppShell.Header>
           <Group h="100%" px="md" justify="space-between">
             <Text size="xl" fw={700} c="blue">
-              Trak
+              Track
             </Text>
             <Group gap="md">
               {session ? (
