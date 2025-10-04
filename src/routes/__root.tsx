@@ -106,6 +106,9 @@ function RootComponent() {
                   <Button component={Link} to="/habits" variant="subtle" size="sm">
                     習慣管理
                   </Button>
+                  <Button component={Link} to="/checkout" variant="subtle" size="sm">
+                    プラン
+                  </Button>
                   <ThemeToggle />
                   <Menu shadow="md" width={200}>
                     <Menu.Target>
@@ -136,6 +139,13 @@ function RootComponent() {
                         to="/settings"
                       >
                         設定
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconSettings size={14} />}
+                        component={Link}
+                        to="/customer/portal"
+                      >
+                        サブスクリプション管理
                       </Menu.Item>
                       <Menu.Divider />
                       <Menu.Item

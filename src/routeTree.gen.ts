@@ -13,7 +13,10 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HabitsIndexRouteImport } from './routes/habits/index'
+import { Route as CheckoutIndexRouteImport } from './routes/checkout/index'
 import { Route as HabitsHabitIdRouteImport } from './routes/habits/$habitId'
+import { Route as CustomerPortalRouteImport } from './routes/customer/portal'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
@@ -40,9 +43,24 @@ const HabitsIndexRoute = HabitsIndexRouteImport.update({
   path: '/habits/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HabitsHabitIdRoute = HabitsHabitIdRouteImport.update({
   id: '/habits/$habitId',
   path: '/habits/$habitId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerPortalRoute = CustomerPortalRouteImport.update({
+  id: '/customer/portal',
+  path: '/customer/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
+  id: '/checkout/success',
+  path: '/checkout/success',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
@@ -79,7 +97,10 @@ export interface FileRoutesByFullPath {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
+  '/customer/portal': typeof CustomerPortalRoute
   '/habits/$habitId': typeof HabitsHabitIdRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/habits': typeof HabitsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -91,7 +112,10 @@ export interface FileRoutesByTo {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
+  '/customer/portal': typeof CustomerPortalRoute
   '/habits/$habitId': typeof HabitsHabitIdRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/habits': typeof HabitsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -104,7 +128,10 @@ export interface FileRoutesById {
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
+  '/customer/portal': typeof CustomerPortalRoute
   '/habits/$habitId': typeof HabitsHabitIdRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/habits/': typeof HabitsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
@@ -118,7 +145,10 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
+    | '/checkout/success'
+    | '/customer/portal'
     | '/habits/$habitId'
+    | '/checkout'
     | '/habits'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
@@ -130,7 +160,10 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
+    | '/checkout/success'
+    | '/customer/portal'
     | '/habits/$habitId'
+    | '/checkout'
     | '/habits'
     | '/api/auth/$'
   id:
@@ -142,7 +175,10 @@ export interface FileRouteTypes {
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
+    | '/checkout/success'
+    | '/customer/portal'
     | '/habits/$habitId'
+    | '/checkout/'
     | '/habits/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
@@ -151,7 +187,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   SettingsRoute: typeof SettingsRoute
+  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+  CustomerPortalRoute: typeof CustomerPortalRoute
   HabitsHabitIdRoute: typeof HabitsHabitIdRoute
+  CheckoutIndexRoute: typeof CheckoutIndexRoute
   HabitsIndexRoute: typeof HabitsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -186,11 +225,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HabitsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/habits/$habitId': {
       id: '/habits/$habitId'
       path: '/habits/$habitId'
       fullPath: '/habits/$habitId'
       preLoaderRoute: typeof HabitsHabitIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer/portal': {
+      id: '/customer/portal'
+      path: '/customer/portal'
+      fullPath: '/customer/portal'
+      preLoaderRoute: typeof CustomerPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout/success': {
+      id: '/checkout/success'
+      path: '/checkout/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof CheckoutSuccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-up': {
@@ -253,7 +313,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   SettingsRoute: SettingsRoute,
+  CheckoutSuccessRoute: CheckoutSuccessRoute,
+  CustomerPortalRoute: CustomerPortalRoute,
   HabitsHabitIdRoute: HabitsHabitIdRoute,
+  CheckoutIndexRoute: CheckoutIndexRoute,
   HabitsIndexRoute: HabitsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
