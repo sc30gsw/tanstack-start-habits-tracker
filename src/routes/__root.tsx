@@ -109,16 +109,23 @@ function RootComponent() {
                   <ThemeToggle />
                   <Menu shadow="md" width={200}>
                     <Menu.Target>
-                      <Avatar
-                        src={session.user.image}
-                        alt={session.user.name}
-                        name={session.user.name}
-                        color="initials"
-                        allowedInitialsColors={['blue']}
-                        size={32}
-                        radius="xl"
-                        style={{ cursor: 'pointer' }}
-                      />
+                      <Button
+                        variant="subtle"
+                        size="sm"
+                        leftSection={
+                          <Avatar
+                            src={session.user.image}
+                            alt={session.user.name}
+                            name={session.user.name}
+                            color="initials"
+                            allowedInitialsColors={['blue']}
+                            size={32}
+                            radius="xl"
+                          />
+                        }
+                      >
+                        {session.user.name}
+                      </Button>
                     </Menu.Target>
 
                     <Menu.Dropdown>
