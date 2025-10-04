@@ -73,7 +73,6 @@ export function HabitDisplay({ habit, onEdit, useTransition }: HabitDisplayProps
               height: 16,
               borderRadius: '50%',
               backgroundColor: getHabitColor(habit.color as HabitColor),
-              border: '2px solid var(--mantine-color-gray-4)',
             }}
           />
           <Text fw={500} size="lg">
