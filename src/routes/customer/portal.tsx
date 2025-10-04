@@ -10,7 +10,10 @@ export const Route = createFileRoute('/customer/portal')({
 function CustomerPortalPage() {
   const handleOpenPolarPortal = async () => {
     try {
-      await authClient.customer.portal()
+      const result = await authClient.customer.portal()
+      if (result?.data?.url) {
+        open(result.data.url, '_blank', 'noopener,noreferrer')
+      }
     } catch (error) {
       console.error('Failed to open portal:', error)
     }
