@@ -88,7 +88,13 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
                   withArrow
                 >
                   <Link to="/habits/$habitId" params={() => ({ habitId: habit.id })}>
-                    <Card withBorder radius="sm" p="sm" bg="green.0" style={{ cursor: 'pointer' }}>
+                    <Card
+                      withBorder
+                      radius="sm"
+                      p="sm"
+                      bg={computedColorScheme === 'dark' ? 'green.9' : 'green.0'}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <Group justify="space-between" align="center">
                         <Group gap="sm" align="center">
                           <div
@@ -99,7 +105,11 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
                               backgroundColor: getHabitColor(habit.color as HabitColor),
                             }}
                           />
-                          <Text size="sm" fw={500}>
+                          <Text
+                            size="sm"
+                            fw={600}
+                            c={computedColorScheme === 'dark' ? 'green.2' : 'green.8'}
+                          >
                             {habit.name}
                           </Text>
                         </Group>
@@ -158,7 +168,13 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
                   color="blue"
                 >
                   <Link to="/habits/$habitId" params={() => ({ habitId: habit.id })}>
-                    <Card withBorder radius="sm" p="sm" bg="gray.0" style={{ cursor: 'pointer' }}>
+                    <Card
+                      withBorder
+                      radius="sm"
+                      p="sm"
+                      bg={computedColorScheme === 'dark' ? 'dark.6' : 'gray.0'}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <Group justify="space-between" align="center">
                         <Group gap="sm" align="center">
                           <div
@@ -170,7 +186,11 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
                               opacity: 0.5,
                             }}
                           />
-                          <Text size="sm" fw={500} c="gray.7">
+                          <Text
+                            size="sm"
+                            fw={500}
+                            c={computedColorScheme === 'dark' ? 'gray.3' : 'gray.7'}
+                          >
                             {habit.name}
                           </Text>
                         </Group>
