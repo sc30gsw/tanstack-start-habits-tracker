@@ -106,7 +106,18 @@ function RootComponent() {
                   <Button component={Link} to="/" variant="subtle" size="sm">
                     ホーム
                   </Button>
-                  <Button component={Link} to="/habits" variant="subtle" size="sm">
+                  <Button
+                    component={Link}
+                    to="/habits"
+                    search={
+                      {
+                        habitFilter: 'all',
+                        habitSort: 'all',
+                      } as any
+                    }
+                    variant="subtle"
+                    size="sm"
+                  >
                     習慣管理
                   </Button>
                   <Button component={Link} to="/checkout" variant="subtle" size="sm">
@@ -202,7 +213,16 @@ function RootComponent() {
                       <Menu.Item component={Link} to="/">
                         ホーム
                       </Menu.Item>
-                      <Menu.Item component={Link} to="/habits">
+                      <Menu.Item
+                        component={Link}
+                        to="/habits"
+                        search={
+                          {
+                            habitFilter: 'all',
+                            habitSort: 'all',
+                          } as any
+                        }
+                      >
                         習慣管理
                       </Menu.Item>
                       <Menu.Item component={Link} to="/checkout">
