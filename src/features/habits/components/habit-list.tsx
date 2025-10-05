@@ -71,16 +71,14 @@ export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
         radius="md"
         p="md"
         style={{
-          textAlign: 'center',
           backgroundColor: 'oklch(70.4% 0.191 22.216 / 0.08)',
           borderLeft: '4px solid oklch(70.4% 0.191 22.216)',
+          '--alert-icon-margin': '8px',
         }}
       >
-        <Stack gap="sm">
-          <Text size="sm" c="dimmed">
-            {getFilterMessage()}
-          </Text>
-        </Stack>
+        <Text size="sm" c="dimmed" style={{ textAlign: 'left', lineHeight: 1.5 }}>
+          {getFilterMessage()}
+        </Text>
       </Alert>
     )
   }
