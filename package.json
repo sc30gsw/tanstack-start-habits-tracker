@@ -22,9 +22,6 @@
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.13.7",
-    "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
-    "@dnd-kit/utilities": "^3.2.2",
     "@holiday-jp/holiday_jp": "^2.5.1",
     "@libsql/client": "^0.15.15",
     "@mantine/charts": "^8.3.1",

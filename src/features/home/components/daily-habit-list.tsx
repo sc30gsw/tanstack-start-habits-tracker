@@ -1,21 +1,11 @@
-import {
-  closestCenter,
-  DndContext,
-  type DragEndEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core'
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
-import { useState } from 'react'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { HabitPriorityFilterPaper } from '~/features/home/components/habit-priority-filter-paper'
-import { SortableHabitCard } from './sortable-habit-card'
+import { DailyHabitCard } from './daily-habit-card'
 
 type DailyHabitListProps = {
   habits: HabitEntity[]
@@ -52,53 +42,8 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
     }
   })
 
-  // ドラッグ&ドロップ用のstate
-  const [completedHabits, setCompletedHabits] = useState(
-    habitsWithRecords.filter((h) => h.isCompleted),
-  )
-  const [inCompletedHabits, setInCompletedHabits] = useState(
-    habitsWithRecords.filter((h) => !h.isCompleted),
-  )
-
-  // habitsが変更されたら更新
-  useState(() => {
-    setCompletedHabits(habitsWithRecords.filter((h) => h.isCompleted))
-    setInCompletedHabits(habitsWithRecords.filter((h) => !h.isCompleted))
-  })
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-  )
-
-  const handleDragEndCompleted = (event: DragEndEvent) => {
-    const { active, over } = event
-
-    if (over && active.id !== over.id) {
-      setCompletedHabits((items) => {
-        const oldIndex = items.findIndex((item) => item.habit.id === active.id)
-        const newIndex = items.findIndex((item) => item.habit.id === over.id)
-
-        return arrayMove(items, oldIndex, newIndex)
-      })
-    }
-  }
-
-  const handleDragEndInCompleted = (event: DragEndEvent) => {
-    const { active, over } = event
-
-    if (over && active.id !== over.id) {
-      setInCompletedHabits((items) => {
-        const oldIndex = items.findIndex((item) => item.habit.id === active.id)
-        const newIndex = items.findIndex((item) => item.habit.id === over.id)
-
-        return arrayMove(items, oldIndex, newIndex)
-      })
-    }
-  }
+  const completedHabits = habitsWithRecords.filter((h) => h.isCompleted)
+  const inCompletedHabits = habitsWithRecords.filter((h) => !h.isCompleted)
 
   const formatDate = dayjs(selectedDate).format('YYYY年MM月DD日（dd）')
 
@@ -121,27 +66,16 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
         </Group>
 
         {completedHabits.length > 0 ? (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEndCompleted}
-          >
-            <SortableContext
-              items={completedHabits.map((h) => h.habit.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <Stack gap="xs">
-                {completedHabits.map(({ habit, record, isCompleted }) => (
-                  <SortableHabitCard
-                    key={habit.id}
-                    habit={habit}
-                    record={record}
-                    isCompleted={isCompleted}
-                  />
-                ))}
-              </Stack>
-            </SortableContext>
-          </DndContext>
+          <Stack gap="xs">
+            {completedHabits.map(({ habit, record, isCompleted }) => (
+              <DailyHabitCard
+                key={habit.id}
+                habit={habit}
+                record={record}
+                isCompleted={isCompleted}
+              />
+            ))}
+          </Stack>
         ) : (
           <Text size="sm" c="dimmed" fs="italic">
             完了した習慣がありません
@@ -159,27 +93,16 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
         </Group>
 
         {inCompletedHabits.length > 0 ? (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEndInCompleted}
-          >
-            <SortableContext
-              items={inCompletedHabits.map((h) => h.habit.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <Stack gap="xs">
-                {inCompletedHabits.map(({ habit, record, isCompleted }) => (
-                  <SortableHabitCard
-                    key={habit.id}
-                    habit={habit}
-                    record={record}
-                    isCompleted={isCompleted}
-                  />
-                ))}
-              </Stack>
-            </SortableContext>
-          </DndContext>
+          <Stack gap="xs">
+            {inCompletedHabits.map(({ habit, record, isCompleted }) => (
+              <DailyHabitCard
+                key={habit.id}
+                habit={habit}
+                record={record}
+                isCompleted={isCompleted}
+              />
+            ))}
+          </Stack>
         ) : (
           <Text size="sm" c="dimmed" fs="italic">
             未完了の習慣がありません
