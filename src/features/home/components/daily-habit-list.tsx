@@ -92,16 +92,16 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
       {habitsWithRecords.length === 0 ? (
         <Alert
           icon={<IconAlertTriangle size={20} />}
-          color="orange"
+          color="red"
           variant="filled"
           radius="lg"
           p="lg"
           style={{
             textAlign: 'center',
             background:
-              'linear-gradient(45deg, var(--mantine-color-orange-6), var(--mantine-color-red-5))',
-            border: '2px solid var(--mantine-color-orange-3)',
-            boxShadow: '0 4px 12px rgba(253, 126, 20, 0.15)',
+              'linear-gradient(45deg, oklch(70.4% 0.191 22.216), oklch(80.8% 0.114 19.571))',
+            border: '2px solid oklch(80.8% 0.114 19.571)',
+            boxShadow: '0 4px 12px oklch(70.4% 0.191 22.216 / 0.25)',
           }}
         >
           <Stack gap="sm">
