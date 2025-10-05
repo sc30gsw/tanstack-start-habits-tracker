@@ -91,21 +91,19 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
       {/* 習慣が0件の場合の表示 */}
       {habitsWithRecords.length === 0 ? (
         <Alert
-          icon={<IconAlertTriangle size={20} />}
+          icon={<IconAlertTriangle size={16} />}
           color="red"
-          variant="filled"
-          radius="lg"
-          p="lg"
+          variant="light"
+          radius="md"
+          p="md"
           style={{
             textAlign: 'center',
-            background:
-              'linear-gradient(45deg, oklch(70.4% 0.191 22.216), oklch(80.8% 0.114 19.571))',
-            border: '2px solid oklch(80.8% 0.114 19.571)',
-            boxShadow: '0 4px 12px oklch(70.4% 0.191 22.216 / 0.25)',
+            backgroundColor: 'oklch(70.4% 0.191 22.216 / 0.08)',
+            borderLeft: '4px solid oklch(70.4% 0.191 22.216)',
           }}
         >
           <Stack gap="sm">
-            <Text size="md" fw={500} c="white">
+            <Text size="sm" c="dimmed">
               {getFilterMessage()}
             </Text>
           </Stack>
