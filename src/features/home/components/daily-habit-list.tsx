@@ -1,12 +1,20 @@
-import { Badge, Group, Paper, Stack, Text, Tooltip, useComputedColorScheme } from '@mantine/core'
-import { IconCheck, IconClock, IconX } from '@tabler/icons-react'
-import { getRouteApi, Link } from '@tanstack/react-router'
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { Group, Paper, Stack, Text, useComputedColorScheme } from '@mantine/core'
+import { IconCheck, IconX } from '@tabler/icons-react'
+import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
-import { useHabitColor } from '~/features/habits/hooks/use-habit-color'
+import { useState } from 'react'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
-import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
-import { formatDuration } from '~/features/habits/utils/time-utils'
+import { SortableHabitCard } from './sortable-habit-card'
 
 type DailyHabitListProps = {
   habits: HabitEntity[]
@@ -20,7 +28,6 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
-  const { getHabitColor } = useHabitColor()
 
   // 選択された日付の記録をマップ化
   const recordsMap = records.reduce(
@@ -44,8 +51,53 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
     }
   })
 
-  const completedHabits = habitsWithRecords.filter((h) => h.isCompleted)
-  const incompletedHabits = habitsWithRecords.filter((h) => !h.isCompleted)
+  // ドラッグ&ドロップ用のstate
+  const [completedHabits, setCompletedHabits] = useState(
+    habitsWithRecords.filter((h) => h.isCompleted),
+  )
+  const [inCompletedHabits, setInCompletedHabits] = useState(
+    habitsWithRecords.filter((h) => !h.isCompleted),
+  )
+
+  // habitsが変更されたら更新
+  useState(() => {
+    setCompletedHabits(habitsWithRecords.filter((h) => h.isCompleted))
+    setInCompletedHabits(habitsWithRecords.filter((h) => !h.isCompleted))
+  })
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  )
+
+  const handleDragEndCompleted = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      setCompletedHabits((items) => {
+        const oldIndex = items.findIndex((item) => item.habit.id === active.id)
+        const newIndex = items.findIndex((item) => item.habit.id === over.id)
+
+        return arrayMove(items, oldIndex, newIndex)
+      })
+    }
+  }
+
+  const handleDragEndInCompleted = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      setInCompletedHabits((items) => {
+        const oldIndex = items.findIndex((item) => item.habit.id === active.id)
+        const newIndex = items.findIndex((item) => item.habit.id === over.id)
+
+        return arrayMove(items, oldIndex, newIndex)
+      })
+    }
+  }
 
   const formatDate = dayjs(selectedDate).format('YYYY年MM月DD日（dd）')
 
@@ -68,71 +120,27 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
         </Group>
 
         {completedHabits.length > 0 ? (
-          <Stack gap="xs">
-            {completedHabits.map(({ habit, record }) => (
-              <Tooltip
-                key={habit.id}
-                label={
-                  <>
-                    <Text size="xs">✅ {habit.name}を完了しました！お疲れ様でした。</Text>
-                    <br />
-                    {record?.duration_minutes && record.duration_minutes > 0 ? (
-                      <Text size="xs">実行時間: {formatDuration(record.duration_minutes)}</Text>
-                    ) : (
-                      ''
-                    )}
-                  </>
-                }
-                position="top"
-                withArrow
-              >
-                <Link to="/habits/$habitId" params={() => ({ habitId: habit.id })}>
-                  <Paper
-                    withBorder
-                    radius="sm"
-                    p="sm"
-                    bg={computedColorScheme === 'dark' ? 'green.9' : 'green.0'}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <Group justify="space-between" align="center">
-                      <Group gap="sm" align="center">
-                        <div
-                          style={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: '50%',
-                            backgroundColor: getHabitColor(habit.color as HabitColor),
-                          }}
-                        />
-                        <Text
-                          size="sm"
-                          fw={600}
-                          c={computedColorScheme === 'dark' ? 'green.2' : 'green.8'}
-                        >
-                          {habit.name}
-                        </Text>
-                      </Group>
-                      <Group gap="xs" align="center">
-                        {record?.duration_minutes && record.duration_minutes > 0 && (
-                          <Badge
-                            variant="light"
-                            color="blue"
-                            size="sm"
-                            leftSection={<IconClock size={12} />}
-                          >
-                            {formatDuration(record.duration_minutes)}
-                          </Badge>
-                        )}
-                        <Badge variant="filled" color="green" size="sm">
-                          完了
-                        </Badge>
-                      </Group>
-                    </Group>
-                  </Paper>
-                </Link>
-              </Tooltip>
-            ))}
-          </Stack>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEndCompleted}
+          >
+            <SortableContext
+              items={completedHabits.map((h) => h.habit.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <Stack gap="xs">
+                {completedHabits.map(({ habit, record, isCompleted }) => (
+                  <SortableHabitCard
+                    key={habit.id}
+                    habit={habit}
+                    record={record}
+                    isCompleted={isCompleted}
+                  />
+                ))}
+              </Stack>
+            </SortableContext>
+          </DndContext>
         ) : (
           <Text size="sm" c="dimmed" fs="italic">
             完了した習慣がありません
@@ -145,80 +153,32 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
         <Group gap="xs" align="center" mb="sm">
           <IconX size={18} color="var(--mantine-color-gray-6)" />
           <Text size="md" fw={500} c="gray.6">
-            未完了 ({incompletedHabits.length})
+            未完了 ({inCompletedHabits.length})
           </Text>
         </Group>
 
-        {incompletedHabits.length > 0 ? (
-          <Stack gap="xs">
-            {incompletedHabits.map(({ habit, record }) => (
-              <Tooltip
-                key={habit.id}
-                label={
-                  <Text size="xs">
-                    💪 {habit.name}
-                    に取り組んでみませんか？今日はまだ時間があります！
-                    <br />
-                    クリックして詳細を確認できます。
-                  </Text>
-                }
-                position="top"
-                withArrow
-                color="blue"
-              >
-                <Link to="/habits/$habitId" params={() => ({ habitId: habit.id })}>
-                  <Paper
-                    withBorder
-                    radius="sm"
-                    p="sm"
-                    bg={computedColorScheme === 'dark' ? 'dark.6' : 'gray.0'}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <Group justify="space-between" align="center">
-                      <Group gap="sm" align="center">
-                        <div
-                          style={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: '50%',
-                            backgroundColor: getHabitColor(habit.color as any),
-                            opacity: 0.5,
-                          }}
-                        />
-                        <Text
-                          size="sm"
-                          fw={500}
-                          c={computedColorScheme === 'dark' ? 'gray.3' : 'gray.7'}
-                        >
-                          {habit.name}
-                        </Text>
-                      </Group>
-                      <Group gap="xs" align="center">
-                        {record?.duration_minutes && record.duration_minutes > 0 && (
-                          <Badge
-                            variant="light"
-                            color="gray"
-                            size="sm"
-                            leftSection={<IconClock size={12} />}
-                          >
-                            {formatDuration(record.duration_minutes)}
-                          </Badge>
-                        )}
-                        <Badge variant="outline" color="gray" size="sm">
-                          未完了
-                        </Badge>
-                      </Group>
-                    </Group>
-                    {record?.notes && (
-                      <Text size="xs" c="dimmed" mt="xs">
-                        {record.notes}
-                      </Text>
-                    )}
-                  </Paper>
-                </Link>
-              </Tooltip>
-            ))}
-          </Stack>
+        {inCompletedHabits.length > 0 ? (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEndInCompleted}
+          >
+            <SortableContext
+              items={inCompletedHabits.map((h) => h.habit.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <Stack gap="xs">
+                {inCompletedHabits.map(({ habit, record, isCompleted }) => (
+                  <SortableHabitCard
+                    key={habit.id}
+                    habit={habit}
+                    record={record}
+                    isCompleted={isCompleted}
+                  />
+                ))}
+              </Stack>
+            </SortableContext>
+          </DndContext>
         ) : (
           <Text size="sm" c="dimmed" fs="italic">
             未完了の習慣がありません
