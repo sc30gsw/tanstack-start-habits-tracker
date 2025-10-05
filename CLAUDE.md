@@ -5,7 +5,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 ## Project Context
 
 ### Project Information
-- **Project Name**: trak-daily-habits-app
+- **Project Name**: track-daily-habits-app
 - **Description**: Comprehensive habit tracking application with time recording and visualization
 - **Target Platform**: MacBook-optimized desktop application with responsive design
 - **Core Features**: Daily habit tracking, duration recording, calendar/heatmap visualization, minimal UI
@@ -21,7 +21,7 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 **Specs** (`.kiro/specs/`) - Formalize development process for individual features
 
 ### Active Specifications
-- `habit-tracking-system`: 習慣追跡システムの包括的な実装
+- `habit-tracking-system`: Comprehensive habit tracking system implementation
 - Use `/kiro:spec-status [feature-name]` to check progress
 
 ## Technology Stack
@@ -60,6 +60,20 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - **recharts**: Additional charting capabilities
 - **web-vitals**: Performance monitoring
 
+### Authentication & Subscriptions
+- **Better Auth**: Modern authentication library with React Start integration
+  - `better-auth`: Core authentication framework
+  - Email/password authentication
+  - Social login (GitHub OAuth)
+  - Passkey/WebAuthn support
+  - Drizzle adapter for database integration
+- **Polar Integration**: Subscription and monetization platform
+  - `@polar-sh/better-auth`: Polar plugin for Better Auth
+  - `@polar-sh/sdk`: Polar SDK for subscription management
+  - Checkout flow integration
+  - Customer portal for subscription management
+  - Webhook handling for subscription events
+
 ## Development Guidelines
 
 ### TanStack Start Best Practices
@@ -87,6 +101,26 @@ Kiro-style Spec Driven Development implementation using claude code slash comman
 - Colocation of related components, hooks, and utilities
 - Consistent naming conventions (kebab-case files, PascalCase components)
 - Proper TypeScript typing throughout
+
+### Authentication & Security
+- Use Better Auth for all authentication flows
+- Configure authentication in `src/lib/auth.ts`
+- Use `authClient` from `src/lib/auth-client.ts` for client-side auth
+- Always use Server Functions for sensitive operations
+- Implement proper session management with Better Auth cookies
+- Follow OAuth best practices for social login (GitHub)
+- Use Passkey/WebAuthn for passwordless authentication when available
+
+### Subscription Management (Polar)
+- Polar integration handles subscription lifecycle
+- Checkout flow: `/checkout` route with success callback
+- Customer portal: `/customer/portal` for subscription management
+- Webhook handlers in `src/lib/auth.ts` for subscription events:
+  - `onOrderPaid`: Handle successful payments
+  - `onSubscriptionActive`: Enable subscription features
+  - `onSubscriptionCanceled`: Handle cancellations
+  - `onSubscriptionRevoked`: Immediate access revocation
+  - `onCustomerStateChanged`: Update customer access control
 
 ## Development Commands
 
@@ -217,11 +251,117 @@ Based on REQUIREMENTS.md specifications:
 - **Settings**: User preferences and configuration
 - **Calendar Data**: Aggregated view data for visualization
 
+#### Database Schema
+```sql
+-- Habits table
+CREATE TABLE habits (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Records table
+CREATE TABLE records (
+  id TEXT PRIMARY KEY,
+  habit_id TEXT NOT NULL REFERENCES habits(id),
+  date DATE NOT NULL,
+  completed BOOLEAN DEFAULT FALSE,
+  duration_minutes INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(habit_id, date)
+);
+
+-- Settings table
+CREATE TABLE settings (
+  id TEXT PRIMARY KEY,
+  theme TEXT DEFAULT 'light',
+  default_view TEXT DEFAULT 'calendar',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## User Stories Summary
+
+**Total Story Points**: 52 | **Timeline**: 3-4 sprints | **Stories**: 6
+
+### Core Features
+1. **Habit Execution Recording** (5 points): Record daily habit execution
+2. **Habit Duration Tracking** (8 points): Track work time (duration) for habits
+3. **Data Persistence** (8 points): Secure data storage with libSQL/Turso
+
+### Visualization Features
+4. **Calendar Display** (13 points): Monthly/weekly/daily timeline view
+5. **Heatmap Visualization** (13 points): Annual continuation status visualization
+
+### UI/UX
+6. **Minimal UI Design** (5 points): Simple and user-friendly interface
+
+## Development Phases
+
+### Phase 1: Core Features (MVP)
+- Habit Execution Recording (Story 1)
+- Habit Duration Tracking (Story 2)
+- Data Persistence (Story 3)
+
+### Phase 2: Visualization
+- Calendar Display (Story 4)
+- Heatmap Visualization (Story 5)
+
+### Phase 3: UI/UX Completion
+- Minimal UI Design (Story 6)
+
+## Authentication Routes
+- `/auth/sign-in` - Email/password and GitHub OAuth sign-in
+- `/auth/sign-up` - User registration
+- `/auth/sign-out` - Sign-out handler
+- `/auth/passkey-setup` - Passkey (WebAuthn) registration
+- `/api/auth/$` - Better Auth API handler (catch-all route)
+
+## Subscription Routes
+- `/checkout` - Polar checkout page for Pro plan
+- `/checkout/success` - Post-checkout success callback
+- `/customer/portal` - Subscription management portal (Polar-hosted)
+
+## Environment Variables
+
+### Required Variables
+```bash
+# Database
+VITE_TURSO_CONNECTION_URL    # Turso database connection URL
+VITE_TURSO_AUTH_TOKEN        # Turso authentication token
+
+# Better Auth
+VITE_BETTER_AUTH_URL         # Application URL (http://localhost:3000 for dev)
+VITE_BETTER_AUTH_SECRET      # Secret key for session encryption
+```
+
+### Optional Variables
+```bash
+# GitHub OAuth
+VITE_GITHUB_CLIENT_ID        # GitHub OAuth app client ID
+VITE_GITHUB_CLIENT_SECRET    # GitHub OAuth app client secret
+
+# Passkey/WebAuthn
+VITE_PASSKEY_RP_ID          # Relying party ID (localhost for dev, domain for prod)
+VITE_PASSKEY_RP_NAME        # Relying party name (app name)
+
+# Polar Integration
+VITE_POLAR_ACCESS_TOKEN     # Polar API access token
+VITE_POLAR_SERVER           # 'sandbox' for dev, 'production' for live
+VITE_POLAR_PRODUCT_ID       # Product ID for Pro plan
+VITE_POLAR_WEBHOOK_SECRET   # Webhook secret for event verification
+```
+
 ## Additional Information Files
 - @REQUIREMENTS.md - Project requirements document with user stories
 - @CODING-STANDARDS.md - Project coding conventions, directory structure, prohibitions
+- @README.md - Comprehensive project documentation with tech stack and deployment guide
 - `package.json` - Dependencies and development scripts
-- `.claude/architecture.md` - Project architecture document
+- `.env.example` - Environment variable template
+- `src/lib/auth.ts` - Better Auth and Polar configuration
+- `src/lib/auth-client.ts` - Client-side auth utilities
 
 ## Prohibited Items (Highest Priority)
 - Excessive use of `any` type (use TypeScript Utility types whenever possible)
