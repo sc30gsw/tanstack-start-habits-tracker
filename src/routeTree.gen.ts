@@ -9,19 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as AuthPasskeySetupRouteImport } from './routes/auth/passkey-setup'
-import { Route as AuthRouteRouteImport } from './routes/auth/route'
-import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
-import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
-import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
-import { Route as CheckoutIndexRouteImport } from './routes/checkout/index'
-import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
-import { Route as CustomerPortalRouteImport } from './routes/customer/portal'
-import { Route as HabitsHabitIdRouteImport } from './routes/habits/$habitId'
-import { Route as HabitsIndexRouteImport } from './routes/habits/index'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as AuthRouteRouteImport } from './routes/auth/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as HabitsIndexRouteImport } from './routes/habits/index'
+import { Route as CheckoutIndexRouteImport } from './routes/checkout/index'
+import { Route as HabitsHabitIdRouteImport } from './routes/habits/$habitId'
+import { Route as CustomerPortalRouteImport } from './routes/customer/portal'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
+import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
+import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
+import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
+import { Route as AuthPasskeySetupRouteImport } from './routes/auth/passkey-setup'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -305,7 +305,9 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthSignUpRoute: AuthSignUpRoute,
 }
 
-const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(AuthRouteRouteChildren)
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -323,7 +325,7 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-
+import type { createStart } from '@tanstack/react-start'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
