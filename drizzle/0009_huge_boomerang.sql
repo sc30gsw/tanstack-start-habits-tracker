@@ -1,0 +1,1 @@
+ALTER TABLE `habits` ADD `priority` text;
