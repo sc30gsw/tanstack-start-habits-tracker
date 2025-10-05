@@ -5,7 +5,11 @@ import { IconAlertTriangle } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { habitDto } from '~/features/habits/server/habit-functions'
-import { createHabitSchema, type HabitColor, type HabitPriority } from '~/features/habits/types/schemas/habit-schemas'
+import {
+  createHabitSchema,
+  type HabitColor,
+  type HabitPriority,
+} from '~/features/habits/types/schemas/habit-schemas'
 import { HabitColorPicker } from '../habit-color-picker'
 import { HabitPriorityPicker } from '../habit-priority-picker'
 
@@ -106,10 +110,16 @@ export function HabitCreateForm({ onSuccess, onCancel }: HabitCreateFormProps) {
         <Stack gap="md">
           <Title order={3}>新しい習慣を作成</Title>
 
-          {(form.errors.name || form.errors.description || form.errors.color || form.errors.priority) && (
+          {(form.errors.name ||
+            form.errors.description ||
+            form.errors.color ||
+            form.errors.priority) && (
             <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
               <Text c="red">
-                {form.errors.name || form.errors.description || form.errors.color || form.errors.priority}
+                {form.errors.name ||
+                  form.errors.description ||
+                  form.errors.color ||
+                  form.errors.priority}
               </Text>
             </Alert>
           )}

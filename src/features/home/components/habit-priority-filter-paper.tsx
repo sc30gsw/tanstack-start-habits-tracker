@@ -18,28 +18,15 @@ export function HabitPriorityFilterPaper({
   // 一意なIDを生成
   const filterId = useId()
 
-  // 優先度別の完了率を計算
+  // 現在選択されているフィルタに基づいた完了率を計算
   const completionStats = useMemo(() => {
-    const filterByPriority = (priority: SearchParams['habitFilter']) => {
-      if (priority === 'all') {
-        return habitsWithRecords
-      }
-
-      return habitsWithRecords.filter((h) => {
-        if (priority === null) {
-          return h.habit.priority === null
-        }
-        return h.habit.priority === priority
-      })
-    }
-
-    const filtered = filterByPriority(searchParams.habitFilter ?? 'all')
-    const completed = filtered.filter((h) => h.isCompleted).length
-    const total = filtered.length
+    // habitsWithRecordsは既にフィルタリング済みなのでそのまま使用
+    const completed = habitsWithRecords.filter((h) => h.isCompleted).length
+    const total = habitsWithRecords.length
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0
 
     return { completed, total, rate }
-  }, [habitsWithRecords, searchParams.habitFilter])
+  }, [habitsWithRecords])
 
   const computedColorScheme = useComputedColorScheme('light')
 
@@ -64,10 +51,9 @@ export function HabitPriorityFilterPaper({
               navigate({
                 search: {
                   ...searchParams,
-                  habitFilter: value === 'all' ? undefined : (value as SearchParams['habitFilter']),
+                  habitFilter: value as SearchParams['habitFilter'],
                 },
                 hash: filterId,
-                hashScrollIntoView: true,
               })
             }
             data={[

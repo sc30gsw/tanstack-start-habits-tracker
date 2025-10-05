@@ -2,6 +2,7 @@ import { Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import { filter, pipe } from 'remeda'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { HabitPriorityFilterPaper } from '~/features/home/components/habit-priority-filter-paper'
@@ -31,16 +32,28 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
     {} as Record<string, RecordEntity>,
   )
 
-  // 習慣と記録を結合し、完了/未完了で分類
-  const habitsWithRecords = habits.map((habit) => {
-    const record = recordsMap[habit.id]
+  // 習慣と記録を結合し、優先度フィルタリングを適用
+  const habitsWithRecords = pipe(
+    habits,
+    filter((habit) => {
+      // 優先度フィルタリング
+      const filterValue = searchParams.habitFilter
 
-    return {
-      habit,
-      record,
-      isCompleted: record?.completed || false,
-    }
-  })
+      // フィルター未設定、'all'、undefinedの場合はすべて表示
+      if (!filterValue || filterValue === 'all') return true
+      if (filterValue === 'null') return habit.priority === null
+      return habit.priority === filterValue
+    }),
+    (filteredHabits) =>
+      filteredHabits.map((habit) => {
+        const record = recordsMap[habit.id]
+        return {
+          habit,
+          record,
+          isCompleted: record?.completed || false,
+        }
+      }),
+  )
 
   const completedHabits = habitsWithRecords.filter((h) => h.isCompleted)
   const inCompletedHabits = habitsWithRecords.filter((h) => !h.isCompleted)
