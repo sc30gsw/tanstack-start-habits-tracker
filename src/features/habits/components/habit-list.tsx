@@ -1,4 +1,4 @@
-import { Card, Stack, Text } from '@mantine/core'
+import { Alert, Card, Stack, Text } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
 import { filter, pipe, sortBy } from 'remeda'
 import type { HabitEntity } from '~/features/habits/types/habit'
@@ -28,15 +28,12 @@ export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
     habits,
     // フィルタリング
     filter((habit) => {
-      if (searchParams.habitFilter === 'all') {
-        return true
-      }
+      const filterValue = searchParams.habitFilter
 
-      if (searchParams.habitFilter === 'null') {
-        return habit.priority === null
-      }
-
-      return habit.priority === searchParams.habitFilter
+      // フィルター未設定、'all'、undefinedの場合はすべて表示
+      if (!filterValue || filterValue === 'all') return true
+      if (filterValue === 'null') return habit.priority === null
+      return habit.priority === filterValue
     }),
     // ソート
     (habits) =>
@@ -44,6 +41,37 @@ export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
         ? sortBy(habits, (habit) => priorityOrder[habit.priority ?? 'null'])
         : habits,
   )
+
+  // フィルター結果が0件の場合の表示
+  if (processedHabits.length === 0) {
+    const getFilterMessage = () => {
+      const filterValue = searchParams.habitFilter
+      if (!filterValue || filterValue === 'all') {
+        return '習慣が登録されていません。上の「新しい習慣を作成」ボタンから習慣を追加してください。'
+      }
+
+      const filterLabels = {
+        high: '高優先度',
+        middle: '中優先度',
+        low: '低優先度',
+        null: '優先度なし',
+      } as const satisfies Record<string, string>
+
+      const filterLabel = filterLabels[filterValue as keyof typeof filterLabels] || filterValue
+
+      return `${filterLabel}の習慣が見つかりませんでした。フィルターを「全て」に変更するか、該当する優先度の習慣を作成してください。`
+    }
+
+    return (
+      <Alert color="blue" variant="light" p="lg" style={{ textAlign: 'center' }}>
+        <Stack gap="sm">
+          <Text size="md" c="dimmed" fs="italic">
+            {getFilterMessage()}
+          </Text>
+        </Stack>
+      </Alert>
+    )
+  }
 
   return (
     <Stack gap="sm">

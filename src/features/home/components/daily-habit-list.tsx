@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
+import { Alert, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -72,9 +72,10 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
       middle: '中優先度',
       low: '低優先度',
       null: '優先度なし',
-    } as const
+    } as const satisfies Record<string, string>
 
     const filterLabel = filterLabels[filterValue as keyof typeof filterLabels] || filterValue
+
     return `${filterLabel}の習慣が見つかりませんでした。フィルターを「全て」に変更するか、該当する習慣を作成してください。`
   }
 
@@ -89,13 +90,13 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
 
       {/* 習慣が0件の場合の表示 */}
       {habitsWithRecords.length === 0 ? (
-        <Card withBorder padding="lg" style={{ textAlign: 'center' }}>
+        <Alert color="blue" variant="light" p="lg" style={{ textAlign: 'center' }}>
           <Stack gap="sm">
             <Text size="md" c="dimmed" fs="italic">
               {getFilterMessage()}
             </Text>
           </Stack>
-        </Card>
+        </Alert>
       ) : (
         <>
           {/* 完了した習慣 */}
@@ -151,11 +152,11 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
               </Text>
             )}
           </div>
-
-          {/* 統計情報 */}
-          <HabitPriorityFilterPaper habitsWithRecords={habitsWithRecords} />
         </>
       )}
+
+      {/* 統計情報（常に表示） */}
+      <HabitPriorityFilterPaper habitsWithRecords={habitsWithRecords} />
     </Stack>
   )
 }
