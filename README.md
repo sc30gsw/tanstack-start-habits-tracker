@@ -162,11 +162,11 @@ graph TB
     Auth -->|セッション保存| DB
     Polar -->|Webhook| Server
 
-    style Client fill:#61DAFB,stroke:#333,stroke-width:2px
-    style Server fill:#FF4154,stroke:#333,stroke-width:2px
-    style DB fill:#003B57,stroke:#333,stroke-width:2px,color:#fff
-    style Auth fill:#9333EA,stroke:#333,stroke-width:2px,color:#fff
-    style Polar fill:#3B82F6,stroke:#333,stroke-width:2px,color:#fff
+    style Client fill:#E1F5FE,stroke:#01579B,stroke-width:2px,color:#01579B
+    style Server fill:#FFEBEE,stroke:#B71C1C,stroke-width:2px,color:#B71C1C
+    style DB fill:#E8EAF6,stroke:#1A237E,stroke-width:2px,color:#1A237E
+    style Auth fill:#F3E5F5,stroke:#4A148C,stroke-width:2px,color:#4A148C
+    style Polar fill:#E3F2FD,stroke:#0D47A1,stroke-width:2px,color:#0D47A1
 ```
 
 ### 認証フロー
