@@ -2,8 +2,8 @@ import { Group, Stack } from '@mantine/core'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+import { CalendarDateCell } from '~/features/habits/components/calendar/calendar-date-cell'
 import type { RecordEntity } from '~/features/habits/types/habit'
-import { CalendarDateCell } from './calendar-date-cell'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)

@@ -9,6 +9,7 @@ export const habits = sqliteTable(
     name: text().notNull().unique(),
     description: text(),
     color: text().default('blue'),
+    priority: text().$type<'high' | 'middle' | 'low' | null>(),
     createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
     userId: text('user_id')

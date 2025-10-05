@@ -64,6 +64,13 @@
       "when": 1759552505697,
       "tag": "0008_tough_zarek",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1759693986247,
+      "tag": "0009_huge_boomerang",
+      "breakpoints": true
     }
   ]
 }

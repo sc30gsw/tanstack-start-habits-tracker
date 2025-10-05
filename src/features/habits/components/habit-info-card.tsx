@@ -1,5 +1,5 @@
 import { Badge, Card, Group, Select, Stack, Text, useComputedColorScheme } from '@mantine/core'
-import { IconChartLine, IconClock, IconTarget, IconTrophy } from '@tabler/icons-react'
+import { IconChartLine, IconClock, IconFlag, IconTarget, IconTrophy } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import { formatTotalDuration } from '~/features/habits/utils/time-utils'
@@ -21,6 +21,22 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
   const completedRecords = records.filter((r) => r.completed).length
   const completionRate = totalRecords > 0 ? completedRecords / totalRecords : 0
   const totalDuration = records.reduce((sum, r) => sum + (r.duration_minutes || 0), 0)
+
+  // 優先度の表示設定
+  const getPriorityConfig = (priority: string | null) => {
+    switch (priority) {
+      case 'high':
+        return { label: '高', color: 'red', icon: <IconFlag size={14} /> }
+      case 'middle':
+        return { label: '中', color: 'yellow', icon: <IconFlag size={14} /> }
+      case 'low':
+        return { label: '低', color: 'blue', icon: <IconFlag size={14} /> }
+      default:
+        return { label: 'なし', color: 'gray', icon: <IconFlag size={14} /> }
+    }
+  }
+
+  const priorityConfig = getPriorityConfig(habit.priority)
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
@@ -54,6 +70,14 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
         )}
 
         <Group gap="md" wrap="wrap">
+          <Badge
+            variant="light"
+            color={priorityConfig.color}
+            size="md"
+            leftSection={priorityConfig.icon}
+          >
+            優先度: {priorityConfig.label}
+          </Badge>
           <Badge variant="light" color="blue" size="md" leftSection={<IconChartLine size={14} />}>
             総記録数: {totalRecords}
           </Badge>

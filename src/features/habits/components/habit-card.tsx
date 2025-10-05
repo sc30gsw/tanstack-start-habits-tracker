@@ -1,8 +1,8 @@
 import { Card, Stack } from '@mantine/core'
 import { useState, useTransition } from 'react'
 import { HabitEditForm } from '~/features/habits/components/form/habit-edit-form'
+import { HabitDisplay } from '~/features/habits/components/habit-display'
 import type { HabitEntity } from '~/features/habits/types/habit'
-import { HabitDisplay } from './habit-display'
 
 export function HabitCard({ habit }: Record<'habit', HabitEntity>) {
   const [isEditing, setIsEditing] = useState(false)

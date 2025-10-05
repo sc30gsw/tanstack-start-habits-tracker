@@ -8,9 +8,12 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
 import { records } from '~/db/schema'
+import type { RecordEntity } from '~/features/habits/types/habit'
+import {
+  createRecordSchema,
+  updateRecordSchema,
+} from '~/features/habits/types/schemas/record-schemas'
 import { auth } from '~/lib/auth'
-import type { RecordEntity, RecordResponse, RecordsListResponse } from '../types/habit'
-import { createRecordSchema, updateRecordSchema } from '../types/schemas/record-schemas'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -21,7 +24,7 @@ dayjs.tz.setDefault('Asia/Tokyo')
  */
 const createRecord = createServerFn({ method: 'POST' })
   .inputValidator(createRecordSchema)
-  .handler(async ({ data }): Promise<RecordResponse> => {
+  .handler(async ({ data }) => {
     try {
       // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
@@ -96,7 +99,7 @@ const createRecord = createServerFn({ method: 'POST' })
  */
 const updateRecord = createServerFn({ method: 'POST' })
   .inputValidator(updateRecordSchema)
-  .handler(async ({ data }): Promise<RecordResponse> => {
+  .handler(async ({ data }) => {
     try {
       // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
@@ -174,7 +177,7 @@ const updateRecord = createServerFn({ method: 'POST' })
  */
 const deleteRecord = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.string().min(1) }))
-  .handler(async ({ data }): Promise<{ success: boolean; error?: string }> => {
+  .handler(async ({ data }) => {
     try {
       // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
@@ -227,7 +230,7 @@ const getRecords = createServerFn({ method: 'GET' })
       })
       .optional(),
   )
-  .handler(async ({ data: filters }): Promise<RecordsListResponse> => {
+  .handler(async ({ data: filters }) => {
     try {
       // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
@@ -291,7 +294,7 @@ const getRecords = createServerFn({ method: 'GET' })
  */
 const getRecordById = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ id: z.string().min(1) }))
-  .handler(async ({ data }): Promise<RecordResponse> => {
+  .handler(async ({ data }) => {
     try {
       // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())

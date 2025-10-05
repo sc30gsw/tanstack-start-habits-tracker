@@ -1,7 +1,7 @@
 import { ActionIcon, Badge, Button, Group, Text, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconEdit, IconTrash } from '@tabler/icons-react'
+import { IconEdit, IconFlag, IconTrash } from '@tabler/icons-react'
 import { Link, useRouter } from '@tanstack/react-router'
 import type { useTransition } from 'react'
 import { useHabitColor } from '~/features/habits/hooks/use-habit-color'
@@ -19,6 +19,22 @@ export function HabitDisplay({ habit, onEdit, useTransition }: HabitDisplayProps
   const [isPending, startTransition] = useTransition
   const router = useRouter()
   const { getHabitColor } = useHabitColor()
+
+  // 優先度の表示設定
+  const getPriorityConfig = (priority: string | null) => {
+    switch (priority) {
+      case 'high':
+        return { label: '高', color: 'red', icon: <IconFlag size={12} /> }
+      case 'middle':
+        return { label: '中', color: 'yellow', icon: <IconFlag size={12} /> }
+      case 'low':
+        return { label: '低', color: 'blue', icon: <IconFlag size={12} /> }
+      default:
+        return { label: 'なし', color: 'gray', icon: <IconFlag size={12} /> }
+    }
+  }
+
+  const priorityConfig = getPriorityConfig(habit.priority)
 
   const handleDelete = async () => {
     modals.openConfirmModal({
@@ -85,6 +101,14 @@ export function HabitDisplay({ habit, onEdit, useTransition }: HabitDisplayProps
           </Text>
         )}
         <Group gap="xs" mt="sm">
+          <Badge
+            variant="light"
+            color={priorityConfig.color}
+            size="sm"
+            leftSection={priorityConfig.icon}
+          >
+            優先度: {priorityConfig.label}
+          </Badge>
           {habit.record_count !== undefined && (
             <Badge variant="light" color="habit">
               記録数: {habit.record_count}
