@@ -7,12 +7,13 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { Group, Paper, Stack, Text, useComputedColorScheme } from '@mantine/core'
+import { Group, Paper, Select, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
+import type { HabitPriority } from '~/features/habits/types/schemas/habit-schemas'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { SortableHabitCard } from './sortable-habit-card'
 
@@ -28,6 +29,9 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
+
+  // 優先度フィルタ用のstate
+  const [priorityFilter, setPriorityFilter] = useState<'all' | HabitPriority>('all')
 
   // 選択された日付の記録をマップ化
   const recordsMap = records.reduce(
@@ -50,6 +54,25 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
       isCompleted: record?.completed || false,
     }
   })
+
+  // 優先度別の完了率を計算
+  const completionStats = useMemo(() => {
+    const filterByPriority = (priority: 'all' | HabitPriority) => {
+      if (priority === 'all') return habitsWithRecords
+
+      return habitsWithRecords.filter((h) => {
+        if (priority === null) return h.habit.priority === null
+        return h.habit.priority === priority
+      })
+    }
+
+    const filtered = filterByPriority(priorityFilter)
+    const completed = filtered.filter((h) => h.isCompleted).length
+    const total = filtered.length
+    const rate = total > 0 ? Math.round((completed / total) * 100) : 0
+
+    return { completed, total, rate }
+  }, [habitsWithRecords, priorityFilter])
 
   // ドラッグ&ドロップ用のstate
   const [completedHabits, setCompletedHabits] = useState(
@@ -193,18 +216,40 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
         p="sm"
         bg={computedColorScheme === 'dark' ? 'dark.6' : 'gray.1'}
       >
-        <Group justify="space-between">
-          <Text size="sm" c="dimmed">
-            完了率
-          </Text>
-          <Text
-            size="sm"
-            fw={600}
-            c={completedHabits.length === habits.length ? 'green.6' : 'blue.6'}
-          >
-            {habits.length > 0 ? Math.round((completedHabits.length / habits.length) * 100) : 0}%
-          </Text>
-        </Group>
+        <Stack gap="sm">
+          <Group justify="space-between" align="center">
+            <Text size="sm" c="dimmed">
+              優先度フィルタ
+            </Text>
+            <Select
+              size="xs"
+              w={140}
+              value={priorityFilter?.toString() ?? 'all'}
+              onChange={(value) =>
+                setPriorityFilter(value === 'all' ? 'all' : (value as HabitPriority))
+              }
+              data={[
+                { value: 'all', label: '全て' },
+                { value: 'high', label: '高' },
+                { value: 'middle', label: '中' },
+                { value: 'low', label: '低' },
+                { value: 'null', label: '優先度なし' },
+              ]}
+            />
+          </Group>
+          <Group justify="space-between">
+            <Text size="sm" c="dimmed">
+              完了率 ({completionStats.completed}/{completionStats.total})
+            </Text>
+            <Text
+              size="sm"
+              fw={600}
+              c={completionStats.rate === 100 ? 'green.6' : 'blue.6'}
+            >
+              {completionStats.rate}%
+            </Text>
+          </Group>
+        </Stack>
       </Paper>
     </Stack>
   )

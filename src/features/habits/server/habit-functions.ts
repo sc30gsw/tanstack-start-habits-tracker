@@ -59,6 +59,7 @@ const createHabit = createServerFn({ method: 'POST' })
           name: data.name,
           description: data.description || null,
           color: data.color || 'blue',
+          priority: data.priority ?? null,
           userId,
         })
         .returning()
@@ -157,6 +158,10 @@ const updateHabit = createServerFn({ method: 'POST' })
 
       if (data.color !== undefined) {
         updateData.color = data.color
+      }
+
+      if (data.priority !== undefined) {
+        updateData.priority = data.priority
       }
 
       // 習慣を更新
