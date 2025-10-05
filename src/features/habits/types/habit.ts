@@ -41,15 +41,6 @@ export type SettingsEntity = Omit<SettingsTable, 'createdAt'> & {
   createdAt: Date
 }
 
-/**
- * API応答用の型定義
- */
-export type HabitResponse = {
-  success: boolean
-  data?: HabitEntity
-  error?: string
-}
-
 export type RecordResponse = {
   success: boolean
   data?: RecordEntity
@@ -59,16 +50,6 @@ export type RecordResponse = {
 export type SettingsResponse = {
   success: boolean
   data?: SettingsEntity
-  error?: string
-}
-
-/**
- * 一覧取得用の型定義
- */
-export type HabitsListResponse = {
-  success: boolean
-  data?: HabitEntity[]
-  total?: number
   error?: string
 }
 

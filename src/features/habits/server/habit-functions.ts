@@ -8,7 +8,7 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
 import { habits } from '~/db/schema'
-import type { HabitEntity, HabitResponse, HabitsListResponse } from '~/features/habits/types/habit'
+import type { HabitEntity } from '~/features/habits/types/habit'
 import {
   createHabitSchema,
   habitSchema,
@@ -25,7 +25,7 @@ dayjs.tz.setDefault('Asia/Tokyo')
  */
 const createHabit = createServerFn({ method: 'POST' })
   .inputValidator(createHabitSchema)
-  .handler(async ({ data }): Promise<HabitResponse> => {
+  .handler(async ({ data }) => {
     try {
       // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
@@ -104,7 +104,7 @@ const createHabit = createServerFn({ method: 'POST' })
  */
 const updateHabit = createServerFn({ method: 'POST' })
   .inputValidator(updateHabitSchema)
-  .handler(async ({ data }): Promise<HabitResponse> => {
+  .handler(async ({ data }) => {
     try {
       // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
@@ -207,7 +207,7 @@ const updateHabit = createServerFn({ method: 'POST' })
  */
 const deleteHabit = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.string().min(1) }))
-  .handler(async ({ data }): Promise<{ success: boolean; error?: string }> => {
+  .handler(async ({ data }) => {
     try {
       // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
@@ -250,58 +250,56 @@ const deleteHabit = createServerFn({ method: 'POST' })
 /**
  * 習慣を取得する
  */
-const getHabits = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<HabitsListResponse> => {
-    try {
-      const session = await auth.api.getSession(getRequest())
-      if (!session) {
-        return { success: false, error: 'Unauthorized' }
-      }
-
-      const allHabits = await db.query.habits.findMany({
-        where: eq(habits.userId, session.user.id),
-      })
-
-      // HabitEntityに変換
-      const habitEntities: HabitEntity[] = allHabits.map((habit) => {
-        // スキーマ検証用のデータ準備（string型のタイムスタンプ）
-        const parsedHabit = habitSchema.parse({
-          ...habit,
-          created_at: habit.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
-          updated_at: habit.updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
-        })
-
-        // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
-        return {
-          ...parsedHabit,
-          color: parsedHabit.color || 'blue', // nullの場合デフォルト値を設定
-          created_at: new Date(parsedHabit.created_at),
-          updated_at: new Date(parsedHabit.updated_at),
-        } as const satisfies HabitEntity
-      })
-
-      return {
-        success: true,
-        data: habitEntities,
-        total: habitEntities.length,
-      }
-    } catch (error) {
-      console.error('Error fetching habits:', error)
-
-      return {
-        success: false,
-        error: 'Failed to fetch habits',
-      }
+const getHabits = createServerFn({ method: 'GET' }).handler(async () => {
+  try {
+    const session = await auth.api.getSession(getRequest())
+    if (!session) {
+      return { success: false, error: 'Unauthorized' }
     }
-  },
-)
+
+    const allHabits = await db.query.habits.findMany({
+      where: eq(habits.userId, session.user.id),
+    })
+
+    // HabitEntityに変換
+    const habitEntities: HabitEntity[] = allHabits.map((habit) => {
+      // スキーマ検証用のデータ準備（string型のタイムスタンプ）
+      const parsedHabit = habitSchema.parse({
+        ...habit,
+        created_at: habit.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        updated_at: habit.updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+      })
+
+      // HabitEntityに変換（Date型のタイムスタンプ、colorのnullハンドリング）
+      return {
+        ...parsedHabit,
+        color: parsedHabit.color || 'blue', // nullの場合デフォルト値を設定
+        created_at: new Date(parsedHabit.created_at),
+        updated_at: new Date(parsedHabit.updated_at),
+      } as const satisfies HabitEntity
+    })
+
+    return {
+      success: true,
+      data: habitEntities,
+      total: habitEntities.length,
+    }
+  } catch (error) {
+    console.error('Error fetching habits:', error)
+
+    return {
+      success: false,
+      error: 'Failed to fetch habits',
+    }
+  }
+})
 
 /**
  * IDで特定の習慣を取得する
  */
 const getHabitById = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ id: z.string().min(1) }))
-  .handler(async ({ data }): Promise<HabitResponse> => {
+  .handler(async ({ data }) => {
     try {
       // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
