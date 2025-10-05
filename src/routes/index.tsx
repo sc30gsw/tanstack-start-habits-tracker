@@ -151,7 +151,7 @@ function Home() {
                   </Text>
                 )}
               </Box>
-              {completedOnSelectedDate > 0 && selectedDate === today && (
+              {completedOnSelectedDate > 0 && (
                 <Button
                   id={copyId}
                   variant="gradient"
