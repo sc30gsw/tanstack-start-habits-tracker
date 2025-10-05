@@ -340,4 +340,10 @@ export const recordDto = {
   deleteRecord,
   getRecords,
   getRecordById,
-} as const
+} as const satisfies {
+  createRecord: typeof createRecord
+  updateRecord: typeof updateRecord
+  deleteRecord: typeof deleteRecord
+  getRecords: typeof getRecords
+  getRecordById: typeof getRecordById
+}

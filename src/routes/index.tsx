@@ -1,5 +1,16 @@
-import { Badge, Button, Card, Container, Group, Stack, Text, Title } from '@mantine/core'
-import { IconChartLine, IconCheck, IconCloudUpload, IconEdit } from '@tabler/icons-react'
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Container,
+  Divider,
+  Group,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core'
+import { IconChartLine, IconCheck, IconCloudUpload, IconEdit, IconShare } from '@tabler/icons-react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ja'
@@ -9,6 +20,8 @@ import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { DailyHabitList } from '~/features/home/components/daily-habit-list'
 import { HomeCalendarView } from '~/features/home/components/home-calendar-view'
 import { HomeHeatmapView } from '~/features/home/components/home-heatmap-view'
+import { ShareHabitsModal } from '~/features/home/components/share-habits-modal'
+import { shareDto } from '~/features/home/server/share-functions'
 
 dayjs.locale('ja')
 
@@ -16,24 +29,29 @@ export const Route = createFileRoute('/')({
   validateSearch: searchSchema,
   component: Home,
   loader: async () => {
-    const [habitsResult, recordsResult] = await Promise.all([
+    const today = dayjs().format('YYYY-MM-DD')
+
+    const [habitsResult, recordsResult, shareDataResult] = await Promise.all([
       habitDto.getHabits(),
       recordDto.getRecords(),
+      shareDto.getCompletedHabitsForShare({ data: { date: today } }),
     ])
 
     return {
       habits: habitsResult,
       records: recordsResult,
+      shareData: shareDataResult,
     }
   },
 })
 
 function Home() {
-  const { habits, records } = Route.useLoaderData()
+  const { habits, records, shareData } = Route.useLoaderData()
+  const navigate = Route.useNavigate()
 
+  const today = dayjs().format('YYYY-MM-DD')
   const totalHabits = habits.success ? habits.data?.length || 0 : 0
   const totalRecords = records.success ? records.data?.length || 0 : 0
-  const today = dayjs().format('YYYY-MM-DD')
   const completedToday = records.success
     ? records.data?.filter((r) => r.date === today && r.completed).length || 0
     : 0
@@ -46,7 +64,7 @@ function Home() {
       <Stack gap="xl">
         <div>
           <Title order={1} mb="sm">
-            Trak - 習慣追跡アプリ
+            Track - 習慣追跡アプリ
           </Title>
           <Text size="lg" c="dimmed">
             日々の習慣を記録し、継続状況を可視化しましょう
@@ -108,8 +126,48 @@ function Home() {
         {/* ヒートマップ */}
         <HomeHeatmapView records={allRecords} habits={allHabits} />
 
-        {/* 選択日付の習慣リスト */}
-        <DailyHabitList habits={allHabits} records={allRecords} />
+        {/* 今日の完了習慣 - 統一されたCardデザイン */}
+        <Card withBorder padding="lg">
+          <Stack gap="lg">
+            <Group justify="space-between" align="center">
+              <Box>
+                <Text size="xl" fw={600}>
+                  今日の完了習慣
+                </Text>
+                {completedToday > 0 && (
+                  <Text size="xs" c="dimmed" mt={4}>
+                    {completedToday}件の習慣を完了しました
+                  </Text>
+                )}
+              </Box>
+              {completedToday > 0 && (
+                <Button
+                  variant="gradient"
+                  gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
+                  size="sm"
+                  leftSection={<IconShare size={16} />}
+                  onClick={() => {
+                    navigate({ search: (prev) => ({ ...prev, open: true }) })
+                  }}
+                  styles={{
+                    root: {
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                      },
+                    },
+                  }}
+                >
+                  共有
+                </Button>
+              )}
+            </Group>
+            <Divider />
+
+            <DailyHabitList habits={allHabits} records={allRecords} />
+          </Stack>
+        </Card>
 
         {/* 説明 */}
         <Card withBorder padding="lg">
@@ -146,6 +204,7 @@ function Home() {
           </Stack>
         </Card>
       </Stack>
+      <ShareHabitsModal shareDataResponse={shareData} />
     </Container>
   )
 }

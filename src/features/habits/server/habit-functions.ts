@@ -359,4 +359,10 @@ export const habitDto = {
   deleteHabit,
   getHabits,
   getHabitById,
-} as const
+} as const satisfies {
+  createHabit: typeof createHabit
+  updateHabit: typeof updateHabit
+  deleteHabit: typeof deleteHabit
+  getHabits: typeof getHabits
+  getHabitById: typeof getHabitById
+}

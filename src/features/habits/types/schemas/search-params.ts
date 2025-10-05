@@ -104,7 +104,7 @@ const currentMonthValidator = z
     return val
   })
 
-const skipValidator = z.boolean().optional().catch(false)
+const boolValidator = z.boolean().optional().catch(false)
 
 export const searchSchema = z.object({
   selectedDate: dateStringValidator,
@@ -112,7 +112,8 @@ export const searchSchema = z.object({
   metric: metricValidator,
   showRecordForm: showRecordFormValidator,
   currentMonth: currentMonthValidator,
-  skip: skipValidator,
+  skip: boolValidator,
+  open: boolValidator,
 })
 
 export type SearchParams = z.infer<typeof searchSchema>
@@ -152,5 +153,6 @@ export function getDefaultSearchParams(): Required<SearchParams> {
     showRecordForm: false,
     currentMonth: dayjs().tz('Asia/Tokyo').format('YYYY-MM'),
     skip: false,
+    open: false,
   }
 }
