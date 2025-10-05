@@ -14,6 +14,7 @@ import { IconChartLine, IconCheck, IconCloudUpload, IconEdit, IconShare } from '
 import { createFileRoute, Link } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ja'
+import { useId } from 'react'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
@@ -48,16 +49,24 @@ export const Route = createFileRoute('/')({
 function Home() {
   const { habits, records, shareData } = Route.useLoaderData()
   const navigate = Route.useNavigate()
+  const searchParams = Route.useSearch()
 
   const today = dayjs().format('YYYY-MM-DD')
+  // 選択された日付を取得（未選択の場合は今日）
+  const selectedDate = searchParams.selectedDate || today
+
   const totalHabits = habits.success ? habits.data?.length || 0 : 0
   const totalRecords = records.success ? records.data?.length || 0 : 0
-  const completedToday = records.success
-    ? records.data?.filter((r) => r.date === today && r.completed).length || 0
+
+  // 選択された日付の完了数を計算
+  const completedOnSelectedDate = records.success
+    ? records.data?.filter((r) => r.date === selectedDate && r.completed).length || 0
     : 0
 
   const allRecords = records.success && records.data ? records.data : []
   const allHabits = habits.success && habits.data ? habits.data : []
+
+  const copyId = useId()
 
   return (
     <Container size="lg" py="xl">
@@ -93,10 +102,10 @@ function Home() {
 
           <Card withBorder padding="lg" style={{ flex: 1 }}>
             <Text c="dimmed" size="sm" mb="xs">
-              今日の完了数
+              {selectedDate === today ? '今日の完了数' : '選択日の完了数'}
             </Text>
             <Text size="xl" fw={700} c="green">
-              {completedToday}
+              {completedOnSelectedDate}
             </Text>
           </Card>
         </Group>
@@ -126,28 +135,31 @@ function Home() {
         {/* ヒートマップ */}
         <HomeHeatmapView records={allRecords} habits={allHabits} />
 
-        {/* 今日の完了習慣 - 統一されたCardデザイン */}
+        {/* 選択日の完了習慣 - 統一されたCardデザイン */}
         <Card withBorder padding="lg">
           <Stack gap="lg">
             <Group justify="space-between" align="center">
               <Box>
                 <Text size="xl" fw={600}>
-                  今日の完了習慣
+                  {selectedDate === today
+                    ? '今日の完了習慣'
+                    : `${dayjs(selectedDate).format('M月D日')}の完了習慣`}
                 </Text>
-                {completedToday > 0 && (
+                {completedOnSelectedDate > 0 && (
                   <Text size="xs" c="dimmed" mt={4}>
-                    {completedToday}件の習慣を完了しました
+                    {completedOnSelectedDate}件の習慣を完了しました
                   </Text>
                 )}
               </Box>
-              {completedToday > 0 && (
+              {completedOnSelectedDate > 0 && selectedDate === today && (
                 <Button
+                  id={copyId}
                   variant="gradient"
                   gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
                   size="sm"
                   leftSection={<IconShare size={16} />}
                   onClick={() => {
-                    navigate({ search: (prev) => ({ ...prev, open: true }) })
+                    navigate({ search: (prev) => ({ ...prev, open: true }), hash: copyId })
                   }}
                   styles={{
                     root: {

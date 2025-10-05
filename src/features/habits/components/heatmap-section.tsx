@@ -11,6 +11,7 @@ import {
 import { IconChartBar, IconCheckbox, IconClock } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import { useId } from 'react'
 import { HabitHeatmap } from '~/features/habits/components/chart/habit-heatmap'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
@@ -32,6 +33,8 @@ export function HeatmapSection({ records, habitColor = 'blue' }: HeatmapSectionP
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
+  const radioId = useId()
+
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
       <Stack gap="md">
@@ -51,9 +54,11 @@ export function HeatmapSection({ records, habitColor = 'blue' }: HeatmapSectionP
           }}
         >
           <Radio.Group
+            name={radioId}
             value={metric}
             onChange={(v) => {
               navigate({
+                hash: radioId,
                 search: (prev) => ({
                   ...prev,
                   metric: v as SearchParams['metric'],
