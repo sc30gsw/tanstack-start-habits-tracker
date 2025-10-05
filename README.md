@@ -223,11 +223,11 @@ graph LR
     Drizzle --> UI[UIコンポーネント]
     UI --> Viz[可視化<br/>Heatmap/Calendar]
 
-    style User fill:#10B981,stroke:#333,stroke-width:2px
-    style Form fill:#F59E0B,stroke:#333,stroke-width:2px
-    style ServerFn fill:#EF4444,stroke:#333,stroke-width:2px
-    style Turso fill:#003B57,stroke:#333,stroke-width:2px,color:#fff
-    style Viz fill:#8B5CF6,stroke:#333,stroke-width:2px,color:#fff
+    style User fill:#E8F5E9,stroke:#1B5E20,stroke-width:2px,color:#1B5E20
+    style Form fill:#FFF3E0,stroke:#E65100,stroke-width:2px,color:#E65100
+    style ServerFn fill:#FFEBEE,stroke:#B71C1C,stroke-width:2px,color:#B71C1C
+    style Turso fill:#E8EAF6,stroke:#1A237E,stroke-width:2px,color:#1A237E
+    style Viz fill:#F3E5F5,stroke:#4A148C,stroke-width:2px,color:#4A148C
 ```
 
 ---
