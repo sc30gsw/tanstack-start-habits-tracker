@@ -14,6 +14,11 @@ const HABIT_COLORS = [
 
 export const habitColorSchema = z.enum(HABIT_COLORS)
 
+// Available habit priorities
+const HABIT_PRIORITIES = ['high', 'middle', 'low'] as const satisfies readonly string[]
+
+export const habitPrioritySchema = z.enum(HABIT_PRIORITIES).nullable()
+
 /**
  * 習慣作成用のZodスキーマ
  *
@@ -36,6 +41,7 @@ export const createHabitSchema = z.object({
     .max(100, '習慣名は100文字以内で入力してください'),
   description: z.string().trim().max(500, '説明は500文字以内で入力してください').optional(),
   color: habitColorSchema.default('blue'),
+  priority: habitPrioritySchema.optional(),
 })
 
 /**
@@ -62,6 +68,7 @@ export const updateHabitSchema = z.object({
     .optional(),
   description: z.string().trim().max(500, '説明は500文字以内で入力してください').optional(),
   color: habitColorSchema.optional(),
+  priority: habitPrioritySchema.optional(),
 })
 
 /**
@@ -77,6 +84,7 @@ export const habitSchema = z.object({
     .string()
     .nullable()
     .transform((val) => val ?? 'blue'),
+  priority: habitPrioritySchema,
   created_at: z.string(),
   updated_at: z.string(),
 })
@@ -88,9 +96,18 @@ export type CreateHabitInput = z.infer<typeof createHabitSchema>
 export type UpdateHabitInput = z.infer<typeof updateHabitSchema>
 export type Habit = z.infer<typeof habitSchema>
 export type HabitColor = z.infer<typeof habitColorSchema>
+export type HabitPriority = z.infer<typeof habitPrioritySchema>
 
 // Available colors for UI components
 export const HABIT_COLOR_OPTIONS = HABIT_COLORS.map((color) => ({
   value: color,
   label: color.charAt(0).toUpperCase() + color.slice(1),
 }))
+
+// Available priorities for UI components
+export const HABIT_PRIORITY_OPTIONS = [
+  { value: null, label: '優先度なし' },
+  { value: 'high', label: '高' },
+  { value: 'middle', label: '中' },
+  { value: 'low', label: '低' },
+] as const satisfies readonly { value: HabitPriority; label: string }[]

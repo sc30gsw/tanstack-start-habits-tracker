@@ -5,9 +5,14 @@ import { IconAlertTriangle } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import type { useTransition } from 'react'
 import { HabitColorPicker } from '~/features/habits/components/habit-color-picker'
+import { HabitPriorityPicker } from '~/features/habits/components/habit-priority-picker'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity, HabitTable } from '~/features/habits/types/habit'
-import { type HabitColor, updateHabitSchema } from '~/features/habits/types/schemas/habit-schemas'
+import {
+  type HabitColor,
+  type HabitPriority,
+  updateHabitSchema,
+} from '~/features/habits/types/schemas/habit-schemas'
 
 type HabitEditFormProps = {
   habit: HabitEntity
@@ -19,11 +24,14 @@ export function HabitEditForm({ habit, onCancel, useTransition }: HabitEditFormP
   const [isPending, startTransition] = useTransition
   const router = useRouter()
 
-  const form = useForm<Pick<HabitTable, 'name' | 'description'> & Record<'color', HabitColor>>({
+  const form = useForm<
+    Pick<HabitTable, 'name' | 'description'> & { color: HabitColor; priority: HabitPriority }
+  >({
     initialValues: {
       name: habit.name,
       description: habit.description ?? '',
       color: (habit.color as HabitColor) ?? 'blue',
+      priority: habit.priority,
     },
     validate: (values) => {
       const result = updateHabitSchema.safeParse({
@@ -48,18 +56,15 @@ export function HabitEditForm({ habit, onCancel, useTransition }: HabitEditFormP
 
       return fieldErrors
     },
-    transformValues: (
-      values: Pick<HabitTable, 'name' | 'description'> & Record<'color', HabitColor>,
-    ) => ({
+    transformValues: (values) => ({
       name: values.name.trim(),
-      description: values.description ? values.description.trim() : 'blue',
+      description: values.description ? values.description.trim() : '',
       color: values.color,
+      priority: values.priority,
     }),
   })
 
-  const handleSubmit = (
-    values: Pick<HabitTable, 'name' | 'description'> & Record<'color', HabitColor>,
-  ) => {
+  const handleSubmit = (values: typeof form.values) => {
     startTransition(async () => {
       try {
         const result = await habitDto.updateHabit({
@@ -68,6 +73,7 @@ export function HabitEditForm({ habit, onCancel, useTransition }: HabitEditFormP
             name: values.name,
             description: values.description ?? '',
             color: values.color,
+            priority: values.priority,
           },
         })
 
@@ -110,9 +116,11 @@ export function HabitEditForm({ habit, onCancel, useTransition }: HabitEditFormP
   return (
     <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
       <Stack gap={4}>
-        {(form.errors.name || form.errors.description || form.errors.color) && (
+        {(form.errors.name || form.errors.description || form.errors.color || form.errors.priority) && (
           <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
-            <Text c="red">{form.errors.name || form.errors.description || form.errors.color}</Text>
+            <Text c="red">
+              {form.errors.name || form.errors.description || form.errors.color || form.errors.priority}
+            </Text>
           </Alert>
         )}
 
@@ -137,6 +145,11 @@ export function HabitEditForm({ habit, onCancel, useTransition }: HabitEditFormP
           value={form.values.color}
           onChange={(color) => form.setFieldValue('color', color)}
           error={form.errors.color}
+        />
+        <HabitPriorityPicker
+          value={form.values.priority}
+          onChange={(priority) => form.setFieldValue('priority', priority)}
+          error={form.errors.priority}
         />
         <Group gap="xs">
           <Button

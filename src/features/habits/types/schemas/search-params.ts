@@ -106,6 +106,31 @@ const currentMonthValidator = z
 
 const boolValidator = z.boolean().optional().catch(false)
 
+/**
+ * 習慣のソート順のバリデーション
+ * - all: 全て表示（デフォルト順）
+ * - priority: 優先度順（high → middle → low → null）
+ */
+const habitSortValidator = z
+  .enum(['all', 'priority'])
+  .optional()
+  .catch((_) => {
+    return 'all'
+  })
+
+/**
+ * 習慣のフィルタリングのバリデーション
+ * - all: 全て表示
+ * - high/middle/low: 各優先度のみ
+ * - null: 優先度なしのみ
+ */
+const habitFilterValidator = z
+  .enum(['all', 'high', 'middle', 'low', 'null'])
+  .optional()
+  .catch((_) => {
+    return 'all'
+  })
+
 export const searchSchema = z.object({
   selectedDate: dateStringValidator,
   calendarView: calendarViewValidator,
@@ -114,6 +139,8 @@ export const searchSchema = z.object({
   currentMonth: currentMonthValidator,
   skip: boolValidator,
   open: boolValidator,
+  habitSort: habitSortValidator,
+  habitFilter: habitFilterValidator,
 })
 
 export type SearchParams = z.infer<typeof searchSchema>
@@ -154,5 +181,7 @@ export function getDefaultSearchParams(): Required<SearchParams> {
     currentMonth: dayjs().tz('Asia/Tokyo').format('YYYY-MM'),
     skip: false,
     open: false,
+    habitSort: 'all',
+    habitFilter: 'all',
   }
 }
