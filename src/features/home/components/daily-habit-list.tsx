@@ -1,4 +1,4 @@
-import { Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
+import { Card, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -60,6 +60,24 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
 
   const formatDate = dayjs(selectedDate).format('YYYY年MM月DD日（dd）')
 
+  // フィルタリング状態に応じたメッセージ
+  const getFilterMessage = () => {
+    const filterValue = searchParams.habitFilter
+    if (!filterValue || filterValue === 'all') {
+      return '習慣が登録されていません。習慣管理ページから新しい習慣を追加してください。'
+    }
+
+    const filterLabels = {
+      high: '高優先度',
+      middle: '中優先度',
+      low: '低優先度',
+      null: '優先度なし',
+    } as const
+
+    const filterLabel = filterLabels[filterValue as keyof typeof filterLabels] || filterValue
+    return `${filterLabel}の習慣が見つかりませんでした。フィルターを「全て」に変更するか、該当する習慣を作成してください。`
+  }
+
   return (
     <Stack gap="md">
       <Group gap="xs" align="center">
@@ -69,62 +87,75 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
         </Text>
       </Group>
 
-      {/* 完了した習慣 */}
-      <div>
-        <Group gap="xs" align="center" mb="sm">
-          <IconCheck size={18} color="var(--mantine-color-green-6)" />
-          <Text size="md" fw={500} c="green.6">
-            完了済み ({completedHabits.length})
-          </Text>
-        </Group>
-
-        {completedHabits.length > 0 ? (
-          <Stack gap="xs">
-            {completedHabits.map(({ habit, record, isCompleted }) => (
-              <DailyHabitCard
-                key={habit.id}
-                habit={habit}
-                record={record}
-                isCompleted={isCompleted}
-              />
-            ))}
+      {/* 習慣が0件の場合の表示 */}
+      {habitsWithRecords.length === 0 ? (
+        <Card withBorder padding="lg" style={{ textAlign: 'center' }}>
+          <Stack gap="sm">
+            <Text size="md" c="dimmed" fs="italic">
+              {getFilterMessage()}
+            </Text>
           </Stack>
-        ) : (
-          <Text size="sm" c="dimmed" fs="italic">
-            完了した習慣がありません
-          </Text>
-        )}
-      </div>
+        </Card>
+      ) : (
+        <>
+          {/* 完了した習慣 */}
+          <div>
+            <Group gap="xs" align="center" mb="sm">
+              <IconCheck size={18} color="var(--mantine-color-green-6)" />
+              <Text size="md" fw={500} c="green.6">
+                完了済み ({completedHabits.length})
+              </Text>
+            </Group>
 
-      {/* 未完了の習慣 */}
-      <div>
-        <Group gap="xs" align="center" mb="sm">
-          <IconX size={18} color="var(--mantine-color-gray-6)" />
-          <Text size="md" fw={500} c="gray.6">
-            未完了 ({inCompletedHabits.length})
-          </Text>
-        </Group>
+            {completedHabits.length > 0 ? (
+              <Stack gap="xs">
+                {completedHabits.map(({ habit, record, isCompleted }) => (
+                  <DailyHabitCard
+                    key={habit.id}
+                    habit={habit}
+                    record={record}
+                    isCompleted={isCompleted}
+                  />
+                ))}
+              </Stack>
+            ) : (
+              <Text size="sm" c="dimmed" fs="italic">
+                完了した習慣がありません
+              </Text>
+            )}
+          </div>
 
-        {inCompletedHabits.length > 0 ? (
-          <Stack gap="xs">
-            {inCompletedHabits.map(({ habit, record, isCompleted }) => (
-              <DailyHabitCard
-                key={habit.id}
-                habit={habit}
-                record={record}
-                isCompleted={isCompleted}
-              />
-            ))}
-          </Stack>
-        ) : (
-          <Text size="sm" c="dimmed" fs="italic">
-            未完了の習慣がありません
-          </Text>
-        )}
-      </div>
+          {/* 未完了の習慣 */}
+          <div>
+            <Group gap="xs" align="center" mb="sm">
+              <IconX size={18} color="var(--mantine-color-gray-6)" />
+              <Text size="md" fw={500} c="gray.6">
+                未完了 ({inCompletedHabits.length})
+              </Text>
+            </Group>
 
-      {/* 統計情報 */}
-      <HabitPriorityFilterPaper habitsWithRecords={habitsWithRecords} />
+            {inCompletedHabits.length > 0 ? (
+              <Stack gap="xs">
+                {inCompletedHabits.map(({ habit, record, isCompleted }) => (
+                  <DailyHabitCard
+                    key={habit.id}
+                    habit={habit}
+                    record={record}
+                    isCompleted={isCompleted}
+                  />
+                ))}
+              </Stack>
+            ) : (
+              <Text size="sm" c="dimmed" fs="italic">
+                未完了の習慣がありません
+              </Text>
+            )}
+          </div>
+
+          {/* 統計情報 */}
+          <HabitPriorityFilterPaper habitsWithRecords={habitsWithRecords} />
+        </>
+      )}
     </Stack>
   )
 }
