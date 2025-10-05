@@ -115,11 +115,17 @@ export function HabitEditForm({ habit, onCancel, useTransition }: HabitEditFormP
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
-      <Stack gap={4}>
-        {(form.errors.name || form.errors.description || form.errors.color || form.errors.priority) && (
+      <Stack gap="md">
+        {(form.errors.name ||
+          form.errors.description ||
+          form.errors.color ||
+          form.errors.priority) && (
           <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
             <Text c="red">
-              {form.errors.name || form.errors.description || form.errors.color || form.errors.priority}
+              {form.errors.name ||
+                form.errors.description ||
+                form.errors.color ||
+                form.errors.priority}
             </Text>
           </Alert>
         )}
@@ -146,6 +152,7 @@ export function HabitEditForm({ habit, onCancel, useTransition }: HabitEditFormP
           onChange={(color) => form.setFieldValue('color', color)}
           error={form.errors.color}
         />
+
         <HabitPriorityPicker
           value={form.values.priority}
           onChange={(priority) => form.setFieldValue('priority', priority)}
