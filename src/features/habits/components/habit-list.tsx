@@ -1,4 +1,5 @@
 import { Alert, Card, Stack, Text } from '@mantine/core'
+import { IconAlertTriangle } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { filter, pipe, sortBy } from 'remeda'
 import type { HabitEntity } from '~/features/habits/types/habit'
@@ -63,9 +64,22 @@ export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
     }
 
     return (
-      <Alert color="blue" variant="light" p="lg" style={{ textAlign: 'center' }}>
+      <Alert
+        icon={<IconAlertTriangle size={20} />}
+        color="orange"
+        variant="filled"
+        radius="lg"
+        p="lg"
+        style={{
+          textAlign: 'center',
+          background:
+            'linear-gradient(45deg, var(--mantine-color-orange-6), var(--mantine-color-red-5))',
+          border: '2px solid var(--mantine-color-orange-3)',
+          boxShadow: '0 4px 12px rgba(253, 126, 20, 0.15)',
+        }}
+      >
         <Stack gap="sm">
-          <Text size="md" c="dimmed" fs="italic">
+          <Text size="md" fw={500} c="white">
             {getFilterMessage()}
           </Text>
         </Stack>

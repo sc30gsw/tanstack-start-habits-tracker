@@ -1,5 +1,5 @@
 import { Alert, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
-import { IconCheck, IconX } from '@tabler/icons-react'
+import { IconAlertTriangle, IconCheck, IconX } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { filter, pipe } from 'remeda'
@@ -90,9 +90,22 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
 
       {/* 習慣が0件の場合の表示 */}
       {habitsWithRecords.length === 0 ? (
-        <Alert color="blue" variant="light" p="lg" style={{ textAlign: 'center' }}>
+        <Alert
+          icon={<IconAlertTriangle size={20} />}
+          color="orange"
+          variant="filled"
+          radius="lg"
+          p="lg"
+          style={{
+            textAlign: 'center',
+            background:
+              'linear-gradient(45deg, var(--mantine-color-orange-6), var(--mantine-color-red-5))',
+            border: '2px solid var(--mantine-color-orange-3)',
+            boxShadow: '0 4px 12px rgba(253, 126, 20, 0.15)',
+          }}
+        >
           <Stack gap="sm">
-            <Text size="md" c="dimmed" fs="italic">
+            <Text size="md" fw={500} c="white">
               {getFilterMessage()}
             </Text>
           </Stack>
