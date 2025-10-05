@@ -1,5 +1,8 @@
 import { Radio, Stack, Text } from '@mantine/core'
-import { HABIT_PRIORITY_OPTIONS, type HabitPriority } from '../types/schemas/habit-schemas'
+import {
+  HABIT_PRIORITY_OPTIONS,
+  type HabitPriority,
+} from '~/features/habits/types/schemas/habit-schemas'
 
 type HabitPriorityPickerProps = {
   value: HabitPriority
@@ -13,7 +16,10 @@ export function HabitPriorityPicker({ value, onChange, error }: HabitPriorityPic
       <Text size="sm" fw={500}>
         優先度
       </Text>
-      <Radio.Group value={value?.toString() ?? 'null'} onChange={(val) => onChange(val === 'null' ? null : (val as HabitPriority))}>
+      <Radio.Group
+        value={value?.toString() ?? 'null'}
+        onChange={(val) => onChange(val === 'null' ? null : (val as HabitPriority))}
+      >
         <Stack gap="xs">
           {HABIT_PRIORITY_OPTIONS.map((option) => (
             <Radio
