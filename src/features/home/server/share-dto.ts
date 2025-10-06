@@ -33,7 +33,11 @@ const getCompletedHabitsForShare = createServerFn({ method: 'POST' })
         .from(records)
         .innerJoin(habits, eq(records.habitId, habits.id))
         .where(
-          and(eq(habits.userId, userId), eq(records.date, data.date), eq(records.completed, true)),
+          and(
+            eq(habits.userId, userId),
+            eq(records.date, data.date),
+            eq(records.status, 'completed'),
+          ),
         )
         .orderBy(habits.name)
 

@@ -39,8 +39,8 @@ export function HabitHeatmap({
       if (metric === 'duration') {
         map[r.date] = r.duration_minutes ?? 0
       } else {
-        // completionの場合、完了=1、未完了=0.5として区別する
-        map[r.date] = r.completed ? 1 : 0.5
+        // completionの場合、完了=1、予定中/スキップ=0.5として区別する
+        map[r.date] = r.status === 'completed' ? 1 : 0.5
       }
     })
 

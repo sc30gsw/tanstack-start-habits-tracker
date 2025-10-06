@@ -20,7 +20,15 @@ export function DayView({ selectedDateRecord }: Record<'selectedDateRecord', Rec
 
   const recordDetails = selectedDateRecord
     ? ([
-        { label: '状態', value: selectedDateRecord.completed ? '完了' : '未完了' },
+        {
+          label: '状態',
+          value:
+            selectedDateRecord.status === 'completed'
+              ? '完了'
+              : selectedDateRecord.status === 'skipped'
+                ? 'スキップ'
+                : '予定中',
+        },
         { label: '時間', value: formatDuration(selectedDateRecord.duration_minutes || 0) },
         { label: '作成', value: dayjs(selectedDateRecord.created_at).format('HH:mm') },
       ] as const satisfies readonly Record<string, string>[])

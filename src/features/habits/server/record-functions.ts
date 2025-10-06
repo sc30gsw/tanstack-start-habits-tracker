@@ -58,7 +58,7 @@ const createRecord = createServerFn({ method: 'POST' })
           id: recordId,
           habitId: data.habitId,
           date: data.date,
-          completed: data.completed,
+          status: data.status,
           duration_minutes: data.durationMinutes,
           notes: data.notes,
           createdAt: now,
@@ -126,8 +126,8 @@ const updateRecord = createServerFn({ method: 'POST' })
       // 更新データの準備
       const updateData: Partial<typeof records.$inferInsert> = {}
 
-      if (data.completed !== undefined) {
-        updateData.completed = data.completed
+      if (data.status !== undefined) {
+        updateData.status = data.status
       }
 
       if (data.durationMinutes !== undefined) {
@@ -226,7 +226,7 @@ const getRecords = createServerFn({ method: 'GET' })
       .object({
         habit_id: z.string().optional(),
         date_from: z.string().optional(),
-        completed: z.boolean().optional(),
+        status: z.enum(['active', 'completed', 'skipped']).optional(),
       })
       .optional(),
   )
@@ -253,8 +253,8 @@ const getRecords = createServerFn({ method: 'GET' })
         conditions.push(eq(records.date, filters.date_from)) // 単純化: 日付範囲は後で実装
       }
 
-      if (filters?.completed !== undefined) {
-        conditions.push(eq(records.completed, filters.completed))
+      if (filters?.status !== undefined) {
+        conditions.push(eq(records.status, filters.status))
       }
 
       // クエリを実行

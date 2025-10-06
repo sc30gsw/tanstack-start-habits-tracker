@@ -71,6 +71,13 @@
       "when": 1759693986247,
       "tag": "0009_huge_boomerang",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1759782167828,
+      "tag": "0010_sad_venus",
+      "breakpoints": true
     }
   ]
 }

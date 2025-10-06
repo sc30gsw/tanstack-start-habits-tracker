@@ -63,7 +63,7 @@ function Home() {
 
   // 選択された日付の完了数を計算
   const completedOnSelectedDate = records.success
-    ? (records.data?.filter((r) => r.date === selectedDate && r.completed).length ?? 0)
+    ? (records.data?.filter((r) => r.date === selectedDate && r.status === 'completed').length ?? 0)
     : 0
 
   const allRecords = records.success && records.data ? records.data : []

@@ -103,7 +103,7 @@ export function CalendarDateCell({
   const borderWidth: CSSProperties['borderWidth'] = '2px'
   const { backgroundColor, borderColor } = getCellBackgroundStyle({
     hasRecord,
-    isCompleted: record?.completed ?? false,
+    isCompleted: record?.status === 'completed',
     isSelected,
     dateType,
   })
@@ -117,7 +117,7 @@ export function CalendarDateCell({
         withinPortal
         label={
           record
-            ? `${record.completed ? '完了' : '未完了'} / ${formatDuration(record.duration_minutes || 0)}`
+            ? `${record.status === 'completed' ? '完了' : record.status === 'skipped' ? 'スキップ' : '予定中'} / ${formatDuration(record.duration_minutes || 0)}`
             : '記録なし'
         }
       >
@@ -189,7 +189,18 @@ export function CalendarDateCell({
       </Text>
       <Text fw={500}>{date.date()}</Text>
       {record && (
-        <Badge size="xs" color={record.completed ? 'green' : 'yellow'} variant="filled" mt={4}>
+        <Badge
+          size="xs"
+          color={
+            record.status === 'completed'
+              ? 'green'
+              : record.status === 'skipped'
+                ? 'orange'
+                : 'blue'
+          }
+          variant="filled"
+          mt={4}
+        >
           {formatDuration(record.duration_minutes || 0)}
         </Badge>
       )}

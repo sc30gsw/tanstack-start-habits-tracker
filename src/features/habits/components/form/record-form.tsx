@@ -3,8 +3,8 @@ import {
   Button,
   Group,
   NumberInput,
+  Select,
   Stack,
-  Switch,
   Text,
   Textarea,
   useComputedColorScheme,
@@ -28,7 +28,7 @@ type RecordFormProps = {
   existingRecord?: RecordEntity
 }
 
-type FormValues = Pick<RecordTable, 'completed' | 'notes'> & {
+type FormValues = Pick<RecordTable, 'status' | 'notes'> & {
   durationMinutes: RecordTable['duration_minutes']
   durationHours: number | ''
 }
@@ -46,7 +46,7 @@ export function RecordForm({
 
   const form = useForm<FormValues>({
     initialValues: {
-      completed: existingRecord?.completed ?? false,
+      status: existingRecord?.status ?? 'active',
       durationMinutes: existingRecord?.duration_minutes ?? 0,
       durationHours: existingRecord?.duration_minutes
         ? minutesToHours(existingRecord.duration_minutes)
@@ -56,11 +56,11 @@ export function RecordForm({
     validate: (values) => {
       // durationMinutes が '' のときは 0 として扱う
       const parsed = createRecordSchema
-        .pick({ completed: true, durationMinutes: true, habitId: true, date: true, notes: true })
+        .pick({ status: true, durationMinutes: true, habitId: true, date: true, notes: true })
         .safeParse({
           habitId: habitId,
           date,
-          completed: values.completed,
+          status: values.status,
           durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
           notes: values.notes,
         })
@@ -81,7 +81,7 @@ export function RecordForm({
       return fieldErrors
     },
     transformValues: (values) => ({
-      completed: values.completed,
+      status: values.status,
       durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
       durationHours: typeof values.durationHours === 'number' ? values.durationHours : 0,
       notes: values.notes,
@@ -91,13 +91,13 @@ export function RecordForm({
   const handleSubmit = (values: FormValues) => {
     const durationMinutes = typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
 
-    // 未完了かつメモが空の場合、メモ入力を促す
-    if (!values.completed && !values.notes?.trim()) {
+    // スキップ状態かつメモが空の場合、メモ入力を促す
+    if (values.status === 'skipped' && !values.notes?.trim()) {
       modals.openConfirmModal({
-        title: '未完了の記録について',
+        title: 'スキップの記録について',
         children: (
           <Text size="sm">
-            習慣を実行しなかった理由や今後の改善点をメモに記録しませんか？
+            習慣をスキップした理由や今後の改善点をメモに記録しませんか？
             <br />
             記録することで習慣の継続に役立ちます。
           </Text>
@@ -136,7 +136,7 @@ export function RecordForm({
     const validationResult = createRecordSchema.safeParse({
       habitId,
       date,
-      completed: values.completed,
+      status: values.status,
       durationMinutes,
       notes: values.notes,
     })
@@ -166,7 +166,7 @@ export function RecordForm({
           ? await recordDto.updateRecord({
               data: {
                 id: existingRecord.id,
-                completed: values.completed ?? false,
+                status: values.status,
                 durationMinutes,
                 notes: values.notes ?? '',
               },
@@ -175,7 +175,7 @@ export function RecordForm({
               data: {
                 habitId,
                 date,
-                completed: values.completed ?? false,
+                status: values.status,
                 durationMinutes,
                 notes: values.notes ?? '',
               },
@@ -240,20 +240,28 @@ export function RecordForm({
   return (
     <form onSubmit={form.onSubmit((values: FormValues) => handleSubmit(values))} noValidate>
       <Stack gap="md">
-        {(form.errors.completed || form.errors.durationMinutes || form.errors.notes) && (
+        {(form.errors.status || form.errors.durationMinutes || form.errors.notes) && (
           <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
             <Text c="red">
-              {form.errors.completed || form.errors.durationMinutes || form.errors.notes}
+              {form.errors.status || form.errors.durationMinutes || form.errors.notes}
             </Text>
           </Alert>
         )}
-        <Switch
-          label="習慣を完了しましたか？"
-          key={form.key('completed')}
-          checked={form.values.completed ?? false}
-          onChange={(e) => form.setFieldValue('completed', e.currentTarget.checked)}
+        <Select
+          label="ステータス"
+          placeholder="ステータスを選択"
+          key={form.key('status')}
+          value={form.values.status}
+          onChange={(value) =>
+            form.setFieldValue('status', value as 'active' | 'completed' | 'skipped')
+          }
+          data={[
+            { value: 'active', label: '📋 予定中' },
+            { value: 'completed', label: '✅ 完了' },
+            { value: 'skipped', label: '⏭️ スキップ' },
+          ]}
           disabled={isPending}
-          error={form.errors.completed}
+          error={form.errors.status}
         />
         <Group gap="md">
           <NumberInput

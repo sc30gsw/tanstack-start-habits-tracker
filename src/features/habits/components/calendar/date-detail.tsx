@@ -108,12 +108,26 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
             <Group gap="sm">
               <Badge
                 variant="filled"
-                color={selectedDateRecord.completed ? 'green' : 'yellow'}
+                color={
+                  selectedDateRecord.status === 'completed'
+                    ? 'green'
+                    : selectedDateRecord.status === 'skipped'
+                      ? 'orange'
+                      : 'blue'
+                }
                 leftSection={
-                  selectedDateRecord.completed ? <IconCheck size={14} /> : <IconX size={14} />
+                  selectedDateRecord.status === 'completed' ? (
+                    <IconCheck size={14} />
+                  ) : (
+                    <IconX size={14} />
+                  )
                 }
               >
-                {selectedDateRecord.completed ? '完了' : '未完了'}
+                {selectedDateRecord.status === 'completed'
+                  ? '完了'
+                  : selectedDateRecord.status === 'skipped'
+                    ? 'スキップ'
+                    : '予定中'}
               </Badge>
               {(selectedDateRecord.duration_minutes || 0) > 0 && (
                 <Badge variant="light" color="blue">
