@@ -1,7 +1,7 @@
 import { DndContext, type DragEndEvent } from '@dnd-kit/core'
 import { Alert, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconAlertTriangle, IconCheck, IconX } from '@tabler/icons-react'
-import { getRouteApi } from '@tanstack/react-router'
+import { getRouteApi, useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { filter, groupBy, pipe } from 'remeda'
 import {
@@ -25,6 +25,7 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
   const apiRoute = getRouteApi('/')
   const searchParams = apiRoute.useSearch()
   const selectedDate = getValidatedDate(searchParams.selectedDate)
+  const router = useRouter()
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
@@ -141,6 +142,9 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
           await unscheduleHabit({ data: { habitId: habitData.habit.id, date } })
           break
       }
+
+      // UI更新
+      router.invalidate()
     } catch (error) {
       console.error('Failed to update habit status:', error)
     }
@@ -177,7 +181,8 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
         ) : (
           <>
             {/* 予定中の習慣 */}
-            <DroppableZone id={`scheduled-${crypto.randomUUID()}`}>
+            {/** biome-ignore lint/correctness/useUniqueElementIds: If it is unique ID drag-and-drop will not work properly */}
+            <DroppableZone id="scheduled">
               <div>
                 <Group gap="xs" align="center" mb="sm">
                   <IconCheck size={18} color="var(--mantine-color-blue-6)" />
@@ -206,7 +211,8 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
             </DroppableZone>
 
             {/* 完了した習慣 */}
-            <DroppableZone id={`completed-${crypto.randomUUID()}`}>
+            {/** biome-ignore lint/correctness/useUniqueElementIds: If it is unique ID drag-and-drop will not work properly */}
+            <DroppableZone id="completed">
               <div>
                 <Group gap="xs" align="center" mb="sm">
                   <IconCheck size={18} color="var(--mantine-color-green-6)" />
@@ -235,7 +241,8 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
             </DroppableZone>
 
             {/* スキップした習慣 */}
-            <DroppableZone id={`skipped-${crypto.randomUUID()}`}>
+            {/** biome-ignore lint/correctness/useUniqueElementIds: If it is unique ID drag-and-drop will not work properly */}
+            <DroppableZone id="skipped">
               <div>
                 <Group gap="xs" align="center" mb="sm">
                   <IconX size={18} color="var(--mantine-color-orange-6)" />
@@ -264,7 +271,8 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
             </DroppableZone>
 
             {/* 未予定の習慣 */}
-            <DroppableZone id={`unscheduled-${crypto.randomUUID()}`}>
+            {/** biome-ignore lint/correctness/useUniqueElementIds: If it is unique ID drag-and-drop will not work properly */}
+            <DroppableZone id="unscheduled">
               <div>
                 <Group gap="xs" align="center" mb="sm">
                   <IconAlertTriangle size={18} color="var(--mantine-color-gray-6)" />
