@@ -29,13 +29,16 @@ dayjs.locale('ja')
 export const Route = createFileRoute('/')({
   validateSearch: searchSchema,
   component: Home,
-  loader: async () => {
+  beforeLoad: async ({ search }) => {
+    return { search }
+  },
+  loader: async ({ context }) => {
     const today = dayjs().format('YYYY-MM-DD')
 
     const [habitsResult, recordsResult, shareDataResult] = await Promise.all([
       habitDto.getHabits(),
       recordDto.getRecords(),
-      shareDto.getCompletedHabitsForShare({ data: { date: today } }),
+      shareDto.getCompletedHabitsForShare({ data: { date: context.search.selectedDate ?? today } }),
     ])
 
     return {
@@ -53,14 +56,14 @@ function Home() {
 
   const today = dayjs().format('YYYY-MM-DD')
   // 選択された日付を取得（未選択の場合は今日）
-  const selectedDate = searchParams.selectedDate || today
+  const selectedDate = searchParams.selectedDate ?? today
 
-  const totalHabits = habits.success ? habits.data?.length || 0 : 0
-  const totalRecords = records.success ? records.data?.length || 0 : 0
+  const totalHabits = habits.success ? (habits.data?.length ?? 0) : 0
+  const totalRecords = records.success ? (records.data?.length ?? 0) : 0
 
   // 選択された日付の完了数を計算
   const completedOnSelectedDate = records.success
-    ? records.data?.filter((r) => r.date === selectedDate && r.completed).length || 0
+    ? (records.data?.filter((r) => r.date === selectedDate && r.completed).length ?? 0)
     : 0
 
   const allRecords = records.success && records.data ? records.data : []
@@ -82,7 +85,7 @@ function Home() {
 
         {/* 統計情報 */}
         <Group gap="lg">
-          <Card withBorder padding="lg" style={{ flex: 1 }}>
+          <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
             <Text c="dimmed" size="sm" mb="xs">
               登録習慣数
             </Text>
@@ -91,7 +94,7 @@ function Home() {
             </Text>
           </Card>
 
-          <Card withBorder padding="lg" style={{ flex: 1 }}>
+          <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
             <Text c="dimmed" size="sm" mb="xs">
               総記録数
             </Text>
@@ -100,9 +103,21 @@ function Home() {
             </Text>
           </Card>
 
-          <Card withBorder padding="lg" style={{ flex: 1 }}>
-            <Text c="dimmed" size="sm" mb="xs">
-              {selectedDate === today ? '今日の完了数' : '選択日の完了数'}
+          <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
+            <Text
+              c="dimmed"
+              size="sm"
+              mb="xs"
+              lineClamp={2}
+              title={
+                selectedDate === today
+                  ? '今日の完了数'
+                  : `${dayjs(selectedDate).format('YYYY年M月D日')}の完了数`
+              }
+            >
+              {selectedDate === today
+                ? '今日の完了数'
+                : `${dayjs(selectedDate).format('M/D')}完了数`}
             </Text>
             <Text size="xl" fw={700} c="green">
               {completedOnSelectedDate}
@@ -159,7 +174,11 @@ function Home() {
                   size="sm"
                   leftSection={<IconShare size={16} />}
                   onClick={() => {
-                    navigate({ search: (prev) => ({ ...prev, open: true }), hash: copyId })
+                    navigate({
+                      search: (prev) => ({ ...prev, open: true }),
+                      hash: copyId,
+                      hashScrollIntoView: true,
+                    })
                   }}
                   styles={{
                     root: {
