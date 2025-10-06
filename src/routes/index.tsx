@@ -117,7 +117,7 @@ function Home() {
             >
               {selectedDate === today
                 ? '今日の完了数'
-                : `${dayjs(selectedDate).format('M/D')}完了数`}
+                : `${dayjs(selectedDate).format('YYYY/M/D')}の完了数`}
             </Text>
             <Text size="xl" fw={700} c="green">
               {completedOnSelectedDate}
