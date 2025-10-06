@@ -28,7 +28,7 @@ export const records = sqliteTable(
       .notNull()
       .references(() => habits.id, { onDelete: 'cascade' }),
     date: text().notNull(), // ISO date string (YYYY-MM-DD)
-    completed: integer({ mode: 'boolean' }).default(false),
+    status: text().$type<'active' | 'completed' | 'skipped'>().notNull().default('active'),
     duration_minutes: integer().default(0),
     notes: text(),
     createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
