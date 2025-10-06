@@ -34,14 +34,14 @@ export function HomeHeatmap({ records }: Record<'records', RecordEntity[]>) {
       groupBy((record) => record.date),
       // 各日付のデータを集約
       mapValues((dateRecords) => {
-        const completed = dateRecords.filter((r) => r.completed).length
+        const completed = dateRecords.filter((r) => r.status === 'completed').length
         const duration = dateRecords.reduce((sum, r) => sum + (r.duration_minutes || 0), 0)
 
         return {
           id: `aggregated-${dateRecords[0].date}`,
           habitId: 'aggregated',
           date: dateRecords[0].date,
-          completed: metric === 'completion' ? completed > 0 : duration > 0,
+          status: (metric === 'completion' ? completed > 0 : duration > 0) ? 'completed' : 'active',
           duration_minutes: metric === 'duration' ? duration : completed,
           notes: null,
           created_at: new Date(),

@@ -28,7 +28,7 @@ const getCompletedHabitsForShare = createServerFn({ method: 'GET' })
       const completedRecords = await db.query.records.findMany({
         where: and(
           eq(records.date, data.date),
-          eq(records.completed, true),
+          eq(records.status, 'completed'),
           eq(records.userId, userId),
         ),
         with: {

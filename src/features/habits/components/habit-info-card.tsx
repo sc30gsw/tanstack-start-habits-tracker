@@ -18,7 +18,7 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
 
   // 統計情報の計算
   const totalRecords = records.length
-  const completedRecords = records.filter((r) => r.completed).length
+  const completedRecords = records.filter((r) => r.status === 'completed').length
   const completionRate = totalRecords > 0 ? completedRecords / totalRecords : 0
   const totalDuration = records.reduce((sum, r) => sum + (r.duration_minutes || 0), 0)
 

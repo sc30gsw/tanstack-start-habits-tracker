@@ -29,6 +29,12 @@ const isValidDate = (dateString: string): boolean => {
 }
 
 /**
+ * 記録ステータスのZodスキーマ
+ */
+export const recordStatusSchema = z.enum(['active', 'completed', 'skipped'])
+export type RecordStatus = z.infer<typeof recordStatusSchema>
+
+/**
  * 記録作成用のZodスキーマ
  *
  * 習慣の実行記録を作成する際の入力データを検証します。
@@ -38,7 +44,7 @@ const isValidDate = (dateString: string): boolean => {
  * const recordData = {
  *   habit_id: 'habit-123',
  *   date: '2025-01-01',
- *   completed: true,
+ *   status: 'active',
  *   duration_minutes: 30
  * }
  * const result = createRecordSchema.safeParse(recordData)
@@ -58,7 +64,7 @@ export const createRecordSchema = z
 
         return inputDate <= todayJST
       }, '未来の日付は記録できません'),
-    completed: z.boolean({ message: '完了状態はtrue/falseで指定してください' }).default(false),
+    status: recordStatusSchema.default('active'),
     durationMinutes: z
       .number({ message: '実行時間は数値で入力してください' })
       .int('実行時間は整数で入力してください')
@@ -73,8 +79,8 @@ export const createRecordSchema = z
   })
   .refine(
     (data) => {
-      // 完了状態がtrueの場合、実行時間が0より大きい必要がある
-      if (data.completed && data.durationMinutes === 0) {
+      // 完了状態がcompletedの場合、実行時間が0より大きい必要がある
+      if (data.status === 'completed' && data.durationMinutes === 0) {
         return false
       }
 
@@ -95,7 +101,7 @@ export const createRecordSchema = z
  * ```typescript
  * const updateData = {
  *   id: 'record-123',
- *   completed: true,
+ *   status: 'completed',
  *   duration_minutes: 45
  * }
  * const result = updateRecordSchema.safeParse(updateData)
@@ -104,7 +110,7 @@ export const createRecordSchema = z
 export const updateRecordSchema = z
   .object({
     id: z.string({ message: '記録IDは必須です' }).min(1, '記録IDを指定してください'),
-    completed: z.boolean({ message: '完了状態はtrue/falseで指定してください' }).optional(),
+    status: recordStatusSchema.optional(),
     durationMinutes: z
       .number({ message: '実行時間は数値で入力してください' })
       .int('実行時間は整数で入力してください')
@@ -119,8 +125,8 @@ export const updateRecordSchema = z
   })
   .refine(
     (data) => {
-      // 完了状態がtrueかつ実行時間が明示的に0に設定されている場合のみエラー
-      if (data.completed === true && data.durationMinutes === 0) {
+      // 完了状態がcompletedかつ実行時間が明示的に0に設定されている場合のみエラー
+      if (data.status === 'completed' && data.durationMinutes === 0) {
         return false
       }
 
@@ -141,7 +147,7 @@ export const recordSchema = z.object({
   id: z.string(),
   habit_id: z.string(),
   date: z.string(),
-  completed: z.boolean(),
+  status: recordStatusSchema,
   durationMinutes: z.number(),
   notes: z.string().optional(),
   createdAt: z.string(),

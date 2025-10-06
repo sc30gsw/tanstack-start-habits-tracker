@@ -116,26 +116,29 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
     try {
       switch (over.id) {
         case 'scheduled':
-          await scheduleHabit({ habitId: habitData.habit.id, date })
+          await scheduleHabit({ data: { habitId: habitData.habit.id, date } })
           break
         case 'completed':
           // 完了には実行時間が必要なので、デフォルト値を設定
           await completeHabit({
-            habitId: habitData.habit.id,
-            date,
-            status: 'completed' as const,
-            durationMinutes: habitData.record?.duration_minutes || 30,
+            data: {
+              habitId: habitData.habit.id,
+              date,
+              status: 'completed' as const,
+              durationMinutes: habitData.record?.duration_minutes || 30,
+            },
           })
           break
         case 'skipped':
           await skipHabit({
-            habitId: habitData.habit.id,
-            date,
-            status: 'skipped' as const,
+            data: {
+              habitId: habitData.habit.id,
+              date,
+            },
           })
           break
         case 'unscheduled':
-          await unscheduleHabit({ habitId: habitData.habit.id, date })
+          await unscheduleHabit({ data: { habitId: habitData.habit.id, date } })
           break
       }
     } catch (error) {
