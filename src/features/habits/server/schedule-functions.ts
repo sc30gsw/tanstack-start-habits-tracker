@@ -26,16 +26,6 @@ const scheduleHabitSchema = z.object({
 })
 
 /**
- * 習慣完了用スキーマ
- */
-const completeHabitSchema = z.object({
-  habitId: z.string().min(1),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  status: z.literal('completed'),
-  durationMinutes: z.number().int().min(0).max(1440),
-})
-
-/**
  * 習慣スキップ用スキーマ（scheduleHabitSchemaと同じ構造）
  */
 const skipHabitSchema = scheduleHabitSchema
@@ -95,73 +85,6 @@ export const scheduleHabit = createServerFn({ method: 'POST' })
       success: true,
       record: newRecord,
       message: '習慣を予定に追加しました',
-    }
-  })
-
-/**
- * 習慣を完了にマーク
- */
-export const completeHabit = createServerFn({ method: 'POST' })
-  .inputValidator(completeHabitSchema)
-  .handler(async ({ data }) => {
-    const session = await auth.api.getSession(getRequest())
-
-    if (!session || !session.user) {
-      throw new Error('認証が必要です')
-    }
-
-    const userId = session.user.id
-
-    // 実行時間のバリデーション
-    if (!data.durationMinutes || data.durationMinutes === 0) {
-      throw new Error('完了する場合は実行時間を入力してください')
-    }
-
-    // 既存のrecordをチェック
-    const existingRecord = await db
-      .select()
-      .from(records)
-      .where(and(eq(records.habitId, data.habitId), eq(records.date, data.date)))
-      .get()
-
-    if (existingRecord) {
-      // recordを更新
-      const [updatedRecord] = await db
-        .update(records)
-        .set({
-          status: 'completed',
-          duration_minutes: data.durationMinutes,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(records.id, existingRecord.id))
-        .returning()
-
-      return {
-        success: true,
-        record: updatedRecord,
-        message: '習慣を完了しました',
-      }
-    }
-
-    // recordが存在しない場合は、新規作成して完了状態にする
-    const [newRecord] = await db
-      .insert(records)
-      .values({
-        id: nanoid(),
-        habitId: data.habitId,
-        date: data.date,
-        status: 'completed',
-        duration_minutes: data.durationMinutes,
-        userId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })
-      .returning()
-
-    return {
-      success: true,
-      record: newRecord,
-      message: '習慣を完了しました',
     }
   })
 

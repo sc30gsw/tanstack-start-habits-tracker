@@ -5,7 +5,6 @@ import { getRouteApi, useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { filter, groupBy, pipe } from 'remeda'
 import {
-  completeHabit,
   scheduleHabit,
   skipHabit,
   unscheduleHabit,
@@ -49,8 +48,14 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
       const filterValue = searchParams.habitFilter
 
       // フィルター未設定、'all'、undefinedの場合はすべて表示
-      if (!filterValue || filterValue === 'all') return true
-      if (filterValue === 'null') return habit.priority === null
+      if (!filterValue || filterValue === 'all') {
+        return true
+      }
+
+      if (filterValue === 'null') {
+        return habit.priority === null
+      }
+
       return habit.priority === filterValue
     }),
     (filteredHabits) =>
@@ -105,11 +110,14 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
 
-    if (!over) return
+    if (!over) {
+      return
+    }
 
-    const habitData = active.data.current as {
-      habit: HabitEntity
-      record?: RecordEntity
+    const habitData = active.data.current
+
+    if (!habitData) {
+      return
     }
 
     const date = dayjs(selectedDate).format('YYYY-MM-DD')
@@ -118,17 +126,6 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
       switch (over.id) {
         case 'scheduled':
           await scheduleHabit({ data: { habitId: habitData.habit.id, date } })
-          break
-        case 'completed':
-          // 完了には実行時間が必要なので、デフォルト値を設定
-          await completeHabit({
-            data: {
-              habitId: habitData.habit.id,
-              date,
-              status: 'completed' as const,
-              durationMinutes: habitData.record?.duration_minutes || 30,
-            },
-          })
           break
         case 'skipped':
           await skipHabit({
@@ -210,35 +207,41 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
               </div>
             </DroppableZone>
 
-            {/* 完了した習慣 */}
-            {/** biome-ignore lint/correctness/useUniqueElementIds: If it is unique ID drag-and-drop will not work properly */}
-            <DroppableZone id="completed">
-              <div>
-                <Group gap="xs" align="center" mb="sm">
-                  <IconCheck size={18} color="var(--mantine-color-green-6)" />
-                  <Text size="md" fw={500} c="green.6">
-                    ✅ 完了済み ({completedHabits.length})
-                  </Text>
-                </Group>
+            <Stack
+              style={{
+                disable: completedHabits.length === 0,
+                cursor: completedHabits.length === 0 ? 'not-allowed' : 'auto',
+              }}
+            >
+              <Group gap="xs" align="center" mb="sm">
+                <IconCheck size={18} color="var(--mantine-color-green-6)" />
+                <Text size="md" fw={500} c="green.6">
+                  ✅ 完了済み ({completedHabits.length})
+                </Text>
+              </Group>
+              {completedHabits.length === 0 && (
+                <Text size="xs" c="dimmed" mb="xs" fs="italic">
+                  ※ 完了するには記録フォームから時間を入力してください
+                </Text>
+              )}
 
-                {completedHabits.length > 0 ? (
-                  <Stack gap="xs">
-                    {completedHabits.map(({ habit, record, isCompleted }) => (
-                      <DraggableHabitCard
-                        key={habit.id}
-                        habit={habit}
-                        record={record}
-                        isCompleted={isCompleted}
-                      />
-                    ))}
-                  </Stack>
-                ) : (
-                  <Text size="sm" c="dimmed" fs="italic">
-                    完了した習慣がありません
-                  </Text>
-                )}
-              </div>
-            </DroppableZone>
+              {completedHabits.length > 0 ? (
+                <Stack gap="xs">
+                  {completedHabits.map(({ habit, record, isCompleted }) => (
+                    <DraggableHabitCard
+                      key={habit.id}
+                      habit={habit}
+                      record={record}
+                      isCompleted={isCompleted}
+                    />
+                  ))}
+                </Stack>
+              ) : (
+                <Text size="sm" c="dimmed" fs="italic">
+                  完了した習慣がありません
+                </Text>
+              )}
+            </Stack>
 
             {/* スキップした習慣 */}
             {/** biome-ignore lint/correctness/useUniqueElementIds: If it is unique ID drag-and-drop will not work properly */}
