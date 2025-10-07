@@ -1,4 +1,4 @@
-import { Badge, Card, type CSSProperties, Text, Tooltip } from '@mantine/core'
+import { Card, type CSSProperties, Text, Tooltip } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
@@ -188,22 +188,6 @@ export function CalendarDateCell({
         {date.format('dd')}
       </Text>
       <Text fw={500}>{date.date()}</Text>
-      {record && (
-        <Badge
-          size="xs"
-          color={
-            record.status === 'completed'
-              ? 'green'
-              : record.status === 'skipped'
-                ? 'orange'
-                : 'blue'
-          }
-          variant="filled"
-          mt={4}
-        >
-          {formatDuration(record.duration_minutes || 0)}
-        </Badge>
-      )}
     </Card>
   )
 }
