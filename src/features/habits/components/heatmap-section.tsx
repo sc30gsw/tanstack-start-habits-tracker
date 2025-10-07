@@ -24,8 +24,9 @@ type HeatmapSectionProps = {
 
 export function HeatmapSection({ records, habitColor = 'blue' }: HeatmapSectionProps) {
   const apiRoute = getRouteApi('/habits/$habitId')
+
   const searchParams = apiRoute.useSearch()
-  const selectedDate = getValidatedDate(searchParams?.selectedDate)
+  const selectedDate = getValidatedDate(searchParams.selectedDate)
   const metric = searchParams.metric ?? 'duration'
 
   const navigate = apiRoute.useNavigate()

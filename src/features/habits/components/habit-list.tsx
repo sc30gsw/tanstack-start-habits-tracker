@@ -32,8 +32,14 @@ export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
       const filterValue = searchParams.habitFilter
 
       // フィルター未設定、'all'、undefinedの場合はすべて表示
-      if (!filterValue || filterValue === 'all') return true
-      if (filterValue === 'null') return habit.priority === null
+      if (!filterValue || filterValue === 'all') {
+        return true
+      }
+
+      if (filterValue === 'null') {
+        return habit.priority === null
+      }
+
       return habit.priority === filterValue
     }),
     // ソート

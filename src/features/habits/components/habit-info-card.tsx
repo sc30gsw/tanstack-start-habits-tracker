@@ -2,6 +2,8 @@ import { Badge, Card, Group, Select, Stack, Text, useComputedColorScheme } from 
 import { IconChartLine, IconClock, IconFlag, IconTarget, IconTrophy } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
+import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
+import { calculateCompletionRate } from '~/features/habits/utils/completion-rate-utils'
 import { formatTotalDuration } from '~/features/habits/utils/time-utils'
 
 type HabitInfoCardProps = {
@@ -12,15 +14,32 @@ type HabitInfoCardProps = {
 
 export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCardProps) {
   const apiRoute = getRouteApi('/habits/$habitId')
+
+  const search = apiRoute.useSearch()
+  const selectedDate = getValidatedDate(search.selectedDate)
+  const calendarView = search.calendarView ?? 'month'
+  const currentMonth = search.currentMonth
+
   const navigate = apiRoute.useNavigate()
+
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
   // 統計情報の計算
   const totalRecords = records.length
-  const completedRecords = records.filter((r) => r.status === 'completed').length
-  const completionRate = totalRecords > 0 ? completedRecords / totalRecords : 0
   const totalDuration = records.reduce((sum, r) => sum + (r.duration_minutes || 0), 0)
+
+  // 選択された期間に基づく達成率計算
+  const { completionRate, completedDays, totalDays } = selectedDate
+    ? calculateCompletionRate(records, selectedDate, calendarView, currentMonth)
+    : {
+        completionRate:
+          totalRecords > 0
+            ? records.filter((r) => r.status === 'completed').length / totalRecords
+            : 0,
+        completedDays: records.filter((r) => r.status === 'completed').length,
+        totalDays: totalRecords,
+      }
 
   // 優先度の表示設定
   const getPriorityConfig = (priority: string | null) => {
@@ -83,6 +102,7 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
           </Badge>
           <Badge variant="light" color="green" size="md" leftSection={<IconTrophy size={14} />}>
             達成率: {Math.round(completionRate * 100)}%
+            {selectedDate && ` (${completedDays}/${totalDays}日)`}
           </Badge>
           <Badge variant="light" color="orange" size="md" leftSection={<IconClock size={14} />}>
             {formatTotalDuration(totalDuration)}
