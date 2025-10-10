@@ -34,11 +34,20 @@ export const Route = createFileRoute('/')({
   },
   loader: async ({ context }) => {
     const today = dayjs().format('YYYY-MM-DD')
+    const selectedDate = context.search.selectedDate ?? today
+
+    // ヒートマップ用に過去1年分の記録を取得
+    const oneYearAgo = dayjs().subtract(1, 'year').format('YYYY-MM-DD')
 
     const [habitsResult, recordsResult, shareDataResult] = await Promise.all([
       habitDto.getHabits(),
-      recordDto.getRecords(),
-      shareDto.getCompletedHabitsForShare({ data: { date: context.search.selectedDate ?? today } }),
+      recordDto.getRecords({
+        data: {
+          date_from: oneYearAgo,
+          date_to: today,
+        },
+      }),
+      shareDto.getCompletedHabitsForShare({ data: { date: selectedDate } }),
     ])
 
     return {

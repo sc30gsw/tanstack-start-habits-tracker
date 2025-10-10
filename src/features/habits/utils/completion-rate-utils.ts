@@ -17,7 +17,7 @@ export function getTargetDateRange(
   selectedDate: Date,
   calendarView: SearchParams['calendarView'],
   currentMonth?: SearchParams['currentMonth'],
-) {
+): { startDate: string; endDate: string; totalDays: number } {
   const selected = dayjs(selectedDate).tz('Asia/Tokyo')
   const today = dayjs().tz('Asia/Tokyo')
 
@@ -116,7 +116,7 @@ export function calculateCompletionRate(
   selectedDate: Date,
   calendarView: SearchParams['calendarView'],
   currentMonth?: SearchParams['currentMonth'],
-): { completionRate: number; completedDays: number; totalDays: number } {
+) {
   const { startDate, endDate, totalDays } = getTargetDateRange(
     selectedDate,
     calendarView,
@@ -135,5 +135,32 @@ export function calculateCompletionRate(
     completionRate,
     completedDays,
     totalDays,
-  }
+  } as const satisfies Record<string, number>
+}
+
+/**
+ * データ取得用の日付範囲を計算する
+ * カレンダービューに基づいた範囲 + ヒートマップ用の過去1年分を考慮
+ */
+export function getDataFetchDateRange(
+  selectedDate: Date,
+  calendarView: SearchParams['calendarView'],
+  currentMonth?: SearchParams['currentMonth'],
+) {
+  const today = dayjs().tz('Asia/Tokyo')
+
+  // ヒートマップのために過去1年分を基準とする
+  const oneYearAgo = today.subtract(1, 'year').format('YYYY-MM-DD')
+
+  // カレンダービューの範囲を取得
+  const { startDate, endDate } = getTargetDateRange(selectedDate, calendarView, currentMonth)
+
+  // より広い範囲を採用（過去1年 vs カレンダービュー範囲）
+  const finalStartDate = dayjs(startDate).isBefore(oneYearAgo) ? startDate : oneYearAgo
+  const finalEndDate = dayjs(endDate).isAfter(today) ? endDate : today.format('YYYY-MM-DD')
+
+  return {
+    dateFrom: finalStartDate,
+    dateTo: finalEndDate,
+  } as const satisfies Record<string, string>
 }

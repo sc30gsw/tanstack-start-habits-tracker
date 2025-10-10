@@ -3,7 +3,7 @@ import { getRequest } from '@tanstack/react-start/server'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, gte, lte, type SQL } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
@@ -226,6 +226,7 @@ const getRecords = createServerFn({ method: 'GET' })
       .object({
         habit_id: z.string().optional(),
         date_from: z.string().optional(),
+        date_to: z.string().optional(),
         status: z.enum(['active', 'completed', 'skipped']).optional(),
       })
       .optional(),
@@ -243,14 +244,20 @@ const getRecords = createServerFn({ method: 'GET' })
       const userId = session.user.id
 
       // フィルタリング条件を準備（自分の記録のみ）
-      const conditions: ReturnType<typeof eq>[] = [eq(records.userId, userId)]
+      const conditions: SQL<unknown>[] = [eq(records.userId, userId)]
 
       if (filters?.habit_id) {
         conditions.push(eq(records.habitId, filters.habit_id))
       }
 
-      if (filters?.date_from) {
-        conditions.push(eq(records.date, filters.date_from)) // 単純化: 日付範囲は後で実装
+      // 日付範囲フィルタリング
+      if (filters?.date_from && filters?.date_to) {
+        // 範囲指定
+        conditions.push(gte(records.date, filters.date_from))
+        conditions.push(lte(records.date, filters.date_to))
+      } else if (filters?.date_from) {
+        // 開始日のみ指定
+        conditions.push(eq(records.date, filters.date_from))
       }
 
       if (filters?.status !== undefined) {
@@ -258,15 +265,10 @@ const getRecords = createServerFn({ method: 'GET' })
       }
 
       // クエリを実行
-      const allRecords =
-        conditions.length > 0
-          ? await db.query.records.findMany({
-              where: and(...conditions),
-              orderBy: records.createdAt,
-            })
-          : await db.query.records.findMany({
-              orderBy: records.createdAt,
-            })
+      const allRecords = await db.query.records.findMany({
+        where: and(...conditions),
+        orderBy: (records, { desc }) => [desc(records.date), desc(records.createdAt)],
+      })
 
       // RecordEntityに変換
       const recordEntities = allRecords.map((record) => ({
