@@ -62,8 +62,11 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
     const baseMonth = currentMonth || dayjs().tz('Asia/Tokyo')
     const endOfMonth = baseMonth.endOf('month')
 
+    // completedのみをフィルタリング
+    const completedRecords = records.filter((record) => record.status === 'completed')
+
     const recordMap = pipe(
-      records,
+      completedRecords,
       indexBy((record) => record.date),
     )
 
@@ -91,8 +94,11 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
     const startOfWeek = baseDate.startOf('week')
     const dayNames = ['日', '月', '火', '水', '木', '金', '土']
 
+    // completedのみをフィルタリング
+    const completedRecords = records.filter((record) => record.status === 'completed')
+
     const recordMap = pipe(
-      records,
+      completedRecords,
       indexBy((record) => record.date),
     )
 
@@ -118,8 +124,11 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
     const baseDate = selectedDate ? dayjs(selectedDate).tz('Asia/Tokyo') : dayjs().tz('Asia/Tokyo')
     const dayKey = baseDate.format('YYYY-MM-DD')
 
+    // completedのみをフィルタリング
+    const completedRecords = records.filter((record) => record.status === 'completed')
+
     const recordMap = pipe(
-      records,
+      completedRecords,
       indexBy((record) => record.date),
     )
     const record = recordMap[dayKey]

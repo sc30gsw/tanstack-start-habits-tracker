@@ -1,19 +1,13 @@
 import { Badge, Card, Group, Select, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconChartLine, IconClock, IconFlag, IconTarget, IconTrophy } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
-import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { calculateCompletionRate } from '~/features/habits/utils/completion-rate-utils'
 import { formatTotalDuration } from '~/features/habits/utils/time-utils'
 
-type HabitInfoCardProps = {
-  habit: HabitEntity
-  records: RecordEntity[]
-  habitsList?: HabitEntity[]
-}
-
-export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCardProps) {
+export function HabitInfoCard() {
   const apiRoute = getRouteApi('/habits/$habitId')
+  const { habit, records: recordsData, habits } = apiRoute.useLoaderData()
 
   const search = apiRoute.useSearch()
   const selectedDate = getValidatedDate(search.selectedDate)
@@ -25,9 +19,12 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
-  // 統計情報の計算
+  const records = recordsData.data || []
+
+  // 統計情報の計算（completedのみを対象）
   const totalRecords = records.length
-  const totalDuration = records.reduce((sum, r) => sum + (r.duration_minutes || 0), 0)
+  const completedRecords = records.filter((r) => r.status === 'completed')
+  const totalDuration = completedRecords.reduce((sum, r) => sum + (r.duration_minutes || 0), 0)
 
   // 選択された期間に基づく達成率計算
   const { completionRate, completedDays, totalDays } = selectedDate
@@ -42,7 +39,7 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
       }
 
   // 優先度の表示設定
-  const getPriorityConfig = (priority: string | null) => {
+  const getPriorityConfig = (priority: 'high' | 'middle' | 'low' | null) => {
     switch (priority) {
       case 'high':
         return { label: '高', color: 'red', icon: <IconFlag size={14} /> }
@@ -55,7 +52,9 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
     }
   }
 
-  const priorityConfig = getPriorityConfig(habit.priority)
+  const priorityConfig = getPriorityConfig(
+    (habit.data?.priority as Parameters<typeof getPriorityConfig>[0]) ?? null,
+  )
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
@@ -67,24 +66,28 @@ export function HabitInfoCard({ habit, records, habitsList = [] }: HabitInfoCard
           </Text>
         </Group>
 
-        {habitsList.length > 1 && (
+        {habits.data && habits.data.length > 1 && (
           <Select
             label="習慣を切り替える"
             size="xs"
             searchable
-            value={habit.id}
+            value={habit.data?.id}
             onChange={(value) => {
-              if (value && value !== habit.id) {
-                navigate({ to: '/habits/$habitId', params: { habitId: value } })
+              if (value && value !== habit.data?.id) {
+                navigate({
+                  to: '/habits/$habitId',
+                  params: { habitId: value },
+                  search: (prev) => ({ ...prev, showRecordForm: false }),
+                })
               }
             }}
-            data={habitsList.map((h) => ({ value: h.id, label: h.name }))}
+            data={habits.data.map((h) => ({ value: h.id, label: h.name }))}
           />
         )}
 
-        {habit.description && (
+        {habit.data?.description && (
           <Text c="dimmed" fs="italic" size="sm">
-            {habit.description}
+            {habit.data.description}
           </Text>
         )}
 

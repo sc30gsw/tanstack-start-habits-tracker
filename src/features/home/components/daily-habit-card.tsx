@@ -1,9 +1,11 @@
 import { Badge, Group, Paper, Text, Tooltip, useComputedColorScheme } from '@mantine/core'
 import { IconClock } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
+import { getRouteApi, Link } from '@tanstack/react-router'
+import dayjs from 'dayjs'
 import { useHabitColor } from '~/features/habits/hooks/use-habit-color'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
+import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
 type DailyHabitCardProps = {
@@ -15,6 +17,11 @@ type DailyHabitCardProps = {
 export function DailyHabitCard({ habit, record, isCompleted }: DailyHabitCardProps) {
   const computedColorScheme = useComputedColorScheme('light')
   const { getHabitColor } = useHabitColor()
+
+  // ホームページのsearchParamsから選択日を取得
+  const apiRoute = getRouteApi('/')
+  const searchParams = apiRoute.useSearch()
+  const selectedDate = getValidatedDate(searchParams.selectedDate)
 
   return (
     <Tooltip
@@ -67,7 +74,11 @@ export function DailyHabitCard({ habit, record, isCompleted }: DailyHabitCardPro
                 opacity: isCompleted ? 1 : 0.5,
               }}
             />
-            <Link to="/habits/$habitId" params={() => ({ habitId: habit.id })}>
+            <Link
+              to="/habits/$habitId"
+              params={() => ({ habitId: habit.id })}
+              search={() => ({ selectedDate: dayjs(selectedDate).format('YYYY-MM-DD') })}
+            >
               <Text
                 size="sm"
                 fw={isCompleted ? 600 : 500}

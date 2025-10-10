@@ -56,14 +56,7 @@ export const createRecordSchema = z
     date: z
       .string({ message: '日付は必須です' })
       .regex(DATE_REGEX, '日付はYYYY-MM-DD形式で入力してください')
-      .refine(isValidDate, '有効な日付を入力してください')
-      .refine((date) => {
-        // 日本時間（JST）で日付を比較
-        const inputDate = date
-        const todayJST = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
-
-        return inputDate <= todayJST
-      }, '未来の日付は記録できません'),
+      .refine(isValidDate, '有効な日付を入力してください'),
     status: recordStatusSchema.default('active'),
     durationMinutes: z
       .number({ message: '実行時間は数値で入力してください' })
@@ -91,6 +84,24 @@ export const createRecordSchema = z
       path: ['durationMinutes'], // エラーをdurationMinutesフィールドに関連付け
     },
   )
+  .refine(
+    (data) => {
+      // 日本時間（JST）で日付を比較
+      const inputDate = data.date
+      const todayJST = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
+
+      // 未来の日付で active 以外のステータスは禁止
+      if (inputDate > todayJST && data.status !== 'active') {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: '未来の日付には「予定中」ステータスのみ記録できます',
+      path: ['status'], // エラーをstatusフィールドに関連付け
+    },
+  )
 
 /**
  * 記録更新用のZodスキーマ
@@ -110,6 +121,11 @@ export const createRecordSchema = z
 export const updateRecordSchema = z
   .object({
     id: z.string({ message: '記録IDは必須です' }).min(1, '記録IDを指定してください'),
+    date: z
+      .string({ message: '日付は必須です' })
+      .regex(DATE_REGEX, '日付はYYYY-MM-DD形式で入力してください')
+      .refine(isValidDate, '有効な日付を入力してください')
+      .optional(),
     status: recordStatusSchema.optional(),
     durationMinutes: z
       .number({ message: '実行時間は数値で入力してください' })
@@ -135,6 +151,27 @@ export const updateRecordSchema = z
     {
       message: '習慣を完了した場合は、実行時間を入力してください',
       path: ['durationMinutes'], // エラーをdurationMinutesフィールドに関連付け
+    },
+  )
+  .refine(
+    (data) => {
+      // 日付が提供されている場合のみチェック
+      if (!data.date) return true
+
+      // 日本時間（JST）で日付を比較
+      const inputDate = data.date
+      const todayJST = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
+
+      // 未来の日付で active 以外のステータスは禁止
+      if (inputDate > todayJST && data.status && data.status !== 'active') {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: '未来の日付には「予定中」ステータスのみ記録できます',
+      path: ['status'], // エラーをstatusフィールドに関連付け
     },
   )
 

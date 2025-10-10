@@ -34,13 +34,18 @@ export function HabitHeatmap({
   const dataMap = useMemo(() => {
     const map: Record<string, number> = {}
 
-    // 実際の記録データをマップに変換
+    // 実際の記録データをマップに変換（completedのみを対象とする）
     records.forEach((r) => {
+      // active（予定中）やskipped（スキップ）は除外
+      if (r.status !== 'completed') {
+        return
+      }
+
       if (metric === 'duration') {
         map[r.date] = r.duration_minutes ?? 0
       } else {
-        // completionの場合、完了=1、予定中/スキップ=0.5として区別する
-        map[r.date] = r.status === 'completed' ? 1 : 0.5
+        // completionの場合、完了=1
+        map[r.date] = 1
       }
     })
 

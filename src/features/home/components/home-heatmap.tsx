@@ -28,20 +28,23 @@ export function HomeHeatmap({ records }: Record<'records', RecordEntity[]>) {
 
   // 全習慣の記録を集約したヒートマップデータを作成
   const aggregatedRecords = useMemo(() => {
+    // completedのみをフィルタリング
+    const completedRecords = records.filter((record) => record.status === 'completed')
+
     return pipe(
-      records,
+      completedRecords,
       // 日付でグループ化
       groupBy((record) => record.date),
       // 各日付のデータを集約
       mapValues((dateRecords) => {
-        const completed = dateRecords.filter((r) => r.status === 'completed').length
+        const completed = dateRecords.length // completedのみなのでlengthで十分
         const duration = dateRecords.reduce((sum, r) => sum + (r.duration_minutes || 0), 0)
 
         return {
           id: `aggregated-${dateRecords[0].date}`,
           habitId: 'aggregated',
           date: dateRecords[0].date,
-          status: (metric === 'completion' ? completed > 0 : duration > 0) ? 'completed' : 'active',
+          status: 'completed' as const, // completedのみなので固定
           duration_minutes: metric === 'duration' ? duration : completed,
           notes: null,
           created_at: new Date(),

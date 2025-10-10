@@ -14,7 +14,18 @@ import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
-import { useTransition } from 'react'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
+import { useEffect, useMemo, useTransition } from 'react'
+import 'dayjs/locale/ja'
+
+// dayjsプラグインと日本のロケールを設定
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.locale('ja')
+dayjs.tz.setDefault('Asia/Tokyo')
+
 import { recordDto } from '~/features/habits/server/record-functions'
 import type { HabitTable, RecordEntity, RecordTable } from '~/features/habits/types/habit'
 import { createRecordSchema } from '~/features/habits/types/schemas/record-schemas'
@@ -87,6 +98,31 @@ export function RecordForm({
       notes: values.notes,
     }),
   })
+
+  // 未来の日付かどうかを判定
+  const isFutureDate = useMemo(() => {
+    const todayJST = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
+    return date > todayJST
+  }, [date])
+
+  // ステータス選択肢を未来の日付に応じて動的に変更
+  const statusOptions = useMemo(() => {
+    if (isFutureDate) {
+      return [{ value: 'active', label: '📋 予定中' }]
+    }
+    return [
+      { value: 'active', label: '📋 予定中' },
+      { value: 'completed', label: '✅ 完了' },
+      { value: 'skipped', label: '⏭️ スキップ' },
+    ]
+  }, [isFutureDate])
+
+  // 未来の日付では強制的に 'active' に設定
+  useEffect(() => {
+    if (isFutureDate && form.values.status !== 'active') {
+      form.setFieldValue('status', 'active')
+    }
+  }, [isFutureDate, form])
 
   const handleSubmit = (values: FormValues) => {
     const durationMinutes = typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
@@ -240,6 +276,15 @@ export function RecordForm({
   return (
     <form onSubmit={form.onSubmit((values: FormValues) => handleSubmit(values))} noValidate>
       <Stack gap="md">
+        {isFutureDate && (
+          <Alert color="blue" title="未来の日付" variant="light">
+            <Text size="sm">
+              未来の日付には「予定中」ステータスのみ記録できます。
+              <br />
+              完了やスキップの記録は、その日が来てから行ってください。
+            </Text>
+          </Alert>
+        )}
         {(form.errors.status || form.errors.durationMinutes || form.errors.notes) && (
           <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
             <Text c="red">
@@ -255,13 +300,10 @@ export function RecordForm({
           onChange={(value) =>
             form.setFieldValue('status', value as 'active' | 'completed' | 'skipped')
           }
-          data={[
-            { value: 'active', label: '📋 予定中' },
-            { value: 'completed', label: '✅ 完了' },
-            { value: 'skipped', label: '⏭️ スキップ' },
-          ]}
+          data={statusOptions}
           disabled={isPending}
           error={form.errors.status}
+          description={isFutureDate ? '未来の日付は予定中のみ選択可能です' : undefined}
         />
         <Group gap="md">
           <NumberInput

@@ -14,11 +14,8 @@ import { IconCheck, IconCopy, IconShare } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { filter, join, map, pipe } from 'remeda'
-import type { ShareDataResponse } from '~/features/home/types/share'
 
-export function ShareHabitsModal({
-  shareDataResponse,
-}: Record<'shareDataResponse', ShareDataResponse>) {
+export function ShareHabitsModal() {
   const routeApi = getRouteApi('/')
   const navigate = routeApi.useNavigate()
   const searchParams = routeApi.useSearch()
@@ -27,6 +24,8 @@ export function ShareHabitsModal({
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
   const textColor = 'gray.6'
+
+  const { shareData: shareDataResponse } = routeApi.useLoaderData()
 
   if (shareDataResponse.error || !shareDataResponse.data) {
     return (

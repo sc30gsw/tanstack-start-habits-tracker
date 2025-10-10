@@ -1,12 +1,8 @@
 import { Box, Card, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconChartBar } from '@tabler/icons-react'
-import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import { HomeHeatmap } from '~/features/home/components/chart/home-heatmap'
 
-export function HomeHeatmapView({
-  records,
-  habits,
-}: Record<'records', RecordEntity[]> & Record<'habits', HabitEntity[]>) {
+export function HomeHeatmapView() {
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
@@ -31,7 +27,7 @@ export function HomeHeatmapView({
             overflow: 'auto',
           }}
         >
-          <HomeHeatmap records={records} habits={habits} />
+          <HomeHeatmap />
         </Box>
       </Stack>
     </Card>
