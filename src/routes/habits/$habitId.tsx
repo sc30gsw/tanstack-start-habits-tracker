@@ -1,18 +1,40 @@
 import { Alert, Container, Stack, Text, Title, useComputedColorScheme } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
+import dayjs from 'dayjs'
 import { HabitDetail } from '~/features/habits/components/habit-detail'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
-import { searchSchema } from '~/features/habits/types/schemas/search-params'
+import { getValidatedDate, searchSchema } from '~/features/habits/types/schemas/search-params'
+import { getDataFetchDateRange } from '~/features/habits/utils/completion-rate-utils'
 
 export const Route = createFileRoute('/habits/$habitId')({
   component: HabitDetailPage,
   validateSearch: searchSchema,
-  loader: async ({ params }) => {
+  beforeLoad: async ({ search }) => {
+    return { search }
+  },
+  loader: async ({ params, context }) => {
+    const today = dayjs().format('YYYY-MM-DD')
+    const selectedDate = context.search.selectedDate ?? today
+    const calendarView = context.search.calendarView ?? 'month'
+    const currentMonth = context.search.currentMonth
+
+    const { dateFrom, dateTo } = getDataFetchDateRange(
+      getValidatedDate(selectedDate),
+      calendarView,
+      currentMonth,
+    )
+
     const [habitResult, recordsResult, habitsResult] = await Promise.all([
       habitDto.getHabitById({ data: { id: params.habitId } }),
-      recordDto.getRecords({ data: { habit_id: params.habitId } }),
+      recordDto.getRecords({
+        data: {
+          habit_id: params.habitId,
+          date_from: dateFrom,
+          date_to: dateTo,
+        },
+      }),
       habitDto.getHabits(),
     ])
 
