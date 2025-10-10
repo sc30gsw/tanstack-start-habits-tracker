@@ -2,12 +2,14 @@ import { Alert, Card, Stack, Text } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { filter, pipe, sortBy } from 'remeda'
-import type { HabitEntity } from '~/features/habits/types/habit'
 import { HabitCard } from './habit-card'
 
-export function HabitList({ habits }: Record<'habits', HabitEntity[]>) {
+export function HabitList() {
   const routeApi = getRouteApi('/habits/')
   const searchParams = routeApi.useSearch()
+
+  const habitsData = routeApi.useLoaderData()
+  const habits = habitsData.data ?? []
 
   if (habits.length === 0) {
     return (

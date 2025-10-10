@@ -67,7 +67,6 @@ export function HomeCalendarDateCell({
   const navigate = apiRoute.useNavigate()
 
   const isSelected = !!(selectedDate && date.isSame(selectedDate, 'day'))
-  const isFuture = date.isAfter(dayjs().tz('Asia/Tokyo'), 'day')
   const dateType = getDateType(date)
 
   // 背景色とボーダーの設定
@@ -77,14 +76,13 @@ export function HomeCalendarDateCell({
     dateType,
   })
 
-  const textColor = getDateTextColor(dateType, isSelected, false, isFuture) // 記録なしとして扱う
+  const textColor = getDateTextColor(dateType, isSelected, false) // 記録なしとして扱う
 
   // 月表示用のコンテンツ
   if (variant === 'month') {
     return (
       <Card
         onClick={() =>
-          !isFuture &&
           navigate({ search: (prev) => ({ ...prev, selectedDate: date.format('YYYY-MM-DD') }) })
         }
         padding="xs"
@@ -92,8 +90,8 @@ export function HomeCalendarDateCell({
         style={{
           flex: 1,
           textAlign: 'center',
-          cursor: isFuture ? 'not-allowed' : 'pointer',
-          opacity: isCurrentMonth ? (isFuture ? 0.3 : 1) : 0.35,
+          cursor: 'pointer',
+          opacity: isCurrentMonth ? 1 : 0.35,
           backgroundColor,
           color: textColor,
           minWidth: 34,
@@ -116,15 +114,13 @@ export function HomeCalendarDateCell({
       style={{
         flex: 1,
         textAlign: 'center',
-        cursor: isFuture ? 'not-allowed' : 'pointer',
-        opacity: isFuture ? 0.5 : 1,
+        cursor: 'pointer',
         backgroundColor,
         color: textColor,
         border: `${borderWidth} solid ${borderColor}`,
         boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
       }}
       onClick={() =>
-        !isFuture &&
         navigate({
           search: (prev) => ({
             ...prev,

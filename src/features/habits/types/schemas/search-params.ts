@@ -33,13 +33,6 @@ const dateStringValidator = z
       return dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
     }
 
-    // 未来の日付かチェック（今日まで許可）
-    const today = dayjs().tz('Asia/Tokyo')
-
-    if (parsed.isAfter(today, 'day')) {
-      return today.format('YYYY-MM-DD')
-    }
-
     return val
   })
 

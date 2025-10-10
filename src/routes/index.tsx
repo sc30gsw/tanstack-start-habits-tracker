@@ -50,7 +50,7 @@ export const Route = createFileRoute('/')({
 })
 
 function Home() {
-  const { habits, records, shareData } = Route.useLoaderData()
+  const { habits, records } = Route.useLoaderData()
   const navigate = Route.useNavigate()
   const searchParams = Route.useSearch()
 
@@ -65,9 +65,6 @@ function Home() {
   const completedOnSelectedDate = records.success
     ? (records.data?.filter((r) => r.date === selectedDate && r.status === 'completed').length ?? 0)
     : 0
-
-  const allRecords = records.success && records.data ? records.data : []
-  const allHabits = habits.success && habits.data ? habits.data : []
 
   const copyId = useId()
 
@@ -148,7 +145,7 @@ function Home() {
         <HomeCalendarView />
 
         {/* ヒートマップ */}
-        <HomeHeatmapView records={allRecords} habits={allHabits} />
+        <HomeHeatmapView />
 
         {/* 選択日の完了習慣 - 統一されたCardデザイン */}
         <Card withBorder padding="lg">
@@ -196,7 +193,7 @@ function Home() {
             </Group>
             <Divider />
 
-            <DailyHabitList habits={allHabits} records={allRecords} />
+            <DailyHabitList />
           </Stack>
         </Card>
 
@@ -235,7 +232,7 @@ function Home() {
           </Stack>
         </Card>
       </Stack>
-      <ShareHabitsModal shareDataResponse={shareData} />
+      <ShareHabitsModal />
     </Container>
   )
 }

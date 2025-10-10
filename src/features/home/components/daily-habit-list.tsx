@@ -9,18 +9,13 @@ import {
   skipHabit,
   unscheduleHabit,
 } from '~/features/habits/server/schedule-functions'
-import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
+import type { RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { DraggableHabitCard } from '~/features/home/components/draggable-habit-card'
 import { DroppableZone } from '~/features/home/components/droppable-zone'
 import { HabitPriorityFilterPaper } from '~/features/home/components/habit-priority-filter-paper'
 
-type DailyHabitListProps = {
-  habits: HabitEntity[]
-  records: RecordEntity[]
-}
-
-export function DailyHabitList({ habits, records }: DailyHabitListProps) {
+export function DailyHabitList() {
   const apiRoute = getRouteApi('/')
   const searchParams = apiRoute.useSearch()
   const selectedDate = getValidatedDate(searchParams.selectedDate)
@@ -29,20 +24,23 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
+  const { habits, records } = apiRoute.useLoaderData()
+
   // 選択された日付の記録をマップ化
-  const recordsMap = records.reduce(
-    (acc, record) => {
-      if (record.date === dayjs(selectedDate).format('YYYY-MM-DD')) {
-        acc[record.habitId] = record
-      }
-      return acc
-    },
-    {} as Record<string, RecordEntity>,
-  )
+  const recordsMap =
+    records.data?.reduce(
+      (acc, record) => {
+        if (record.date === dayjs(selectedDate).format('YYYY-MM-DD')) {
+          acc[record.habitId] = record
+        }
+        return acc
+      },
+      {} as Record<string, RecordEntity>,
+    ) ?? {}
 
   // 習慣と記録を結合し、優先度フィルタリングを適用
   const habitsWithRecords = pipe(
-    habits,
+    habits.data ?? [],
     filter((habit) => {
       // 優先度フィルタリング
       const filterValue = searchParams.habitFilter
@@ -61,6 +59,7 @@ export function DailyHabitList({ habits, records }: DailyHabitListProps) {
     (filteredHabits) =>
       filteredHabits.map((habit) => {
         const record = recordsMap[habit.id]
+
         return {
           habit,
           record,

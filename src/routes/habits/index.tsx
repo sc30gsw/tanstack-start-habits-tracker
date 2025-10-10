@@ -67,11 +67,7 @@ function HabitsPage() {
         {/* ソート・フィルタUI */}
         <HabitOrganizer />
 
-        {habitsData.success ? (
-          <HabitList habits={habitsData.data ?? []} />
-        ) : (
-          <div>エラー: {habitsData.error}</div>
-        )}
+        {habitsData.success ? <HabitList /> : <div>エラー: {habitsData.error}</div>}
       </Stack>
     </Container>
   )

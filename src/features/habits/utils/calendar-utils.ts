@@ -53,12 +53,7 @@ export function getDateTextColor(
   dateType: ReturnType<typeof getDateType>,
   isSelected: boolean,
   hasRecord: boolean,
-  isFuture: boolean,
 ) {
-  if (isFuture) {
-    return 'var(--mantine-color-gray-5)'
-  }
-
   if (isSelected || hasRecord) {
     return '#fff'
   }

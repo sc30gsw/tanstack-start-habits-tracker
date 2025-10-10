@@ -21,7 +21,7 @@ export const Route = createFileRoute('/habits/$habitId')({
 })
 
 function HabitDetailPage() {
-  const { habit, records, habits } = Route.useLoaderData()
+  const { habit } = Route.useLoaderData()
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
@@ -41,11 +41,7 @@ function HabitDetailPage() {
         <Title order={1} c={titleColor}>
           {habit.data.name}
         </Title>
-        <HabitDetail
-          habit={habit.data}
-          records={records.success && records.data ? records.data : []}
-          habitsList={habits.success && habits.data ? habits.data : []}
-        />
+        <HabitDetail />
       </Stack>
     </Container>
   )

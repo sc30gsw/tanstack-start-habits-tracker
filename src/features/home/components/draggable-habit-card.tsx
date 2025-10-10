@@ -22,7 +22,7 @@ export function DraggableHabitCard({ habit, record, isCompleted }: DraggableHabi
     transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.5 : 1,
     cursor: isDragging ? 'grabbing' : 'grab',
-  }
+  } as const satisfies React.CSSProperties
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>

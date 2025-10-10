@@ -6,33 +6,32 @@ import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { useMemo } from 'react'
 import { groupBy, mapValues, pipe } from 'remeda'
-import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
+import type { RecordEntity } from '~/features/habits/types/habit'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
-type HomeHeatmapProps = {
-  records: RecordEntity[]
-  habits: HabitEntity[]
-}
-
-export function HomeHeatmap({ records, habits }: HomeHeatmapProps) {
+export function HomeHeatmap() {
   const apiRoute = getRouteApi('/')
   const searchParams = apiRoute.useSearch()
   const selectedDate = searchParams?.selectedDate || null
 
   const navigate = apiRoute.useNavigate()
 
+  const { habits, records } = apiRoute.useLoaderData()
+
   // 習慣IDから習慣名へのマップを作成
   const habitNameMap = useMemo(() => {
-    return habits.reduce(
-      (acc, habit) => {
-        acc[habit.id] = habit.name
-        return acc
-      },
-      {} as Record<string, string>,
+    return (
+      habits.data?.reduce(
+        (acc, habit) => {
+          acc[habit.id] = habit.name
+          return acc
+        },
+        {} as Record<string, string>,
+      ) || {}
     )
   }, [habits])
 
@@ -43,13 +42,14 @@ export function HomeHeatmap({ records, habits }: HomeHeatmapProps) {
 
     // 日付ごとにレコードをグループ化
     pipe(
-      records,
+      records.data ?? [],
       groupBy((record) => record.date),
       mapValues((dateRecords) => {
         // 各日付の総時間を計算
         const totalDuration = dateRecords.reduce((sum, r) => sum + (r.duration_minutes || 0), 0)
         dataMap[dateRecords[0].date] = totalDuration
         habitDetailsMap[dateRecords[0].date] = dateRecords
+
         return dateRecords
       }),
     )
@@ -63,6 +63,7 @@ export function HomeHeatmap({ records, habits }: HomeHeatmapProps) {
   // データの最大値を計算
   const maxValue = useMemo(() => {
     const values = Object.values(dataMap)
+
     return Math.max(...values, 1)
   }, [dataMap])
 
