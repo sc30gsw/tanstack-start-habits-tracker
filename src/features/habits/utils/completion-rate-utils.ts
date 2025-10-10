@@ -139,25 +139,48 @@ export function calculateCompletionRate(
 }
 
 /**
- * データ取得用の日付範囲を計算する
- * カレンダービューに基づいた範囲 + ヒートマップ用の過去1年分を考慮
+ * カレンダーグリッド(42日分)の日付範囲を計算する
+ * 日曜始まり・土曜終わりのカレンダーで、前月末〜翌月初めを含む
  */
-export function getDataFetchDateRange(
-  selectedDate: Date,
-  calendarView: SearchParams['calendarView'],
-  currentMonth?: SearchParams['currentMonth'],
-) {
+export function getCalendarGridDateRange(currentMonth?: SearchParams['currentMonth']) {
+  const today = dayjs().tz('Asia/Tokyo')
+  const targetMonth = currentMonth ? dayjs.tz(currentMonth, 'Asia/Tokyo') : today
+
+  // 月の最初の日
+  const firstDayOfMonth = targetMonth.startOf('month')
+
+  // 月の最初の日の曜日（0=日曜, 1=月曜, ..., 6=土曜）
+  const firstDayWeekday = firstDayOfMonth.day()
+
+  // カレンダーグリッドの開始日（日曜始まり）
+  // 日曜(0)の場合は0日前、月曜(1)の場合は1日前、...、土曜(6)の場合は6日前
+  const gridStartDate = firstDayOfMonth.subtract(firstDayWeekday, 'day')
+
+  // カレンダーグリッドの終了日（開始日+41日 = 42日分）
+  const gridEndDate = gridStartDate.add(41, 'day')
+
+  return {
+    startDate: gridStartDate.format('YYYY-MM-DD'),
+    endDate: gridEndDate.format('YYYY-MM-DD'),
+  } as const satisfies Record<string, string>
+}
+
+/**
+ * データ取得用の日付範囲を計算する
+ * ヒートマップ用の過去1年分 + カレンダーグリッド42日分を考慮
+ */
+export function getDataFetchDateRange(currentMonth?: SearchParams['currentMonth']) {
   const today = dayjs().tz('Asia/Tokyo')
 
-  // ヒートマップのために過去1年分を基準とする
+  // ヒートマップのために過去1年分
   const oneYearAgo = today.subtract(1, 'year').format('YYYY-MM-DD')
 
-  // カレンダービューの範囲を取得
-  const { startDate, endDate } = getTargetDateRange(selectedDate, calendarView, currentMonth)
+  // カレンダーグリッド42日分の範囲を取得
+  const { startDate: calendarStart, endDate: calendarEnd } = getCalendarGridDateRange(currentMonth)
 
-  // より広い範囲を採用（過去1年 vs カレンダービュー範囲）
-  const finalStartDate = dayjs(startDate).isBefore(oneYearAgo) ? startDate : oneYearAgo
-  const finalEndDate = dayjs(endDate).isAfter(today) ? endDate : today.format('YYYY-MM-DD')
+  // より広い範囲を採用
+  const finalStartDate = dayjs(calendarStart).isBefore(oneYearAgo) ? calendarStart : oneYearAgo
+  const finalEndDate = dayjs(calendarEnd).isAfter(today) ? calendarEnd : today.format('YYYY-MM-DD')
 
   return {
     dateFrom: finalStartDate,

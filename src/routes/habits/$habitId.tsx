@@ -1,11 +1,10 @@
 import { Alert, Container, Stack, Text, Title, useComputedColorScheme } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
-import dayjs from 'dayjs'
 import { HabitDetail } from '~/features/habits/components/habit-detail'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
-import { getValidatedDate, searchSchema } from '~/features/habits/types/schemas/search-params'
+import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { getDataFetchDateRange } from '~/features/habits/utils/completion-rate-utils'
 
 export const Route = createFileRoute('/habits/$habitId')({
@@ -15,16 +14,8 @@ export const Route = createFileRoute('/habits/$habitId')({
     return { search }
   },
   loader: async ({ params, context }) => {
-    const today = dayjs().format('YYYY-MM-DD')
-    const selectedDate = context.search.selectedDate ?? today
-    const calendarView = context.search.calendarView ?? 'month'
-    const currentMonth = context.search.currentMonth
-
-    const { dateFrom, dateTo } = getDataFetchDateRange(
-      getValidatedDate(selectedDate),
-      calendarView,
-      currentMonth,
-    )
+    // ヒートマップ(今日から1年分) + カレンダーグリッド(42日分)の範囲を取得
+    const { dateFrom, dateTo } = getDataFetchDateRange(context.search.currentMonth)
 
     const [habitResult, recordsResult, habitsResult] = await Promise.all([
       habitDto.getHabitById({ data: { id: params.habitId } }),

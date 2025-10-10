@@ -18,6 +18,7 @@ import { useId } from 'react'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
+import { getDataFetchDateRange } from '~/features/habits/utils/completion-rate-utils'
 import { DailyHabitList } from '~/features/home/components/daily-habit-list'
 import { HomeCalendarView } from '~/features/home/components/home-calendar-view'
 import { HomeHeatmapView } from '~/features/home/components/home-heatmap-view'
@@ -36,15 +37,15 @@ export const Route = createFileRoute('/')({
     const today = dayjs().format('YYYY-MM-DD')
     const selectedDate = context.search.selectedDate ?? today
 
-    // ヒートマップ用に過去1年分の記録を取得
-    const oneYearAgo = dayjs().subtract(1, 'year').format('YYYY-MM-DD')
+    // ヒートマップ(今日から1年分) + カレンダーグリッド(42日分)の範囲を取得
+    const { dateFrom, dateTo } = getDataFetchDateRange(context.search.currentMonth)
 
     const [habitsResult, recordsResult, shareDataResult] = await Promise.all([
       habitDto.getHabits(),
       recordDto.getRecords({
         data: {
-          date_from: oneYearAgo,
-          date_to: today,
+          date_from: dateFrom,
+          date_to: dateTo,
         },
       }),
       shareDto.getCompletedHabitsForShare({ data: { date: selectedDate } }),
