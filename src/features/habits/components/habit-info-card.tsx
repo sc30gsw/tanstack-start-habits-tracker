@@ -74,7 +74,11 @@ export function HabitInfoCard() {
             value={habit.data?.id}
             onChange={(value) => {
               if (value && value !== habit.data?.id) {
-                navigate({ to: '/habits/$habitId', params: { habitId: value } })
+                navigate({
+                  to: '/habits/$habitId',
+                  params: { habitId: value },
+                  search: (prev) => ({ ...prev, showRecordForm: false }),
+                })
               }
             }}
             data={habits.data.map((h) => ({ value: h.id, label: h.name }))}
