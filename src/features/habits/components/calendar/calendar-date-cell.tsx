@@ -24,6 +24,11 @@ const CELL_COLORS = {
     normal: 'var(--mantine-color-yellow-5)',
     selected: 'var(--mantine-color-yellow-6)',
   },
+  // スキップ状態の色
+  skipped: {
+    normal: 'var(--mantine-color-gray-5)',
+    selected: 'var(--mantine-color-gray-6)',
+  },
   // 記録なし状態の色
   noRecord: {
     normal: 'transparent', // getDateColorで決定
@@ -41,17 +46,32 @@ const CELL_COLORS = {
 type CellStyleState = {
   hasRecord: boolean
   isCompleted: boolean
+  isSkipped: boolean
   isSelected: boolean
   dateType: ReturnType<typeof getDateType>
 }
 
 // 背景色とボーダー色を決定する純粋関数
 function getCellBackgroundStyle(state: CellStyleState) {
-  const { hasRecord, isCompleted, isSelected, dateType } = state
+  const { hasRecord, isCompleted, isSkipped, isSelected, dateType } = state
 
   // 記録がある場合
   if (hasRecord) {
-    const colorSet = isCompleted ? CELL_COLORS.completed : CELL_COLORS.incomplete
+    let colorSet:
+      | typeof CELL_COLORS.incomplete
+      | typeof CELL_COLORS.completed
+      | typeof CELL_COLORS.skipped = CELL_COLORS.incomplete
+
+    switch (true) {
+      case isCompleted:
+        colorSet = CELL_COLORS.completed
+        break
+
+      case isSkipped:
+        colorSet = CELL_COLORS.skipped
+        break
+    }
+
     return {
       backgroundColor: isSelected ? colorSet.selected : colorSet.normal,
       borderColor: isSelected ? CELL_COLORS.border.selected : CELL_COLORS.border.normal,
@@ -103,6 +123,7 @@ export function CalendarDateCell({
   const { backgroundColor, borderColor } = getCellBackgroundStyle({
     hasRecord,
     isCompleted: record?.status === 'completed',
+    isSkipped: record?.status === 'skipped',
     isSelected,
     dateType,
   })
