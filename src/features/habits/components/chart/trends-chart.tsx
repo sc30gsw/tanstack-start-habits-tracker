@@ -23,15 +23,19 @@ type TrendsChartProps = {
 
 type ChartData = {
   date: string
+  dateKey: `${number}-${number}-${number}`
   duration: number
 }
 
 export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) {
   const routeApi = getRouteApi('/habits/$habitId')
+  const navigate = routeApi.useNavigate()
+
   const searchParams = routeApi.useSearch()
   const selectedDate = getValidatedDate(searchParams?.selectedDate)
   const calendarView = searchParams?.calendarView || 'month'
   const currentMonthString = searchParams?.currentMonth || dayjs(selectedDate).format('YYYY-MM')
+
   const currentMonth = dayjs.tz(currentMonthString, 'Asia/Tokyo').isValid()
     ? dayjs.tz(currentMonthString, 'Asia/Tokyo').startOf('month')
     : dayjs(selectedDate).startOf('month')
@@ -82,6 +86,7 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
 
         return {
           date,
+          dateKey: dayKey,
           duration,
         }
       }),
@@ -92,7 +97,7 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
   const aggregateByWeek = (): ChartData[] => {
     const baseDate = selectedDate ? dayjs(selectedDate).tz('Asia/Tokyo') : dayjs().tz('Asia/Tokyo')
     const startOfWeek = baseDate.startOf('week')
-    const dayNames = ['日', '月', '火', '水', '木', '金', '土']
+    const dayNames = ['日', '月', '火', '水', '木', '金', '土'] as const satisfies readonly string[]
 
     // completedのみをフィルタリング
     const completedRecords = records.filter((record) => record.status === 'completed')
@@ -113,6 +118,7 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
 
         return {
           date: dayName,
+          dateKey: date.format('YYYY-MM-DD') as ChartData['dateKey'],
           duration,
         }
       }),
@@ -122,7 +128,7 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
   // 日別集約（選択された日付の詳細）
   const aggregateByDay = (): ChartData[] => {
     const baseDate = selectedDate ? dayjs(selectedDate).tz('Asia/Tokyo') : dayjs().tz('Asia/Tokyo')
-    const dayKey = baseDate.format('YYYY-MM-DD')
+    const dateKey = baseDate.format('YYYY-MM-DD') as ChartData['dateKey']
 
     // completedのみをフィルタリング
     const completedRecords = records.filter((record) => record.status === 'completed')
@@ -131,13 +137,14 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
       completedRecords,
       indexBy((record) => record.date),
     )
-    const record = recordMap[dayKey]
+    const record = recordMap[dateKey]
 
     const duration = record?.duration_minutes || 0
 
     return [
       {
         date: baseDate.format('M/D'),
+        dateKey,
         duration,
       },
     ]
@@ -201,65 +208,83 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
           </Text>
         </Group>
 
-        <CompositeChart
-          h={300}
-          data={chartData}
-          dataKey="date"
-          maxBarWidth={30}
-          series={[
-            {
-              name: 'duration',
-              label: '実行時間',
-              color: getBarColor(habitColor),
-              type: 'bar',
-            },
-            {
-              name: 'duration',
-              label: '実行時間',
-              color: `${habitColor}.8`,
-              type: 'line',
-            },
-            {
-              name: 'duration',
-              label: '実行時間',
-              color: `${habitColor}.8`,
-              type: 'area',
-            },
-          ]}
-          curveType="bump"
-          tooltipProps={{
-            content: ({ label, payload }) => {
-              if (!payload || payload.length === 0) {
-                return null
+        <div style={{ cursor: 'pointer' }}>
+          <CompositeChart
+            h={300}
+            data={chartData}
+            dataKey="date"
+            maxBarWidth={30}
+            series={[
+              {
+                name: 'duration',
+                label: '実行時間',
+                color: getBarColor(habitColor),
+                type: 'bar',
+              },
+              {
+                name: 'duration',
+                label: '実行時間',
+                color: `${habitColor}.8`,
+                type: 'line',
+              },
+              {
+                name: 'duration',
+                label: '実行時間',
+                color: `${habitColor}.8`,
+                type: 'area',
+              },
+            ]}
+            curveType="bump"
+            tooltipProps={{
+              content: ({ label, payload }) => {
+                if (!payload || payload.length === 0) {
+                  return null
+                }
+
+                const data = payload[0]?.payload
+
+                if (!data) {
+                  return null
+                }
+
+                return (
+                  <Card withBorder padding="xs" shadow="md" style={{ minWidth: 120 }}>
+                    <Stack gap={4}>
+                      <Text size="sm" fw={500}>
+                        {label}
+                      </Text>
+                      <Text size="sm" c="dimmed">
+                        実行時間: {data.duration}分
+                      </Text>
+                    </Stack>
+                  </Card>
+                )
+              },
+            }}
+            yAxisProps={{
+              tickFormatter: (value: number) => `${value}分`,
+              domain: [0, 'dataMax + 10'],
+              ticks: yAxisTicks,
+            }}
+            tickLine="none"
+            onClick={(event) => {
+              // @ts-expect-error - Recharts event type
+              if (event?.activePayload?.[0]?.payload) {
+                // @ts-expect-error - Recharts payload type
+                const payload = event.activePayload[0].payload as ChartData
+
+                if (payload.dateKey) {
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      selectedDate: payload.dateKey,
+                    }),
+                  })
+                }
               }
-
-              const data = payload[0]?.payload
-
-              if (!data) {
-                return null
-              }
-
-              return (
-                <Card withBorder padding="xs" shadow="md" style={{ minWidth: 120 }}>
-                  <Stack gap={4}>
-                    <Text size="sm" fw={500}>
-                      {label}
-                    </Text>
-                    <Text size="sm" c="dimmed">
-                      実行時間: {data.duration}分
-                    </Text>
-                  </Stack>
-                </Card>
-              )
-            },
-          }}
-          yAxisProps={{
-            tickFormatter: (value: number) => `${value}分`,
-            domain: [0, 'dataMax + 10'],
-            ticks: yAxisTicks,
-          }}
-          tickLine="none"
-        />
+            }}
+          />
+        </div>
       </Stack>
     </Card>
   )
