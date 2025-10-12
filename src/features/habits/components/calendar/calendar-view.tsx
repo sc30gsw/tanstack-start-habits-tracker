@@ -7,6 +7,7 @@ import utc from 'dayjs/plugin/utc'
 import { DayView } from '~/features/habits/components/calendar/day-view'
 import { MonthView } from '~/features/habits/components/calendar/month-view'
 import { WeekView } from '~/features/habits/components/calendar/week-view'
+import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate, type SearchParams } from '~/features/habits/types/schemas/search-params'
 
@@ -35,7 +36,7 @@ export function CalendarView({ selectedDateRecord, recordMap }: CalendarViewProp
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
   return (
-    <Card withBorder padding="lg" radius="md" shadow="sm">
+    <Card withBorder padding="lg" radius="md" shadow="sm" id={CALENDAR_VIEW_HASH_TARGET}>
       <Stack gap="sm">
         <Group justify="space-between" align="center">
           <Group gap="xs" align="center">

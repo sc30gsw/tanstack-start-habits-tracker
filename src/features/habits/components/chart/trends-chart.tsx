@@ -11,6 +11,7 @@ dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
 import { indexBy, map, pipe } from 'remeda'
+import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
@@ -267,21 +268,24 @@ export function TrendsChart({ records, habitColor = 'blue' }: TrendsChartProps) 
               ticks: yAxisTicks,
             }}
             tickLine="none"
-            onClick={(event) => {
-              // @ts-expect-error - Recharts event type
-              if (event?.activePayload?.[0]?.payload) {
-                // @ts-expect-error - Recharts payload type
-                const payload = event.activePayload[0].payload as ChartData
+            composedChartProps={{
+              onClick: (payload) => {
+                // activeIndexを使ってchartDataから該当するデータを取得
+                if (payload?.activeIndex !== undefined) {
+                  const index = Number(payload.activeIndex)
+                  const clickedData = chartData[index]
 
-                if (payload.dateKey) {
-                  navigate({
-                    search: (prev) => ({
-                      ...prev,
-                      selectedDate: payload.dateKey,
-                    }),
-                  })
+                  if (clickedData?.dateKey) {
+                    navigate({
+                      hash: CALENDAR_VIEW_HASH_TARGET,
+                      search: (prev) => ({
+                        ...prev,
+                        selectedDate: clickedData.dateKey,
+                      }),
+                    })
+                  }
                 }
-              }
+              },
             }}
           />
         </div>
