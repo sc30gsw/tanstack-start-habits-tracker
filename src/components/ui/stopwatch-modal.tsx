@@ -262,7 +262,6 @@ export function StopwatchModal() {
   return (
     <Modal opened={isOpen} onClose={handleClose} title="ストップウォッチ" size="md" centered>
       <Stack gap="lg">
-        {/* 習慣選択 */}
         <Select
           label="習慣を選択"
           placeholder="習慣を選んでください"
