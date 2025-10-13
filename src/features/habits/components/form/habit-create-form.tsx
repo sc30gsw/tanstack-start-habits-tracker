@@ -4,14 +4,14 @@ import { notifications } from '@mantine/notifications'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import { useTransition } from 'react'
+import { HabitColorPicker } from '~/features/habits/components/habit-color-picker'
+import { HabitPriorityPicker } from '~/features/habits/components/habit-priority-picker'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import {
   createHabitSchema,
   type HabitColor,
   type HabitPriority,
 } from '~/features/habits/types/schemas/habit-schemas'
-import { HabitColorPicker } from '../habit-color-picker'
-import { HabitPriorityPicker } from '../habit-priority-picker'
 
 type FormValues = {
   name: string
