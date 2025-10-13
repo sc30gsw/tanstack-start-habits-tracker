@@ -3,6 +3,7 @@ import {
   Group,
   Modal,
   Select,
+  Skeleton,
   Stack,
   Text,
   Textarea,
@@ -25,7 +26,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, useLocation, useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import type { InferSelectModel } from 'drizzle-orm'
-import { useEffect, useState, useTransition } from 'react'
+import { Suspense, useEffect, useState, useTransition } from 'react'
 import { z } from 'zod/v4'
 import { GET_HABITS_CACHE_KEY, GET_RECORD_BY_HABIT_AND_DATE_CACHE_KEY } from '~/constants/cache-key'
 import type { habits as HabitTable } from '~/db/schema'
@@ -252,7 +253,11 @@ export function StopwatchModal() {
 
     modals.open({
       title: '習慣を記録',
-      children: <FinishRecordForm elapsedSeconds={currentElapsed} habitId={selectedHabitId!} />,
+      children: (
+        <Suspense fallback={<FinishRecordFormSkeleton />}>
+          <FinishRecordForm elapsedSeconds={currentElapsed} habitId={selectedHabitId!} />
+        </Suspense>
+      ),
     })
   }
 
@@ -340,6 +345,21 @@ const finishRecordFormSchema = z.object({
 type FinishRecordFormProps = {
   elapsedSeconds: number
   habitId: InferSelectModel<typeof HabitTable>['id']
+}
+
+function FinishRecordFormSkeleton() {
+  return (
+    <Stack gap="md">
+      <Skeleton height={20} width="60%" />
+      <Skeleton height={80} />
+      <Skeleton height={40} />
+      <Skeleton height={120} />
+      <Group gap="sm">
+        <Skeleton height={36} width={100} />
+        <Skeleton height={36} width={100} />
+      </Group>
+    </Stack>
+  )
 }
 
 function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
