@@ -124,6 +124,15 @@ const habitFilterValidator = z
     return 'all'
   })
 
+/**
+ * ストップウォッチのバリデーション
+ */
+const stopwatchOpenValidator = boolValidator
+const stopwatchHabitIdValidator = z.string().nullable().optional().catch(null)
+const stopwatchRunningValidator = boolValidator
+const stopwatchStartTimeValidator = z.number().nullable().optional().catch(null)
+const stopwatchElapsedValidator = z.number().optional().catch(0)
+
 export const searchSchema = z.object({
   selectedDate: dateStringValidator,
   calendarView: calendarViewValidator,
@@ -134,6 +143,11 @@ export const searchSchema = z.object({
   open: boolValidator,
   habitSort: habitSortValidator,
   habitFilter: habitFilterValidator,
+  stopwatchOpen: stopwatchOpenValidator,
+  stopwatchHabitId: stopwatchHabitIdValidator,
+  stopwatchRunning: stopwatchRunningValidator,
+  stopwatchStartTime: stopwatchStartTimeValidator,
+  stopwatchElapsed: stopwatchElapsedValidator,
 })
 
 export type SearchParams = z.infer<typeof searchSchema>
@@ -176,5 +190,10 @@ export function getDefaultSearchParams(): Required<SearchParams> {
     open: false,
     habitSort: 'all',
     habitFilter: 'all',
+    stopwatchOpen: false,
+    stopwatchHabitId: null,
+    stopwatchRunning: false,
+    stopwatchStartTime: null,
+    stopwatchElapsed: 0,
   }
 }

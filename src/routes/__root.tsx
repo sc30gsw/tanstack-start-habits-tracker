@@ -15,7 +15,7 @@ import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { theme } from '~/theme'
 
 export const Route = createRootRoute({
-  validateSearch: searchSchema.pick({ skip: true }),
+  validateSearch: searchSchema,
   beforeLoad: async ({ location, search }) => {
     // 認証が不要なパブリックルート
     const result = await getCurrentUser()

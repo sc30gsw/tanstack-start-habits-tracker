@@ -2,7 +2,7 @@ import { Alert, Card, Stack, Text } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { filter, pipe, sortBy } from 'remeda'
-import { HabitCard } from './habit-card'
+import { HabitCard } from '~/features/habits/components/habit-card'
 
 export function HabitList() {
   const routeApi = getRouteApi('/habits/')
