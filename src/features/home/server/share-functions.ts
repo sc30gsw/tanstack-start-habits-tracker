@@ -1,14 +1,11 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { and, eq, type InferSelectModel } from 'drizzle-orm'
+import { and, asc, eq, type InferSelectModel } from 'drizzle-orm'
 import { db } from '~/db'
-import { type habits, records } from '~/db/schema'
+import { habits, records } from '~/db/schema'
 import { getShareDataSchema } from '~/features/home/types/share'
 import { auth } from '~/lib/auth'
 
-/**
- * 完了した習慣とメモを取得する
- */
 const getCompletedHabitsForShare = createServerFn({ method: 'GET' })
   .inputValidator(getShareDataSchema)
   .handler(async ({ data }) => {
@@ -24,44 +21,50 @@ const getCompletedHabitsForShare = createServerFn({ method: 'GET' })
 
       const userId = session.user.id
 
-      // 指定日付の完了した記録を取得（習慣情報も含む）
-      const completedRecords = await db.query.records.findMany({
-        where: and(
-          eq(records.date, data.date),
-          eq(records.status, 'completed'),
-          eq(records.userId, userId),
-        ),
-        with: {
-          habit: true,
-        },
-      })
+      const completedRecords = await db
+        .select({
+          records,
+          habits,
+        })
+        .from(records)
+        .innerJoin(habits, eq(records.habitId, habits.id))
+        .where(
+          and(
+            eq(records.date, data.date),
+            eq(records.status, 'completed'),
+            eq(records.userId, userId),
+          ),
+        )
+        .orderBy(asc(habits.createdAt))
 
-      // 習慣ごとにメモをグループ化
       const shareDataMap = new Map<
         string,
         {
           habitName: InferSelectModel<typeof habits>['name']
           notes: InferSelectModel<typeof records>['notes'][]
+          duration: InferSelectModel<typeof records>['duration_minutes']
         }
       >()
 
-      for (const record of completedRecords) {
-        if (!record.habit) continue
-
-        const habitId = record.habitId
+      for (const row of completedRecords) {
+        const habitId = row.records.habitId
 
         if (!shareDataMap.has(habitId)) {
           shareDataMap.set(habitId, {
-            habitName: record.habit.name,
+            habitName: row.habits.name,
             notes: [],
+            duration: 0,
           })
         }
 
-        // メモがある場合は追加（nullの場合も追加）
-        shareDataMap.get(habitId)?.notes.push(record.notes)
+        const habitData = shareDataMap.get(habitId)
+
+        if (habitData) {
+          habitData.notes.push(row.records.notes)
+          habitData.duration = (habitData.duration ?? 0) + (row.records.duration_minutes ?? 0)
+        }
       }
 
-      // Map を配列に変換
       const shareData = Array.from(shareDataMap.values())
 
       return {

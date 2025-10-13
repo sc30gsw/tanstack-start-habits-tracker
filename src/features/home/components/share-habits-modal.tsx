@@ -55,7 +55,6 @@ export function ShareHabitsModal() {
   const today = dayjs().format('YYYY-MM-DD')
   const shareData = shareDataResponse.data
 
-  // 共有テキストの生成
   const shareText = (() => {
     if (shareData.length === 0) {
       return '今日は完了した習慣がありませんでした :sweat_smile:'
@@ -64,21 +63,23 @@ export function ShareHabitsModal() {
     const habitTexts = pipe(
       shareData,
       map((habit) => {
-        // 習慣名を親アイテムとして設定
-        const habitLine = `• ${habit.habitName}`
+        const notHaveNotes =
+          !habit.notes || habit.notes.length === 0 || habit.notes.every((note) => !note)
 
-        if (!habit.notes || habit.notes.length === 0) {
-          return habitLine
+        if (notHaveNotes) {
+          return `• ${habit.habitName} ${habit.duration}分`
         }
 
-        // ノートを習慣の子要素としてインデントしてネスト
+        const habitLine = `• ${habit.habitName}`
+
         const noteLines = pipe(
           habit.notes,
           filter((note): note is string => note !== null && note !== ''),
           map((note) =>
             pipe(
               note.split('\n'),
-              map((line) => `    ◦ ${line.replace(/^[・\-\s]+/, '')}`), // インデントでネスト表現
+              filter((line) => line.trim() !== ''),
+              map((line) => `    ◦ ${line.replace(/^[・\-\s]+/, '')} ${habit.duration}分`),
               join('\n'),
             ),
           ),
@@ -101,13 +102,15 @@ export function ShareHabitsModal() {
     })
   }
 
-  // 個別習慣のテキスト生成
   const generateHabitText = (habit: (typeof shareData)[number]) => {
-    const habitLine = `• ${habit.habitName}`
+    const notHaveNotes =
+      !habit.notes || habit.notes.length === 0 || habit.notes.every((note) => !note)
 
-    if (!habit.notes || habit.notes.length === 0) {
-      return habitLine
+    if (notHaveNotes) {
+      return `• ${habit.habitName} ${habit.duration}分`
     }
+
+    const habitLine = `• ${habit.habitName}`
 
     const noteLines = pipe(
       habit.notes,
@@ -115,7 +118,8 @@ export function ShareHabitsModal() {
       map((note) =>
         pipe(
           note.split('\n'),
-          map((line) => `    ◦ ${line.replace(/^[・\-\s]+/, '')}`),
+          filter((line) => line.trim() !== ''),
+          map((line) => `    ◦ ${line.replace(/^[・\-\s]+/, '')} ${habit.duration}分`),
           join('\n'),
         ),
       ),
