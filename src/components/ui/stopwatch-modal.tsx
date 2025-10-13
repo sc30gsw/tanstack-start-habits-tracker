@@ -21,7 +21,7 @@ import {
   IconRefresh,
 } from '@tabler/icons-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { getRouteApi, useRouter } from '@tanstack/react-router'
+import { getRouteApi, useLocation, useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import type { InferSelectModel } from 'drizzle-orm'
 import { useEffect, useState, useTransition } from 'react'
@@ -35,6 +35,7 @@ import type { HabitEntity } from '~/features/habits/types/habit'
 export function StopwatchModal() {
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
+  const location = useLocation()
   const searchParams = routeApi.useSearch()
 
   const theme = useMantineTheme()
@@ -54,7 +55,6 @@ export function StopwatchModal() {
 
   const habits: HabitEntity[] = habitsResponse?.data ?? []
 
-  // タイマー更新
   useEffect(() => {
     if (!isRunning || !startTime) {
       setDisplayTime(pausedElapsed)
@@ -83,12 +83,31 @@ export function StopwatchModal() {
   const handleClose = () => {
     if (isRunning || pausedElapsed > 0) {
       modals.openConfirmModal({
-        title: '確認',
-        children: <Text size="sm">習慣が記録されません。本当に閉じますか？</Text>,
+        title: (
+          <Group gap="xs">
+            <IconPlayerStop size={20} />
+            <Text>計測を中断</Text>
+          </Group>
+        ),
+        children: (
+          <Stack gap="sm">
+            <Text size="sm">
+              計測中の時間は
+              <Text component="span" fw={700} c="red">
+                記録されません
+              </Text>
+              。
+            </Text>
+            <Text size="sm" c="dimmed">
+              記録する場合は「終了する」ボタンを使用してください。
+            </Text>
+          </Stack>
+        ),
         labels: { confirm: '閉じる', cancel: 'キャンセル' },
         confirmProps: { color: 'red' },
         onConfirm: () => {
           navigate({
+            to: location.pathname,
             search: (prev) => ({
               ...prev,
               stopwatchOpen: false,
@@ -102,6 +121,7 @@ export function StopwatchModal() {
       })
     } else {
       navigate({
+        to: location.pathname,
         search: (prev) => ({
           ...prev,
           stopwatchOpen: false,
@@ -112,6 +132,7 @@ export function StopwatchModal() {
 
   const handleHabitSelect = (habitId: InferSelectModel<typeof HabitTable>['id'] | null) => {
     navigate({
+      to: location.pathname,
       search: (prev) => ({
         ...prev,
         stopwatchHabitId: habitId,
@@ -130,6 +151,7 @@ export function StopwatchModal() {
     }
 
     navigate({
+      to: location.pathname,
       search: (prev) => ({
         ...prev,
         stopwatchRunning: true,
@@ -142,6 +164,7 @@ export function StopwatchModal() {
     const currentElapsed = displayTime
 
     navigate({
+      to: location.pathname,
       search: (prev) => ({
         ...prev,
         stopwatchRunning: false,
@@ -153,6 +176,7 @@ export function StopwatchModal() {
 
   const handleResume = () => {
     navigate({
+      to: location.pathname,
       search: (prev) => ({
         ...prev,
         stopwatchRunning: true,
@@ -163,12 +187,35 @@ export function StopwatchModal() {
 
   const handleReset = () => {
     modals.openConfirmModal({
-      title: '確認',
-      children: <Text size="sm">習慣が記録されません。本当にリセットしますか？</Text>,
+      title: (
+        <Group gap="xs">
+          <IconRefresh size={20} />
+          <Text>タイマーをリセット</Text>
+        </Group>
+      ),
+      children: (
+        <Stack gap="sm">
+          <Text size="sm">
+            計測中の
+            <Text component="span" fw={700} c="orange">
+              {formatTime(displayTime)}
+            </Text>
+            は
+            <Text component="span" fw={700} c="red">
+              記録されません
+            </Text>
+            。
+          </Text>
+          <Text size="sm" c="dimmed">
+            タイマーを0:00:00に戻してやり直しますか？
+          </Text>
+        </Stack>
+      ),
       labels: { confirm: 'リセット', cancel: 'キャンセル' },
       confirmProps: { color: 'red' },
       onConfirm: () => {
         navigate({
+          to: location.pathname,
           search: (prev) => ({
             ...prev,
             stopwatchRunning: false,
@@ -196,6 +243,7 @@ export function StopwatchModal() {
 
     if (isRunning) {
       navigate({
+        to: location.pathname,
         search: (prev) => ({
           ...prev,
           stopwatchRunning: false,
@@ -228,7 +276,6 @@ export function StopwatchModal() {
           searchable
         />
 
-        {/* タイマー表示 */}
         <Stack align="center" gap="xs">
           <IconClock size={48} color={theme.colors.blue[6]} />
           <Title order={1} style={{ fontSize: '3rem', fontWeight: 700, fontFamily: 'monospace' }}>
@@ -239,7 +286,6 @@ export function StopwatchModal() {
           </Text>
         </Stack>
 
-        {/* ボタン */}
         {!isRunning && pausedElapsed === 0 && (
           <Group grow>
             <Button
@@ -303,6 +349,7 @@ type FinishRecordFormProps = {
 function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
+  const location = useLocation()
   const router = useRouter()
 
   const [isPending, startTransition] = useTransition()
@@ -359,6 +406,7 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
           })
 
           navigate({
+            to: location.pathname,
             search: (prev) => ({
               ...prev,
               stopwatchOpen: false,
