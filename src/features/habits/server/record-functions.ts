@@ -33,7 +33,6 @@ const createRecord = createServerFn({ method: 'POST' })
       }
       const userId = session.user.id
 
-      // 同一習慣・同一日付の記録の重複チェック
       const existingRecord = await db.query.records.findFirst({
         where: and(eq(records.habitId, data.habitId), eq(records.date, data.date)),
       })

@@ -228,37 +228,62 @@ export function StopwatchModal() {
 
   const handleFinish = () => {
     const currentElapsed = displayTime
+    const currentMinutes = Math.floor(currentElapsed / 60)
 
-    if (currentElapsed === 0) {
-      notifications.show({
-        title: 'エラー',
-        message: '記録する時間がありません',
-        color: 'red',
+    const openRecordModal = () => {
+      if (isRunning) {
+        navigate({
+          to: location.pathname,
+          search: (prev) => ({
+            ...prev,
+            stopwatchRunning: false,
+            stopwatchStartTime: null,
+            stopwatchElapsed: currentElapsed,
+          }),
+        })
+      }
+
+      modals.open({
+        title: '習慣を記録',
+        children: (
+          <Suspense fallback={<FinishRecordFormSkeleton />}>
+            <FinishRecordForm elapsedSeconds={currentElapsed} habitId={selectedHabitId!} />
+          </Suspense>
+        ),
+      })
+    }
+
+    if (currentMinutes === 0) {
+      modals.openConfirmModal({
+        title: (
+          <Group gap="xs">
+            <IconAlertTriangle size={20} color={theme.colors.yellow[6]} />
+            <Text>1分未満の記録</Text>
+          </Group>
+        ),
+        children: (
+          <Stack gap="sm">
+            <Text size="sm">
+              計測時間が1分未満のため、
+              <Text component="span" fw={700} c="orange">
+                0分として記録
+              </Text>
+              されます。
+            </Text>
+            <Text size="sm" c="dimmed">
+              このまま記録を続けますか？
+            </Text>
+          </Stack>
+        ),
+        labels: { confirm: '0分で記録する', cancel: 'キャンセル' },
+        confirmProps: { color: 'orange' },
+        onConfirm: openRecordModal,
       })
 
       return
     }
 
-    if (isRunning) {
-      navigate({
-        to: location.pathname,
-        search: (prev) => ({
-          ...prev,
-          stopwatchRunning: false,
-          stopwatchStartTime: null,
-          stopwatchElapsed: currentElapsed,
-        }),
-      })
-    }
-
-    modals.open({
-      title: '習慣を記録',
-      children: (
-        <Suspense fallback={<FinishRecordFormSkeleton />}>
-          <FinishRecordForm elapsedSeconds={currentElapsed} habitId={selectedHabitId!} />
-        </Suspense>
-      ),
-    })
+    openRecordModal()
   }
 
   return (
@@ -372,7 +397,7 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
   const computedColorScheme = useComputedColorScheme('light')
 
   const today = dayjs().format('YYYY-MM-DD')
-  const durationMinutes = Math.ceil(elapsedSeconds / 60)
+  const durationMinutes = Math.floor(elapsedSeconds / 60)
 
   const { data: existingRecordResponse } = useSuspenseQuery({
     queryKey: [GET_RECORD_BY_HABIT_AND_DATE_CACHE_KEY, habitId, today],
