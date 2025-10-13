@@ -1,6 +1,6 @@
 import { AppShell, Avatar, Button, Group, Menu, Text } from '@mantine/core'
 import { IconClock, IconCreditCard, IconLogout, IconSettings } from '@tabler/icons-react'
-import { getRouteApi, Link } from '@tanstack/react-router'
+import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { StopwatchModal } from '~/components/ui/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
@@ -9,6 +9,7 @@ import { authClient } from '~/lib/auth-client'
 export function Header() {
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
+  const location = useLocation()
 
   const { data: session } = authClient.useSession()
 
@@ -51,6 +52,7 @@ export function Header() {
                   leftSection={<IconClock size={16} />}
                   onClick={() => {
                     navigate({
+                      to: location.pathname,
                       search: (prev) => ({
                         ...prev,
                         stopwatchOpen: true,
@@ -137,6 +139,7 @@ export function Header() {
                   size="xs"
                   onClick={() => {
                     navigate({
+                      to: location.pathname,
                       search: (prev) => ({
                         ...prev,
                         stopwatchOpen: true,
