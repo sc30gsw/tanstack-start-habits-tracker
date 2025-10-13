@@ -19,15 +19,12 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
-/**
- * 新しい記録を作成する
- */
 const createRecord = createServerFn({ method: 'POST' })
   .inputValidator(createRecordSchema)
   .handler(async ({ data }) => {
     try {
-      // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
+
       if (!session?.user?.id) {
         return {
           success: false,
@@ -48,7 +45,6 @@ const createRecord = createServerFn({ method: 'POST' })
         }
       }
 
-      // 新しい記録を作成
       const recordId = nanoid()
       const now = dayjs().tz('Asia/Tokyo').toISOString()
 
@@ -94,15 +90,12 @@ const createRecord = createServerFn({ method: 'POST' })
     }
   })
 
-/**
- * 既存の記録を更新する
- */
 const updateRecord = createServerFn({ method: 'POST' })
   .inputValidator(updateRecordSchema)
   .handler(async ({ data }) => {
     try {
-      // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
+
       if (!session?.user?.id) {
         return {
           success: false,
@@ -111,7 +104,6 @@ const updateRecord = createServerFn({ method: 'POST' })
       }
       const userId = session.user.id
 
-      // 記録の存在確認（自分の記録かどうかもチェック）
       const existingRecord = await db.query.records.findFirst({
         where: and(eq(records.id, data.id), eq(records.userId, userId)),
       })
@@ -123,7 +115,6 @@ const updateRecord = createServerFn({ method: 'POST' })
         }
       }
 
-      // 更新データの準備
       const updateData: Partial<typeof records.$inferInsert> = {}
 
       if (data.status !== undefined) {
@@ -138,14 +129,12 @@ const updateRecord = createServerFn({ method: 'POST' })
         updateData.notes = data.notes
       }
 
-      // 記録を更新
       const [updatedRecord] = await db
         .update(records)
         .set(updateData)
         .where(eq(records.id, data.id))
         .returning()
 
-      // RecordEntityに変換
       const recordEntity = {
         ...updatedRecord,
         created_at: new Date(updatedRecord.createdAt!),
@@ -172,15 +161,12 @@ const updateRecord = createServerFn({ method: 'POST' })
     }
   })
 
-/**
- * 記録を削除する
- */
 const deleteRecord = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }) => {
     try {
-      // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
+
       if (!session?.user?.id) {
         return {
           success: false,
@@ -189,7 +175,6 @@ const deleteRecord = createServerFn({ method: 'POST' })
       }
       const userId = session.user.id
 
-      // 記録の存在確認（自分の記録かどうかもチェック）
       const existingRecord = await db.query.records.findFirst({
         where: and(eq(records.id, data.id), eq(records.userId, userId)),
       })
@@ -201,7 +186,6 @@ const deleteRecord = createServerFn({ method: 'POST' })
         }
       }
 
-      // 記録を削除
       await db.delete(records).where(and(eq(records.id, data.id), eq(records.userId, userId)))
 
       return {
@@ -217,9 +201,6 @@ const deleteRecord = createServerFn({ method: 'POST' })
     }
   })
 
-/**
- * 記録を取得する（フィルタリング対応）
- */
 const getRecords = createServerFn({ method: 'GET' })
   .inputValidator(
     z
@@ -233,8 +214,8 @@ const getRecords = createServerFn({ method: 'GET' })
   )
   .handler(async ({ data: filters }) => {
     try {
-      // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
+
       if (!session?.user?.id) {
         return {
           success: false,
@@ -243,20 +224,16 @@ const getRecords = createServerFn({ method: 'GET' })
       }
       const userId = session.user.id
 
-      // フィルタリング条件を準備（自分の記録のみ）
       const conditions: SQL<unknown>[] = [eq(records.userId, userId)]
 
       if (filters?.habit_id) {
         conditions.push(eq(records.habitId, filters.habit_id))
       }
 
-      // 日付範囲フィルタリング
       if (filters?.date_from && filters?.date_to) {
-        // 範囲指定
         conditions.push(gte(records.date, filters.date_from))
         conditions.push(lte(records.date, filters.date_to))
       } else if (filters?.date_from) {
-        // 開始日のみ指定
         conditions.push(eq(records.date, filters.date_from))
       }
 
@@ -264,13 +241,11 @@ const getRecords = createServerFn({ method: 'GET' })
         conditions.push(eq(records.status, filters.status))
       }
 
-      // クエリを実行
       const allRecords = await db.query.records.findMany({
         where: and(...conditions),
         orderBy: (records, { desc }) => [desc(records.date), desc(records.createdAt)],
       })
 
-      // RecordEntityに変換
       const recordEntities = allRecords.map((record) => ({
         ...record,
         created_at: new Date(record.createdAt!),
@@ -291,15 +266,12 @@ const getRecords = createServerFn({ method: 'GET' })
     }
   })
 
-/**
- * IDで特定の記録を取得する
- */
 const getRecordById = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ id: z.string().min(1) }))
   .handler(async ({ data }) => {
     try {
-      // セッションからuserIdを取得
       const session = await auth.api.getSession(getRequest())
+
       if (!session?.user?.id) {
         return {
           success: false,
@@ -319,7 +291,6 @@ const getRecordById = createServerFn({ method: 'GET' })
         }
       }
 
-      // RecordEntityに変換
       const recordEntity = {
         ...record,
         created_at: new Date(record.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString()),

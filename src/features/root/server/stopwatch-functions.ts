@@ -41,11 +41,12 @@ export const saveStopwatchRecord = createServerFn({ method: 'POST' })
 
       if (existingRecord) {
         const newDuration = (existingRecord.duration_minutes ?? 0) + data.durationMinutes
-        const newNotes = data.notes
-          ? existingRecord.notes
-            ? `${existingRecord.notes}\n${data.notes}`
-            : data.notes
-          : existingRecord.notes
+        // notesがundefinedでなければ、その値を使用（空文字列も含む）
+        // undefinedの場合のみ既存のnotesを保持
+        const newNotes =
+          data.notes !== undefined
+            ? data.notes || null // 空文字列の場合はnullに変換
+            : existingRecord.notes
 
         await db
           .update(records)

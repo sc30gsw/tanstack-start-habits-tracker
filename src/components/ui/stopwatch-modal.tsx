@@ -415,7 +415,7 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
           data: {
             habitId,
             durationMinutes,
-            notes: values.notes?.trim() || undefined,
+            notes: values.notes !== undefined ? values.notes.trim() : undefined,
             date: today,
           },
         })
