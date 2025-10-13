@@ -29,8 +29,8 @@ import { z } from 'zod/v4'
 import { GET_HABITS_CACHE_KEY } from '~/constants/cache-key'
 import type { habits as HabitTable } from '~/db/schema'
 import { habitDto } from '~/features/habits/server/habit-functions'
-import { stopwatchDto } from '~/features/habits/server/stopwatch-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
+import { stopwatchDto } from '~/features/root/server/stopwatch-functions'
 
 export function StopwatchModal() {
   const routeApi = getRouteApi('__root__')
@@ -85,7 +85,7 @@ export function StopwatchModal() {
       modals.openConfirmModal({
         title: (
           <Group gap="xs">
-            <IconPlayerStop size={20} />
+            <IconPlayerStop size={20} color={theme.colors.red[6]} />
             <Text>計測を中断</Text>
           </Group>
         ),
@@ -189,18 +189,14 @@ export function StopwatchModal() {
     modals.openConfirmModal({
       title: (
         <Group gap="xs">
-          <IconRefresh size={20} />
+          <IconRefresh size={20} color={theme.colors.orange[6]} />
           <Text>タイマーをリセット</Text>
         </Group>
       ),
       children: (
         <Stack gap="sm">
           <Text size="sm">
-            計測中の
-            <Text component="span" fw={700} c="orange">
-              {formatTime(displayTime)}
-            </Text>
-            は
+            計測中の時間は
             <Text component="span" fw={700} c="red">
               記録されません
             </Text>
