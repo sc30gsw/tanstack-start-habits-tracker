@@ -390,7 +390,6 @@ function FinishRecordFormSkeleton() {
 function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
-  const location = useLocation()
   const router = useRouter()
 
   const [isPending, startTransition] = useTransition()
@@ -454,19 +453,19 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
             color: 'green',
           })
 
+          modals.closeAll()
+
           navigate({
-            to: location.pathname,
-            search: (prev) => ({
-              ...prev,
+            to: '/habits/$habitId',
+            params: { habitId },
+            search: {
               stopwatchOpen: false,
               stopwatchHabitId: null,
               stopwatchRunning: false,
               stopwatchStartTime: null,
               stopwatchElapsed: 0,
-            }),
+            },
           })
-
-          modals.closeAll()
         } else {
           notifications.show({
             title: 'エラー',
