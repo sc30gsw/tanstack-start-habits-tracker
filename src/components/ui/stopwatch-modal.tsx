@@ -14,6 +14,7 @@ import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import {
+  IconAlertTriangle,
   IconClock,
   IconPlayerPause,
   IconPlayerPlay,
@@ -26,7 +27,7 @@ import dayjs from 'dayjs'
 import type { InferSelectModel } from 'drizzle-orm'
 import { useEffect, useState, useTransition } from 'react'
 import { z } from 'zod/v4'
-import { GET_HABITS_CACHE_KEY } from '~/constants/cache-key'
+import { GET_HABITS_CACHE_KEY, GET_RECORD_BY_HABIT_AND_DATE_CACHE_KEY } from '~/constants/cache-key'
 import type { habits as HabitTable } from '~/db/schema'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
@@ -85,7 +86,7 @@ export function StopwatchModal() {
       modals.openConfirmModal({
         title: (
           <Group gap="xs">
-            <IconPlayerStop size={20} color={theme.colors.red[6]} />
+            <IconAlertTriangle size={20} color={theme.colors.red[6]} />
             <Text>計測を中断</Text>
           </Group>
         ),
@@ -350,7 +351,15 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
   const [isPending, startTransition] = useTransition()
   const computedColorScheme = useComputedColorScheme('light')
 
+  const today = dayjs().format('YYYY-MM-DD')
   const durationMinutes = Math.ceil(elapsedSeconds / 60)
+
+  const { data: existingRecordResponse } = useSuspenseQuery({
+    queryKey: [GET_RECORD_BY_HABIT_AND_DATE_CACHE_KEY, habitId, today],
+    queryFn: () => stopwatchDto.getRecordByHabitAndDate({ data: { habitId, date: today } }),
+  })
+
+  const existingRecord = existingRecordResponse?.data
 
   const form = useForm<z.infer<typeof finishRecordFormSchema>>({
     initialValues: {
@@ -437,14 +446,55 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
           ここまでの習慣を記録しますか？
         </Text>
 
+        {existingRecord && (
+          <Stack
+            gap="xs"
+            p="sm"
+            style={{ backgroundColor: 'var(--mantine-color-blue-0)', borderRadius: '8px' }}
+          >
+            <Text size="sm" fw={600} c="blue">
+              📝 本日の既存記録
+            </Text>
+            <Group gap="xs">
+              <Text size="sm" c="dimmed">
+                既存の時間:
+              </Text>
+              <Text size="sm" fw={600}>
+                {existingRecord.duration_minutes}分
+              </Text>
+            </Group>
+            {existingRecord.notes && (
+              <Stack gap={4}>
+                <Text size="sm" c="dimmed">
+                  既存のメモ:
+                </Text>
+                <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+                  {existingRecord.notes}
+                </Text>
+              </Stack>
+            )}
+          </Stack>
+        )}
+
         <Group gap="xs">
           <Text size="lg" fw={600}>
-            記録時間:
+            {existingRecord ? '追加する時間:' : '記録時間:'}
           </Text>
           <Text size="lg" fw={700} c="blue">
             {durationMinutes}分
           </Text>
         </Group>
+
+        {existingRecord && (
+          <Group gap="xs">
+            <Text size="sm" fw={600} c="dimmed">
+              合計時間:
+            </Text>
+            <Text size="lg" fw={700} c="green">
+              {(existingRecord.duration_minutes ?? 0) + durationMinutes}分
+            </Text>
+          </Group>
+        )}
 
         <Textarea
           label="メモ・感想"

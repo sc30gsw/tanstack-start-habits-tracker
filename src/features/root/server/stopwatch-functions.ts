@@ -1,10 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
+import dayjs from 'dayjs'
 import { and, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
 import { records } from '~/db/schema'
+import type { RecordEntity } from '~/features/habits/types/habit'
 import { auth } from '~/lib/auth'
 
 const saveStopwatchRecordSchema = z.object({
@@ -93,8 +95,61 @@ export const saveStopwatchRecord = createServerFn({ method: 'POST' })
     }
   })
 
+/**
+ * 習慣IDと日付で特定の記録を取得する
+ */
+const getRecordByHabitAndDate = createServerFn({ method: 'GET' })
+  .inputValidator(z.object({ habitId: z.string().min(1), date: z.string().min(1) }))
+  .handler(async ({ data }) => {
+    try {
+      const session = await auth.api.getSession(getRequest())
+
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
+
+      const record = await db.query.records.findFirst({
+        where: and(
+          eq(records.habitId, data.habitId),
+          eq(records.date, data.date),
+          eq(records.userId, userId),
+        ),
+      })
+
+      if (!record) {
+        return {
+          success: false,
+          data: null,
+        }
+      }
+
+      const recordEntity = {
+        ...record,
+        created_at: new Date(record.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString()),
+      } as const satisfies RecordEntity
+
+      return {
+        success: true,
+        data: recordEntity,
+      }
+    } catch (error) {
+      console.error('Error fetching record:', error)
+
+      return {
+        success: false,
+        error: 'Failed to fetch record',
+      }
+    }
+  })
+
 export const stopwatchDto = {
   saveStopwatchRecord,
+  getRecordByHabitAndDate,
 } as const satisfies {
   saveStopwatchRecord: typeof saveStopwatchRecord
+  getRecordByHabitAndDate: typeof getRecordByHabitAndDate
 }
