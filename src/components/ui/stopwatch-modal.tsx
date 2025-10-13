@@ -383,7 +383,7 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
 
   const form = useForm<z.infer<typeof finishRecordFormSchema>>({
     initialValues: {
-      notes: '',
+      notes: existingRecord?.notes || '',
     },
     validate: (values) => {
       const result = finishRecordFormSchema.safeParse(values)
@@ -462,62 +462,56 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
   return (
     <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
       <Stack gap="md">
-        <Text size="sm" c="dimmed">
-          ここまでの習慣を記録しますか？
-        </Text>
-
-        {existingRecord && (
-          <Stack
-            gap="xs"
-            p="sm"
-            style={{ backgroundColor: 'var(--mantine-color-blue-0)', borderRadius: '8px' }}
-          >
-            <Text size="sm" fw={600} c="blue">
-              📝 本日の既存記録
+        {existingRecord ? (
+          <Stack gap="xs">
+            <Text size="sm" c="dimmed">
+              本日はすでに記録があります。時間とメモを追加します。
+            </Text>
+            <Group gap="md">
+              <Group gap="xs">
+                <Text size="sm" c="dimmed">
+                  既存:
+                </Text>
+                <Text size="sm" fw={600}>
+                  {existingRecord.duration_minutes}分
+                </Text>
+              </Group>
+              <Group gap="xs">
+                <Text size="sm" c="dimmed">
+                  追加:
+                </Text>
+                <Text size="sm" fw={600} c="blue">
+                  +{durationMinutes}分
+                </Text>
+              </Group>
+              <Group gap="xs">
+                <Text size="sm" c="dimmed">
+                  合計:
+                </Text>
+                <Text size="lg" fw={700} c="green">
+                  {(existingRecord.duration_minutes ?? 0) + durationMinutes}分
+                </Text>
+              </Group>
+            </Group>
+          </Stack>
+        ) : (
+          <Stack gap="xs">
+            <Text size="sm" c="dimmed">
+              ここまでの習慣を記録しますか？
             </Text>
             <Group gap="xs">
-              <Text size="sm" c="dimmed">
-                既存の時間:
+              <Text size="lg" fw={600}>
+                記録時間:
               </Text>
-              <Text size="sm" fw={600}>
-                {existingRecord.duration_minutes}分
+              <Text size="lg" fw={700} c="blue">
+                {durationMinutes}分
               </Text>
             </Group>
-            {existingRecord.notes && (
-              <Stack gap={4}>
-                <Text size="sm" c="dimmed">
-                  既存のメモ:
-                </Text>
-                <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
-                  {existingRecord.notes}
-                </Text>
-              </Stack>
-            )}
           </Stack>
         )}
 
-        <Group gap="xs">
-          <Text size="lg" fw={600}>
-            {existingRecord ? '追加する時間:' : '記録時間:'}
-          </Text>
-          <Text size="lg" fw={700} c="blue">
-            {durationMinutes}分
-          </Text>
-        </Group>
-
-        {existingRecord && (
-          <Group gap="xs">
-            <Text size="sm" fw={600} c="dimmed">
-              合計時間:
-            </Text>
-            <Text size="lg" fw={700} c="green">
-              {(existingRecord.duration_minutes ?? 0) + durationMinutes}分
-            </Text>
-          </Group>
-        )}
-
         <Textarea
-          label="メモ・感想"
+          label={existingRecord ? 'メモ・感想（既存のメモに追記されます）' : 'メモ・感想'}
           placeholder="今日の感想や具体的に何をやったかを記録..."
           rows={4}
           maxLength={500}
