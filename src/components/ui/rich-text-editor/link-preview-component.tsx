@@ -3,6 +3,7 @@ import type { NodeViewProps } from '@tiptap/react'
 import { NodeViewWrapper } from '@tiptap/react'
 import { useEffect, useState } from 'react'
 import { LinkPreviewCard } from '~/components/ui/link-preview-card'
+import { FETCH_OGT_DATA_CACHE_KEY } from '~/constants/cache-key'
 import { fetchOgpData } from '~/features/root/server/ogp-functions'
 
 export function LinkPreviewComponent({ node, updateAttributes }: NodeViewProps) {
@@ -17,7 +18,7 @@ export function LinkPreviewComponent({ node, updateAttributes }: NodeViewProps) 
   const [shouldFetch, setShouldFetch] = useState(!title && !description && !image)
 
   const { data: ogpData, isLoading } = useQuery({
-    queryKey: ['ogp', url],
+    queryKey: [FETCH_OGT_DATA_CACHE_KEY, url],
     queryFn: async () => {
       const result = await fetchOgpData({ data: { url } })
       if (result.success) {

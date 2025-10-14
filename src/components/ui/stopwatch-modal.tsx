@@ -33,6 +33,20 @@ import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
 import { stopwatchDto } from '~/features/root/server/stopwatch-functions'
 
+const MILLISECONDS_PER_SECOND = 1000
+const SECONDS_PER_MINUTE = 60
+const SECONDS_PER_HOUR = 3600
+const STOPWATCH_UPDATE_INTERVAL_MS = 100
+const MINIMUM_RECORDABLE_SECONDS = 60
+const TIME_DISPLAY_PADDING = 2
+
+const convertSecondsToMinutes = (seconds: number): number => {
+  if (seconds < MINIMUM_RECORDABLE_SECONDS) {
+    return 0
+  }
+  return Math.round(seconds / SECONDS_PER_MINUTE)
+}
+
 export function StopwatchModal() {
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
@@ -65,20 +79,20 @@ export function StopwatchModal() {
 
     const interval = setInterval(() => {
       const now = Date.now()
-      const elapsed = Math.floor((now - startTime) / 1000) + pausedElapsed
+      const elapsed = Math.floor((now - startTime) / MILLISECONDS_PER_SECOND) + pausedElapsed
 
       setDisplayTime(elapsed)
-    }, 100)
+    }, STOPWATCH_UPDATE_INTERVAL_MS)
 
     return () => clearInterval(interval)
   }, [isRunning, startTime, pausedElapsed])
 
   const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
+    const hours = Math.floor(seconds / SECONDS_PER_HOUR)
+    const minutes = Math.floor((seconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE)
+    const secs = seconds % SECONDS_PER_MINUTE
 
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+    return `${String(hours).padStart(TIME_DISPLAY_PADDING, '0')}:${String(minutes).padStart(TIME_DISPLAY_PADDING, '0')}:${String(secs).padStart(TIME_DISPLAY_PADDING, '0')}`
   }
 
   const handleClose = () => {
@@ -271,7 +285,7 @@ export function StopwatchModal() {
     }
 
     const currentElapsed = displayTime
-    const currentMinutes = Math.floor(currentElapsed / 60)
+    const currentMinutes = convertSecondsToMinutes(currentElapsed)
 
     const openRecordModal = () => {
       modals.open({
@@ -426,7 +440,7 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
   const [isPending, startTransition] = useTransition()
 
   const today = dayjs().format('YYYY-MM-DD')
-  const durationMinutes = Math.floor(elapsedSeconds / 60)
+  const durationMinutes = convertSecondsToMinutes(elapsedSeconds)
 
   const { data: existingRecordResponse } = useSuspenseQuery({
     queryKey: [GET_RECORD_BY_HABIT_AND_DATE_CACHE_KEY, habitId, today],
