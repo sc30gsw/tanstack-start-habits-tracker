@@ -13,6 +13,7 @@ export function LinkPreviewComponent({ node, updateAttributes }: NodeViewProps) 
     image?: string | null
     siteName?: string | null
   }
+
   const [shouldFetch, setShouldFetch] = useState(!title && !description && !image)
 
   const { data: ogpData, isLoading } = useQuery({

@@ -142,36 +142,16 @@
   margin: 0.75em 0;
 }
 
-.code-block-copy-button {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 4px 8px;
-  font-size: 11px;
-  font-family: system-ui, -apple-system, sans-serif;
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  color: var(--mantine-color-gray-4);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 10;
+/* デフォルトでコピーボタンを非表示 */
+.code-block-wrapper .code-block-copy-button {
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.code-block-copy-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: var(--mantine-color-gray-2);
-}
-
-.code-block-copy-button:active {
-  transform: scale(0.95);
-}
-
-.code-block-copy-button.copied {
-  background-color: var(--mantine-color-green-9);
-  border-color: var(--mantine-color-green-7);
-  color: white;
+/* ホバー時、またはコピー済み時にボタンを表示 */
+.code-block-wrapper:hover .code-block-copy-button,
+.code-block-wrapper .code-block-copy-button[data-copied="true"] {
+  opacity: 1;
 }
 
 .ProseMirror pre code {

@@ -33,10 +33,8 @@ import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/cod
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
-// lowlightインスタンスを作成（common言語セットを使用）
 const lowlight = createLowlight(common)
 
-// 利用可能な言語のリスト
 const LANGUAGE_OPTIONS = [
   { value: 'null', label: '自動検出' },
   { value: 'javascript', label: 'JavaScript' },
@@ -57,7 +55,10 @@ const LANGUAGE_OPTIONS = [
   { value: 'rust', label: 'Rust' },
   { value: 'ruby', label: 'Ruby' },
   { value: 'php', label: 'PHP' },
-]
+] as const satisfies readonly Record<string, string>[]
+
+const TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX = /^```([a-z]+)?(?::([^\s]+))?[\s\n]$/
+const CODEBLOCK_REGEX = /^```([a-z]+)?(?::([^\n]+))?\n([\s\S]*?)\n```$/m
 
 type RichTextEditorProps = {
   content: string
@@ -73,6 +74,7 @@ export function RichTextEditor({
   disabled = false,
 }: RichTextEditorProps) {
   const computedColorScheme = useComputedColorScheme('light')
+
   const [linkModalOpen, setLinkModalOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
   const [linkText, setLinkText] = useState('')
@@ -83,7 +85,7 @@ export function RichTextEditor({
         heading: {
           levels: [1, 2, 3],
         },
-        codeBlock: false, // デフォルトのcodeBlockを無効化
+        codeBlock: false,
       }),
       CodeBlockLowlight.configure({
         lowlight,
@@ -98,7 +100,7 @@ export function RichTextEditor({
         addInputRules() {
           return [
             textblockTypeInputRule({
-              find: /^```([a-z]+)?(?::([^\s]+))?[\s\n]$/,
+              find: TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX,
               type: this.type,
               getAttributes: (match) => ({
                 language: match[1] || null,
@@ -137,8 +139,8 @@ export function RichTextEditor({
       handlePaste: (view, event) => {
         const text = event.clipboardData?.getData('text/plain')
 
-        // Markdown形式のコードブロック（```言語:ファイル名）を検出
-        const codeBlockMatch = text?.match(/^```([a-z]+)?(?::([^\n]+))?\n([\s\S]*?)\n```$/m)
+        const codeBlockMatch = text?.match(CODEBLOCK_REGEX)
+
         if (codeBlockMatch && editor) {
           event.preventDefault()
           const language = codeBlockMatch[1] || null
@@ -159,15 +161,14 @@ export function RichTextEditor({
         }
 
         if (text && isValidUrl(text)) {
-          // URLをそのままペーストした場合、リンクプレビューを作成
           const { state } = view
           const { selection } = state
           const { $from } = selection
 
-          // 空の行にペーストした場合のみプレビュー作成
           if ($from.parent.textContent === '') {
             event.preventDefault()
             editor?.commands.setLinkPreview({ url: text })
+
             return true
           }
         }
@@ -217,7 +218,6 @@ export function RichTextEditor({
       return
     }
 
-    // If there's text selected or provided, use it
     if (linkText) {
       editor
         .chain()
@@ -230,7 +230,6 @@ export function RichTextEditor({
         })
         .run()
     } else {
-      // Just add link to selected text
       editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run()
     }
 

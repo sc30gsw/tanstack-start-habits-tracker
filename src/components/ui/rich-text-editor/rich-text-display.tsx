@@ -10,7 +10,6 @@ import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/cod
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
-// lowlightインスタンスを作成（common言語セットを使用）
 const lowlight = createLowlight(common)
 
 export function RichTextDisplay({ html }: Record<'html', string>) {
