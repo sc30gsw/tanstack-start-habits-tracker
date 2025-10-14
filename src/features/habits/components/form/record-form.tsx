@@ -1,14 +1,4 @@
-import {
-  Alert,
-  Button,
-  Group,
-  NumberInput,
-  Select,
-  Stack,
-  Text,
-  Textarea,
-  useComputedColorScheme,
-} from '@mantine/core'
+import { Alert, Button, Group, NumberInput, Select, Stack, Text } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
@@ -17,7 +7,7 @@ import { useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import { useEffect, useMemo, useTransition } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import 'dayjs/locale/ja'
 
 // dayjsプラグインと日本のロケールを設定
@@ -26,6 +16,7 @@ dayjs.extend(timezone)
 dayjs.locale('ja')
 dayjs.tz.setDefault('Asia/Tokyo')
 
+import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
 import { recordDto } from '~/features/habits/server/record-functions'
 import type { HabitTable, RecordEntity, RecordTable } from '~/features/habits/types/habit'
 import { createRecordSchema } from '~/features/habits/types/schemas/record-schemas'
@@ -53,7 +44,8 @@ export function RecordForm({
 }: RecordFormProps) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-  const computedColorScheme = useComputedColorScheme('light')
+
+  const [editorContent, setEditorContent] = useState(existingRecord?.notes ?? '')
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -123,6 +115,11 @@ export function RecordForm({
       form.setFieldValue('status', 'active')
     }
   }, [isFutureDate, form])
+
+  // Sync editor content with form
+  useEffect(() => {
+    form.setFieldValue('notes', editorContent)
+  }, [editorContent])
 
   const handleSubmit = (values: FormValues) => {
     const durationMinutes = typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
@@ -333,35 +330,18 @@ export function RecordForm({
             style={{ flex: 1 }}
           />
         </Group>
-        <Textarea
-          label="メモ・感想"
-          placeholder="今日の感想や具体的に何をやったかを記録..."
-          rows={4}
-          maxLength={500}
-          key={form.key('notes')}
-          value={form.values.notes ?? ''}
-          onChange={(e) => form.setFieldValue('notes', e.currentTarget.value)}
-          error={form.errors.notes}
-          disabled={isPending}
-          description={`${form.values.notes?.length}/500文字`}
-          data-autofocus
-          styles={{
-            input: {
-              backgroundColor:
-                computedColorScheme === 'dark'
-                  ? 'var(--mantine-color-dark-6)'
-                  : 'var(--mantine-color-white)',
-              color:
-                computedColorScheme === 'dark'
-                  ? 'var(--mantine-color-gray-1)'
-                  : 'var(--mantine-color-dark-8)',
-              border:
-                computedColorScheme === 'dark'
-                  ? '1px solid var(--mantine-color-dark-4)'
-                  : '1px solid var(--mantine-color-gray-3)',
-            },
-          }}
-        />
+        <Stack gap="xs">
+          <Text size="sm" fw={500}>
+            メモ・感想
+          </Text>
+          <RichTextEditor
+            content={editorContent}
+            onChange={setEditorContent}
+            placeholder="今日の感想や具体的に何をやったかを記録..."
+            disabled={isPending}
+            maxLength={500}
+          />
+        </Stack>
         <Group gap="sm">
           <Button type="submit" loading={isPending} disabled={isPending}>
             {existingRecord ? '記録を更新' : '記録を保存'}

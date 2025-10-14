@@ -14,6 +14,8 @@ import { IconCheck, IconCopy, IconShare } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { filter, join, map, pipe } from 'remeda'
+import { RichTextDisplay } from '~/components/ui/rich-text-editor/rich-text-display'
+import { htmlToShareText } from '~/utils/html-helpers'
 
 export function ShareHabitsModal() {
   const routeApi = getRouteApi('/')
@@ -23,7 +25,6 @@ export function ShareHabitsModal() {
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
-  const textColor = 'gray.6'
 
   const { shareData: shareDataResponse } = routeApi.useLoaderData()
 
@@ -75,14 +76,15 @@ export function ShareHabitsModal() {
         const noteLines = pipe(
           habit.notes,
           filter((note): note is string => note !== null && note !== ''),
-          map((note) =>
-            pipe(
-              note.split('\n'),
+          map((note) => {
+            const plainText = htmlToShareText(note)
+            return pipe(
+              plainText.split('\n'),
               filter((line) => line.trim() !== ''),
               map((line) => `    ◦ ${line.replace(/^[・\-\s]+/, '')} ${habit.duration}分`),
               join('\n'),
-            ),
-          ),
+            )
+          }),
           join('\n'),
         )
 
@@ -115,14 +117,15 @@ export function ShareHabitsModal() {
     const noteLines = pipe(
       habit.notes,
       filter((note): note is string => note !== null && note !== ''),
-      map((note) =>
-        pipe(
-          note.split('\n'),
+      map((note) => {
+        const plainText = htmlToShareText(note)
+        return pipe(
+          plainText.split('\n'),
           filter((line) => line.trim() !== ''),
           map((line) => `    ◦ ${line.replace(/^[・\-\s]+/, '')} ${habit.duration}分`),
           join('\n'),
-        ),
-      ),
+        )
+      }),
       join('\n'),
     )
 
@@ -223,13 +226,9 @@ export function ShareHabitsModal() {
                       <Stack gap={2} mt={8} ml={16}>
                         {habit.notes
                           .filter((note): note is string => note !== null && note !== '')
-                          .map((note, noteIndex) =>
-                            note.split('\n').map((line, lineIndex) => (
-                              <Text key={`${noteIndex}-${lineIndex}`} size="sm" c={textColor}>
-                                ◦ {line.replace(/^[・\-\s]+/, '')}
-                              </Text>
-                            )),
-                          )}
+                          .map((note, noteIndex) => (
+                            <RichTextDisplay key={noteIndex} html={note} />
+                          ))}
                       </Stack>
                     )}
                   </div>
