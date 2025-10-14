@@ -23,6 +23,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEffect, useState } from 'react'
+import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
 type RichTextEditorProps = {
@@ -65,6 +66,7 @@ export function RichTextEditor({
           target: '_blank',
         },
       }),
+      LinkPreview,
     ],
     content,
     editable: !disabled,
@@ -75,6 +77,23 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class: `prose prose-sm ${computedColorScheme === 'dark' ? 'prose-invert' : ''} max-w-none focus:outline-none`,
+      },
+      handlePaste: (view, event) => {
+        const text = event.clipboardData?.getData('text/plain')
+        if (text && isValidUrl(text)) {
+          // URLをそのままペーストした場合、リンクプレビューを作成
+          const { state } = view
+          const { selection } = state
+          const { $from } = selection
+
+          // 空の行にペーストした場合のみプレビュー作成
+          if ($from.parent.textContent === '') {
+            event.preventDefault()
+            editor?.commands.setLinkPreview({ url: text })
+            return true
+          }
+        }
+        return false
       },
     },
   })
@@ -96,6 +115,15 @@ export function RichTextEditor({
   }
 
   const currentLength = editor.getText().length
+
+  const isValidUrl = (text: string): boolean => {
+    try {
+      const url = new URL(text)
+      return url.protocol === 'http:' || url.protocol === 'https:'
+    } catch {
+      return false
+    }
+  }
 
   const handleOpenLinkModal = () => {
     const previousUrl = editor.getAttributes('link').href

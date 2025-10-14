@@ -5,6 +5,26 @@
   outline: none;
 }
 
+/* Display-only styles (for RichTextDisplay component) */
+.ProseMirror[contenteditable="false"] {
+  padding: 0;
+  min-height: auto;
+}
+
+.ProseMirror[contenteditable="false"] p {
+  margin: 0.1em 0;
+}
+
+.ProseMirror[contenteditable="false"] ul,
+.ProseMirror[contenteditable="false"] ol {
+  margin: 0.1em 0;
+  padding-left: 1.2rem;
+}
+
+.ProseMirror[contenteditable="false"] li {
+  margin: 0;
+}
+
 .ProseMirror p.is-editor-empty:first-child::before {
   color: var(--mantine-color-dimmed);
   content: attr(data-placeholder);
@@ -110,10 +130,37 @@
   text-decoration: underline;
   cursor: pointer;
   transition: color 0.2s ease;
+  position: relative;
 }
 
 .ProseMirror a:hover {
   color: var(--mantine-color-blue-7);
+}
+
+/* Link preview on hover */
+.ProseMirror a::after {
+  content: attr(href);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ProseMirror a:hover::after {
+  opacity: 1;
 }
 
 /* Dark mode adjustments */

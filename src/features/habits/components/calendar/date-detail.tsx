@@ -147,7 +147,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                       computedColorScheme === 'dark'
                         ? 'var(--mantine-color-dark-6)'
                         : 'var(--mantine-color-gray-0)',
-                    padding: '8px 12px',
+                    padding: '6px 8px',
                     borderRadius: '6px',
                     border:
                       computedColorScheme === 'dark'

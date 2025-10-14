@@ -3,6 +3,7 @@ import Link from '@tiptap/extension-link'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEffect } from 'react'
+import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
 export function RichTextDisplay({ html }: Record<'html', string>) {
@@ -22,6 +23,7 @@ export function RichTextDisplay({ html }: Record<'html', string>) {
           target: '_blank',
         },
       }),
+      LinkPreview,
     ],
     content: html,
     editable: false,
@@ -45,7 +47,7 @@ export function RichTextDisplay({ html }: Record<'html', string>) {
   return (
     <Box
       style={{
-        padding: '8px',
+        padding: 0,
       }}
     >
       <EditorContent editor={editor} />
