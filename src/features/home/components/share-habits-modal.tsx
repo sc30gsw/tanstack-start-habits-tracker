@@ -254,7 +254,7 @@ export function ShareHabitsModal() {
                       )}
                     </CopyButton>
 
-                    <Stack gap={4}>
+                    <Stack gap={0}>
                       <div style={{ fontWeight: 600, fontSize: '14px' }}>
                         <RichTextDisplay
                           html={`<ul><li>${habit.habitName} ${habit.duration}分</li></ul>`}
