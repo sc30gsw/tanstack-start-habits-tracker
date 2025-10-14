@@ -117,11 +117,6 @@ export function DailyHabitCard({ habit, record, isCompleted }: DailyHabitCardPro
             </Badge>
           </Group>
         </Group>
-        {!isCompleted && record?.notes && (
-          <Text size="xs" c="dimmed" mt="xs">
-            {record.notes}
-          </Text>
-        )}
       </Paper>
     </Tooltip>
   )

@@ -1,0 +1,333 @@
+/* Tiptap Editor Styles */
+.ProseMirror {
+  padding: 12px;
+  min-height: 100px;
+  outline: none;
+}
+
+/* Display-only styles (for RichTextDisplay component) */
+.ProseMirror[contenteditable="false"] {
+  padding: 0;
+  min-height: auto;
+}
+
+.ProseMirror[contenteditable="false"] p {
+  margin: 0.1em 0;
+}
+
+.ProseMirror[contenteditable="false"] ul,
+.ProseMirror[contenteditable="false"] ol {
+  margin: 0.1em 0;
+  padding-left: 1.2rem;
+}
+
+.ProseMirror[contenteditable="false"] li {
+  margin: 0;
+}
+
+/* Hide trailing break paragraphs in read-only mode */
+.ProseMirror[contenteditable="false"] > p:last-child:has(br.ProseMirror-trailingBreak) {
+  display: none;
+}
+
+.ProseMirror[contenteditable="false"] li > p:last-child:has(br.ProseMirror-trailingBreak) {
+  display: none;
+}
+
+.ProseMirror[contenteditable="false"] ul > p:has(br.ProseMirror-trailingBreak),
+.ProseMirror[contenteditable="false"] ol > p:has(br.ProseMirror-trailingBreak) {
+  display: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: var(--mantine-color-dimmed);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.ProseMirror p {
+  margin: 0.5em 0;
+}
+
+.ProseMirror p:first-child {
+  margin-top: 0;
+}
+
+.ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+  margin: 0.5em 0;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.ProseMirror li {
+  margin: 0.25em 0;
+}
+
+/* Code and Code Block Styles */
+.ProseMirror code {
+  background-color: rgba(97, 97, 97, 0.1);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.ProseMirror pre {
+  background-color: var(--mantine-color-dark-7);
+  border-radius: 6px;
+  padding: 16px;
+  font-family: 'Courier New', Consolas, Monaco, monospace;
+  overflow-x: auto;
+  margin: 0.75em 0;
+  color: var(--mantine-color-gray-0);
+  line-height: 1.5;
+  position: relative;
+}
+
+/* コードブロックのヘッダー（ファイル名表示のみ） */
+.ProseMirror pre[data-filename]::before {
+  content: attr(data-filename);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--mantine-color-gray-4);
+  background-color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  font-weight: 500;
+}
+
+/* ファイル名がある場合のみpadding-topを追加 */
+.ProseMirror pre[data-filename] {
+  padding-top: 40px;
+}
+
+/* ファイル名がない場合はヘッダーを完全に非表示 */
+.ProseMirror pre:not([data-filename]) {
+  padding-top: 16px;
+}
+
+/* コピーボタンのスタイル（NodeViewで追加される） */
+.code-block-wrapper {
+  position: relative;
+  margin: 0.75em 0;
+}
+
+/* デフォルトでコピーボタンを非表示 */
+.code-block-wrapper .code-block-copy-button {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* ホバー時、またはコピー済み時にボタンを表示 */
+.code-block-wrapper:hover .code-block-copy-button,
+.code-block-wrapper .code-block-copy-button[data-copied="true"] {
+  opacity: 1;
+}
+
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: 0.875em;
+}
+
+/* Syntax Highlighting Colors - Light Mode */
+.ProseMirror pre .hljs-comment,
+.ProseMirror pre .hljs-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.ProseMirror pre .hljs-keyword,
+.ProseMirror pre .hljs-selector-tag,
+.ProseMirror pre .hljs-subst {
+  color: #d73a49;
+  font-weight: bold;
+}
+
+.ProseMirror pre .hljs-string,
+.ProseMirror pre .hljs-attr,
+.ProseMirror pre .hljs-symbol,
+.ProseMirror pre .hljs-bullet,
+.ProseMirror pre .hljs-addition {
+  color: #22863a;
+}
+
+.ProseMirror pre .hljs-title,
+.ProseMirror pre .hljs-section,
+.ProseMirror pre .hljs-attribute {
+  color: #6f42c1;
+  font-weight: bold;
+}
+
+.ProseMirror pre .hljs-variable,
+.ProseMirror pre .hljs-template-variable {
+  color: #e36209;
+}
+
+.ProseMirror pre .hljs-type,
+.ProseMirror pre .hljs-built_in,
+.ProseMirror pre .hljs-builtin-name,
+.ProseMirror pre .hljs-params {
+  color: #005cc5;
+}
+
+.ProseMirror pre .hljs-meta,
+.ProseMirror pre .hljs-meta-keyword {
+  color: #005cc5;
+}
+
+.ProseMirror pre .hljs-number,
+.ProseMirror pre .hljs-literal {
+  color: #005cc5;
+}
+
+.ProseMirror pre .hljs-regexp,
+.ProseMirror pre .hljs-link {
+  color: #032f62;
+}
+
+.ProseMirror pre .hljs-function .hljs-title {
+  color: #6f42c1;
+}
+
+.ProseMirror pre .hljs-tag {
+  color: #22863a;
+}
+
+.ProseMirror pre .hljs-name {
+  color: #22863a;
+  font-weight: bold;
+}
+
+.ProseMirror pre .hljs-deletion {
+  color: #b31d28;
+  background-color: #ffeef0;
+}
+
+.ProseMirror pre .hljs-emphasis {
+  font-style: italic;
+}
+
+.ProseMirror pre .hljs-strong {
+  font-weight: bold;
+}
+
+.ProseMirror strong {
+  font-weight: 700;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
+
+.ProseMirror s {
+  text-decoration: line-through;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid var(--mantine-color-gray-4);
+  padding-left: 1rem;
+  margin: 1em 0;
+  color: var(--mantine-color-dimmed);
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  margin: 1em 0 0.5em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.ProseMirror h1 {
+  font-size: 1.5em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.3em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.1em;
+}
+
+/* Link styles */
+.ProseMirror a {
+  color: var(--mantine-color-blue-6);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.ProseMirror a:hover {
+  color: var(--mantine-color-blue-7);
+}
+
+/* Link preview on hover */
+.ProseMirror a::after {
+  content: attr(href);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ProseMirror a:hover::after {
+  opacity: 1;
+}
+
+/* Dark mode adjustments */
+[data-mantine-color-scheme='dark'] .ProseMirror code {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror blockquote {
+  border-left-color: var(--mantine-color-dark-4);
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror a {
+  color: var(--mantine-color-blue-4);
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror a:hover {
+  color: var(--mantine-color-blue-3);
+}

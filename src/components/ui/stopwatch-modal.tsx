@@ -6,9 +6,7 @@ import {
   Skeleton,
   Stack,
   Text,
-  Textarea,
   Title,
-  useComputedColorScheme,
   useMantineTheme,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
@@ -28,6 +26,7 @@ import dayjs from 'dayjs'
 import type { InferSelectModel } from 'drizzle-orm'
 import { Suspense, useEffect, useState, useTransition } from 'react'
 import { z } from 'zod/v4'
+import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
 import { GET_HABITS_CACHE_KEY, GET_RECORD_BY_HABIT_AND_DATE_CACHE_KEY } from '~/constants/cache-key'
 import type { habits as HabitTable } from '~/db/schema'
 import { habitDto } from '~/features/habits/server/habit-functions'
@@ -84,6 +83,21 @@ export function StopwatchModal() {
 
   const handleClose = () => {
     if (isRunning || pausedElapsed > 0) {
+      // タイマーが動いている場合は先に停止
+      if (isRunning) {
+        const currentElapsed = displayTime
+
+        navigate({
+          to: location.pathname,
+          search: (prev) => ({
+            ...prev,
+            stopwatchRunning: false,
+            stopwatchStartTime: null,
+            stopwatchElapsed: currentElapsed,
+          }),
+        })
+      }
+
       modals.openConfirmModal({
         title: (
           <Group gap="xs">
@@ -188,6 +202,21 @@ export function StopwatchModal() {
   }
 
   const handleReset = () => {
+    // タイマーが動いている場合は先に停止
+    if (isRunning) {
+      const currentElapsed = displayTime
+
+      navigate({
+        to: location.pathname,
+        search: (prev) => ({
+          ...prev,
+          stopwatchRunning: false,
+          stopwatchStartTime: null,
+          stopwatchElapsed: currentElapsed,
+        }),
+      })
+    }
+
     modals.openConfirmModal({
       title: (
         <Group gap="xs">
@@ -227,22 +256,24 @@ export function StopwatchModal() {
   }
 
   const handleFinish = () => {
+    if (isRunning) {
+      const currentElapsed = displayTime
+
+      navigate({
+        to: location.pathname,
+        search: (prev) => ({
+          ...prev,
+          stopwatchRunning: false,
+          stopwatchStartTime: null,
+          stopwatchElapsed: currentElapsed,
+        }),
+      })
+    }
+
     const currentElapsed = displayTime
     const currentMinutes = Math.floor(currentElapsed / 60)
 
     const openRecordModal = () => {
-      if (isRunning) {
-        navigate({
-          to: location.pathname,
-          search: (prev) => ({
-            ...prev,
-            stopwatchRunning: false,
-            stopwatchStartTime: null,
-            stopwatchElapsed: currentElapsed,
-          }),
-        })
-      }
-
       modals.open({
         title: '習慣を記録',
         children: (
@@ -364,7 +395,7 @@ export function StopwatchModal() {
 }
 
 const finishRecordFormSchema = z.object({
-  notes: z.string().max(500, 'メモは500文字以内で入力してください').optional(),
+  notes: z.string().optional(),
 })
 
 type FinishRecordFormProps = {
@@ -393,7 +424,6 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
   const router = useRouter()
 
   const [isPending, startTransition] = useTransition()
-  const computedColorScheme = useComputedColorScheme('light')
 
   const today = dayjs().format('YYYY-MM-DD')
   const durationMinutes = Math.floor(elapsedSeconds / 60)
@@ -404,6 +434,8 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
   })
 
   const existingRecord = existingRecordResponse?.data
+
+  const [editorContent, setEditorContent] = useState(existingRecord?.notes || '')
 
   const form = useForm<z.infer<typeof finishRecordFormSchema>>({
     initialValues: {
@@ -429,6 +461,11 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
       return fieldErrors
     },
   })
+
+  // Sync editor content with form
+  useEffect(() => {
+    form.setFieldValue('notes', editorContent)
+  }, [editorContent])
 
   const handleSubmit = (values: z.infer<typeof finishRecordFormSchema>) => {
     startTransition(async () => {
@@ -534,33 +571,17 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
           </Stack>
         )}
 
-        <Textarea
-          label={existingRecord ? 'メモ・感想（既存のメモに追記されます）' : 'メモ・感想'}
-          placeholder="今日の感想や具体的に何をやったかを記録..."
-          rows={4}
-          maxLength={500}
-          key={form.key('notes')}
-          {...form.getInputProps('notes')}
-          disabled={isPending}
-          description={`${form.values.notes?.length ?? 0}/500文字`}
-          data-autofocus
-          styles={{
-            input: {
-              backgroundColor:
-                computedColorScheme === 'dark'
-                  ? 'var(--mantine-color-dark-6)'
-                  : 'var(--mantine-color-white)',
-              color:
-                computedColorScheme === 'dark'
-                  ? 'var(--mantine-color-gray-1)'
-                  : 'var(--mantine-color-dark-8)',
-              border:
-                computedColorScheme === 'dark'
-                  ? '1px solid var(--mantine-color-dark-4)'
-                  : '1px solid var(--mantine-color-gray-3)',
-            },
-          }}
-        />
+        <Stack gap="xs">
+          <Text size="sm" fw={500}>
+            {existingRecord ? 'メモ・感想（既存のメモに追記されます）' : 'メモ・感想'}
+          </Text>
+          <RichTextEditor
+            content={editorContent}
+            onChange={setEditorContent}
+            placeholder="今日の感想や具体的に何をやったかを記録..."
+            disabled={isPending}
+          />
+        </Stack>
 
         <Group gap="sm">
           <Button type="submit" loading={isPending} disabled={isPending}>

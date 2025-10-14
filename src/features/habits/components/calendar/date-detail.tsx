@@ -11,6 +11,7 @@ import {
 import { IconCalendarEvent, IconCheck, IconEdit, IconPlus, IconX } from '@tabler/icons-react'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import { RichTextDisplay } from '~/components/ui/rich-text-editor/rich-text-display'
 import { RecordForm } from '~/features/habits/components/form/record-form'
 import { RecordDeleteButton } from '~/features/habits/components/record-delete-button'
 import type { HabitTable, RecordEntity } from '~/features/habits/types/habit'
@@ -140,16 +141,13 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                 <Text size="sm" fw={500} c={textColor}>
                   メモ・感想
                 </Text>
-                <Text
-                  size="sm"
-                  c={titleColor}
+                <div
                   style={{
-                    whiteSpace: 'pre-wrap',
                     backgroundColor:
                       computedColorScheme === 'dark'
                         ? 'var(--mantine-color-dark-6)'
                         : 'var(--mantine-color-gray-0)',
-                    padding: '8px 12px',
+                    padding: '6px 8px',
                     borderRadius: '6px',
                     border:
                       computedColorScheme === 'dark'
@@ -157,8 +155,8 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                         : '1px solid var(--mantine-color-gray-2)',
                   }}
                 >
-                  {selectedDateRecord.notes}
-                </Text>
+                  <RichTextDisplay html={selectedDateRecord.notes} />
+                </div>
               </Stack>
             )}
           </Stack>
