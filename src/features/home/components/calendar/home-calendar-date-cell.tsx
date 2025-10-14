@@ -154,6 +154,7 @@ export function HomeCalendarDateCell({
         color: textColor,
         border: `${borderWidth} solid ${borderColor}`,
         boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
+        minHeight: '80px',
       }}
       onClick={() =>
         navigate({
@@ -164,21 +165,50 @@ export function HomeCalendarDateCell({
         })
       }
     >
-      <Text
-        size="xs"
-        c={
-          isSelected
-            ? 'white' // 選択時は白文字で視認性を確保
-            : dateType === 'sunday'
-              ? 'red.7'
-              : dateType === 'saturday'
-                ? 'blue.7'
-                : 'dimmed'
-        }
-      >
-        {date.format('dd')}
-      </Text>
-      <Text fw={500}>{date.date()}</Text>
+      <Stack gap={2} align="stretch">
+        <Text
+          size="xs"
+          c={
+            isSelected
+              ? 'white' // 選択時は白文字で視認性を確保
+              : dateType === 'sunday'
+                ? 'red.7'
+                : dateType === 'saturday'
+                  ? 'blue.7'
+                  : 'dimmed'
+          }
+        >
+          {date.format('dd')}
+        </Text>
+        <Text fw={500}>{date.date()}</Text>
+        {completedRecords.length > 0 && (
+          <Stack gap={1} mt={4}>
+            {completedRecords.slice(0, 3).map((record) => (
+              <Text
+                key={record.id}
+                size="9px"
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'rgba(34,139,230,0.1)',
+                  padding: '1px 3px',
+                  borderRadius: '2px',
+                  textAlign: 'left',
+                }}
+                title={record.habit?.name}
+              >
+                {record.habit?.name}
+              </Text>
+            ))}
+            {completedRecords.length > 3 && (
+              <Text size="8px" c="dimmed" ta="center">
+                +{completedRecords.length - 3}件
+              </Text>
+            )}
+          </Stack>
+        )}
+      </Stack>
     </Card>
   )
 }
