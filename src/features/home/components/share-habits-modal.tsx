@@ -108,7 +108,7 @@ export function ShareHabitsModal() {
           !habit.notes || habit.notes.length === 0 || habit.notes.every((note) => !note)
 
         if (notHaveNotes) {
-          return `<li>${habit.habitName} ${habit.duration}分</li>`
+          return `<li><strong>${habit.habitName} ${habit.duration}分</strong></li>`
         }
 
         const noteHtmls = pipe(
@@ -123,7 +123,7 @@ export function ShareHabitsModal() {
             ? noteHtmls
             : `<div>${noteHtmls}</div>`
 
-        return `<li>${habit.habitName} ${habit.duration}分${wrappedNotes}</li>`
+        return `<li><strong>${habit.habitName} ${habit.duration}分</strong>${wrappedNotes}</li>`
       }),
       join(''),
     )
