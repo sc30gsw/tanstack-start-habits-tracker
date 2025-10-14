@@ -85,6 +85,31 @@ export function DailyHabitList() {
   const skippedHabits = habitsByStatus.skipped ?? []
   const unscheduledHabits = habitsByStatus.unscheduled ?? []
 
+  const totalCompletedDuration = completedHabits.reduce((sum, { record }) => {
+    return sum + (record?.duration_minutes ?? 0)
+  }, 0)
+
+  const formatDuration = (minutes: number) => {
+    if (minutes === 0) {
+      return '0分'
+    }
+
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+
+    if (hours === 0) {
+      return `${mins}分`
+    }
+
+    if (mins === 0) {
+      return `${hours}時間（${minutes}分）`
+    }
+
+    return `${hours}時間${mins}分（${minutes}分）`
+  }
+
+  const totalCompletedDurationText = formatDuration(totalCompletedDuration)
+
   const formatDate = dayjs(selectedDate).format('YYYY年MM月DD日（dd）')
 
   // フィルタリング状態に応じたメッセージ
@@ -212,11 +237,18 @@ export function DailyHabitList() {
                 cursor: completedHabits.length === 0 ? 'not-allowed' : 'auto',
               }}
             >
-              <Group gap="xs" align="center" mb="sm">
-                <IconCheck size={18} color="var(--mantine-color-green-6)" />
-                <Text size="md" fw={500} c="green.6">
-                  ✅ 完了済み ({completedHabits.length})
-                </Text>
+              <Group gap="xs" align="center" mb="sm" justify="space-between">
+                <Group gap="xs" align="center">
+                  <IconCheck size={18} color="var(--mantine-color-green-6)" />
+                  <Text size="md" fw={500} c="green.6">
+                    ✅ 完了済み ({completedHabits.length})
+                  </Text>
+                </Group>
+                {completedHabits.length > 0 && (
+                  <Text size="sm" c="blue.6" fw={600}>
+                    合計: {totalCompletedDurationText}
+                  </Text>
+                )}
               </Group>
               {completedHabits.length === 0 && (
                 <Text size="xs" c="dimmed" mb="xs" fs="italic">

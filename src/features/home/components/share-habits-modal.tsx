@@ -57,6 +57,29 @@ export function ShareHabitsModal() {
   const today = dayjs().format('YYYY-MM-DD')
   const shareData = shareDataResponse.data
 
+  const totalDuration = shareData.reduce((sum, habit) => sum + (habit.duration ?? 0), 0)
+
+  const formatDuration = (minutes: number) => {
+    if (minutes === 0) {
+      return '0分'
+    }
+
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+
+    if (hours === 0) {
+      return `${mins}分`
+    }
+
+    if (mins === 0) {
+      return `${hours}時間（${minutes}分）`
+    }
+
+    return `${hours}時間${mins}分（${minutes}分）`
+  }
+
+  const totalDurationText = formatDuration(totalDuration)
+
   const shareText = (() => {
     if (shareData.length === 0) {
       return '今日は完了した習慣がありませんでした :sweat_smile:'
@@ -93,7 +116,7 @@ export function ShareHabitsModal() {
       join('\n'),
     )
 
-    return habitTexts.trim()
+    return `${habitTexts.trim()}\n\n合計: ${totalDurationText}`
   })()
 
   const shareHtml = (() => {
@@ -128,7 +151,7 @@ export function ShareHabitsModal() {
       join(''),
     )
 
-    return `<ul>${habitHtmls}</ul>`
+    return `<ul>${habitHtmls}</ul><p><strong>合計: ${totalDurationText}</strong></p>`
   })()
 
   const handleCopySuccess = () => {
@@ -197,9 +220,16 @@ export function ShareHabitsModal() {
         size="lg"
       >
         <Stack gap="lg">
-          <Text size="lg" c={titleColor} fw={600}>
-            {dayjs(today).format('YYYY年MM月DD日')}の完了した習慣
-          </Text>
+          <Group justify="space-between" align="center">
+            <Text size="lg" c={titleColor} fw={600}>
+              {dayjs(today).format('YYYY年MM月DD日')}の完了した習慣
+            </Text>
+            {shareData.length > 0 && (
+              <Text size="md" c="blue.6" fw={600}>
+                合計: {totalDurationText}
+              </Text>
+            )}
+          </Group>
 
           {shareData.length === 0 ? (
             <Text c="dimmed" fs="italic">
