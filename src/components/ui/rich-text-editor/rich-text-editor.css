@@ -25,6 +25,20 @@
   margin: 0;
 }
 
+/* Hide trailing break paragraphs in read-only mode */
+.ProseMirror[contenteditable="false"] > p:last-child:has(br.ProseMirror-trailingBreak) {
+  display: none;
+}
+
+.ProseMirror[contenteditable="false"] li > p:last-child:has(br.ProseMirror-trailingBreak) {
+  display: none;
+}
+
+.ProseMirror[contenteditable="false"] ul > p:has(br.ProseMirror-trailingBreak),
+.ProseMirror[contenteditable="false"] ol > p:has(br.ProseMirror-trailingBreak) {
+  display: none;
+}
+
 .ProseMirror p.is-editor-empty:first-child::before {
   color: var(--mantine-color-dimmed);
   content: attr(data-placeholder);

@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Box,
   Button,
   CopyButton,
   Group,
@@ -71,29 +72,63 @@ export function ShareHabitsModal() {
           return `• ${habit.habitName} ${habit.duration}分`
         }
 
-        const habitLine = `• ${habit.habitName}`
-
+        const habitLine = `• ${habit.habitName} ${habit.duration}分`
         const noteLines = pipe(
           habit.notes,
           filter((note): note is string => note !== null && note !== ''),
           map((note) => {
             const plainText = htmlToShareText(note)
-            return pipe(
-              plainText.split('\n'),
-              filter((line) => line.trim() !== ''),
-              map((line) => `    ◦ ${line.replace(/^[・\-\s]+/, '')} ${habit.duration}分`),
-              join('\n'),
-            )
+
+            return plainText
+              .split('\n')
+              .filter((line) => line.trim())
+              .map((line) => `　${line}`)
+              .join('\n')
           }),
           join('\n'),
         )
 
-        return `${habitLine}\n${noteLines}`
+        return noteLines ? `${habitLine}\n${noteLines}` : habitLine
       }),
       join('\n'),
     )
 
     return habitTexts.trim()
+  })()
+
+  const shareHtml = (() => {
+    if (shareData.length === 0) {
+      return '<p>今日は完了した習慣がありませんでした :sweat_smile:</p>'
+    }
+
+    const habitHtmls = pipe(
+      shareData,
+      map((habit) => {
+        const notHaveNotes =
+          !habit.notes || habit.notes.length === 0 || habit.notes.every((note) => !note)
+
+        if (notHaveNotes) {
+          return `<li>${habit.habitName} ${habit.duration}分</li>`
+        }
+
+        const noteHtmls = pipe(
+          habit.notes,
+          filter((note): note is string => note !== null && note !== ''),
+          map((note) => note),
+          join(''),
+        )
+
+        const wrappedNotes =
+          noteHtmls.trim().startsWith('<ul>') || noteHtmls.trim().startsWith('<ol>')
+            ? noteHtmls
+            : `<div>${noteHtmls}</div>`
+
+        return `<li>${habit.habitName} ${habit.duration}分${wrappedNotes}</li>`
+      }),
+      join(''),
+    )
+
+    return `<ul>${habitHtmls}</ul>`
   })()
 
   const handleCopySuccess = () => {
@@ -112,24 +147,24 @@ export function ShareHabitsModal() {
       return `• ${habit.habitName} ${habit.duration}分`
     }
 
-    const habitLine = `• ${habit.habitName}`
+    const habitLine = `• ${habit.habitName} ${habit.duration}分`
 
     const noteLines = pipe(
       habit.notes,
       filter((note): note is string => note !== null && note !== ''),
       map((note) => {
         const plainText = htmlToShareText(note)
-        return pipe(
-          plainText.split('\n'),
-          filter((line) => line.trim() !== ''),
-          map((line) => `    ◦ ${line.replace(/^[・\-\s]+/, '')} ${habit.duration}分`),
-          join('\n'),
-        )
+
+        return plainText
+          .split('\n')
+          .filter((line) => line.trim())
+          .map((line) => `　${line}`)
+          .join('\n')
       }),
       join('\n'),
     )
 
-    return `${habitLine}\n${noteLines}`
+    return noteLines ? `${habitLine}\n${noteLines}` : habitLine
   }
 
   return (
@@ -219,18 +254,20 @@ export function ShareHabitsModal() {
                       )}
                     </CopyButton>
 
-                    <Text fw={600} c={titleColor} size="md">
-                      • {habit.habitName}
-                    </Text>
-                    {habit.notes && habit.notes.length > 0 && (
-                      <Stack gap={2} mt={8} ml={16}>
-                        {habit.notes
-                          .filter((note): note is string => note !== null && note !== '')
-                          .map((note, noteIndex) => (
-                            <RichTextDisplay key={noteIndex} html={note} />
-                          ))}
-                      </Stack>
-                    )}
+                    <Stack gap={4}>
+                      <div style={{ fontWeight: 600, fontSize: '14px' }}>
+                        <RichTextDisplay html={`<ul><li>${habit.habitName} ${habit.duration}分</li></ul>`} />
+                      </div>
+                      {habit.notes && habit.notes.length > 0 && (
+                        <Box ml={16}>
+                          {habit.notes
+                            .filter((note): note is string => note !== null && note !== '')
+                            .map((note, noteIndex) => (
+                              <RichTextDisplay key={noteIndex} html={note} />
+                            ))}
+                        </Box>
+                      )}
+                    </Stack>
                   </div>
                 )
               })}
@@ -241,11 +278,8 @@ export function ShareHabitsModal() {
             <Text size="md" c={titleColor} fw={600}>
               共有テキストプレビュー
             </Text>
-            <Text
-              size="sm"
-              c={titleColor}
+            <Box
               style={{
-                whiteSpace: 'pre-wrap',
                 backgroundColor:
                   computedColorScheme === 'dark'
                     ? 'var(--mantine-color-dark-6)'
@@ -264,8 +298,8 @@ export function ShareHabitsModal() {
                     : '0 2px 8px rgba(0, 0, 0, 0.1)',
               }}
             >
-              {shareText}
-            </Text>
+              <RichTextDisplay html={shareHtml} />
+            </Box>
           </Stack>
 
           <CopyButton value={shareText} timeout={2000}>
