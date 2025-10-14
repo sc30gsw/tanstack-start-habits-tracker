@@ -90,7 +90,6 @@
   background-color: var(--mantine-color-dark-7);
   border-radius: 6px;
   padding: 16px;
-  padding-top: 40px; /* ヘッダー用のスペース */
   font-family: 'Courier New', Consolas, Monaco, monospace;
   overflow-x: auto;
   margin: 0.75em 0;
