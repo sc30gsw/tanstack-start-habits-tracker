@@ -1,6 +1,6 @@
-import { NodeViewWrapper } from '@tiptap/react'
-import type { NodeViewProps } from '@tiptap/react'
 import { useQuery } from '@tanstack/react-query'
+import type { NodeViewProps } from '@tiptap/react'
+import { NodeViewWrapper } from '@tiptap/react'
 import { useEffect, useState } from 'react'
 import { LinkPreviewCard } from '~/components/ui/link-preview-card'
 import { fetchOgpData } from '~/features/root/server/ogp-functions'
