@@ -256,7 +256,9 @@ export function ShareHabitsModal() {
 
                     <Stack gap={4}>
                       <div style={{ fontWeight: 600, fontSize: '14px' }}>
-                        <RichTextDisplay html={`<ul><li>${habit.habitName} ${habit.duration}分</li></ul>`} />
+                        <RichTextDisplay
+                          html={`<ul><li>${habit.habitName} ${habit.duration}分</li></ul>`}
+                        />
                       </div>
                       {habit.notes && habit.notes.length > 0 && (
                         <Box ml={16}>
