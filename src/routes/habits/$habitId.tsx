@@ -1,11 +1,15 @@
 import { Alert, Container, Stack, Text, Title, useComputedColorScheme } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
+import { eq } from 'drizzle-orm'
+import { db } from '~/db'
+import { habitLevels } from '~/db/schema'
 import { HabitDetail } from '~/features/habits/components/habit-detail'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { getDataFetchDateRange } from '~/features/habits/utils/completion-rate-utils'
+import { calculateLevelInfo } from '~/features/habits/utils/habit-level-utils'
 
 export const Route = createFileRoute('/habits/$habitId')({
   component: HabitDetailPage,
@@ -17,7 +21,7 @@ export const Route = createFileRoute('/habits/$habitId')({
     // ヒートマップ(今日から1年分) + カレンダーグリッド(42日分)の範囲を取得
     const { dateFrom, dateTo } = getDataFetchDateRange(context.search.currentMonth)
 
-    const [habitResult, recordsResult, habitsResult] = await Promise.all([
+    const [habitResult, recordsResult, habitsResult, habitLevelData] = await Promise.all([
       habitDto.getHabitById({ data: { id: params.habitId } }),
       recordDto.getRecords({
         data: {
@@ -27,9 +31,17 @@ export const Route = createFileRoute('/habits/$habitId')({
         },
       }),
       habitDto.getHabits(),
+      db.query.habitLevels.findFirst({
+        where: eq(habitLevels.habitId, params.habitId),
+      }),
     ])
 
-    return { habit: habitResult, records: recordsResult, habits: habitsResult }
+    const levelInfo =
+      habitLevelData && recordsResult.success && recordsResult.data
+        ? calculateLevelInfo(habitLevelData, recordsResult.data, context.search.selectedDate)
+        : null
+
+    return { habit: habitResult, records: recordsResult, habits: habitsResult, levelInfo }
   },
 })
 

@@ -7,7 +7,7 @@ import { and, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
-import { habits } from '~/db/schema'
+import { habitLevels, habits } from '~/db/schema'
 import type { HabitEntity } from '~/features/habits/types/habit'
 import {
   createHabitSchema,
@@ -59,6 +59,20 @@ const createHabit = createServerFn({ method: 'POST' })
           userId,
         })
         .returning()
+
+      const levelId = nanoid()
+      await db.insert(habitLevels).values({
+        id: levelId,
+        habitId: habitId,
+        userId: userId,
+        uniqueCompletionDays: 0,
+        completionLevel: 1,
+        totalHoursDecimal: 0.0,
+        hoursLevel: 1,
+        currentStreak: 0,
+        longestStreak: 0,
+        lastActivityDate: null,
+      })
 
       const parsedHabit = habitSchema.parse({
         ...habit,
