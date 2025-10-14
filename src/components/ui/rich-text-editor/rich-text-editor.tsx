@@ -23,6 +23,7 @@ import {
 import { textblockTypeInputRule } from '@tiptap/core'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Link from '@tiptap/extension-link'
+import ListItem from '@tiptap/extension-list-item'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -86,6 +87,45 @@ export function RichTextEditor({
           levels: [1, 2, 3],
         },
         codeBlock: false,
+        bulletList: {
+          keepMarks: true,
+          keepAttributes: false,
+        },
+        orderedList: {
+          keepMarks: true,
+          keepAttributes: false,
+        },
+        listItem: false, // Disable default to use custom
+      }),
+      ListItem.extend({
+        addKeyboardShortcuts() {
+          return {
+            Enter: () => {
+              const { state } = this.editor
+              const { $from } = state.selection
+
+              // Check if we're in a list item
+              const listItemDepth = $from.depth - 1
+              if (listItemDepth < 0 || $from.node(listItemDepth).type.name !== 'listItem') {
+                return false
+              }
+
+              // Get the current list item node
+              const currentListItem = $from.node(listItemDepth)
+
+              // Check if the list item is empty (only contains empty paragraph)
+              const isEmpty = currentListItem.textContent.length === 0
+
+              if (isEmpty) {
+                // Exit the list (Slack-like behavior)
+                return this.editor.commands.liftListItem('listItem')
+              }
+
+              // Create new list item (default behavior)
+              return this.editor.commands.splitListItem('listItem')
+            },
+          }
+        },
       }),
       CodeBlockLowlight.configure({
         lowlight,
@@ -122,6 +162,22 @@ export function RichTextEditor({
           class: 'rich-text-link',
           rel: 'noopener noreferrer',
           target: '_blank',
+        },
+      }).extend({
+        addKeyboardShortcuts() {
+          return {
+            'Mod-Shift-u': () => {
+              const previousUrl = this.editor.getAttributes('link').href
+              const { from, to } = this.editor.state.selection
+              const selectedText = this.editor.state.doc.textBetween(from, to, '')
+
+              setLinkUrl(previousUrl || '')
+              setLinkText(selectedText || '')
+              setLinkModalOpen(true)
+
+              return true
+            },
+          }
         },
       }),
       LinkPreview,
@@ -261,7 +317,7 @@ export function RichTextEditor({
           borderTopRightRadius: '4px',
         }}
       >
-        <Tooltip label="太字 (Cmd+B)">
+        <Tooltip label="太字 (⌘B)">
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBold().run()}
@@ -283,7 +339,7 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="斜体 (Cmd+I)">
+        <Tooltip label="斜体 (⌘I)">
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -305,7 +361,7 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="取り消し線">
+        <Tooltip label="取り消し線 (⌘⇧X)">
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -327,7 +383,7 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="コード">
+        <Tooltip label="コード (⌘E)">
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleCode().run()}
@@ -349,7 +405,7 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="コードブロック">
+        <Tooltip label="コードブロック (⌘⌥C)">
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleCodeBlock().run()}
@@ -421,7 +477,7 @@ export function RichTextEditor({
           </>
         )}
 
-        <Tooltip label="箇条書き">
+        <Tooltip label="箇条書き (⌘⇧8)">
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -443,7 +499,7 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="番号付きリスト">
+        <Tooltip label="番号付きリスト (⌘⇧7)">
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -477,7 +533,7 @@ export function RichTextEditor({
           }}
         />
 
-        <Tooltip label="リンク挿入">
+        <Tooltip label="リンク挿入 (⌘⇧U)">
           <button
             type="button"
             onClick={handleOpenLinkModal}

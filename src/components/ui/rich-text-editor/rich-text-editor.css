@@ -75,11 +75,17 @@
 
 .ProseMirror li {
   margin: 0.25em 0;
+  display: list-item;
+}
+
+.ProseMirror li > p {
+  margin: 0;
 }
 
 /* Code and Code Block Styles */
 .ProseMirror code {
-  background-color: rgba(97, 97, 97, 0.1);
+  background-color: #2B2D30;
+  color: #E8912D;
   border-radius: 3px;
   padding: 2px 4px;
   font-family: 'Courier New', monospace;
@@ -313,7 +319,8 @@
 
 /* Dark mode adjustments */
 [data-mantine-color-scheme='dark'] .ProseMirror code {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #4a3c2a;
+  color: #f5a142;
 }
 
 [data-mantine-color-scheme='dark'] .ProseMirror pre {
