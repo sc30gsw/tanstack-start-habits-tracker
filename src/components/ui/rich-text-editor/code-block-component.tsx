@@ -1,8 +1,8 @@
+import { ActionIcon, Tooltip } from '@mantine/core'
+import { IconCheck, IconCopy } from '@tabler/icons-react'
 import type { NodeViewProps } from '@tiptap/react'
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
 import { useState } from 'react'
-import { ActionIcon, Tooltip } from '@mantine/core'
-import { IconCheck, IconCopy } from '@tabler/icons-react'
 
 export function CodeBlockComponent({ node }: NodeViewProps) {
   const [copied, setCopied] = useState(false)

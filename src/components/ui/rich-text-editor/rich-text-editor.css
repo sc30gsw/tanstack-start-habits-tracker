@@ -99,8 +99,8 @@
   position: relative;
 }
 
-/* コードブロックのヘッダー（ファイル名または言語表示） */
-.ProseMirror pre::before {
+/* コードブロックのヘッダー（ファイル名表示のみ） */
+.ProseMirror pre[data-filename]::before {
   content: attr(data-filename);
   position: absolute;
   top: 0;
@@ -117,23 +117,14 @@
   font-weight: 500;
 }
 
-/* ファイル名がない場合は言語を表示 */
-.ProseMirror pre:not([data-filename])::before {
-  content: attr(data-language);
-  text-align: right;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 400;
-  opacity: 0.7;
+/* ファイル名がある場合のみpadding-topを追加 */
+.ProseMirror pre[data-filename] {
+  padding-top: 40px;
 }
 
-/* ファイル名も言語もない場合はヘッダーを非表示 */
-.ProseMirror pre:not([data-filename]):not([data-language]) {
+/* ファイル名がない場合はヘッダーを完全に非表示 */
+.ProseMirror pre:not([data-filename]) {
   padding-top: 16px;
-}
-
-.ProseMirror pre:not([data-filename]):not([data-language])::before {
-  display: none;
 }
 
 /* コピーボタンのスタイル（NodeViewで追加される） */
