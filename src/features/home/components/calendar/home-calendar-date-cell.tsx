@@ -1,4 +1,4 @@
-import { Card, type CSSProperties, Text } from '@mantine/core'
+import { Card, type CSSProperties, Stack, Text } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
@@ -66,10 +66,15 @@ export function HomeCalendarDateCell({
 
   const navigate = apiRoute.useNavigate()
 
+  const { records } = apiRoute.useLoaderData()
+
+  const dateString = date.format('YYYY-MM-DD')
+  const completedRecords =
+    records.data?.filter((r) => r.date === dateString && r.status === 'completed') ?? []
+
   const isSelected = !!(selectedDate && date.isSame(selectedDate, 'day'))
   const dateType = getDateType(date)
 
-  // 背景色とボーダーの設定
   const borderWidth: CSSProperties['borderWidth'] = '2px'
   const { backgroundColor, borderColor } = getCellBackgroundStyle({
     isSelected,
@@ -97,11 +102,41 @@ export function HomeCalendarDateCell({
           minWidth: 34,
           border: `${borderWidth} solid ${borderColor}`,
           boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
+          minHeight: '80px',
         }}
       >
-        <Text size="sm" fw={500}>
-          {date.date()}
-        </Text>
+        <Stack gap={2} align="stretch">
+          <Text size="sm" fw={500}>
+            {date.date()}
+          </Text>
+          {completedRecords.length > 0 && (
+            <Stack gap={1} mt={4}>
+              {completedRecords.slice(0, 3).map((record) => (
+                <Text
+                  key={record.id}
+                  size="9px"
+                  style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'rgba(34,139,230,0.1)',
+                    padding: '1px 3px',
+                    borderRadius: '2px',
+                    textAlign: 'left',
+                  }}
+                  title={record.habit?.name}
+                >
+                  {record.habit?.name}
+                </Text>
+              ))}
+              {completedRecords.length > 3 && (
+                <Text size="8px" c="dimmed" ta="center">
+                  +{completedRecords.length - 3}件
+                </Text>
+              )}
+            </Stack>
+          )}
+        </Stack>
       </Card>
     )
   }

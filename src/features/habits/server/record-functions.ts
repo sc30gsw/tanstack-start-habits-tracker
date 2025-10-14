@@ -243,11 +243,20 @@ const getRecords = createServerFn({ method: 'GET' })
       const allRecords = await db.query.records.findMany({
         where: and(...conditions),
         orderBy: (records, { desc }) => [desc(records.date), desc(records.createdAt)],
+        with: { habit: true },
       })
 
       const recordEntities = allRecords.map((record) => ({
         ...record,
         created_at: new Date(record.createdAt!),
+        habit: record.habit
+          ? {
+              ...record.habit,
+              created_at: new Date(record.habit.createdAt!),
+              updated_at: new Date(record.habit.updatedAt!),
+              color: record.habit.color ?? 'blue',
+            }
+          : undefined,
       }))
 
       return {
