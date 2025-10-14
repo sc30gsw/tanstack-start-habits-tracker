@@ -423,21 +423,6 @@ export function RichTextEditor({
         <EditorContent editor={editor} />
       </Box>
 
-      {/* Character count */}
-      <Box mt="xs" style={{ textAlign: 'right' }}>
-        <span
-          style={{
-            fontSize: '12px',
-            color:
-              currentLength > maxLength
-                ? 'var(--mantine-color-red-6)'
-                : 'var(--mantine-color-dimmed)',
-          }}
-        >
-          {currentLength}/{maxLength}文字
-        </span>
-      </Box>
-
       {/* Link Modal */}
       <Modal
         opened={linkModalOpen}

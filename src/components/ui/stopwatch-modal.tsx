@@ -548,7 +548,6 @@ function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormProps) {
             onChange={setEditorContent}
             placeholder="今日の感想や具体的に何をやったかを記録..."
             disabled={isPending}
-            maxLength={500}
           />
         </Stack>
 
