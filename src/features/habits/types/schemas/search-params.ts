@@ -133,6 +133,20 @@ const stopwatchRunningValidator = boolValidator
 const stopwatchStartTimeValidator = z.number().nullable().optional().catch(null)
 const stopwatchElapsedValidator = z.number().optional().catch(0)
 
+/**
+ * レベルタブのバリデーション
+ * - overview: 概要
+ * - levels: レベル詳細
+ * - streak: ストリーク詳細
+ * - badges: バッジコレクション
+ */
+const levelTabValidator = z
+  .enum(['overview', 'levels', 'streak', 'badges'])
+  .optional()
+  .catch((_) => {
+    return 'overview'
+  })
+
 export const searchSchema = z.object({
   selectedDate: dateStringValidator,
   calendarView: calendarViewValidator,
@@ -148,6 +162,7 @@ export const searchSchema = z.object({
   stopwatchRunning: stopwatchRunningValidator,
   stopwatchStartTime: stopwatchStartTimeValidator,
   stopwatchElapsed: stopwatchElapsedValidator,
+  levelTab: levelTabValidator,
 })
 
 export type SearchParams = z.infer<typeof searchSchema>
@@ -195,5 +210,6 @@ export function getDefaultSearchParams(): Required<SearchParams> {
     stopwatchRunning: false,
     stopwatchStartTime: null,
     stopwatchElapsed: 0,
+    levelTab: 'overview',
   }
 }
