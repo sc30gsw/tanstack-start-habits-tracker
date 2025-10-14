@@ -21,7 +21,10 @@ export function HabitLevelCard() {
         <Stack gap="xs">
           <Group justify="space-between">
             <Group gap="xs">
-              <CompletionIcon size={24} />
+              <CompletionIcon
+                size={24}
+                color={`var(--mantine-color-${levelInfo.completion.color}-6)`}
+              />
               <Text fw={600} size="md">
                 {levelInfo.completion.title}
               </Text>
@@ -31,12 +34,30 @@ export function HabitLevelCard() {
             </Badge>
           </Group>
 
-          <Progress
-            value={levelInfo.completion.progressPercent}
-            color={levelInfo.completion.color}
-            size="lg"
-            radius="md"
-          />
+          <div className="relative overflow-hidden">
+            <Progress
+              value={levelInfo.completion.progressPercent}
+              color={levelInfo.completion.color}
+              size="lg"
+              radius="md"
+              styles={{
+                section: {
+                  background: `linear-gradient(90deg, var(--mantine-color-${levelInfo.completion.color}-5) 0%, var(--mantine-color-${levelInfo.completion.color}-7) 50%, var(--mantine-color-${levelInfo.completion.color}-5) 100%)`,
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
+                  position: 'relative',
+                },
+              }}
+            />
+            <div
+              className="pointer-events-none absolute top-0 h-full w-full"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
+                animation: 'shine 2s ease-in-out infinite',
+              }}
+            />
+          </div>
 
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
@@ -54,7 +75,7 @@ export function HabitLevelCard() {
         <Stack gap="xs">
           <Group justify="space-between">
             <Group gap="xs">
-              <HoursIcon size={24} />
+              <HoursIcon size={24} color={`var(--mantine-color-${levelInfo.hours.color}-6)`} />
               <Text fw={600} size="md">
                 {levelInfo.hours.title}
               </Text>
@@ -64,12 +85,30 @@ export function HabitLevelCard() {
             </Badge>
           </Group>
 
-          <Progress
-            value={levelInfo.hours.progressPercent}
-            color={levelInfo.hours.color}
-            size="lg"
-            radius="md"
-          />
+          <div className="relative overflow-hidden">
+            <Progress
+              value={levelInfo.hours.progressPercent}
+              color={levelInfo.hours.color}
+              size="lg"
+              radius="md"
+              styles={{
+                section: {
+                  background: `linear-gradient(90deg, var(--mantine-color-${levelInfo.hours.color}-5) 0%, var(--mantine-color-${levelInfo.hours.color}-7) 50%, var(--mantine-color-${levelInfo.hours.color}-5) 100%)`,
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
+                  position: 'relative',
+                },
+              }}
+            />
+            <div
+              className="pointer-events-none absolute top-0 h-full w-full"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
+                animation: 'shine 2s ease-in-out infinite',
+              }}
+            />
+          </div>
 
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
