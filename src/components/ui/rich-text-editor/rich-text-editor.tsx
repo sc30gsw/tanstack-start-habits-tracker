@@ -11,6 +11,7 @@ import {
 import {
   IconBold,
   IconCode,
+  IconCodePlus,
   IconItalic,
   IconLink,
   IconLinkOff,
@@ -18,20 +19,24 @@ import {
   IconListNumbers,
   IconStrikethrough,
 } from '@tabler/icons-react'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { common, createLowlight } from 'lowlight'
 import { useEffect, useState } from 'react'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
+
+// lowlightインスタンスを作成（common言語セットを使用）
+const lowlight = createLowlight(common)
 
 type RichTextEditorProps = {
   content: string
   onChange: (html: string) => void
   placeholder?: string
   disabled?: boolean
-  maxLength?: number
 }
 
 export function RichTextEditor({
@@ -39,7 +44,6 @@ export function RichTextEditor({
   onChange,
   placeholder = '今日の感想や具体的に何をやったかを記録...',
   disabled = false,
-  maxLength = 500,
 }: RichTextEditorProps) {
   const computedColorScheme = useComputedColorScheme('light')
   const [linkModalOpen, setLinkModalOpen] = useState(false)
@@ -52,6 +56,10 @@ export function RichTextEditor({
         heading: {
           levels: [1, 2, 3],
         },
+        codeBlock: false, // デフォルトのcodeBlockを無効化
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
       }),
       Placeholder.configure({
         placeholder,
@@ -113,8 +121,6 @@ export function RichTextEditor({
   if (!editor) {
     return null
   }
-
-  const currentLength = editor.getText().length
 
   const isValidUrl = (text: string): boolean => {
     try {
@@ -271,6 +277,28 @@ export function RichTextEditor({
             }}
           >
             <IconCode size={18} />
+          </button>
+        </Tooltip>
+
+        <Tooltip label="コードブロック">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+            disabled={disabled}
+            className={editor.isActive('codeBlock') ? 'is-active' : ''}
+            style={{
+              padding: '4px 8px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              backgroundColor: editor.isActive('codeBlock')
+                ? 'var(--mantine-color-blue-5)'
+                : 'transparent',
+              color: editor.isActive('codeBlock') ? 'white' : 'inherit',
+              opacity: disabled ? 0.5 : 1,
+            }}
+          >
+            <IconCodePlus size={18} />
           </button>
         </Tooltip>
 

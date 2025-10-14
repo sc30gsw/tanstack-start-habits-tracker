@@ -77,6 +77,7 @@
   margin: 0.25em 0;
 }
 
+/* Code and Code Block Styles */
 .ProseMirror code {
   background-color: rgba(97, 97, 97, 0.1);
   border-radius: 3px;
@@ -86,17 +87,103 @@
 }
 
 .ProseMirror pre {
-  background-color: rgba(97, 97, 97, 0.1);
-  border-radius: 4px;
-  padding: 12px;
-  font-family: 'Courier New', monospace;
+  background-color: var(--mantine-color-dark-7);
+  border-radius: 6px;
+  padding: 16px;
+  font-family: 'Courier New', Consolas, Monaco, monospace;
   overflow-x: auto;
-  margin: 0.5em 0;
+  margin: 0.75em 0;
+  color: var(--mantine-color-gray-0);
+  line-height: 1.5;
 }
 
 .ProseMirror pre code {
   background: none;
   padding: 0;
+  color: inherit;
+  font-size: 0.875em;
+}
+
+/* Syntax Highlighting Colors - Light Mode */
+.ProseMirror pre .hljs-comment,
+.ProseMirror pre .hljs-quote {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.ProseMirror pre .hljs-keyword,
+.ProseMirror pre .hljs-selector-tag,
+.ProseMirror pre .hljs-subst {
+  color: #d73a49;
+  font-weight: bold;
+}
+
+.ProseMirror pre .hljs-string,
+.ProseMirror pre .hljs-attr,
+.ProseMirror pre .hljs-symbol,
+.ProseMirror pre .hljs-bullet,
+.ProseMirror pre .hljs-addition {
+  color: #22863a;
+}
+
+.ProseMirror pre .hljs-title,
+.ProseMirror pre .hljs-section,
+.ProseMirror pre .hljs-attribute {
+  color: #6f42c1;
+  font-weight: bold;
+}
+
+.ProseMirror pre .hljs-variable,
+.ProseMirror pre .hljs-template-variable {
+  color: #e36209;
+}
+
+.ProseMirror pre .hljs-type,
+.ProseMirror pre .hljs-built_in,
+.ProseMirror pre .hljs-builtin-name,
+.ProseMirror pre .hljs-params {
+  color: #005cc5;
+}
+
+.ProseMirror pre .hljs-meta,
+.ProseMirror pre .hljs-meta-keyword {
+  color: #005cc5;
+}
+
+.ProseMirror pre .hljs-number,
+.ProseMirror pre .hljs-literal {
+  color: #005cc5;
+}
+
+.ProseMirror pre .hljs-regexp,
+.ProseMirror pre .hljs-link {
+  color: #032f62;
+}
+
+.ProseMirror pre .hljs-function .hljs-title {
+  color: #6f42c1;
+}
+
+.ProseMirror pre .hljs-tag {
+  color: #22863a;
+}
+
+.ProseMirror pre .hljs-name {
+  color: #22863a;
+  font-weight: bold;
+}
+
+.ProseMirror pre .hljs-deletion {
+  color: #b31d28;
+  background-color: #ffeef0;
+}
+
+.ProseMirror pre .hljs-emphasis {
+  font-style: italic;
+}
+
+.ProseMirror pre .hljs-strong {
+  font-weight: bold;
 }
 
 .ProseMirror strong {

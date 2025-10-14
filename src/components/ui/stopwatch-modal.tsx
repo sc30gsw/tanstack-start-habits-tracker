@@ -363,7 +363,7 @@ export function StopwatchModal() {
 }
 
 const finishRecordFormSchema = z.object({
-  notes: z.string().max(500, 'メモは500文字以内で入力してください').optional(),
+  notes: z.string().optional(),
 })
 
 type FinishRecordFormProps = {

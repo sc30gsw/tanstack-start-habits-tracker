@@ -66,7 +66,6 @@ export const createRecordSchema = z
       .default(0),
     notes: z
       .string()
-      .max(500, 'メモは500文字以内で入力してください')
       .optional()
       .transform((val) => val?.trim() || undefined),
   })
@@ -135,7 +134,6 @@ export const updateRecordSchema = z
       .optional(),
     notes: z
       .string()
-      .max(500, 'メモは500文字以内で入力してください')
       .optional()
       .transform((val) => val?.trim() || undefined),
   })

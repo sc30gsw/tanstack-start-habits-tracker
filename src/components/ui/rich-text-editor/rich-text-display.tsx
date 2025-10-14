@@ -1,10 +1,15 @@
 import { Box, useComputedColorScheme } from '@mantine/core'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Link from '@tiptap/extension-link'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { common, createLowlight } from 'lowlight'
 import { useEffect } from 'react'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
+
+// lowlightインスタンスを作成（common言語セットを使用）
+const lowlight = createLowlight(common)
 
 export function RichTextDisplay({ html }: Record<'html', string>) {
   const computedColorScheme = useComputedColorScheme('light')
@@ -15,6 +20,10 @@ export function RichTextDisplay({ html }: Record<'html', string>) {
         heading: {
           levels: [1, 2, 3],
         },
+        codeBlock: false, // デフォルトのcodeBlockを無効化
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
       }),
       Link.configure({
         openOnClick: true,
