@@ -1,10 +1,12 @@
 import { Box, useComputedColorScheme } from '@mantine/core'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Link from '@tiptap/extension-link'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
 import { useEffect } from 'react'
+import { CodeBlockComponent } from '~/components/ui/rich-text-editor/code-block-component'
+import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
@@ -24,7 +26,16 @@ export function RichTextDisplay({ html }: Record<'html', string>) {
       }),
       CodeBlockLowlight.configure({
         lowlight,
+        HTMLAttributes: {
+          class: 'code-block',
+        },
+        languageClassPrefix: 'language-',
+      }).extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeBlockComponent)
+        },
       }),
+      CodeBlockLanguageExtension,
       Link.configure({
         openOnClick: true,
         HTMLAttributes: {

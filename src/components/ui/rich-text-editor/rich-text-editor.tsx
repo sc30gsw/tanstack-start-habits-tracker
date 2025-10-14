@@ -3,6 +3,7 @@ import {
   Button,
   Group,
   Modal,
+  Select,
   Stack,
   TextInput,
   Tooltip,
@@ -19,18 +20,44 @@ import {
   IconListNumbers,
   IconStrikethrough,
 } from '@tabler/icons-react'
+import { textblockTypeInputRule } from '@tiptap/core'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Link from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
 import { useEffect, useState } from 'react'
+import { CodeBlockComponent } from '~/components/ui/rich-text-editor/code-block-component'
+import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
 // lowlightインスタンスを作成（common言語セットを使用）
 const lowlight = createLowlight(common)
+
+// 利用可能な言語のリスト
+const LANGUAGE_OPTIONS = [
+  { value: 'null', label: '自動検出' },
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'typescript', label: 'TypeScript' },
+  { value: 'python', label: 'Python' },
+  { value: 'java', label: 'Java' },
+  { value: 'css', label: 'CSS' },
+  { value: 'html', label: 'HTML' },
+  { value: 'json', label: 'JSON' },
+  { value: 'bash', label: 'Bash' },
+  { value: 'sql', label: 'SQL' },
+  { value: 'markdown', label: 'Markdown' },
+  { value: 'yaml', label: 'YAML' },
+  { value: 'xml', label: 'XML' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'go', label: 'Go' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'ruby', label: 'Ruby' },
+  { value: 'php', label: 'PHP' },
+]
 
 type RichTextEditorProps = {
   content: string
@@ -60,7 +87,28 @@ export function RichTextEditor({
       }),
       CodeBlockLowlight.configure({
         lowlight,
+        HTMLAttributes: {
+          class: 'code-block',
+        },
+        languageClassPrefix: 'language-',
+      }).extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeBlockComponent)
+        },
+        addInputRules() {
+          return [
+            textblockTypeInputRule({
+              find: /^```([a-z]+)?(?::([^\s]+))?[\s\n]$/,
+              type: this.type,
+              getAttributes: (match) => ({
+                language: match[1] || null,
+                filename: match[2] || null,
+              }),
+            }),
+          ]
+        },
       }),
+      CodeBlockLanguageExtension,
       Placeholder.configure({
         placeholder,
       }),
@@ -88,6 +136,28 @@ export function RichTextEditor({
       },
       handlePaste: (view, event) => {
         const text = event.clipboardData?.getData('text/plain')
+
+        // Markdown形式のコードブロック（```言語:ファイル名）を検出
+        const codeBlockMatch = text?.match(/^```([a-z]+)?(?::([^\n]+))?\n([\s\S]*?)\n```$/m)
+        if (codeBlockMatch && editor) {
+          event.preventDefault()
+          const language = codeBlockMatch[1] || null
+          const filename = codeBlockMatch[2] || null
+          const code = codeBlockMatch[3]
+
+          editor
+            .chain()
+            .focus()
+            .insertContent({
+              type: 'codeBlock',
+              attrs: { language, filename },
+              content: code ? [{ type: 'text', text: code }] : undefined,
+            })
+            .run()
+
+          return true
+        }
+
         if (text && isValidUrl(text)) {
           // URLをそのままペーストした場合、リンクプレビューを作成
           const { state } = view
@@ -301,6 +371,56 @@ export function RichTextEditor({
             <IconCodePlus size={18} />
           </button>
         </Tooltip>
+
+        {/* 言語選択とファイル名入力（コードブロックがアクティブな時のみ表示） */}
+        {editor.isActive('codeBlock') && (
+          <>
+            <Select
+              data={LANGUAGE_OPTIONS}
+              value={editor.getAttributes('codeBlock').language || 'null'}
+              onChange={(value) => {
+                if (value === 'null') {
+                  editor.chain().focus().updateAttributes('codeBlock', { language: null }).run()
+                } else {
+                  editor.chain().focus().updateAttributes('codeBlock', { language: value }).run()
+                }
+              }}
+              size="xs"
+              w={140}
+              disabled={disabled}
+              placeholder="言語"
+              styles={{
+                input: {
+                  fontSize: '12px',
+                  height: '28px',
+                  minHeight: '28px',
+                },
+              }}
+              allowDeselect={false}
+            />
+            <TextInput
+              value={editor.getAttributes('codeBlock').filename || ''}
+              onChange={(e) => {
+                editor
+                  .chain()
+                  .focus()
+                  .updateAttributes('codeBlock', { filename: e.currentTarget.value || null })
+                  .run()
+              }}
+              size="xs"
+              w={180}
+              disabled={disabled}
+              placeholder="ファイル名（例: example.ts）"
+              styles={{
+                input: {
+                  fontSize: '12px',
+                  height: '28px',
+                  minHeight: '28px',
+                },
+              }}
+            />
+          </>
+        )}
 
         <Tooltip label="箇条書き">
           <button

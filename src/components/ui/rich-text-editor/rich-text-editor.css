@@ -90,11 +90,88 @@
   background-color: var(--mantine-color-dark-7);
   border-radius: 6px;
   padding: 16px;
+  padding-top: 40px; /* ヘッダー用のスペース */
   font-family: 'Courier New', Consolas, Monaco, monospace;
   overflow-x: auto;
   margin: 0.75em 0;
   color: var(--mantine-color-gray-0);
   line-height: 1.5;
+  position: relative;
+}
+
+/* コードブロックのヘッダー（ファイル名または言語表示） */
+.ProseMirror pre::before {
+  content: attr(data-filename);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--mantine-color-gray-4);
+  background-color: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  font-weight: 500;
+}
+
+/* ファイル名がない場合は言語を表示 */
+.ProseMirror pre:not([data-filename])::before {
+  content: attr(data-language);
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/* ファイル名も言語もない場合はヘッダーを非表示 */
+.ProseMirror pre:not([data-filename]):not([data-language]) {
+  padding-top: 16px;
+}
+
+.ProseMirror pre:not([data-filename]):not([data-language])::before {
+  display: none;
+}
+
+/* コピーボタンのスタイル（NodeViewで追加される） */
+.code-block-wrapper {
+  position: relative;
+  margin: 0.75em 0;
+}
+
+.code-block-copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: var(--mantine-color-gray-4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.code-block-copy-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--mantine-color-gray-2);
+}
+
+.code-block-copy-button:active {
+  transform: scale(0.95);
+}
+
+.code-block-copy-button.copied {
+  background-color: var(--mantine-color-green-9);
+  border-color: var(--mantine-color-green-7);
+  color: white;
 }
 
 .ProseMirror pre code {
