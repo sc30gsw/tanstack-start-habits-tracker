@@ -83,6 +83,21 @@ export function StopwatchModal() {
 
   const handleClose = () => {
     if (isRunning || pausedElapsed > 0) {
+      // タイマーが動いている場合は先に停止
+      if (isRunning) {
+        const currentElapsed = displayTime
+
+        navigate({
+          to: location.pathname,
+          search: (prev) => ({
+            ...prev,
+            stopwatchRunning: false,
+            stopwatchStartTime: null,
+            stopwatchElapsed: currentElapsed,
+          }),
+        })
+      }
+
       modals.openConfirmModal({
         title: (
           <Group gap="xs">
@@ -187,6 +202,21 @@ export function StopwatchModal() {
   }
 
   const handleReset = () => {
+    // タイマーが動いている場合は先に停止
+    if (isRunning) {
+      const currentElapsed = displayTime
+
+      navigate({
+        to: location.pathname,
+        search: (prev) => ({
+          ...prev,
+          stopwatchRunning: false,
+          stopwatchStartTime: null,
+          stopwatchElapsed: currentElapsed,
+        }),
+      })
+    }
+
     modals.openConfirmModal({
       title: (
         <Group gap="xs">
@@ -226,22 +256,24 @@ export function StopwatchModal() {
   }
 
   const handleFinish = () => {
+    if (isRunning) {
+      const currentElapsed = displayTime
+
+      navigate({
+        to: location.pathname,
+        search: (prev) => ({
+          ...prev,
+          stopwatchRunning: false,
+          stopwatchStartTime: null,
+          stopwatchElapsed: currentElapsed,
+        }),
+      })
+    }
+
     const currentElapsed = displayTime
     const currentMinutes = Math.floor(currentElapsed / 60)
 
     const openRecordModal = () => {
-      if (isRunning) {
-        navigate({
-          to: location.pathname,
-          search: (prev) => ({
-            ...prev,
-            stopwatchRunning: false,
-            stopwatchStartTime: null,
-            stopwatchElapsed: currentElapsed,
-          }),
-        })
-      }
-
       modals.open({
         title: '習慣を記録',
         children: (
