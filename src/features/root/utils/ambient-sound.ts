@@ -4,12 +4,12 @@ import {
   IconAnchor,
   IconBuildingStore,
   IconCloudRain,
+  IconCloudStorm,
   IconDroplet,
   IconDroplets,
   IconFlame,
-  IconPlant,
+  IconPlant2,
   IconSquareRoundedX,
-  IconStormOff,
   IconWaveSine,
 } from '@tabler/icons-react'
 
@@ -32,7 +32,7 @@ export const AMBIENT_SOUNDS = [
     id: 'thunder-rain',
     name: '雷雨',
     file: '/audio/雷雨.mp3',
-    icon: IconStormOff,
+    icon: IconCloudStorm,
     color: 'indigo',
   },
   {
@@ -67,7 +67,7 @@ export const AMBIENT_SOUNDS = [
     id: 'morning-bird',
     name: '小鳥のさえずり',
     file: '/audio/朝の雰囲気（鳥）.mp3',
-    icon: IconPlant,
+    icon: IconPlant2,
     color: 'green',
   },
   {
@@ -81,7 +81,7 @@ export const AMBIENT_SOUNDS = [
     id: 'countryside',
     name: '田園風景',
     file: '/audio/countryside.mp3',
-    icon: IconPlant,
+    icon: IconPlant2,
     color: 'lime',
   },
   {
