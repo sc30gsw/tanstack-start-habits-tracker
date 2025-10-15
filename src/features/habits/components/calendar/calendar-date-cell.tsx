@@ -3,6 +3,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
@@ -143,7 +144,10 @@ export function CalendarDateCell({
       >
         <Card
           onClick={() =>
-            navigate({ search: (prev) => ({ ...prev, selectedDate: date.format('YYYY-MM-DD') }) })
+            navigate({
+              hash: CALENDAR_VIEW_HASH_TARGET,
+              search: (prev) => ({ ...prev, selectedDate: date.format('YYYY-MM-DD') }),
+            })
           }
           padding="xs"
           withBorder

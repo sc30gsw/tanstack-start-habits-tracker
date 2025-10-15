@@ -14,6 +14,7 @@ import dayjs from 'dayjs'
 import { RichTextDisplay } from '~/components/ui/rich-text-editor/rich-text-display'
 import { RecordForm } from '~/features/habits/components/form/record-form'
 import { RecordDeleteButton } from '~/features/habits/components/record-delete-button'
+import { RECORD_FORM_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { HabitTable, RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { formatDuration } from '~/features/habits/utils/time-utils'
@@ -36,7 +37,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
   const textColor = 'gray.6' // ユニバーサルカラー（light/dark両対応）
 
   return (
-    <Card withBorder padding="lg" radius="md" shadow="sm">
+    <Card withBorder padding="lg" radius="md" shadow="sm" id={RECORD_FORM_HASH_TARGET}>
       <Stack gap="md">
         <Group justify="space-between">
           <Group gap="xs" align="center">
@@ -53,6 +54,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
               color="gray"
               onClick={() => {
                 navigate({
+                  hash: RECORD_FORM_HASH_TARGET,
                   search: (prev) => ({
                     ...prev,
                     showRecordForm: false,
@@ -70,6 +72,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                   leftSection={<IconPlus size={16} />}
                   onClick={() => {
                     navigate({
+                      hash: RECORD_FORM_HASH_TARGET,
                       search: (prev) => ({
                         ...prev,
                         showRecordForm: true,
@@ -88,6 +91,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                     leftSection={<IconEdit size={16} />}
                     onClick={() => {
                       navigate({
+                        hash: RECORD_FORM_HASH_TARGET,
                         search: (prev) => ({
                           ...prev,
                           showRecordForm: true,
@@ -177,6 +181,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
             existingRecord={selectedDateRecord || undefined}
             onSuccess={() => {
               navigate({
+                hash: RECORD_FORM_HASH_TARGET,
                 search: (prev) => ({
                   ...prev,
                   showRecordForm: false,
@@ -186,6 +191,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
             }}
             onCancel={() => {
               navigate({
+                hash: RECORD_FORM_HASH_TARGET,
                 search: (prev) => ({
                   ...prev,
                   showRecordForm: false,
