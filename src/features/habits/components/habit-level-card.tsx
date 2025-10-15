@@ -1,5 +1,6 @@
 import {
   Alert,
+  Anchor,
   Badge,
   Card,
   Divider,
@@ -10,9 +11,11 @@ import {
   Tabs,
   Text,
 } from '@mantine/core'
+import { modals } from '@mantine/modals'
 import {
   IconCalendar,
   IconFlame,
+  IconInfoCircle,
   IconLayoutDashboard,
   IconPin,
   IconStar,
@@ -20,6 +23,7 @@ import {
 } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { BadgeCollection } from '~/features/habits/components/badge-collection'
+import { LevelInfo } from '~/features/habits/components/level-info'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { getIconComponent } from '~/features/habits/utils/icon-mapper'
 
@@ -37,6 +41,14 @@ export function HabitLevelCard() {
 
   const CompletionIcon = getIconComponent(levelInfo.completion.icon)
   const HoursIcon = getIconComponent(levelInfo.hours.icon)
+
+  const handleOpenLevelInfo = () => {
+    modals.open({
+      title: 'レベルについて',
+      size: 'xl',
+      children: <LevelInfo />,
+    })
+  }
 
   const handleTabChange = (value: string | null) => {
     if (
@@ -175,6 +187,19 @@ export function HabitLevelCard() {
 
         <Tabs.Panel value="levels" pt="lg">
           <Stack gap="lg">
+            {/* レベル情報リンク */}
+            <Group justify="flex-end">
+              <Anchor
+                size="sm"
+                c="blue"
+                onClick={handleOpenLevelInfo}
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
+                <IconInfoCircle size={16} />
+                レベルとは?
+              </Anchor>
+            </Group>
+
             {/* 継続レベルセクション */}
             <Stack gap="xs">
               <Group justify="space-between">

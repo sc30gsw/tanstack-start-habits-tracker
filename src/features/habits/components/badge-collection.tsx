@@ -1,5 +1,7 @@
-import { Badge, Card, Group, SimpleGrid, Stack, Text, Tooltip } from '@mantine/core'
-import { IconLock } from '@tabler/icons-react'
+import { Anchor, Badge, Card, Group, SimpleGrid, Stack, Text, Tooltip } from '@mantine/core'
+import { modals } from '@mantine/modals'
+import { IconInfoCircle, IconLock } from '@tabler/icons-react'
+import { BadgeInfo } from '~/features/habits/components/badge-info'
 import type { BadgeItem } from '~/features/habits/constants/badges'
 import { COMPLETION_BADGES, HOURS_BADGES } from '~/features/habits/constants/badges'
 import { getIconComponent } from '~/features/habits/utils/icon-mapper'
@@ -105,13 +107,32 @@ export function BadgeCollection({
   const totalBadges = COMPLETION_BADGES.length + HOURS_BADGES.length
   const totalUnlocked = unlockedCompletionCount + unlockedHoursCount
 
+  const handleOpenBadgeInfo = () => {
+    modals.open({
+      title: 'バッジについて',
+      size: 'xl',
+      children: <BadgeInfo />,
+    })
+  }
+
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Stack gap="lg">
         <Group justify="space-between">
-          <Text size="lg" fw={700}>
-            🏆 バッジコレクション
-          </Text>
+          <Group gap="xs">
+            <Text size="lg" fw={700}>
+              🏆 バッジコレクション
+            </Text>
+            <Anchor
+              size="xs"
+              c="blue"
+              onClick={handleOpenBadgeInfo}
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              <IconInfoCircle size={16} />
+              バッジとは？
+            </Anchor>
+          </Group>
           <Badge size="lg" variant="gradient" gradient={{ from: 'yellow', to: 'orange' }}>
             {totalUnlocked} / {totalBadges}
           </Badge>
