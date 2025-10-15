@@ -1,24 +1,21 @@
 import { NumberInput, Stack, Text } from '@mantine/core'
-import { getRouteApi, useLocation } from '@tanstack/react-router'
 import type { PomodoroSettings } from '~/features/root/types/stopwatch'
 
 type PomodoroSettingsFormProps = {
   settings: PomodoroSettings
+  onSettingsChange: (settings: PomodoroSettings) => void
   disabled?: boolean
 }
 
-export function PomodoroSettingsForm({ settings, disabled = false }: PomodoroSettingsFormProps) {
-  const routeApi = getRouteApi('__root__')
-  const navigate = routeApi.useNavigate()
-  const location = useLocation()
-
+export function PomodoroSettingsForm({
+  settings,
+  onSettingsChange,
+  disabled = false,
+}: PomodoroSettingsFormProps) {
   const handleSettingChange = (field: keyof PomodoroSettings, value: number | string) => {
-    navigate({
-      to: location.pathname,
-      search: (prev) => ({
-        ...prev,
-        [`pomodoro${field.charAt(0).toUpperCase()}${field.slice(1)}`]: value,
-      }),
+    onSettingsChange({
+      ...settings,
+      [field]: typeof value === 'number' ? value : Number(value),
     })
   }
 

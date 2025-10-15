@@ -1,15 +1,14 @@
 import type { InferSelectModel } from 'drizzle-orm'
 import type { habits, records } from '~/db/schema'
-import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 
-export type PomodoroPhase = NonNullable<SearchParams['pomodoroPhase']>
+export type PomodoroPhase = 'focus' | 'break' | 'longBreak' | 'waiting'
 
 export type PomodoroSettings = Record<
   'focusDuration' | 'breakDuration' | 'longBreakDuration' | 'longBreakInterval',
   number
 >
 
-export type PomodoroState = Record<'phase', SearchParams['pomodoroPhase']> &
+export type PomodoroState = Record<'phase', PomodoroPhase> &
   Record<'currentSet' | 'completedPomodoros' | 'accumulatedFocusTime', number>
 
 export type PhaseConfig = Record<'title' | 'message', string> & {

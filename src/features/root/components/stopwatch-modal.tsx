@@ -4,7 +4,7 @@ import { IconAlertTriangle } from '@tabler/icons-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, useLocation } from '@tanstack/react-router'
 import type { InferSelectModel } from 'drizzle-orm'
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { GET_HABITS_CACHE_KEY } from '~/constants/cache-key'
 import type { habits as HabitTable } from '~/db/schema'
 import { habitDto } from '~/features/habits/server/habit-functions'
@@ -14,7 +14,7 @@ import { FinishRecordForm } from '~/features/root/components/final-record-form'
 import { PomodoroSettingsForm } from '~/features/root/components/pomodoro-settings'
 import { PomodoroTimer } from '~/features/root/components/pomodoro-timer'
 import { StopwatchTimer } from '~/features/root/components/stopwatch-timer'
-import type { PomodoroSettings } from '~/features/root/types/stopwatch'
+import type { PomodoroPhase, PomodoroSettings } from '~/features/root/types/stopwatch'
 import { requestNotificationPermission } from '~/features/root/utils/notifications'
 import { DEFAULT_POMODORO_SETTINGS } from '~/features/root/utils/pomodoro'
 import { convertSecondsToMinutes } from '~/features/root/utils/stopwatch-utils'
@@ -31,21 +31,12 @@ export function StopwatchModal() {
   const startTime = searchParams.stopwatchStartTime ?? null
   const pausedElapsed = searchParams.stopwatchElapsed ?? 0
 
-  // ポモドーロ関連の状態
   const mode = searchParams.stopwatchMode ?? 'stopwatch'
-  const phase = searchParams.pomodoroPhase ?? 'waiting'
-  const currentSet = searchParams.pomodoroSet ?? 0
-  const completedPomodoros = searchParams.pomodoroCompletedPomodoros ?? 0
-  const accumulatedTime = searchParams.pomodoroAccumulatedTime ?? 0
-
-  const settings = {
-    focusDuration: searchParams.pomodoroFocusDuration ?? DEFAULT_POMODORO_SETTINGS.focusDuration,
-    breakDuration: searchParams.pomodoroBreakDuration ?? DEFAULT_POMODORO_SETTINGS.breakDuration,
-    longBreakDuration:
-      searchParams.pomodoroLongBreakDuration ?? DEFAULT_POMODORO_SETTINGS.longBreakDuration,
-    longBreakInterval:
-      searchParams.pomodoroLongBreakInterval ?? DEFAULT_POMODORO_SETTINGS.longBreakInterval,
-  } as const satisfies PomodoroSettings
+  const [phase, setPhase] = useState<PomodoroPhase>('waiting')
+  const [currentSet, setCurrentSet] = useState(0)
+  const [completedPomodoros, setCompletedPomodoros] = useState(0)
+  const [accumulatedTime, setAccumulatedTime] = useState(0)
+  const [settings, setSettings] = useState<PomodoroSettings>(DEFAULT_POMODORO_SETTINGS)
 
   // 通知権限のリクエスト
   useEffect(() => {
@@ -106,6 +97,12 @@ export function StopwatchModal() {
         labels: { confirm: '閉じる', cancel: 'キャンセル' },
         confirmProps: { color: 'red' },
         onConfirm: () => {
+          // ポモドーロ状態をリセット
+          setPhase('waiting')
+          setCurrentSet(0)
+          setCompletedPomodoros(0)
+          setAccumulatedTime(0)
+
           navigate({
             to: location.pathname,
             search: (prev) => ({
@@ -115,10 +112,6 @@ export function StopwatchModal() {
               stopwatchRunning: false,
               stopwatchStartTime: null,
               stopwatchElapsed: 0,
-              pomodoroPhase: 'waiting',
-              pomodoroSet: 1,
-              pomodoroCompletedPomodoros: 0,
-              pomodoroAccumulatedTime: 0,
             }),
           })
         },
@@ -273,6 +266,7 @@ export function StopwatchModal() {
         {mode === 'pomodoro' && (
           <PomodoroSettingsForm
             settings={settings}
+            onSettingsChange={setSettings}
             disabled={isRunning || pausedElapsed > 0 || accumulatedTime > 0}
           />
         )}
@@ -297,6 +291,10 @@ export function StopwatchModal() {
             isRunning={isRunning}
             startTime={startTime}
             pausedElapsed={pausedElapsed}
+            onPhaseChange={setPhase}
+            onSetChange={setCurrentSet}
+            onCompletedPomodorosChange={setCompletedPomodoros}
+            onAccumulatedTimeChange={setAccumulatedTime}
             onFinish={handleFinish}
           />
         )}

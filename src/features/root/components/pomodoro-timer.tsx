@@ -12,8 +12,7 @@ import { getRouteApi, useLocation } from '@tanstack/react-router'
 import type { InferSelectModel } from 'drizzle-orm'
 import { useEffect, useState } from 'react'
 import type { habits } from '~/db/schema'
-import type { SearchParams } from '~/features/habits/types/schemas/search-params'
-import type { PomodoroSettings } from '~/features/root/types/stopwatch'
+import type { PomodoroPhase, PomodoroSettings } from '~/features/root/types/stopwatch'
 import { showPhaseCompleteNotification } from '~/features/root/utils/notifications'
 import {
   determineNextPhase,
@@ -31,7 +30,7 @@ const TIME_DISPLAY_PADDING = 2
 
 type PomodoroTimerProps = {
   habitId: InferSelectModel<typeof habits>['id'] | null
-  phase: NonNullable<SearchParams['pomodoroPhase']>
+  phase: PomodoroPhase
   currentSet: number
   completedPomodoros: number
   accumulatedTime: number
@@ -39,6 +38,10 @@ type PomodoroTimerProps = {
   isRunning: boolean
   startTime: number | null
   pausedElapsed: number
+  onPhaseChange: (phase: PomodoroPhase) => void
+  onSetChange: (set: number) => void
+  onCompletedPomodorosChange: (count: number) => void
+  onAccumulatedTimeChange: (time: number) => void
   onFinish: () => void
 }
 
@@ -52,6 +55,10 @@ export function PomodoroTimer({
   isRunning,
   startTime,
   pausedElapsed,
+  onPhaseChange,
+  onSetChange,
+  onCompletedPomodorosChange,
+  onAccumulatedTimeChange,
   onFinish,
 }: PomodoroTimerProps) {
   const routeApi = getRouteApi('__root__')
@@ -94,13 +101,18 @@ export function PomodoroTimer({
         )
 
         // セット数の更新（休憩が終わったら +1）
-        const newSet =
-          phase === 'break' || phase === 'longBreak' ? currentSet + 1 : currentSet
+        const newSet = phase === 'break' || phase === 'longBreak' ? currentSet + 1 : currentSet
 
         // 通知表示
         showPhaseCompleteNotification(phase, nextPhase)
 
-        // 次のフェーズに自動遷移（待機状態ではなく直接開始）
+        // 状態を更新
+        onPhaseChange(nextPhase)
+        onSetChange(newSet)
+        onCompletedPomodorosChange(newCompletedPomodoros)
+        onAccumulatedTimeChange(newAccumulatedTime)
+
+        // タイマーを再開
         navigate({
           to: location.pathname,
           search: (prev) => ({
@@ -108,10 +120,6 @@ export function PomodoroTimer({
             stopwatchRunning: true,
             stopwatchStartTime: Date.now(),
             stopwatchElapsed: 0,
-            pomodoroPhase: nextPhase,
-            pomodoroSet: newSet,
-            pomodoroCompletedPomodoros: newCompletedPomodoros,
-            pomodoroAccumulatedTime: newAccumulatedTime,
           }),
         })
 
@@ -212,10 +220,14 @@ export function PomodoroTimer({
         )
 
         // セット数の更新（休憩が終わったら +1）
-        const newSet =
-          phase === 'break' || phase === 'longBreak' ? currentSet + 1 : currentSet
+        const newSet = phase === 'break' || phase === 'longBreak' ? currentSet + 1 : currentSet
 
-        // 次のフェーズに自動遷移
+        // 状態を更新
+        onPhaseChange(nextPhase)
+        onSetChange(newSet)
+        onCompletedPomodorosChange(newCompletedPomodoros)
+
+        // タイマーを再開
         navigate({
           to: location.pathname,
           search: (prev) => ({
@@ -223,9 +235,6 @@ export function PomodoroTimer({
             stopwatchRunning: true,
             stopwatchStartTime: Date.now(),
             stopwatchElapsed: 0,
-            pomodoroPhase: nextPhase,
-            pomodoroSet: newSet,
-            pomodoroCompletedPomodoros: newCompletedPomodoros,
           }),
         })
       },
@@ -267,6 +276,12 @@ export function PomodoroTimer({
       labels: { confirm: 'リセット', cancel: 'キャンセル' },
       confirmProps: { color: 'red' },
       onConfirm: () => {
+        // 状態をすべてリセット
+        onPhaseChange('waiting')
+        onSetChange(0)
+        onCompletedPomodorosChange(0)
+        onAccumulatedTimeChange(0)
+
         navigate({
           to: location.pathname,
           search: (prev) => ({
@@ -274,10 +289,6 @@ export function PomodoroTimer({
             stopwatchRunning: false,
             stopwatchStartTime: null,
             stopwatchElapsed: 0,
-            pomodoroPhase: 'waiting',
-            pomodoroSet: 1,
-            pomodoroCompletedPomodoros: 0,
-            pomodoroAccumulatedTime: 0,
           }),
         })
         setDisplayTime(0)

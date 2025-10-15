@@ -1,5 +1,4 @@
-import type { SearchParams } from '~/features/habits/types/schemas/search-params'
-import type { PomodoroSettings } from '~/features/root/types/stopwatch'
+import type { PomodoroPhase, PomodoroSettings } from '~/features/root/types/stopwatch'
 
 /**
  * デフォルトのポモドーロ設定
@@ -15,7 +14,7 @@ export const DEFAULT_POMODORO_SETTINGS = {
  * 次のフェーズを決定する
  */
 export function determineNextPhase(
-  currentPhase: SearchParams['pomodoroPhase'],
+  currentPhase: PomodoroPhase,
   completedPomodoros: number,
   longBreakInterval: number,
 ) {
@@ -32,16 +31,13 @@ export function determineNextPhase(
 /**
  * 現在のフェーズの時間設定を取得する（分）
  */
-export function getCurrentPhaseDuration(
-  phase: NonNullable<SearchParams['pomodoroPhase']>,
-  settings: PomodoroSettings,
-) {
+export function getCurrentPhaseDuration(phase: PomodoroPhase, settings: PomodoroSettings) {
   const durations = {
     focus: settings.focusDuration,
     break: settings.breakDuration,
     longBreak: settings.longBreakDuration,
     waiting: 0,
-  } as const satisfies Record<NonNullable<SearchParams['pomodoroPhase']>, number>
+  } as const satisfies Record<PomodoroPhase, number>
 
   return durations[phase]
 }
@@ -49,13 +45,13 @@ export function getCurrentPhaseDuration(
 /**
  * フェーズに応じたカラーを取得する
  */
-export function getPhaseColor(phase: NonNullable<SearchParams['pomodoroPhase']>) {
+export function getPhaseColor(phase: PomodoroPhase) {
   const colors = {
     focus: 'red',
     break: 'green',
     longBreak: 'grape',
     waiting: 'gray',
-  } as const satisfies Record<NonNullable<SearchParams['pomodoroPhase']>, string>
+  } as const satisfies Record<PomodoroPhase, string>
 
   return colors[phase]
 }
@@ -63,13 +59,13 @@ export function getPhaseColor(phase: NonNullable<SearchParams['pomodoroPhase']>)
 /**
  * フェーズに応じたラベルを取得する
  */
-export function getPhaseLabel(phase: NonNullable<SearchParams['pomodoroPhase']>) {
+export function getPhaseLabel(phase: PomodoroPhase) {
   const labels = {
     focus: '🍅 集中時間',
     break: '☕ 休憩',
     longBreak: '🌟 長い休憩',
     waiting: '待機中',
-  } as const satisfies Record<NonNullable<SearchParams['pomodoroPhase']>, string>
+  } as const satisfies Record<PomodoroPhase, string>
 
   return labels[phase]
 }
@@ -77,13 +73,13 @@ export function getPhaseLabel(phase: NonNullable<SearchParams['pomodoroPhase']>)
 /**
  * 開始ボタンのラベルを取得する
  */
-export function getStartButtonLabel(nextPhase: NonNullable<SearchParams['pomodoroPhase']>) {
+export function getStartButtonLabel(nextPhase: PomodoroPhase) {
   const labels = {
     focus: '集中開始',
     break: '休憩開始',
     longBreak: '長い休憩開始',
     waiting: '開始',
-  } as const satisfies Record<NonNullable<SearchParams['pomodoroPhase']>, string>
+  } as const satisfies Record<PomodoroPhase, string>
 
   return labels[nextPhase]
 }
