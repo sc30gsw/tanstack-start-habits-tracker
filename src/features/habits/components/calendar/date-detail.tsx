@@ -25,6 +25,7 @@ type DateDetailProps = {
 }
 
 export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
+  console.log('🚀 ~ DateDetail ~ selectedDateRecord:', selectedDateRecord)
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
   const selectedDate = getValidatedDate(searchParams?.selectedDate)
@@ -34,7 +35,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
   const router = useRouter()
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
-  const textColor = 'gray.6' // ユニバーサルカラー（light/dark両対応）
+  const textColor = 'gray.6'
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm" id={RECORD_FORM_HASH_TARGET}>

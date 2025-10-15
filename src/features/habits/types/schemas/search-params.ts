@@ -147,6 +147,19 @@ const levelTabValidator = z
     return 'overview'
   })
 
+/**
+ * 詳細タブのバリデーション
+ * - dashboard: ダッシュボード（情報＋レベル）
+ * - records: 記録（カレンダー＋トレンドチャート - 連動）
+ * - heatmap: 年間記録（ヒートマップ - 1年分固定表示）
+ */
+const detailTabValidator = z
+  .enum(['dashboard', 'records', 'heatmap'])
+  .optional()
+  .catch((_) => {
+    return 'dashboard'
+  })
+
 export const searchSchema = z.object({
   selectedDate: dateStringValidator,
   calendarView: calendarViewValidator,
@@ -163,6 +176,7 @@ export const searchSchema = z.object({
   stopwatchStartTime: stopwatchStartTimeValidator,
   stopwatchElapsed: stopwatchElapsedValidator,
   levelTab: levelTabValidator,
+  detailTab: detailTabValidator,
 })
 
 export type SearchParams = z.infer<typeof searchSchema>
@@ -211,5 +225,6 @@ export function getDefaultSearchParams(): Required<SearchParams> {
     stopwatchStartTime: null,
     stopwatchElapsed: 0,
     levelTab: 'overview',
+    detailTab: 'dashboard',
   }
 }
