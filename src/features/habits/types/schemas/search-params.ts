@@ -137,8 +137,11 @@ const stopwatchElapsedValidator = z.number().optional().catch(0)
  * ポモドーロのバリデーション
  */
 const stopwatchModeValidator = z.enum(['stopwatch', 'pomodoro']).optional().catch('stopwatch')
-const pomodoroPhaseValidator = z.enum(['focus', 'break', 'longBreak', 'waiting']).optional().catch('waiting')
-const pomodoroSetValidator = z.number().optional().catch(1)
+const pomodoroPhaseValidator = z
+  .enum(['focus', 'break', 'longBreak', 'waiting'])
+  .optional()
+  .catch('waiting')
+const pomodoroSetValidator = z.number().optional().catch(0)
 const pomodoroCompletedPomodorosValidator = z.number().optional().catch(0)
 const pomodoroAccumulatedTimeValidator = z.number().optional().catch(0)
 const pomodoroFocusDurationValidator = z.number().optional().catch(25)
@@ -248,7 +251,7 @@ export function getDefaultSearchParams(): Required<SearchParams> {
     stopwatchElapsed: 0,
     stopwatchMode: 'stopwatch',
     pomodoroPhase: 'waiting',
-    pomodoroSet: 1,
+    pomodoroSet: 0,
     pomodoroCompletedPomodoros: 0,
     pomodoroAccumulatedTime: 0,
     pomodoroFocusDuration: 25,

@@ -1,5 +1,6 @@
 import { notifications } from '@mantine/notifications'
-import type { NotificationConfig, PomodoroPhase } from '../types/stopwatch'
+import type { SearchParams } from '~/features/habits/types/schemas/search-params'
+import type { NotificationConfig } from '~/features/root/types/stopwatch'
 
 /**
  * ブラウザ通知の権限をリクエストする
@@ -13,7 +14,10 @@ export async function requestNotificationPermission() {
 /**
  * フェーズ完了時の通知設定を取得する
  */
-function getPhaseCompleteConfig(currentPhase: PomodoroPhase, nextPhase: PomodoroPhase) {
+function getPhaseCompleteConfig(
+  currentPhase: NonNullable<SearchParams['pomodoroPhase']>,
+  nextPhase: NonNullable<SearchParams['pomodoroPhase']>,
+) {
   const configs = {
     focus: {
       title: '🍅 集中時間完了！',
@@ -38,7 +42,7 @@ function getPhaseCompleteConfig(currentPhase: PomodoroPhase, nextPhase: Pomodoro
       message: '',
       color: 'gray',
     },
-  } as const satisfies Record<PomodoroPhase, NotificationConfig>
+  } as const satisfies Record<NonNullable<SearchParams['pomodoroPhase']>, NotificationConfig>
 
   return configs[currentPhase]
 }
@@ -67,8 +71,8 @@ function playNotificationSound() {
  * フェーズ完了通知を表示する
  */
 export function showPhaseCompleteNotification(
-  currentPhase: PomodoroPhase,
-  nextPhase: PomodoroPhase,
+  currentPhase: NonNullable<SearchParams['pomodoroPhase']>,
+  nextPhase: NonNullable<SearchParams['pomodoroPhase']>,
 ) {
   const config = getPhaseCompleteConfig(currentPhase, nextPhase)
 

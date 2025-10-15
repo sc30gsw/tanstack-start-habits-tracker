@@ -12,7 +12,8 @@ import { getRouteApi, useLocation } from '@tanstack/react-router'
 import type { InferSelectModel } from 'drizzle-orm'
 import { useEffect, useState } from 'react'
 import type { habits } from '~/db/schema'
-import type { PomodoroPhase, PomodoroSettings } from '~/features/root/types/stopwatch'
+import type { SearchParams } from '~/features/habits/types/schemas/search-params'
+import type { PomodoroSettings } from '~/features/root/types/stopwatch'
 import { showPhaseCompleteNotification } from '~/features/root/utils/notifications'
 import {
   determineNextPhase,
@@ -30,8 +31,7 @@ const TIME_DISPLAY_PADDING = 2
 
 type PomodoroTimerProps = {
   habitId: InferSelectModel<typeof habits>['id'] | null
-  phase: PomodoroPhase
-  currentSet: number
+  phase: NonNullable<SearchParams['pomodoroPhase']>
   completedPomodoros: number
   accumulatedTime: number
   settings: PomodoroSettings
@@ -44,7 +44,6 @@ type PomodoroTimerProps = {
 export function PomodoroTimer({
   habitId,
   phase,
-  currentSet,
   completedPomodoros,
   accumulatedTime,
   settings,
@@ -92,9 +91,6 @@ export function PomodoroTimer({
           settings.longBreakInterval,
         )
 
-        // セット数を更新（長い休憩が終わったら次のセットへ）
-        const newSet = phase === 'longBreak' ? currentSet + 1 : currentSet
-
         // 通知表示
         showPhaseCompleteNotification(phase, nextPhase)
 
@@ -107,7 +103,7 @@ export function PomodoroTimer({
             stopwatchStartTime: Date.now(),
             stopwatchElapsed: 0,
             pomodoroPhase: nextPhase,
-            pomodoroSet: newSet,
+            pomodoroSet: newCompletedPomodoros,
             pomodoroCompletedPomodoros: newCompletedPomodoros,
             pomodoroAccumulatedTime: newAccumulatedTime,
           }),
@@ -209,9 +205,6 @@ export function PomodoroTimer({
           settings.longBreakInterval,
         )
 
-        // セット数を更新（長い休憩が終わったら次のセットへ）
-        const newSet = phase === 'longBreak' ? currentSet + 1 : currentSet
-
         // 次のフェーズに自動遷移
         navigate({
           to: location.pathname,
@@ -221,7 +214,7 @@ export function PomodoroTimer({
             stopwatchStartTime: Date.now(),
             stopwatchElapsed: 0,
             pomodoroPhase: nextPhase,
-            pomodoroSet: newSet,
+            pomodoroSet: newCompletedPomodoros,
             pomodoroCompletedPomodoros: newCompletedPomodoros,
           }),
         })
@@ -307,7 +300,7 @@ export function PomodoroTimer({
           {getPhaseLabel(phase)}
         </Badge>
         <Text size="sm" c="dimmed">
-          第{currentSet}セット
+          {phase === 'waiting' ? '開始前' : `第${completedPomodoros + 1}ポモドーロ`}
         </Text>
       </Group>
 

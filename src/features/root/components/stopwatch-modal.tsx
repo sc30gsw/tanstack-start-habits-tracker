@@ -9,15 +9,12 @@ import { GET_HABITS_CACHE_KEY } from '~/constants/cache-key'
 import type { habits as HabitTable } from '~/db/schema'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
+import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { FinishRecordForm } from '~/features/root/components/final-record-form'
 import { PomodoroSettingsForm } from '~/features/root/components/pomodoro-settings'
 import { PomodoroTimer } from '~/features/root/components/pomodoro-timer'
 import { StopwatchTimer } from '~/features/root/components/stopwatch-timer'
-import type {
-  PomodoroPhase,
-  PomodoroSettings,
-  StopwatchMode,
-} from '~/features/root/types/stopwatch'
+import type { PomodoroSettings } from '~/features/root/types/stopwatch'
 import { requestNotificationPermission } from '~/features/root/utils/notifications'
 import { DEFAULT_POMODORO_SETTINGS } from '~/features/root/utils/pomodoro'
 import { convertSecondsToMinutes } from '~/features/root/utils/stopwatch-utils'
@@ -35,20 +32,19 @@ export function StopwatchModal() {
   const pausedElapsed = searchParams.stopwatchElapsed ?? 0
 
   // ポモドーロ関連の状態
-  const mode: StopwatchMode = searchParams.stopwatchMode ?? 'stopwatch'
-  const phase: PomodoroPhase = searchParams.pomodoroPhase ?? 'waiting'
-  const currentSet = searchParams.pomodoroSet ?? 1
+  const mode = searchParams.stopwatchMode ?? 'stopwatch'
+  const phase = searchParams.pomodoroPhase ?? 'waiting'
   const completedPomodoros = searchParams.pomodoroCompletedPomodoros ?? 0
   const accumulatedTime = searchParams.pomodoroAccumulatedTime ?? 0
 
-  const settings: PomodoroSettings = {
+  const settings = {
     focusDuration: searchParams.pomodoroFocusDuration ?? DEFAULT_POMODORO_SETTINGS.focusDuration,
     breakDuration: searchParams.pomodoroBreakDuration ?? DEFAULT_POMODORO_SETTINGS.breakDuration,
     longBreakDuration:
       searchParams.pomodoroLongBreakDuration ?? DEFAULT_POMODORO_SETTINGS.longBreakDuration,
     longBreakInterval:
       searchParams.pomodoroLongBreakInterval ?? DEFAULT_POMODORO_SETTINGS.longBreakInterval,
-  }
+  } as const satisfies PomodoroSettings
 
   // 通知権限のリクエスト
   useEffect(() => {
@@ -166,7 +162,7 @@ export function StopwatchModal() {
       to: location.pathname,
       search: (prev) => ({
         ...prev,
-        stopwatchMode: newMode as StopwatchMode,
+        stopwatchMode: newMode as SearchParams['stopwatchMode'],
         stopwatchRunning: false,
         stopwatchStartTime: null,
         stopwatchElapsed: 0,
@@ -293,7 +289,6 @@ export function StopwatchModal() {
           <PomodoroTimer
             habitId={selectedHabitId}
             phase={phase}
-            currentSet={currentSet}
             completedPomodoros={completedPomodoros}
             accumulatedTime={accumulatedTime}
             settings={settings}
