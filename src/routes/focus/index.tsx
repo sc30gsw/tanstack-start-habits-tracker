@@ -15,8 +15,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import {
   AMBIENT_SOUNDS,
-  AmbientSoundManager,
   type AmbientSound,
+  AmbientSoundManager,
 } from '~/features/root/utils/ambient-sound'
 
 export const Route = createFileRoute('/focus/')({
