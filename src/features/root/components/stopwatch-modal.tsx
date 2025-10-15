@@ -1,4 +1,14 @@
-import { Group, Modal, SegmentedControl, Select, Skeleton, Stack, Text } from '@mantine/core'
+import {
+  Box,
+  Divider,
+  Group,
+  Modal,
+  SegmentedControl,
+  Select,
+  Skeleton,
+  Stack,
+  Text,
+} from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
@@ -10,6 +20,7 @@ import type { habits as HabitTable } from '~/db/schema'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import type { HabitEntity } from '~/features/habits/types/habit'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
+import { AmbientSoundPlayer } from '~/features/root/components/ambient-sound-player'
 import { FinishRecordForm } from '~/features/root/components/final-record-form'
 import { PomodoroSettingsForm } from '~/features/root/components/pomodoro-settings'
 import { PomodoroTimer } from '~/features/root/components/pomodoro-timer'
@@ -46,6 +57,9 @@ export function StopwatchModal() {
   const [settings, setSettings] = useState<PomodoroSettings>(DEFAULT_POMODORO_SETTINGS)
   const [isSettingsValid, setIsSettingsValid] = useState(true)
   const [isStateRestored, setIsStateRestored] = useState(false)
+
+  // 環境音の停止トリガー
+  const [shouldStopAmbient, setShouldStopAmbient] = useState(false)
 
   // Wake Lock マネージャー
   const wakeLockManager = useRef(new WakeLockManager())
@@ -218,6 +232,9 @@ export function StopwatchModal() {
           // LocalStorageの状態もクリア
           clearTimerState()
 
+          // 環境音を停止
+          setShouldStopAmbient(true)
+
           navigate({
             to: location.pathname,
             search: (prev) => ({
@@ -246,6 +263,9 @@ export function StopwatchModal() {
         },
       })
     } else {
+      // 環境音を停止
+      setShouldStopAmbient(true)
+
       navigate({
         to: location.pathname,
         search: (prev) => ({
@@ -289,6 +309,10 @@ export function StopwatchModal() {
         pomodoroAccumulatedTime: 0,
       }),
     })
+  }
+
+  const handleAmbientStopped = () => {
+    setShouldStopAmbient(false)
   }
 
   const handleFinish = () => {
@@ -423,6 +447,12 @@ export function StopwatchModal() {
             disabled={isRunning || phase !== 'waiting'}
           />
         )}
+
+        {/* 環境音プレイヤー */}
+        <Divider label="環境音" labelPosition="left" />
+        <Box mb={16}>
+          <AmbientSoundPlayer shouldStop={shouldStopAmbient} onStopped={handleAmbientStopped} />
+        </Box>
 
         {/* タイマー表示 */}
         {mode === 'stopwatch' ? (

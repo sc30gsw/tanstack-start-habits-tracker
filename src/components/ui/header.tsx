@@ -2,6 +2,7 @@ import { AppShell, Avatar, Button, Group, Menu, Text } from '@mantine/core'
 import { IconClock, IconCreditCard, IconLogout, IconSettings } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense } from 'react'
+import { GlobalAmbientPlayer } from '~/features/root/components/global-ambient-player'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
@@ -63,6 +64,7 @@ export function Header() {
                   習慣を記録する
                 </Button>
 
+                <GlobalAmbientPlayer />
                 <ThemeToggle />
 
                 <Menu shadow="md" width={200}>
@@ -119,6 +121,7 @@ export function Header() {
               </>
             ) : (
               <>
+                <GlobalAmbientPlayer />
                 <ThemeToggle />
                 <Button component={Link} to="/auth/sign-in" variant="subtle" size="sm">
                   ログイン
@@ -149,6 +152,7 @@ export function Header() {
                 >
                   <IconClock size={16} />
                 </Button>
+                <GlobalAmbientPlayer />
                 <ThemeToggle />
                 <Menu shadow="md" width={200}>
                   <Menu.Target>
@@ -215,6 +219,7 @@ export function Header() {
             )}
             {!session && (
               <Group gap="xs">
+                <GlobalAmbientPlayer />
                 <ThemeToggle />
                 <Button component={Link} to="/auth/sign-in" variant="subtle" size="xs">
                   ログイン
