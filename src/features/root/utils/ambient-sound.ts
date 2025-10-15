@@ -13,7 +13,6 @@ export const AMBIENT_SOUNDS = [
 ] as const satisfies readonly { id: string; name: string; file: `/audio/${string}.mp3` | null }[]
 
 export type AmbientSound = (typeof AMBIENT_SOUNDS)[number]
-export type AmbientSoundId = AmbientSound['id']
 
 const STORAGE_KEY = 'habits-tracker-ambient-settings'
 
