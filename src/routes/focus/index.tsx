@@ -1,7 +1,9 @@
 import {
   ActionIcon,
+  Box,
   Card,
   Container,
+  Flex,
   Grid,
   Group,
   Paper,
@@ -12,11 +14,11 @@ import {
   Tooltip,
 } from '@mantine/core'
 import {
-  IconCircleX,
   IconPlayerPause,
   IconPlayerPlay,
   IconVolume,
   IconVolumeOff,
+  IconX,
 } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useId, useRef, useState } from 'react'
@@ -127,16 +129,16 @@ function RouteComponent() {
   return (
     <Container size="xl" py="xl">
       <Stack gap="xl">
-        <div>
+        <Box>
           <Title order={1} mb="xs">
             Focus Zone
           </Title>
           <Text c="dimmed" size="lg">
             集中力を高める環境音で、作業効率をアップ
           </Text>
-        </div>
+        </Box>
 
-        <div>
+        <Box>
           <Text size="lg" fw={500} mb="md">
             環境音を選択
           </Text>
@@ -170,49 +172,40 @@ function RouteComponent() {
                       onClick={() => handleSoundSelect(isSelected ? 'none' : sound.id)}
                     >
                       <Stack gap="md" align="center">
-                        <div
-                          style={{
-                            position: 'relative',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                        >
-                          <div
+                        <Box pos="relative">
+                          <Flex
+                            w={64}
+                            h={64}
+                            align="center"
+                            justify="center"
                             style={{
-                              width: 64,
-                              height: 64,
                               borderRadius: '50%',
                               backgroundColor: `var(--mantine-color-${sound.color}-1)`,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
                               border: isSelected
                                 ? `2px solid var(--mantine-color-${sound.color}-6)`
                                 : '2px solid transparent',
                             }}
                           >
                             <Icon size={32} color={`var(--mantine-color-${sound.color}-6)`} />
-                          </div>
+                          </Flex>
 
-                          {/* 再生インジケーター */}
                           <ActionIcon
                             size="sm"
                             radius="xl"
                             color={sound.color}
                             variant="filled"
+                            pos="absolute"
+                            bottom={-4}
+                            right={-4}
                             style={{
-                              position: 'absolute',
-                              bottom: -4,
-                              right: -4,
                               visibility: isCurrentlyPlaying ? 'visible' : 'hidden',
                             }}
                           >
                             <IconPlayerPlay size={12} />
                           </ActionIcon>
-                        </div>
+                        </Box>
 
-                        <div style={{ textAlign: 'center' }}>
+                        <Box ta="center">
                           <Text fw={500} size="sm">
                             {sound.name}
                           </Text>
@@ -227,7 +220,7 @@ function RouteComponent() {
                           >
                             再生中
                           </Text>
-                        </div>
+                        </Box>
                       </Stack>
                     </Card>
                   </Grid.Col>
@@ -235,7 +228,7 @@ function RouteComponent() {
               }),
             )}
           </Grid>
-        </div>
+        </Box>
 
         <Paper p="xl" radius="md" withBorder>
           <Stack gap="lg">
@@ -280,7 +273,7 @@ function RouteComponent() {
           p="md"
           radius="md"
           withBorder
-          bg={isPlaying ? 'blue.0' : 'gray.0'}
+          bg={isPlaying ? 'blue.1' : 'gray.1'}
         >
           <Group justify="space-between">
             <Group gap="xs">
@@ -289,7 +282,7 @@ function RouteComponent() {
               ) : (
                 <IconVolumeOff size={20} color="var(--mantine-color-gray-6)" />
               )}
-              <Text fw={500}>
+              <Text fw={500} c={isPlaying ? 'blue.9' : 'dimmed'}>
                 {soundId && soundId !== 'none'
                   ? `${AMBIENT_SOUNDS.find((sound) => sound.id === soundId)?.name}${isPlaying ? ' を再生中' : ''}`
                   : '環境音を選択して再生を開始してください'}
@@ -315,7 +308,7 @@ function RouteComponent() {
                       color="red"
                       onClick={handleClearSelection}
                     >
-                      <IconCircleX size={20} />
+                      <IconX size={20} />
                     </ActionIcon>
                   </Tooltip>
                 </>
