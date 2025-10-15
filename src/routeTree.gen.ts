@@ -9,10 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as HabitsIndexRouteImport } from './routes/habits/index'
+import { Route as FocusIndexRouteImport } from './routes/focus/index'
 import { Route as CheckoutIndexRouteImport } from './routes/checkout/index'
 import { Route as HabitsHabitIdRouteImport } from './routes/habits/$habitId'
 import { Route as CustomerPortalRouteImport } from './routes/customer/portal'
@@ -23,11 +24,6 @@ import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthPasskeySetupRouteImport } from './routes/auth/passkey-setup'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -38,9 +34,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HabitsIndexRoute = HabitsIndexRouteImport.update({
   id: '/habits/',
   path: '/habits/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FocusIndexRoute = FocusIndexRouteImport.update({
+  id: '/focus/',
+  path: '/focus/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
@@ -92,7 +98,6 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
-  '/settings': typeof SettingsRoute
   '/auth/passkey-setup': typeof AuthPasskeySetupRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
@@ -101,13 +106,14 @@ export interface FileRoutesByFullPath {
   '/customer/portal': typeof CustomerPortalRoute
   '/habits/$habitId': typeof HabitsHabitIdRoute
   '/checkout': typeof CheckoutIndexRoute
+  '/focus': typeof FocusIndexRoute
   '/habits': typeof HabitsIndexRoute
+  '/settings': typeof SettingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
-  '/settings': typeof SettingsRoute
   '/auth/passkey-setup': typeof AuthPasskeySetupRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
@@ -116,14 +122,15 @@ export interface FileRoutesByTo {
   '/customer/portal': typeof CustomerPortalRoute
   '/habits/$habitId': typeof HabitsHabitIdRoute
   '/checkout': typeof CheckoutIndexRoute
+  '/focus': typeof FocusIndexRoute
   '/habits': typeof HabitsIndexRoute
+  '/settings': typeof SettingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
-  '/settings': typeof SettingsRoute
   '/auth/passkey-setup': typeof AuthPasskeySetupRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
@@ -132,7 +139,9 @@ export interface FileRoutesById {
   '/customer/portal': typeof CustomerPortalRoute
   '/habits/$habitId': typeof HabitsHabitIdRoute
   '/checkout/': typeof CheckoutIndexRoute
+  '/focus/': typeof FocusIndexRoute
   '/habits/': typeof HabitsIndexRoute
+  '/settings/': typeof SettingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -140,7 +149,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
-    | '/settings'
     | '/auth/passkey-setup'
     | '/auth/sign-in'
     | '/auth/sign-out'
@@ -149,13 +157,14 @@ export interface FileRouteTypes {
     | '/customer/portal'
     | '/habits/$habitId'
     | '/checkout'
+    | '/focus'
     | '/habits'
+    | '/settings'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/settings'
     | '/auth/passkey-setup'
     | '/auth/sign-in'
     | '/auth/sign-out'
@@ -164,13 +173,14 @@ export interface FileRouteTypes {
     | '/customer/portal'
     | '/habits/$habitId'
     | '/checkout'
+    | '/focus'
     | '/habits'
+    | '/settings'
     | '/api/auth/$'
   id:
     | '__root__'
     | '/'
     | '/auth'
-    | '/settings'
     | '/auth/passkey-setup'
     | '/auth/sign-in'
     | '/auth/sign-out'
@@ -179,31 +189,27 @@ export interface FileRouteTypes {
     | '/customer/portal'
     | '/habits/$habitId'
     | '/checkout/'
+    | '/focus/'
     | '/habits/'
+    | '/settings/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
-  SettingsRoute: typeof SettingsRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   CustomerPortalRoute: typeof CustomerPortalRoute
   HabitsHabitIdRoute: typeof HabitsHabitIdRoute
   CheckoutIndexRoute: typeof CheckoutIndexRoute
+  FocusIndexRoute: typeof FocusIndexRoute
   HabitsIndexRoute: typeof HabitsIndexRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -218,11 +224,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/': {
+      id: '/settings/'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/habits/': {
       id: '/habits/'
       path: '/habits'
       fullPath: '/habits'
       preLoaderRoute: typeof HabitsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/focus/': {
+      id: '/focus/'
+      path: '/focus'
+      fullPath: '/focus'
+      preLoaderRoute: typeof FocusIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout/': {
@@ -312,12 +332,13 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
-  SettingsRoute: SettingsRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   CustomerPortalRoute: CustomerPortalRoute,
   HabitsHabitIdRoute: HabitsHabitIdRoute,
   CheckoutIndexRoute: CheckoutIndexRoute,
+  FocusIndexRoute: FocusIndexRoute,
   HabitsIndexRoute: HabitsIndexRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

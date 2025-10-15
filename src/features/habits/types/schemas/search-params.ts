@@ -139,28 +139,6 @@ const stopwatchElapsedValidator = z.number().optional().catch(0)
 const stopwatchModeValidator = z.enum(['stopwatch', 'pomodoro']).optional().catch('stopwatch')
 
 /**
- * 環境音のバリデーション
- */
-const ambientSoundValidator = z
-  .enum([
-    'none',
-    'rain',
-    'thunder-rain',
-    'wave',
-    'river',
-    'waterfall',
-    'bonfire',
-    'morning-bird',
-    'cafe',
-    'countryside',
-    'harbor',
-  ])
-  .optional()
-  .catch('none')
-
-const ambientVolumeValidator = z.number().min(0).max(100).optional().catch(50)
-
-/**
  * レベルタブのバリデーション
  * - overview: 概要
  * - levels: レベル詳細
@@ -203,8 +181,6 @@ export const searchSchema = z.object({
   stopwatchStartTime: stopwatchStartTimeValidator,
   stopwatchElapsed: stopwatchElapsedValidator,
   stopwatchMode: stopwatchModeValidator,
-  ambientSound: ambientSoundValidator,
-  ambientVolume: ambientVolumeValidator,
   levelTab: levelTabValidator,
   detailTab: detailTabValidator,
 })
@@ -255,8 +231,6 @@ export function getDefaultSearchParams(): Required<SearchParams> {
     stopwatchStartTime: null,
     stopwatchElapsed: 0,
     stopwatchMode: 'stopwatch',
-    ambientSound: 'none',
-    ambientVolume: 50,
     levelTab: 'overview',
     detailTab: 'dashboard',
   }
