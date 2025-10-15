@@ -1,4 +1,4 @@
-import { Badge, Card, Group, Stack, Text, Tooltip } from '@mantine/core'
+import { Badge, Card, Group, SimpleGrid, Stack, Text, Tooltip } from '@mantine/core'
 import { IconLock } from '@tabler/icons-react'
 import type { BadgeItem } from '~/features/habits/constants/badges'
 import { COMPLETION_BADGES, HOURS_BADGES } from '~/features/habits/constants/badges'
@@ -141,9 +141,9 @@ export function BadgeCollection({
               {unlockedCompletionCount} / {COMPLETION_BADGES.length}
             </Badge>
           </Group>
-          <Group gap="md" justify="center">
+          <SimpleGrid cols={{ base: 2, xs: 3, sm: 5, md: 7 }} spacing="md">
             {COMPLETION_BADGES.map((badge) => renderBadge(badge, completionLevel >= badge.level))}
-          </Group>
+          </SimpleGrid>
         </Stack>
 
         {/* 総時間レベルバッジ */}
@@ -156,9 +156,9 @@ export function BadgeCollection({
               {unlockedHoursCount} / {HOURS_BADGES.length}
             </Badge>
           </Group>
-          <Group gap="md" justify="center">
+          <SimpleGrid cols={{ base: 2, xs: 3, sm: 5, md: 7 }} spacing="md">
             {HOURS_BADGES.map((badge) => renderBadge(badge, hoursLevel >= badge.level))}
-          </Group>
+          </SimpleGrid>
         </Stack>
 
         {/* モチベーションメッセージ */}

@@ -1,5 +1,23 @@
-import { Alert, Badge, Card, Divider, Group, Progress, Stack, Tabs, Text } from '@mantine/core'
-import { IconCalendar, IconFlame, IconPin, IconStar, IconTrophy } from '@tabler/icons-react'
+import {
+  Alert,
+  Badge,
+  Card,
+  Divider,
+  Grid,
+  Group,
+  Progress,
+  Stack,
+  Tabs,
+  Text,
+} from '@mantine/core'
+import {
+  IconCalendar,
+  IconFlame,
+  IconLayoutDashboard,
+  IconPin,
+  IconStar,
+  IconTrophy,
+} from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { BadgeCollection } from '~/features/habits/components/badge-collection'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
@@ -37,20 +55,40 @@ export function HabitLevelCard() {
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Tabs value={levelTab} onChange={handleTabChange} variant="pills">
-        <Tabs.List grow>
-          <Tabs.Tab value="overview" leftSection={<IconTrophy size={16} />}>
-            概要
-          </Tabs.Tab>
-          <Tabs.Tab value="levels" leftSection={<IconStar size={16} />}>
-            レベル
-          </Tabs.Tab>
-          <Tabs.Tab value="streak" leftSection={<IconFlame size={16} />}>
-            ストリーク
-          </Tabs.Tab>
-          <Tabs.Tab value="badges" leftSection={<IconTrophy size={16} />}>
-            バッジ
-          </Tabs.Tab>
-        </Tabs.List>
+        <Grid gutter="xs">
+          <Grid.Col span={{ base: 6, xs: 3 }}>
+            <Tabs.Tab
+              value="overview"
+              leftSection={<IconLayoutDashboard size={16} />}
+              style={{ width: '100%' }}
+            >
+              概要
+            </Tabs.Tab>
+          </Grid.Col>
+          <Grid.Col span={{ base: 6, xs: 3 }}>
+            <Tabs.Tab value="levels" leftSection={<IconStar size={16} />} style={{ width: '100%' }}>
+              レベル
+            </Tabs.Tab>
+          </Grid.Col>
+          <Grid.Col span={{ base: 6, xs: 3 }}>
+            <Tabs.Tab
+              value="streak"
+              leftSection={<IconFlame size={16} />}
+              style={{ width: '100%' }}
+            >
+              ストリーク
+            </Tabs.Tab>
+          </Grid.Col>
+          <Grid.Col span={{ base: 6, xs: 3 }}>
+            <Tabs.Tab
+              value="badges"
+              leftSection={<IconTrophy size={16} />}
+              style={{ width: '100%' }}
+            >
+              バッジ
+            </Tabs.Tab>
+          </Grid.Col>
+        </Grid>
 
         <Tabs.Panel value="overview" pt="lg">
           <Stack gap="lg">
