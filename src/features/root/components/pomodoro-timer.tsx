@@ -71,7 +71,7 @@ export function PomodoroTimer({
 
   const lastPhaseRef = useRef<PomodoroPhase>(phase)
   const phaseTransitionHandledRef = useRef(false)
-  
+
   // 状態値の最新の参照を保持
   const stateRef = useRef({
     phase,
@@ -79,7 +79,7 @@ export function PomodoroTimer({
     completedPomodoros,
     accumulatedTime,
   })
-  
+
   // 状態値が変更されたら更新
   useEffect(() => {
     stateRef.current = {
@@ -89,7 +89,7 @@ export function PomodoroTimer({
       accumulatedTime,
     }
   })
-  
+
   // コールバック関数の最新の参照を保持（依存配列の問題を回避）
   const callbacksRef = useRef({
     onPhaseChange,
@@ -97,7 +97,7 @@ export function PomodoroTimer({
     onCompletedPomodorosChange,
     onAccumulatedTimeChange,
   })
-  
+
   // コールバック関数が変更されたら更新
   useEffect(() => {
     callbacksRef.current = {
@@ -132,7 +132,12 @@ export function PomodoroTimer({
         clearInterval(interval)
 
         // refから最新の状態を取得
-        const { phase: currentPhase, currentSet, completedPomodoros, accumulatedTime } = stateRef.current
+        const {
+          phase: currentPhase,
+          currentSet,
+          completedPomodoros,
+          accumulatedTime,
+        } = stateRef.current
 
         // 累積時間の更新（集中時間のみ、実際の経過時間を加算）
         const newAccumulatedTime =
@@ -148,7 +153,8 @@ export function PomodoroTimer({
         )
 
         // セット数の更新（休憩が終わったら +1）
-        const newSet = currentPhase === 'break' || currentPhase === 'longBreak' ? currentSet + 1 : currentSet
+        const newSet =
+          currentPhase === 'break' || currentPhase === 'longBreak' ? currentSet + 1 : currentSet
 
         // 開発環境でのみログ出力
         if (import.meta.env.DEV) {

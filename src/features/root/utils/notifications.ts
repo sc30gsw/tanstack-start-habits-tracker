@@ -75,6 +75,9 @@ export function showPhaseCompleteNotification(
 
   // デバウンス: 1秒以内の重複通知を防ぐ
   if (now - lastNotificationTime < NOTIFICATION_DEBOUNCE_MS) {
+    if (import.meta.env.DEV) {
+      console.log('🚫 通知デバウンス: 重複防止')
+    }
     return
   }
 
