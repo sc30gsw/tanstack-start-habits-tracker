@@ -2,7 +2,7 @@ import { AppShell, Avatar, Button, Group, Menu, Text } from '@mantine/core'
 import { IconClock, IconCreditCard, IconLogout, IconSettings } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense } from 'react'
-import { StopwatchModal } from '~/components/ui/stopwatch-modal'
+import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
 

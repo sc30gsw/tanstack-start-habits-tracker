@@ -134,6 +134,11 @@ const stopwatchStartTimeValidator = z.number().nullable().optional().catch(null)
 const stopwatchElapsedValidator = z.number().optional().catch(0)
 
 /**
+ * ポモドーロのバリデーション
+ */
+const stopwatchModeValidator = z.enum(['stopwatch', 'pomodoro']).optional().catch('stopwatch')
+
+/**
  * レベルタブのバリデーション
  * - overview: 概要
  * - levels: レベル詳細
@@ -175,6 +180,7 @@ export const searchSchema = z.object({
   stopwatchRunning: stopwatchRunningValidator,
   stopwatchStartTime: stopwatchStartTimeValidator,
   stopwatchElapsed: stopwatchElapsedValidator,
+  stopwatchMode: stopwatchModeValidator,
   levelTab: levelTabValidator,
   detailTab: detailTabValidator,
 })
@@ -224,6 +230,7 @@ export function getDefaultSearchParams(): Required<SearchParams> {
     stopwatchRunning: false,
     stopwatchStartTime: null,
     stopwatchElapsed: 0,
+    stopwatchMode: 'stopwatch',
     levelTab: 'overview',
     detailTab: 'dashboard',
   }
