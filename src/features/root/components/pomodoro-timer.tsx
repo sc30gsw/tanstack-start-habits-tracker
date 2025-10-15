@@ -38,6 +38,7 @@ type PomodoroTimerProps = {
   isRunning: boolean
   startTime: number | null
   pausedElapsed: number
+  isSettingsValid: boolean
   onPhaseChange: (phase: PomodoroPhase) => void
   onSetChange: (set: number) => void
   onCompletedPomodorosChange: (count: number) => void
@@ -55,6 +56,7 @@ export function PomodoroTimer({
   isRunning,
   startTime,
   pausedElapsed,
+  isSettingsValid,
   onPhaseChange,
   onSetChange,
   onCompletedPomodorosChange,
@@ -138,9 +140,14 @@ export function PomodoroTimer({
     phaseDuration,
     accumulatedTime,
     completedPomodoros,
+    currentSet,
     settings.longBreakInterval,
     navigate,
     location.pathname,
+    onPhaseChange,
+    onSetChange,
+    onCompletedPomodorosChange,
+    onAccumulatedTimeChange,
   ])
 
   const formatTime = (seconds: number) => {
@@ -159,11 +166,19 @@ export function PomodoroTimer({
       return
     }
 
-    // 待機状態から開始する場合、次のフェーズを決定
-    const nextPhase =
-      phase === 'waiting'
-        ? determineNextPhase('break', completedPomodoros, settings.longBreakInterval)
-        : phase
+    if (!isSettingsValid) {
+      notifications.show({
+        title: 'エラー',
+        message: '設定値が正しくありません',
+        color: 'red',
+      })
+      return
+    }
+
+    // 待機状態から開始する場合、フォーカスフェーズを設定
+    if (phase === 'waiting') {
+      onPhaseChange('focus')
+    }
 
     navigate({
       to: location.pathname,
@@ -171,7 +186,6 @@ export function PomodoroTimer({
         ...prev,
         stopwatchRunning: true,
         stopwatchStartTime: Date.now(),
-        pomodoroPhase: nextPhase,
       }),
     })
   }
@@ -362,7 +376,7 @@ export function PomodoroTimer({
           <Button
             leftSection={<IconPlayerPlay size={16} />}
             onClick={handleStart}
-            disabled={!habitId}
+            disabled={!habitId || !isSettingsValid}
           >
             {getStartButtonLabel(
               determineNextPhase('break', completedPomodoros, settings.longBreakInterval),

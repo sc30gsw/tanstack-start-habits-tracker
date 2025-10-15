@@ -1,22 +1,51 @@
 import { NumberInput, Stack, Text } from '@mantine/core'
+import { useEffect } from 'react'
 import type { PomodoroSettings } from '~/features/root/types/stopwatch'
 
 type PomodoroSettingsFormProps = {
   settings: PomodoroSettings
   onSettingsChange: (settings: PomodoroSettings) => void
+  onValidationChange?: (isValid: boolean) => void
   disabled?: boolean
 }
 
 export function PomodoroSettingsForm({
   settings,
   onSettingsChange,
+  onValidationChange,
   disabled = false,
 }: PomodoroSettingsFormProps) {
+  // バリデーションチェック
+  const isValid =
+    settings.focusDuration >= 1 &&
+    settings.focusDuration <= 60 &&
+    settings.breakDuration >= 1 &&
+    settings.breakDuration <= 30 &&
+    settings.longBreakDuration >= 1 &&
+    settings.longBreakDuration <= 60 &&
+    settings.longBreakInterval >= 2 &&
+    settings.longBreakInterval <= 10
+
+  // バリデーション状態を親に通知
+  useEffect(() => {
+    onValidationChange?.(isValid)
+  }, [isValid, onValidationChange])
+
   const handleSettingChange = (field: keyof PomodoroSettings, value: number | string) => {
-    onSettingsChange({
-      ...settings,
-      [field]: typeof value === 'number' ? value : Number(value),
-    })
+    // 空文字列や未定義の場合は何もしない（入力中を許可）
+    if (value === '' || value === undefined || value === null) {
+      return
+    }
+
+    const numValue = typeof value === 'number' ? value : Number(value)
+
+    // 数値として有効な場合のみ更新
+    if (!Number.isNaN(numValue)) {
+      onSettingsChange({
+        ...settings,
+        [field]: numValue,
+      })
+    }
   }
 
   return (
@@ -27,38 +56,62 @@ export function PomodoroSettingsForm({
       <NumberInput
         label="集中時間"
         value={settings.focusDuration}
-        onChange={(val) => handleSettingChange('focusDuration', val || 25)}
-        min={1}
-        max={60}
+        onChange={(val) => handleSettingChange('focusDuration', val)}
         suffix=" 分"
         disabled={disabled}
+        allowDecimal={false}
+        allowNegative={false}
+        clampBehavior="strict"
+        error={
+          settings.focusDuration < 1 || settings.focusDuration > 60
+            ? '1〜60分の範囲で入力してください'
+            : undefined
+        }
       />
       <NumberInput
         label="休憩時間"
         value={settings.breakDuration}
-        onChange={(val) => handleSettingChange('breakDuration', val || 5)}
-        min={1}
-        max={30}
+        onChange={(val) => handleSettingChange('breakDuration', val)}
         suffix=" 分"
         disabled={disabled}
+        allowDecimal={false}
+        allowNegative={false}
+        clampBehavior="strict"
+        error={
+          settings.breakDuration < 1 || settings.breakDuration > 30
+            ? '1〜30分の範囲で入力してください'
+            : undefined
+        }
       />
       <NumberInput
         label="長い休憩"
         value={settings.longBreakDuration}
-        onChange={(val) => handleSettingChange('longBreakDuration', val || 15)}
-        min={1}
-        max={60}
+        onChange={(val) => handleSettingChange('longBreakDuration', val)}
         suffix=" 分"
         disabled={disabled}
+        allowDecimal={false}
+        allowNegative={false}
+        clampBehavior="strict"
+        error={
+          settings.longBreakDuration < 1 || settings.longBreakDuration > 60
+            ? '1〜60分の範囲で入力してください'
+            : undefined
+        }
       />
       <NumberInput
         label="長い休憩の間隔"
         value={settings.longBreakInterval}
-        onChange={(val) => handleSettingChange('longBreakInterval', val || 3)}
-        min={2}
-        max={10}
+        onChange={(val) => handleSettingChange('longBreakInterval', val)}
         suffix=" セット毎"
         disabled={disabled}
+        allowDecimal={false}
+        allowNegative={false}
+        clampBehavior="strict"
+        error={
+          settings.longBreakInterval < 2 || settings.longBreakInterval > 10
+            ? '2〜10セットの範囲で入力してください'
+            : undefined
+        }
       />
     </Stack>
   )

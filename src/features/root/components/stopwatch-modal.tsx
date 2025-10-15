@@ -37,6 +37,7 @@ export function StopwatchModal() {
   const [completedPomodoros, setCompletedPomodoros] = useState(0)
   const [accumulatedTime, setAccumulatedTime] = useState(0)
   const [settings, setSettings] = useState<PomodoroSettings>(DEFAULT_POMODORO_SETTINGS)
+  const [isSettingsValid, setIsSettingsValid] = useState(true)
 
   // 通知権限のリクエスト
   useEffect(() => {
@@ -245,7 +246,11 @@ export function StopwatchModal() {
             { label: 'ストップウォッチ', value: 'stopwatch' },
             { label: 'ポモドーロ', value: 'pomodoro' },
           ]}
-          disabled={isRunning || pausedElapsed > 0 || (mode === 'pomodoro' && accumulatedTime > 0)}
+          disabled={
+            isRunning ||
+            pausedElapsed > 0 ||
+            (mode === 'pomodoro' && (accumulatedTime > 0 || phase !== 'waiting'))
+          }
         />
 
         {/* 習慣選択 */}
@@ -258,7 +263,7 @@ export function StopwatchModal() {
           }))}
           value={selectedHabitId}
           onChange={handleHabitSelect}
-          disabled={isRunning || pausedElapsed > 0 || (mode === 'pomodoro' && accumulatedTime > 0)}
+          disabled={isRunning || pausedElapsed > 0}
           searchable
         />
 
@@ -267,7 +272,8 @@ export function StopwatchModal() {
           <PomodoroSettingsForm
             settings={settings}
             onSettingsChange={setSettings}
-            disabled={isRunning || pausedElapsed > 0 || accumulatedTime > 0}
+            onValidationChange={setIsSettingsValid}
+            disabled={isRunning || pausedElapsed > 0}
           />
         )}
 
@@ -291,6 +297,7 @@ export function StopwatchModal() {
             isRunning={isRunning}
             startTime={startTime}
             pausedElapsed={pausedElapsed}
+            isSettingsValid={isSettingsValid}
             onPhaseChange={setPhase}
             onSetChange={setCurrentSet}
             onCompletedPomodorosChange={setCompletedPomodoros}
