@@ -1,5 +1,5 @@
 import { relations, sql } from 'drizzle-orm'
-import { index, integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
+import { index, integer, real, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
 
 // Habits table for habit definitions
 export const habits = sqliteTable(
@@ -143,10 +143,47 @@ export const settings = sqliteTable('settings', {
     .references(() => users.id, { onDelete: 'cascade' }),
 })
 
+// Habit Levels table for tracking habit progression
+export const habitLevels = sqliteTable(
+  'habit_levels',
+  {
+    id: text().primaryKey(),
+    habitId: text('habit_id')
+      .notNull()
+      .unique() // 1 habit = 1 level record
+      .references(() => habits.id, { onDelete: 'cascade' }),
+
+    // Continuation level stats
+    uniqueCompletionDays: integer('unique_completion_days').default(0).notNull(),
+    completionLevel: integer('completion_level').default(1).notNull(),
+
+    // Total hours level stats
+    totalHoursDecimal: real('total_hours_decimal').default(0.0).notNull(),
+    hoursLevel: integer('hours_level').default(1).notNull(),
+
+    // Streak stats
+    currentStreak: integer('current_streak').default(0).notNull(),
+    longestStreak: integer('longest_streak').default(0).notNull(),
+    lastActivityDate: text('last_activity_date'),
+
+    // Metadata
+    createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    index('habit_levels_habitId').on(table.habitId),
+    index('habit_levels_userId').on(table.userId),
+  ],
+)
+
 export const usersRelations = relations(users, ({ many }) => ({
   habits: many(habits),
   records: many(records),
   settings: many(settings),
+  habitLevels: many(habitLevels),
 }))
 
 export const habitsRelations = relations(habits, ({ one, many }) => ({
@@ -155,6 +192,10 @@ export const habitsRelations = relations(habits, ({ one, many }) => ({
     references: [users.id],
   }),
   records: many(records),
+  level: one(habitLevels, {
+    fields: [habits.id],
+    references: [habitLevels.habitId],
+  }),
 }))
 
 export const recordsRelations = relations(records, ({ one }) => ({
@@ -171,6 +212,17 @@ export const recordsRelations = relations(records, ({ one }) => ({
 export const settingsRelations = relations(settings, ({ one }) => ({
   user: one(users, {
     fields: [settings.userId],
+    references: [users.id],
+  }),
+}))
+
+export const habitLevelsRelations = relations(habitLevels, ({ one }) => ({
+  habit: one(habits, {
+    fields: [habitLevels.habitId],
+    references: [habits.id],
+  }),
+  user: one(users, {
+    fields: [habitLevels.userId],
     references: [users.id],
   }),
 }))

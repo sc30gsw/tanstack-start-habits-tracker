@@ -7,17 +7,40 @@ import { and, eq, gte, lte, type SQL } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
-import { records } from '~/db/schema'
+import { habitLevels, records } from '~/db/schema'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import {
   createRecordSchema,
   updateRecordSchema,
 } from '~/features/habits/types/schemas/record-schemas'
+import { calculateHabitStats } from '~/features/habits/utils/habit-level-utils'
 import { auth } from '~/lib/auth'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
+
+async function updateHabitLevel(habitId: string) {
+  const habitRecords = await db.query.records.findMany({
+    where: eq(records.habitId, habitId),
+  })
+
+  const stats = calculateHabitStats(habitRecords)
+
+  await db
+    .update(habitLevels)
+    .set({
+      uniqueCompletionDays: stats.uniqueDays,
+      completionLevel: stats.completionLevel,
+      totalHoursDecimal: stats.totalHours,
+      hoursLevel: stats.hoursLevel,
+      currentStreak: stats.currentStreak,
+      longestStreak: stats.longestStreak,
+      lastActivityDate: stats.lastDate,
+      updatedAt: dayjs().tz('Asia/Tokyo').toISOString(),
+    })
+    .where(eq(habitLevels.habitId, habitId))
+}
 
 const createRecord = createServerFn({ method: 'POST' })
   .inputValidator(createRecordSchema)
@@ -62,7 +85,8 @@ const createRecord = createServerFn({ method: 'POST' })
         })
         .returning()
 
-      // RecordEntityに変換
+      await updateHabitLevel(data.habitId)
+
       const recordEntity = {
         ...record,
         created_at: new Date(record.createdAt!),
@@ -134,6 +158,8 @@ const updateRecord = createServerFn({ method: 'POST' })
         .where(eq(records.id, data.id))
         .returning()
 
+      await updateHabitLevel(existingRecord.habitId)
+
       const recordEntity = {
         ...updatedRecord,
         created_at: new Date(updatedRecord.createdAt!),
@@ -185,7 +211,11 @@ const deleteRecord = createServerFn({ method: 'POST' })
         }
       }
 
+      const habitId = existingRecord.habitId
+
       await db.delete(records).where(and(eq(records.id, data.id), eq(records.userId, userId)))
+
+      await updateHabitLevel(habitId)
 
       return {
         success: true,
