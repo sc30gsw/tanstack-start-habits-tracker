@@ -12,10 +12,6 @@ type AmbientSoundControllerProps = {
   }) => ReactNode
 }
 
-/**
- * 環境音の状態管理とロジックを担当する共通コンポーネント
- * UI表示はchildrenに委譲し、コンポジションパターンで柔軟に対応
- */
 export function AmbientSoundController({ children }: AmbientSoundControllerProps) {
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
@@ -27,7 +23,6 @@ export function AmbientSoundController({ children }: AmbientSoundControllerProps
 
   const managerRef = useRef<AmbientSoundManager | null>(null)
 
-  // 初期化
   useEffect(() => {
     managerRef.current = new AmbientSoundManager()
 
@@ -37,9 +32,10 @@ export function AmbientSoundController({ children }: AmbientSoundControllerProps
     }
   }, [])
 
-  // selectedSoundIdが変更されたら自動的に再生
   useEffect(() => {
-    if (!managerRef.current) return
+    if (!managerRef.current) {
+      return
+    }
 
     if (selectedSoundId === 'none') {
       managerRef.current.stop()
@@ -48,9 +44,11 @@ export function AmbientSoundController({ children }: AmbientSoundControllerProps
     }
   }, [selectedSoundId])
 
-  // volumeが変更されたら音量を更新
   useEffect(() => {
-    if (!managerRef.current) return
+    if (!managerRef.current) {
+      return
+    }
+
     managerRef.current.setVolume(volume / 100)
   }, [volume])
 

@@ -29,19 +29,34 @@ export function GlobalAmbientPlayer() {
             <Menu.Dropdown>
               <Menu.Label>環境音を選択</Menu.Label>
 
-              {AMBIENT_SOUNDS.map((sound) => (
-                <Menu.Item
-                  key={sound.id}
-                  onClick={() => handleSoundChange(sound.id)}
-                  color={selectedSoundId === sound.id ? 'blue' : undefined}
-                  bg={selectedSoundId === sound.id ? 'var(--mantine-color-blue-light)' : undefined}
-                >
-                  {sound.name}
-                </Menu.Item>
-              ))}
+              {AMBIENT_SOUNDS.map((sound) => {
+                const Icon = sound.icon
+
+                return (
+                  <Menu.Item
+                    key={sound.id}
+                    onClick={() => handleSoundChange(sound.id)}
+                    color={selectedSoundId === sound.id ? sound.color : undefined}
+                    bg={
+                      selectedSoundId === sound.id ? 'var(--mantine-color-blue-light)' : undefined
+                    }
+                    leftSection={<Icon size={18} color={`var(--mantine-color-${sound.color}-6)`} />}
+                  >
+                    {sound.name}
+                  </Menu.Item>
+                )
+              })}
 
               <Menu.Divider />
-              <Stack gap="xs" p="xs">
+              <Stack
+                gap="xs"
+                p="xs"
+                style={{
+                  visibility: isPlaying ? 'visible' : 'hidden',
+                  height: isPlaying ? 'auto' : 0,
+                  overflow: 'hidden',
+                }}
+              >
                 <Text size="xs" fw={500}>
                   音量調整
                 </Text>
@@ -60,7 +75,6 @@ export function GlobalAmbientPlayer() {
                     { value: 50, label: '50%' },
                     { value: 100, label: '100%' },
                   ]}
-                  disabled={selectedSoundId === 'none'}
                 />
               </Stack>
             </Menu.Dropdown>

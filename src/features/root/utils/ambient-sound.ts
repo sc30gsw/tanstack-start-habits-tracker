@@ -1,16 +1,103 @@
+import type { MantineColor } from '@mantine/core'
+import type { TablerIcon } from '@tabler/icons-react'
+import {
+  IconAnchor,
+  IconBuildingStore,
+  IconCloudRain,
+  IconDroplet,
+  IconDroplets,
+  IconFlame,
+  IconPlant,
+  IconSquareRoundedX,
+  IconStormOff,
+  IconWaveSine,
+} from '@tabler/icons-react'
+
 export const AMBIENT_SOUNDS = [
-  { id: 'none', name: 'なし', file: null },
-  { id: 'rain', name: '🌧️ 雨音', file: '/audio/雨.mp3' },
-  { id: 'thunder-rain', name: '⛈️ 雷雨', file: '/audio/雷雨.mp3' },
-  { id: 'wave', name: '🌊 波の音', file: '/audio/波.mp3' },
-  { id: 'river', name: '💧 川のせせらぎ', file: '/audio/川.mp3' },
-  { id: 'waterfall', name: '💦 滝の音', file: '/audio/滝.mp3' },
-  { id: 'bonfire', name: '🔥 焚き火', file: '/audio/焚き火.mp3' },
-  { id: 'morning-bird', name: '🐦 小鳥のさえずり', file: '/audio/朝の雰囲気（鳥）.mp3' },
-  { id: 'cafe', name: '☕ カフェの雰囲気', file: '/audio/カフェ.mp3' },
-  { id: 'countryside', name: '🌾 田園風景', file: '/audio/countryside.mp3' },
-  { id: 'harbor', name: '⚓ 港の音', file: '/audio/港.mp3' },
-] as const satisfies readonly { id: string; name: string; file: `/audio/${string}.mp3` | null }[]
+  {
+    id: 'none',
+    name: 'なし',
+    file: null,
+    icon: IconSquareRoundedX,
+    color: 'gray',
+  },
+  {
+    id: 'rain',
+    name: '雨音',
+    file: '/audio/雨.mp3',
+    icon: IconCloudRain,
+    color: 'blue',
+  },
+  {
+    id: 'thunder-rain',
+    name: '雷雨',
+    file: '/audio/雷雨.mp3',
+    icon: IconStormOff,
+    color: 'indigo',
+  },
+  {
+    id: 'wave',
+    name: '波の音',
+    file: '/audio/波.mp3',
+    icon: IconWaveSine,
+    color: 'cyan',
+  },
+  {
+    id: 'river',
+    name: '川のせせらぎ',
+    file: '/audio/川.mp3',
+    icon: IconDroplet,
+    color: 'teal',
+  },
+  {
+    id: 'waterfall',
+    name: '滝の音',
+    file: '/audio/滝.mp3',
+    icon: IconDroplets,
+    color: 'blue',
+  },
+  {
+    id: 'bonfire',
+    name: '焚き火',
+    file: '/audio/焚き火.mp3',
+    icon: IconFlame,
+    color: 'orange',
+  },
+  {
+    id: 'morning-bird',
+    name: '小鳥のさえずり',
+    file: '/audio/朝の雰囲気（鳥）.mp3',
+    icon: IconPlant,
+    color: 'green',
+  },
+  {
+    id: 'cafe',
+    name: 'カフェの雰囲気',
+    file: '/audio/カフェ.mp3',
+    icon: IconBuildingStore,
+    color: 'grape',
+  },
+  {
+    id: 'countryside',
+    name: '田園風景',
+    file: '/audio/countryside.mp3',
+    icon: IconPlant,
+    color: 'lime',
+  },
+  {
+    id: 'harbor',
+    name: '港の音',
+    file: '/audio/港.mp3',
+    icon: IconAnchor,
+    color: 'blue',
+  },
+] as const satisfies readonly {
+  id: string
+  name: string
+  file: `/audio/${string}.mp3` | null
+  icon: TablerIcon
+  color: MantineColor
+}[]
 
 export type AmbientSound = (typeof AMBIENT_SOUNDS)[number]
 

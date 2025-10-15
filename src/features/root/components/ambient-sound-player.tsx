@@ -6,28 +6,61 @@ import { AmbientSoundController } from './ambient-sound-controller'
 export function AmbientSoundPlayer() {
   return (
     <AmbientSoundController>
-      {({ selectedSoundId, volume, handleSoundChange, handleVolumeChange }) => (
-        <Stack gap="md">
-          <Group gap="xs">
-            <IconMusic size={18} />
-            <Text size="sm" fw={500}>
-              環境音
-            </Text>
-          </Group>
+      {({ selectedSoundId, volume, handleSoundChange, handleVolumeChange }) => {
+        const selectedSound = AMBIENT_SOUNDS.find((s) => s.id === selectedSoundId)
+        const SelectedIcon = selectedSound?.icon
 
-          <Select
-            placeholder="環境音を選択"
-            data={AMBIENT_SOUNDS.map((sound) => ({
-              value: sound.id,
-              label: sound.name,
-            }))}
-            value={selectedSoundId}
-            onChange={(value) => value && handleSoundChange(value as any)}
-            size="sm"
-          />
+        return (
+          <Stack gap="md">
+            <Group gap="xs">
+              <IconMusic size={18} />
+              <Text size="sm" fw={500}>
+                環境音
+              </Text>
+            </Group>
 
-          {selectedSoundId !== 'none' && (
-            <Stack gap="xs">
+            <Select
+              placeholder="環境音を選択"
+              data={AMBIENT_SOUNDS.map((sound) => ({
+                value: sound.id,
+                label: sound.name,
+              }))}
+              value={selectedSoundId}
+              onChange={(value) => value && handleSoundChange(value as any)}
+              size="sm"
+              leftSection={
+                SelectedIcon && (
+                  <SelectedIcon
+                    size={18}
+                    color={`var(--mantine-color-${selectedSound?.color}-6)`}
+                  />
+                )
+              }
+              renderOption={({ option }) => {
+                const sound = AMBIENT_SOUNDS.find((s) => s.id === option.value)
+
+                if (!sound) {
+                  return option.label
+                }
+
+                const Icon = sound.icon
+                return (
+                  <Group gap="xs">
+                    <Icon size={18} color={`var(--mantine-color-${sound.color}-6)`} />
+                    <Text>{sound.name}</Text>
+                  </Group>
+                )
+              }}
+            />
+
+            <Stack
+              gap="xs"
+              style={{
+                visibility: selectedSoundId !== 'none' ? 'visible' : 'hidden',
+                height: selectedSoundId !== 'none' ? 'auto' : 0,
+                overflow: 'hidden',
+              }}
+            >
               <Group gap="xs">
                 <IconVolume size={16} />
                 <Text size="xs" c="dimmed">
@@ -48,9 +81,9 @@ export function AmbientSoundPlayer() {
                 ]}
               />
             </Stack>
-          )}
-        </Stack>
-      )}
+          </Stack>
+        )
+      }}
     </AmbientSoundController>
   )
 }
