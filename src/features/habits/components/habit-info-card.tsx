@@ -1,4 +1,4 @@
-import { Badge, Card, Group, Select, Stack, Text, useComputedColorScheme } from '@mantine/core'
+import { Badge, Card, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
 import { IconChartLine, IconClock, IconFlag, IconTarget, IconTrophy } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
@@ -7,14 +7,12 @@ import { formatTotalDuration } from '~/features/habits/utils/time-utils'
 
 export function HabitInfoCard() {
   const apiRoute = getRouteApi('/habits/$habitId')
-  const { habit, records: recordsData, habits } = apiRoute.useLoaderData()
+  const { habit, records: recordsData } = apiRoute.useLoaderData()
 
   const search = apiRoute.useSearch()
   const selectedDate = getValidatedDate(search.selectedDate)
   const calendarView = search.calendarView ?? 'month'
   const currentMonth = search.currentMonth
-
-  const navigate = apiRoute.useNavigate()
 
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
@@ -66,23 +64,10 @@ export function HabitInfoCard() {
           </Text>
         </Group>
 
-        {habits.data && habits.data.length > 1 && (
-          <Select
-            label="習慣を切り替える"
-            size="xs"
-            searchable
-            value={habit.data?.id}
-            onChange={(value) => {
-              if (value && value !== habit.data?.id) {
-                navigate({
-                  to: '/habits/$habitId',
-                  params: { habitId: value },
-                  search: (prev) => ({ ...prev, showRecordForm: false }),
-                })
-              }
-            }}
-            data={habits.data.map((h) => ({ value: h.id, label: h.name }))}
-          />
+        {habit.data?.name && (
+          <Text size="xl" fw={700} c={titleColor}>
+            {habit.data.name}
+          </Text>
         )}
 
         {habit.data?.description && (
