@@ -9,13 +9,14 @@ import {
   Stack,
   Text,
   Title,
+  Tooltip,
 } from '@mantine/core'
 import {
+  IconCircleX,
   IconPlayerPause,
   IconPlayerPlay,
   IconVolume,
   IconVolumeOff,
-  IconX,
 } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useId, useRef, useState } from 'react'
@@ -289,22 +290,26 @@ function RouteComponent() {
             <Group gap="xs">
               {soundId && soundId !== 'none' && (
                 <>
-                  <ActionIcon
-                    size="lg"
-                    variant="filled"
-                    color={isPlaying ? 'red' : 'blue'}
-                    onClick={handlePlayPause}
-                  >
-                    {isPlaying ? <IconPlayerPause size={20} /> : <IconPlayerPlay size={20} />}
-                  </ActionIcon>
-                  <ActionIcon
-                    size="lg"
-                    variant="subtle"
-                    color="gray"
-                    onClick={handleClearSelection}
-                  >
-                    <IconX size={20} />
-                  </ActionIcon>
+                  <Tooltip label={isPlaying ? '停止' : '再生'}>
+                    <ActionIcon
+                      size="lg"
+                      variant="filled"
+                      color={isPlaying ? 'red' : 'blue'}
+                      onClick={handlePlayPause}
+                    >
+                      {isPlaying ? <IconPlayerPause size={20} /> : <IconPlayerPlay size={20} />}
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="選択を解除">
+                    <ActionIcon
+                      size="lg"
+                      variant="light"
+                      color="red"
+                      onClick={handleClearSelection}
+                    >
+                      <IconCircleX size={20} />
+                    </ActionIcon>
+                  </Tooltip>
                 </>
               )}
             </Group>
