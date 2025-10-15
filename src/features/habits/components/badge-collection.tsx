@@ -1,4 +1,14 @@
-import { Anchor, Badge, Card, Group, SimpleGrid, Stack, Text, Tooltip } from '@mantine/core'
+import {
+  Anchor,
+  Badge,
+  Card,
+  Group,
+  SimpleGrid,
+  Stack,
+  Text,
+  Tooltip,
+  useComputedColorScheme,
+} from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { IconInfoCircle, IconLock } from '@tabler/icons-react'
 import { BadgeInfo } from '~/features/habits/components/badge-info'
@@ -10,6 +20,12 @@ export function BadgeCollection({
   completionLevel,
   hoursLevel,
 }: Record<'completionLevel' | 'hoursLevel', number>) {
+  const computedColorScheme = useComputedColorScheme('light')
+
+  const getBadgeTitleColor = () => {
+    return computedColorScheme === 'dark' ? 'dark.9' : undefined
+  }
+
   const renderBadge = (badge: BadgeItem, isUnlocked: boolean) => {
     const Icon = getIconComponent(badge.icon)
     const currentLevel = badge.type === 'completion' ? completionLevel : hoursLevel
@@ -77,7 +93,7 @@ export function BadgeCollection({
                 <Badge color={badge.color} size="xs" variant="filled">
                   Lv. {badge.level}
                 </Badge>
-                <Text size="xs" fw={600} ta="center" lineClamp={2}>
+                <Text size="xs" fw={600} ta="center" lineClamp={2} c={getBadgeTitleColor()}>
                   {badge.title}
                 </Text>
               </>
