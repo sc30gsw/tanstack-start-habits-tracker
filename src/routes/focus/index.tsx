@@ -72,7 +72,7 @@ function RouteComponent() {
         ...prev,
         soundId,
       }),
-      hash: audioControlPaperId,
+      hash: soundId,
     })
 
     if (soundId === 'none') {
@@ -104,7 +104,7 @@ function RouteComponent() {
         ...prev,
         soundId: 'none',
       }),
-      hash: audioControlPaperId,
+      hash: 'none',
     })
 
     managerRef.current?.stop()
@@ -148,6 +148,7 @@ function RouteComponent() {
               return (
                 <Grid.Col key={sound.id} span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
                   <Card
+                    id={sound.id}
                     padding="lg"
                     radius="md"
                     withBorder
