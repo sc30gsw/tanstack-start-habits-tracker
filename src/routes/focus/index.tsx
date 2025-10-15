@@ -20,6 +20,7 @@ import {
 } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useId, useRef, useState } from 'react'
+import { filter, map, pipe } from 'remeda'
 import { z } from 'zod/v4'
 import {
   AMBIENT_SOUNDS,
@@ -140,93 +141,99 @@ function RouteComponent() {
             環境音を選択
           </Text>
           <Grid>
-            {AMBIENT_SOUNDS.map((sound) => {
-              const Icon = sound.icon
-              const isSelected = soundId === sound.id
-              const isCurrentlyPlaying = isSelected && isPlaying
+            {pipe(
+              AMBIENT_SOUNDS,
+              filter((sound) => sound.id !== 'none'),
+              map((sound) => {
+                const Icon = sound.icon
+                const isSelected = soundId === sound.id
+                const isCurrentlyPlaying = isSelected && isPlaying
 
-              return (
-                <Grid.Col key={sound.id} span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
-                  <Card
-                    id={sound.id}
-                    padding="lg"
-                    radius="md"
-                    withBorder
-                    style={{
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      borderColor: isSelected ? `var(--mantine-color-${sound.color}-6)` : undefined,
-                      borderWidth: isSelected ? 2 : 1,
-                      backgroundColor: isSelected
-                        ? `var(--mantine-color-${sound.color}-light)`
-                        : undefined,
-                    }}
-                    onClick={() => handleSoundSelect(isSelected ? 'none' : sound.id)}
-                  >
-                    <Stack gap="md" align="center">
-                      <div
-                        style={{
-                          position: 'relative',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
+                return (
+                  <Grid.Col key={sound.id} span={{ base: 12, xs: 6, sm: 4, md: 3 }}>
+                    <Card
+                      id={sound.id}
+                      padding="lg"
+                      radius="md"
+                      withBorder
+                      style={{
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        borderColor: isSelected
+                          ? `var(--mantine-color-${sound.color}-6)`
+                          : undefined,
+                        borderWidth: isSelected ? 2 : 1,
+                        backgroundColor: isSelected
+                          ? `var(--mantine-color-${sound.color}-light)`
+                          : undefined,
+                      }}
+                      onClick={() => handleSoundSelect(isSelected ? 'none' : sound.id)}
+                    >
+                      <Stack gap="md" align="center">
                         <div
                           style={{
-                            width: 64,
-                            height: 64,
-                            borderRadius: '50%',
-                            backgroundColor: `var(--mantine-color-${sound.color}-1)`,
+                            position: 'relative',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            border: isSelected
-                              ? `2px solid var(--mantine-color-${sound.color}-6)`
-                              : '2px solid transparent',
                           }}
                         >
-                          <Icon size={32} color={`var(--mantine-color-${sound.color}-6)`} />
+                          <div
+                            style={{
+                              width: 64,
+                              height: 64,
+                              borderRadius: '50%',
+                              backgroundColor: `var(--mantine-color-${sound.color}-1)`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: isSelected
+                                ? `2px solid var(--mantine-color-${sound.color}-6)`
+                                : '2px solid transparent',
+                            }}
+                          >
+                            <Icon size={32} color={`var(--mantine-color-${sound.color}-6)`} />
+                          </div>
+
+                          {/* 再生インジケーター */}
+                          <ActionIcon
+                            size="sm"
+                            radius="xl"
+                            color={sound.color}
+                            variant="filled"
+                            style={{
+                              position: 'absolute',
+                              bottom: -4,
+                              right: -4,
+                              visibility: isCurrentlyPlaying ? 'visible' : 'hidden',
+                            }}
+                          >
+                            <IconPlayerPlay size={12} />
+                          </ActionIcon>
                         </div>
 
-                        {/* 再生インジケーター */}
-                        <ActionIcon
-                          size="sm"
-                          radius="xl"
-                          color={sound.color}
-                          variant="filled"
-                          style={{
-                            position: 'absolute',
-                            bottom: -4,
-                            right: -4,
-                            visibility: isCurrentlyPlaying ? 'visible' : 'hidden',
-                          }}
-                        >
-                          <IconPlayerPlay size={12} />
-                        </ActionIcon>
-                      </div>
-
-                      <div style={{ textAlign: 'center' }}>
-                        <Text fw={500} size="sm">
-                          {sound.name}
-                        </Text>
-                        <Text
-                          size="xs"
-                          c={sound.color}
-                          fw={500}
-                          style={{
-                            visibility: isCurrentlyPlaying ? 'visible' : 'hidden',
-                            height: isCurrentlyPlaying ? 'auto' : 0,
-                          }}
-                        >
-                          再生中
-                        </Text>
-                      </div>
-                    </Stack>
-                  </Card>
-                </Grid.Col>
-              )
-            })}
+                        <div style={{ textAlign: 'center' }}>
+                          <Text fw={500} size="sm">
+                            {sound.name}
+                          </Text>
+                          <Text
+                            size="xs"
+                            c={sound.color}
+                            fw={500}
+                            style={{
+                              visibility: isCurrentlyPlaying ? 'visible' : 'hidden',
+                              height: isCurrentlyPlaying ? 'auto' : 0,
+                            }}
+                          >
+                            再生中
+                          </Text>
+                        </div>
+                      </Stack>
+                    </Card>
+                  </Grid.Col>
+                )
+              }),
+            )}
           </Grid>
         </div>
 
