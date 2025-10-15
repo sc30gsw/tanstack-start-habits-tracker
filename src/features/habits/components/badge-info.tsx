@@ -7,8 +7,13 @@ import { getIconComponent } from '~/features/habits/utils/icon-mapper'
 export function BadgeInfo() {
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
-  const textColor = computedColorScheme === 'dark' ? 'gray.3' : 'gray.7'
+  const textColor = computedColorScheme === 'dark' ? 'gray.4' : 'gray.7'
+  const badgeTextColor = computedColorScheme === 'dark' ? 'dark.9' : 'gray.9'
   const bgColor = computedColorScheme === 'dark' ? 'dark.6' : 'gray.0'
+
+  const getBadgeTitleColor = (color: string) => {
+    return computedColorScheme === 'dark' ? `${color}.9` : `${color}.9`
+  }
 
   const renderBadgeInfo = (
     badge: (typeof COMPLETION_BADGES)[number],
@@ -45,13 +50,13 @@ export function BadgeInfo() {
             <Icon size={32} color={`var(--mantine-color-${badge.color}-7)`} stroke={2} />
           </div>
           <Stack gap={4} align="center">
-            <Text size="sm" fw={700} c={`${badge.color}.9`} ta="center">
+            <Text size="sm" fw={700} c={getBadgeTitleColor(badge.color)} ta="center">
               {badge.title}
             </Text>
-            <Text size="xs" c={textColor} ta="center">
+            <Text size="xs" c={badgeTextColor} ta="center">
               Lv.{badge.level}
             </Text>
-            <Text size="xs" c={textColor} ta="center" fw={500}>
+            <Text size="xs" c={badgeTextColor} ta="center" fw={500}>
               {type === 'completion' ? `${threshold}日達成` : `${threshold}時間達成`}
             </Text>
           </Stack>

@@ -7,8 +7,12 @@ import { getIconComponent } from '~/features/habits/utils/icon-mapper'
 export function LevelInfo() {
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
-  const textColor = computedColorScheme === 'dark' ? 'gray.3' : 'gray.7'
+  const textColor = computedColorScheme === 'dark' ? 'gray.4' : 'gray.7'
   const bgColor = computedColorScheme === 'dark' ? 'dark.6' : 'gray.0'
+
+  const getLevelTitleColor = (color: string) => {
+    return computedColorScheme === 'dark' ? `${color}.3` : `${color}.9`
+  }
 
   const renderLevelInfo = (
     level: (typeof COMPLETION_TITLES)[number] | (typeof HOURS_TITLES)[number],
@@ -49,7 +53,7 @@ export function LevelInfo() {
                 <Icon size={24} color={`var(--mantine-color-${level.info.color}-7)`} stroke={2} />
               </div>
               <Stack gap={4}>
-                <Text size="md" fw={700} c={`${level.info.color}.9`}>
+                <Text size="md" fw={700} c={getLevelTitleColor(level.info.color)}>
                   {level.info.title}
                 </Text>
                 <Text size="xs" c={textColor}>
