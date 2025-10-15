@@ -134,6 +134,19 @@ const stopwatchStartTimeValidator = z.number().nullable().optional().catch(null)
 const stopwatchElapsedValidator = z.number().optional().catch(0)
 
 /**
+ * ポモドーロのバリデーション
+ */
+const stopwatchModeValidator = z.enum(['stopwatch', 'pomodoro']).optional().catch('stopwatch')
+const pomodoroPhaseValidator = z.enum(['focus', 'break', 'longBreak', 'waiting']).optional().catch('waiting')
+const pomodoroSetValidator = z.number().optional().catch(1)
+const pomodoroCompletedPomodorosValidator = z.number().optional().catch(0)
+const pomodoroAccumulatedTimeValidator = z.number().optional().catch(0)
+const pomodoroFocusDurationValidator = z.number().optional().catch(25)
+const pomodoroBreakDurationValidator = z.number().optional().catch(5)
+const pomodoroLongBreakDurationValidator = z.number().optional().catch(15)
+const pomodoroLongBreakIntervalValidator = z.number().optional().catch(3)
+
+/**
  * レベルタブのバリデーション
  * - overview: 概要
  * - levels: レベル詳細
@@ -175,6 +188,15 @@ export const searchSchema = z.object({
   stopwatchRunning: stopwatchRunningValidator,
   stopwatchStartTime: stopwatchStartTimeValidator,
   stopwatchElapsed: stopwatchElapsedValidator,
+  stopwatchMode: stopwatchModeValidator,
+  pomodoroPhase: pomodoroPhaseValidator,
+  pomodoroSet: pomodoroSetValidator,
+  pomodoroCompletedPomodoros: pomodoroCompletedPomodorosValidator,
+  pomodoroAccumulatedTime: pomodoroAccumulatedTimeValidator,
+  pomodoroFocusDuration: pomodoroFocusDurationValidator,
+  pomodoroBreakDuration: pomodoroBreakDurationValidator,
+  pomodoroLongBreakDuration: pomodoroLongBreakDurationValidator,
+  pomodoroLongBreakInterval: pomodoroLongBreakIntervalValidator,
   levelTab: levelTabValidator,
   detailTab: detailTabValidator,
 })
@@ -224,6 +246,15 @@ export function getDefaultSearchParams(): Required<SearchParams> {
     stopwatchRunning: false,
     stopwatchStartTime: null,
     stopwatchElapsed: 0,
+    stopwatchMode: 'stopwatch',
+    pomodoroPhase: 'waiting',
+    pomodoroSet: 1,
+    pomodoroCompletedPomodoros: 0,
+    pomodoroAccumulatedTime: 0,
+    pomodoroFocusDuration: 25,
+    pomodoroBreakDuration: 5,
+    pomodoroLongBreakDuration: 15,
+    pomodoroLongBreakInterval: 3,
     levelTab: 'overview',
     detailTab: 'dashboard',
   }
