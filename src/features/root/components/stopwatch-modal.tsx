@@ -58,9 +58,6 @@ export function StopwatchModal() {
   const [isSettingsValid, setIsSettingsValid] = useState(true)
   const [isStateRestored, setIsStateRestored] = useState(false)
 
-  // 環境音の停止トリガー
-  const [shouldStopAmbient, setShouldStopAmbient] = useState(false)
-
   // Wake Lock マネージャー
   const wakeLockManager = useRef(new WakeLockManager())
 
@@ -232,9 +229,6 @@ export function StopwatchModal() {
           // LocalStorageの状態もクリア
           clearTimerState()
 
-          // 環境音を停止
-          setShouldStopAmbient(true)
-
           navigate({
             to: location.pathname,
             search: (prev) => ({
@@ -263,9 +257,6 @@ export function StopwatchModal() {
         },
       })
     } else {
-      // 環境音を停止
-      setShouldStopAmbient(true)
-
       navigate({
         to: location.pathname,
         search: (prev) => ({
@@ -309,10 +300,6 @@ export function StopwatchModal() {
         pomodoroAccumulatedTime: 0,
       }),
     })
-  }
-
-  const handleAmbientStopped = () => {
-    setShouldStopAmbient(false)
   }
 
   const handleFinish = () => {
@@ -451,7 +438,7 @@ export function StopwatchModal() {
         {/* 環境音プレイヤー */}
         <Divider label="環境音" labelPosition="left" />
         <Box mb={16}>
-          <AmbientSoundPlayer shouldStop={shouldStopAmbient} onStopped={handleAmbientStopped} />
+          <AmbientSoundPlayer />
         </Box>
 
         {/* タイマー表示 */}

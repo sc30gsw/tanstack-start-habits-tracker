@@ -9,12 +9,7 @@ import {
   AmbientSoundManager,
 } from '~/features/root/utils/ambient-sound'
 
-type AmbientSoundPlayerProps = {
-  shouldStop?: boolean
-  onStopped?: () => void
-}
-
-export function AmbientSoundPlayer({ shouldStop = false, onStopped }: AmbientSoundPlayerProps) {
+export function AmbientSoundPlayer() {
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
   const location = useLocation()
@@ -57,24 +52,6 @@ export function AmbientSoundPlayer({ shouldStop = false, onStopped }: AmbientSou
 
     managerRef.current.setVolume(volume / 100)
   }, [volume])
-
-  // 外部からの停止トリガー
-  useEffect(() => {
-    if (shouldStop && managerRef.current) {
-      managerRef.current.stop()
-
-      // search paramsも更新
-      navigate({
-        to: location.pathname,
-        search: (prev) => ({
-          ...prev,
-          ambientSound: 'none',
-        }),
-      })
-
-      onStopped?.()
-    }
-  }, [shouldStop, onStopped, navigate, location.pathname])
 
   // 環境音の変更
   const handleSoundChange = (value: string | null) => {
