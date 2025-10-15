@@ -10,9 +10,16 @@ import {
   Text,
   Title,
 } from '@mantine/core'
-import { IconPlayerPause, IconPlayerPlay, IconVolume, IconVolumeOff } from '@tabler/icons-react'
+import {
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconVolume,
+  IconVolumeOff,
+  IconX,
+} from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
+import { z } from 'zod/v4'
 import {
   AMBIENT_SOUNDS,
   type AmbientSound,
@@ -20,15 +27,36 @@ import {
 } from '~/features/root/utils/ambient-sound'
 
 export const Route = createFileRoute('/focus/')({
+  validateSearch: z.object({
+    soundId: z
+      .enum([
+        'none',
+        'rain',
+        'thunder-rain',
+        'wave',
+        'river',
+        'waterfall',
+        'bonfire',
+        'morning-bird',
+        'cafe',
+        'countryside',
+        'harbor',
+      ])
+      .optional()
+      .catch('none'),
+    volume: z.number().min(0).max(100).optional().catch(50),
+  }),
   component: RouteComponent,
 })
 
 function RouteComponent() {
   const managerRef = useRef<AmbientSoundManager | null>(null)
-  const [selectedSoundId, setSelectedSoundId] = useState<AmbientSound['id']>('none')
-  const [volume, setVolume] = useState(50)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioControlPaperId = useId()
 
-  // マネージャーの初期化
+  const navigate = Route.useNavigate()
+  const { soundId, volume } = Route.useSearch()
+
   useEffect(() => {
     managerRef.current = new AmbientSoundManager()
 
@@ -38,21 +66,61 @@ function RouteComponent() {
   }, [])
 
   const handleSoundSelect = (soundId: AmbientSound['id']) => {
-    setSelectedSoundId(soundId)
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        soundId,
+      }),
+      hash: audioControlPaperId,
+    })
 
     if (soundId === 'none') {
       managerRef.current?.stop()
+      setIsPlaying(false)
     } else {
       managerRef.current?.play(soundId)
+      setIsPlaying(true)
     }
   }
 
-  const handleVolumeChange = (newVolume: number) => {
-    setVolume(newVolume)
-    managerRef.current?.setVolume(newVolume / 100)
+  const handlePlayPause = () => {
+    if (!soundId || soundId === 'none') {
+      return
+    }
+
+    if (isPlaying) {
+      managerRef.current?.stop()
+      setIsPlaying(false)
+    } else {
+      managerRef.current?.play(soundId)
+      setIsPlaying(true)
+    }
   }
 
-  const isPlaying = selectedSoundId !== 'none'
+  const handleClearSelection = () => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        soundId: 'none',
+      }),
+      hash: audioControlPaperId,
+    })
+
+    managerRef.current?.stop()
+    setIsPlaying(false)
+  }
+
+  const handleVolumeChange = (newVolume: number) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        volume: newVolume,
+      }),
+      hash: audioControlPaperId,
+    })
+
+    managerRef.current?.setVolume(newVolume / 100)
+  }
 
   return (
     <Container size="xl" py="xl">
@@ -66,15 +134,14 @@ function RouteComponent() {
           </Text>
         </div>
 
-        {/* 環境音カード */}
         <div>
           <Text size="lg" fw={500} mb="md">
             環境音を選択
           </Text>
           <Grid>
-            {AMBIENT_SOUNDS.filter((sound) => sound.id !== 'none').map((sound) => {
+            {AMBIENT_SOUNDS.map((sound) => {
               const Icon = sound.icon
-              const isSelected = selectedSoundId === sound.id
+              const isSelected = soundId === sound.id
               const isCurrentlyPlaying = isSelected && isPlaying
 
               return (
@@ -121,32 +188,37 @@ function RouteComponent() {
                         </div>
 
                         {/* 再生インジケーター */}
-                        {isCurrentlyPlaying && (
-                          <ActionIcon
-                            size="sm"
-                            radius="xl"
-                            color={sound.color}
-                            variant="filled"
-                            style={{
-                              position: 'absolute',
-                              bottom: -4,
-                              right: -4,
-                            }}
-                          >
-                            <IconPlayerPlay size={12} />
-                          </ActionIcon>
-                        )}
+                        <ActionIcon
+                          size="sm"
+                          radius="xl"
+                          color={sound.color}
+                          variant="filled"
+                          style={{
+                            position: 'absolute',
+                            bottom: -4,
+                            right: -4,
+                            visibility: isCurrentlyPlaying ? 'visible' : 'hidden',
+                          }}
+                        >
+                          <IconPlayerPlay size={12} />
+                        </ActionIcon>
                       </div>
 
                       <div style={{ textAlign: 'center' }}>
                         <Text fw={500} size="sm">
                           {sound.name}
                         </Text>
-                        {isCurrentlyPlaying && (
-                          <Text size="xs" c={sound.color} fw={500}>
-                            再生中
-                          </Text>
-                        )}
+                        <Text
+                          size="xs"
+                          c={sound.color}
+                          fw={500}
+                          style={{
+                            visibility: isCurrentlyPlaying ? 'visible' : 'hidden',
+                            height: isCurrentlyPlaying ? 'auto' : 0,
+                          }}
+                        >
+                          再生中
+                        </Text>
                       </div>
                     </Stack>
                   </Card>
@@ -156,7 +228,6 @@ function RouteComponent() {
           </Grid>
         </div>
 
-        {/* 音量コントロール */}
         <Paper p="xl" radius="md" withBorder>
           <Stack gap="lg">
             <Group justify="space-between">
@@ -195,35 +266,50 @@ function RouteComponent() {
           </Stack>
         </Paper>
 
-        {/* 停止ボタン */}
-        {isPlaying && (
-          <Paper p="md" radius="md" withBorder bg="blue.0">
-            <Group justify="space-between">
-              <Group gap="xs">
-                <IconPlayerPlay size={20} color="var(--mantine-color-blue-6)" />
-                <Text fw={500}>
-                  {AMBIENT_SOUNDS.find((s) => s.id === selectedSoundId)?.name} を再生中
-                </Text>
-              </Group>
-              <ActionIcon
-                size="lg"
-                variant="filled"
-                color="red"
-                onClick={() => handleSoundSelect('none')}
-              >
-                <IconPlayerPause size={20} />
-              </ActionIcon>
+        <Paper
+          id={audioControlPaperId}
+          p="md"
+          radius="md"
+          withBorder
+          bg={isPlaying ? 'blue.0' : 'gray.0'}
+        >
+          <Group justify="space-between">
+            <Group gap="xs">
+              {isPlaying ? (
+                <IconVolume size={20} color="var(--mantine-color-blue-6)" />
+              ) : (
+                <IconVolumeOff size={20} color="var(--mantine-color-gray-6)" />
+              )}
+              <Text fw={500}>
+                {soundId && soundId !== 'none'
+                  ? `${AMBIENT_SOUNDS.find((sound) => sound.id === soundId)?.name}${isPlaying ? ' を再生中' : ''}`
+                  : '環境音を選択して再生を開始してください'}
+              </Text>
             </Group>
-          </Paper>
-        )}
-
-        {!isPlaying && (
-          <Paper p="xl" radius="md" bg="gray.0" style={{ textAlign: 'center' }}>
-            <Text c="dimmed" size="sm">
-              環境音を選択して再生を開始してください
-            </Text>
-          </Paper>
-        )}
+            <Group gap="xs">
+              {soundId && soundId !== 'none' && (
+                <>
+                  <ActionIcon
+                    size="lg"
+                    variant="filled"
+                    color={isPlaying ? 'red' : 'blue'}
+                    onClick={handlePlayPause}
+                  >
+                    {isPlaying ? <IconPlayerPause size={20} /> : <IconPlayerPlay size={20} />}
+                  </ActionIcon>
+                  <ActionIcon
+                    size="lg"
+                    variant="subtle"
+                    color="gray"
+                    onClick={handleClearSelection}
+                  >
+                    <IconX size={20} />
+                  </ActionIcon>
+                </>
+              )}
+            </Group>
+          </Group>
+        </Paper>
       </Stack>
     </Container>
   )
