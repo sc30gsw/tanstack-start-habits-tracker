@@ -4,7 +4,7 @@ import { IconAlertTriangle } from '@tabler/icons-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, useLocation } from '@tanstack/react-router'
 import type { InferSelectModel } from 'drizzle-orm'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { GET_HABITS_CACHE_KEY } from '~/constants/cache-key'
 import type { habits as HabitTable } from '~/db/schema'
 import { habitDto } from '~/features/habits/server/habit-functions'
@@ -18,6 +18,13 @@ import type { PomodoroPhase, PomodoroSettings } from '~/features/root/types/stop
 import { requestNotificationPermission } from '~/features/root/utils/notifications'
 import { DEFAULT_POMODORO_SETTINGS } from '~/features/root/utils/pomodoro'
 import { convertSecondsToMinutes } from '~/features/root/utils/stopwatch-utils'
+import {
+  clearTimerState,
+  loadTimerState,
+  onVisibilityChange,
+  saveTimerState,
+  WakeLockManager,
+} from '~/features/root/utils/timer-persistence'
 
 export function StopwatchModal() {
   const routeApi = getRouteApi('__root__')
@@ -38,6 +45,102 @@ export function StopwatchModal() {
   const [accumulatedTime, setAccumulatedTime] = useState(0)
   const [settings, setSettings] = useState<PomodoroSettings>(DEFAULT_POMODORO_SETTINGS)
   const [isSettingsValid, setIsSettingsValid] = useState(true)
+  const [isStateRestored, setIsStateRestored] = useState(false)
+
+  // Wake Lock マネージャー
+  const wakeLockManager = useRef(new WakeLockManager())
+
+  // 初回マウント時にLocalStorageから状態を復元
+  useEffect(() => {
+    if (!isStateRestored && isOpen) {
+      const savedState = loadTimerState()
+
+      if (savedState && savedState.habitId === selectedHabitId && savedState.mode === mode) {
+        // ポモドーロモードの状態を復元
+        if (mode === 'pomodoro' && savedState.phase) {
+          setPhase(savedState.phase)
+          setCurrentSet(savedState.currentSet ?? 0)
+          setCompletedPomodoros(savedState.completedPomodoros ?? 0)
+          setAccumulatedTime(savedState.accumulatedTime ?? 0)
+          if (savedState.settings) {
+            setSettings(savedState.settings)
+          }
+
+          if (import.meta.env.DEV) {
+            console.log('🔄 ポモドーロ状態を復元:', {
+              phase: savedState.phase,
+              currentSet: savedState.currentSet,
+              completedPomodoros: savedState.completedPomodoros,
+              accumulatedTime: savedState.accumulatedTime,
+            })
+          }
+        }
+      }
+
+      setIsStateRestored(true)
+    }
+  }, [isOpen, isStateRestored, selectedHabitId, mode])
+
+  // タイマー実行中はWake Lockを取得
+  useEffect(() => {
+    if (isRunning && isOpen) {
+      wakeLockManager.current.request()
+    } else {
+      wakeLockManager.current.release()
+    }
+
+    // クリーンアップ
+    return () => {
+      wakeLockManager.current.release()
+    }
+  }, [isRunning, isOpen])
+
+  // タイマーの状態をLocalStorageに自動保存
+  useEffect(() => {
+    if (isOpen && (isRunning || pausedElapsed > 0 || accumulatedTime > 0)) {
+      const interval = setInterval(() => {
+        saveTimerState({
+          mode,
+          habitId: selectedHabitId,
+          isRunning,
+          startTime,
+          pausedElapsed,
+          phase,
+          currentSet,
+          completedPomodoros,
+          accumulatedTime,
+          settings,
+          lastSaved: Date.now(),
+        })
+      }, 5000) // 5秒ごとに保存
+
+      return () => clearInterval(interval)
+    }
+  }, [
+    isOpen,
+    mode,
+    selectedHabitId,
+    isRunning,
+    startTime,
+    pausedElapsed,
+    phase,
+    currentSet,
+    completedPomodoros,
+    accumulatedTime,
+    settings,
+  ])
+
+  // ページの可視性が変わったときの処理
+  useEffect(() => {
+    const cleanup = onVisibilityChange((isVisible) => {
+      if (isVisible && isRunning) {
+        // ページが再表示されたときにWake Lockを再取得
+        wakeLockManager.current.request()
+      }
+    })
+
+    return cleanup
+  }, [isRunning])
 
   // 通知権限のリクエスト
   useEffect(() => {
@@ -45,6 +148,13 @@ export function StopwatchModal() {
       requestNotificationPermission()
     }
   }, [isOpen, mode])
+
+  // モーダルが閉じられたときに状態復元フラグをリセット
+  useEffect(() => {
+    if (!isOpen) {
+      setIsStateRestored(false)
+    }
+  }, [isOpen])
 
   const { data: habitsResponse } = useSuspenseQuery({
     queryKey: [GET_HABITS_CACHE_KEY],
@@ -103,6 +213,10 @@ export function StopwatchModal() {
           setCurrentSet(0)
           setCompletedPomodoros(0)
           setAccumulatedTime(0)
+          setIsStateRestored(false)
+
+          // LocalStorageの状態もクリア
+          clearTimerState()
 
           navigate({
             to: location.pathname,
@@ -153,6 +267,14 @@ export function StopwatchModal() {
   }
 
   const handleModeChange = (newMode: string) => {
+    // モード切り替え時に状態をリセット
+    setPhase('waiting')
+    setCurrentSet(0)
+    setCompletedPomodoros(0)
+    setAccumulatedTime(0)
+    setIsStateRestored(false)
+    clearTimerState()
+
     navigate({
       to: location.pathname,
       search: (prev) => ({
@@ -170,6 +292,18 @@ export function StopwatchModal() {
   }
 
   const handleFinish = () => {
+    // LocalStorageの状態をクリア
+    clearTimerState()
+
+    // 状態復元フラグをリセット
+    setIsStateRestored(false)
+
+    // 現在の経過時間を計算（実行中の場合は現在時刻から計算）
+    let currentElapsed = pausedElapsed
+    if (isRunning && startTime) {
+      currentElapsed = Math.floor((Date.now() - startTime) / 1000) + pausedElapsed
+    }
+
     if (isRunning) {
       navigate({
         to: location.pathname,
@@ -177,13 +311,26 @@ export function StopwatchModal() {
           ...prev,
           stopwatchRunning: false,
           stopwatchStartTime: null,
+          stopwatchElapsed: currentElapsed,
         }),
       })
     }
 
     // ポモドーロモードの場合は累積時間を使用、ストップウォッチモードの場合は経過時間を使用
-    const totalSeconds = mode === 'pomodoro' ? accumulatedTime : pausedElapsed
+    const totalSeconds = mode === 'pomodoro' ? accumulatedTime : currentElapsed
     const currentMinutes = convertSecondsToMinutes(totalSeconds)
+
+    if (import.meta.env.DEV) {
+      console.log('🏁 タイマー終了:', {
+        mode,
+        totalSeconds,
+        currentMinutes,
+        isRunning,
+        startTime,
+        pausedElapsed,
+        currentElapsed,
+      })
+    }
 
     const openRecordModal = () => {
       modals.open({
