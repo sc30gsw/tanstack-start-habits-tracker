@@ -32,6 +32,7 @@ const TIME_DISPLAY_PADDING = 2
 type PomodoroTimerProps = {
   habitId: InferSelectModel<typeof habits>['id'] | null
   phase: NonNullable<SearchParams['pomodoroPhase']>
+  currentSet: number
   completedPomodoros: number
   accumulatedTime: number
   settings: PomodoroSettings
@@ -44,6 +45,7 @@ type PomodoroTimerProps = {
 export function PomodoroTimer({
   habitId,
   phase,
+  currentSet,
   completedPomodoros,
   accumulatedTime,
   settings,
@@ -91,6 +93,10 @@ export function PomodoroTimer({
           settings.longBreakInterval,
         )
 
+        // セット数の更新（休憩が終わったら +1）
+        const newSet =
+          phase === 'break' || phase === 'longBreak' ? currentSet + 1 : currentSet
+
         // 通知表示
         showPhaseCompleteNotification(phase, nextPhase)
 
@@ -103,7 +109,7 @@ export function PomodoroTimer({
             stopwatchStartTime: Date.now(),
             stopwatchElapsed: 0,
             pomodoroPhase: nextPhase,
-            pomodoroSet: newCompletedPomodoros,
+            pomodoroSet: newSet,
             pomodoroCompletedPomodoros: newCompletedPomodoros,
             pomodoroAccumulatedTime: newAccumulatedTime,
           }),
@@ -205,6 +211,10 @@ export function PomodoroTimer({
           settings.longBreakInterval,
         )
 
+        // セット数の更新（休憩が終わったら +1）
+        const newSet =
+          phase === 'break' || phase === 'longBreak' ? currentSet + 1 : currentSet
+
         // 次のフェーズに自動遷移
         navigate({
           to: location.pathname,
@@ -214,7 +224,7 @@ export function PomodoroTimer({
             stopwatchStartTime: Date.now(),
             stopwatchElapsed: 0,
             pomodoroPhase: nextPhase,
-            pomodoroSet: newCompletedPomodoros,
+            pomodoroSet: newSet,
             pomodoroCompletedPomodoros: newCompletedPomodoros,
           }),
         })
@@ -300,7 +310,7 @@ export function PomodoroTimer({
           {getPhaseLabel(phase)}
         </Badge>
         <Text size="sm" c="dimmed">
-          {phase === 'waiting' ? '開始前' : `第${completedPomodoros + 1}ポモドーロ`}
+          {phase === 'waiting' ? '開始前' : `第${currentSet + 1}セット`}
         </Text>
       </Group>
 

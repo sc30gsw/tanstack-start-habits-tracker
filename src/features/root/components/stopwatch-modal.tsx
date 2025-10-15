@@ -34,6 +34,7 @@ export function StopwatchModal() {
   // ポモドーロ関連の状態
   const mode = searchParams.stopwatchMode ?? 'stopwatch'
   const phase = searchParams.pomodoroPhase ?? 'waiting'
+  const currentSet = searchParams.pomodoroSet ?? 0
   const completedPomodoros = searchParams.pomodoroCompletedPomodoros ?? 0
   const accumulatedTime = searchParams.pomodoroAccumulatedTime ?? 0
 
@@ -289,6 +290,7 @@ export function StopwatchModal() {
           <PomodoroTimer
             habitId={selectedHabitId}
             phase={phase}
+            currentSet={currentSet}
             completedPomodoros={completedPomodoros}
             accumulatedTime={accumulatedTime}
             settings={settings}
