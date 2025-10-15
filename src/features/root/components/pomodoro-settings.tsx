@@ -32,15 +32,16 @@ export function PomodoroSettingsForm({
   }, [isValid, onValidationChange])
 
   const handleSettingChange = (field: keyof PomodoroSettings, value: number | string) => {
-    // 空文字列や未定義の場合は何もしない（入力中を許可）
-    if (value === '' || value === undefined || value === null) {
+    // undefined, null, 空文字列の場合は何もしない
+    if (value === undefined || value === null || value === '') {
       return
     }
 
+    // 数値に変換
     const numValue = typeof value === 'number' ? value : Number(value)
 
-    // 数値として有効な場合のみ更新
-    if (!Number.isNaN(numValue)) {
+    // 数値として有効で、かつNaNでない場合のみ更新
+    if (!Number.isNaN(numValue) && numValue > 0) {
       onSettingsChange({
         ...settings,
         [field]: numValue,

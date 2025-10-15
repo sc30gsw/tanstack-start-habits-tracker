@@ -10,7 +10,7 @@ import {
 } from '@tabler/icons-react'
 import { getRouteApi, useLocation } from '@tanstack/react-router'
 import type { InferSelectModel } from 'drizzle-orm'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { habits } from '~/db/schema'
 import type { PomodoroPhase, PomodoroSettings } from '~/features/root/types/stopwatch'
 import { showPhaseCompleteNotification } from '~/features/root/utils/notifications'
@@ -69,6 +69,45 @@ export function PomodoroTimer({
 
   const [displayTime, setDisplayTime] = useState(pausedElapsed)
 
+  const lastPhaseRef = useRef<PomodoroPhase>(phase)
+  const phaseTransitionHandledRef = useRef(false)
+  
+  // 状態値の最新の参照を保持
+  const stateRef = useRef({
+    phase,
+    currentSet,
+    completedPomodoros,
+    accumulatedTime,
+  })
+  
+  // 状態値が変更されたら更新
+  useEffect(() => {
+    stateRef.current = {
+      phase,
+      currentSet,
+      completedPomodoros,
+      accumulatedTime,
+    }
+  })
+  
+  // コールバック関数の最新の参照を保持（依存配列の問題を回避）
+  const callbacksRef = useRef({
+    onPhaseChange,
+    onSetChange,
+    onCompletedPomodorosChange,
+    onAccumulatedTimeChange,
+  })
+  
+  // コールバック関数が変更されたら更新
+  useEffect(() => {
+    callbacksRef.current = {
+      onPhaseChange,
+      onSetChange,
+      onCompletedPomodorosChange,
+      onAccumulatedTimeChange,
+    }
+  })
+
   // フェーズの時間設定（分→秒変換）
   const phaseDuration = getCurrentPhaseDuration(phase, settings) * SECONDS_PER_MINUTE
   const remainingTime = phaseDuration - displayTime
@@ -78,6 +117,8 @@ export function PomodoroTimer({
   useEffect(() => {
     if (!isRunning || !startTime || phase === 'waiting') {
       setDisplayTime(pausedElapsed)
+      phaseTransitionHandledRef.current = false
+
       return
     }
 
@@ -85,34 +126,50 @@ export function PomodoroTimer({
       const now = Date.now()
       const elapsed = Math.floor((now - startTime) / MILLISECONDS_PER_SECOND) + pausedElapsed
 
-      // フェーズ完了チェック
-      if (elapsed >= phaseDuration && phaseDuration > 0) {
+      // フェーズ完了チェック（1回のみ実行）
+      if (elapsed >= phaseDuration && phaseDuration > 0 && !phaseTransitionHandledRef.current) {
+        phaseTransitionHandledRef.current = true
         clearInterval(interval)
 
-        // 累積時間の更新（集中時間のみ）
+        // refから最新の状態を取得
+        const { phase: currentPhase, currentSet, completedPomodoros, accumulatedTime } = stateRef.current
+
+        // 累積時間の更新（集中時間のみ、実際の経過時間を加算）
         const newAccumulatedTime =
-          phase === 'focus' ? accumulatedTime + phaseDuration : accumulatedTime
+          currentPhase === 'focus' ? accumulatedTime + elapsed : accumulatedTime
         const newCompletedPomodoros =
-          phase === 'focus' ? completedPomodoros + 1 : completedPomodoros
+          currentPhase === 'focus' ? completedPomodoros + 1 : completedPomodoros
 
         // 次のフェーズを決定
         const nextPhase = determineNextPhase(
-          phase,
+          currentPhase,
           newCompletedPomodoros,
           settings.longBreakInterval,
         )
 
         // セット数の更新（休憩が終わったら +1）
-        const newSet = phase === 'break' || phase === 'longBreak' ? currentSet + 1 : currentSet
+        const newSet = currentPhase === 'break' || currentPhase === 'longBreak' ? currentSet + 1 : currentSet
 
-        // 通知表示
-        showPhaseCompleteNotification(phase, nextPhase)
+        // 開発環境でのみログ出力
+        if (import.meta.env.DEV) {
+          console.log('🍅 ポモドーロ: フェーズ遷移', {
+            currentPhase,
+            nextPhase,
+            currentSet,
+            newSet,
+            completedPomodoros: newCompletedPomodoros,
+            accumulatedTime: newAccumulatedTime,
+          })
+        }
 
-        // 状態を更新
-        onPhaseChange(nextPhase)
-        onSetChange(newSet)
-        onCompletedPomodorosChange(newCompletedPomodoros)
-        onAccumulatedTimeChange(newAccumulatedTime)
+        // 通知表示（1回のみ）
+        showPhaseCompleteNotification(currentPhase, nextPhase)
+
+        // 状態を更新（refから最新のコールバックを取得）
+        callbacksRef.current.onPhaseChange(nextPhase)
+        callbacksRef.current.onSetChange(newSet)
+        callbacksRef.current.onCompletedPomodorosChange(newCompletedPomodoros)
+        callbacksRef.current.onAccumulatedTimeChange(newAccumulatedTime)
 
         // タイマーを再開
         navigate({
@@ -136,19 +193,25 @@ export function PomodoroTimer({
     isRunning,
     startTime,
     pausedElapsed,
-    phase,
     phaseDuration,
-    accumulatedTime,
-    completedPomodoros,
-    currentSet,
     settings.longBreakInterval,
     navigate,
     location.pathname,
-    onPhaseChange,
-    onSetChange,
-    onCompletedPomodorosChange,
-    onAccumulatedTimeChange,
   ])
+
+  // タイマーが再開されたときにフラグをリセット（startTimeが変わったとき）
+  useEffect(() => {
+    if (startTime) {
+      phaseTransitionHandledRef.current = false
+    }
+  }, [startTime, phase, currentSet, completedPomodoros])
+
+  // フェーズが変わったときの記録
+  useEffect(() => {
+    if (lastPhaseRef.current !== phase) {
+      lastPhaseRef.current = phase
+    }
+  }, [phase, currentSet, completedPomodoros])
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / SECONDS_PER_MINUTE)

@@ -273,7 +273,7 @@ export function StopwatchModal() {
             settings={settings}
             onSettingsChange={setSettings}
             onValidationChange={setIsSettingsValid}
-            disabled={isRunning || pausedElapsed > 0}
+            disabled={isRunning || phase !== 'waiting'}
           />
         )}
 
