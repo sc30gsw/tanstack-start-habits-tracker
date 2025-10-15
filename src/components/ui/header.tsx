@@ -1,5 +1,11 @@
 import { AppShell, Avatar, Button, Group, Menu, Text } from '@mantine/core'
-import { IconClock, IconCreditCard, IconLogout, IconSettings } from '@tabler/icons-react'
+import {
+  IconClock,
+  IconCreditCard,
+  IconHeadphones,
+  IconLogout,
+  IconSettings,
+} from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
@@ -41,6 +47,15 @@ export function Header() {
                   size="sm"
                 >
                   習慣管理
+                </Button>
+                <Button
+                  component={Link}
+                  to="/focus"
+                  variant="subtle"
+                  size="sm"
+                  leftSection={<IconHeadphones size={16} />}
+                >
+                  Focus Zone
                 </Button>
                 <Button component={Link} to="/checkout" variant="subtle" size="sm">
                   プラン
@@ -180,6 +195,13 @@ export function Header() {
                       }
                     >
                       習慣管理
+                    </Menu.Item>
+                    <Menu.Item
+                      component={Link}
+                      to="/focus"
+                      leftSection={<IconHeadphones size={14} />}
+                    >
+                      Focus Zone
                     </Menu.Item>
                     <Menu.Item component={Link} to="/checkout">
                       プラン
