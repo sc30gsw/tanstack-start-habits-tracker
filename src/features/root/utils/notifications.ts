@@ -1,6 +1,10 @@
 import { notifications } from '@mantine/notifications'
 import type { NotificationConfig, PomodoroPhase } from '~/features/root/types/stopwatch'
 
+// 最後に表示された通知のタイムスタンプを記録（重複防止用）
+let lastNotificationTime = 0
+const NOTIFICATION_DEBOUNCE_MS = 1000 // 1秒以内の重複を防ぐ
+
 /**
  * ブラウザ通知の権限をリクエストする
  */
@@ -17,10 +21,7 @@ function getPhaseCompleteConfig(currentPhase: PomodoroPhase, nextPhase: Pomodoro
   const configs = {
     focus: {
       title: '🍅 集中時間完了！',
-      message:
-        nextPhase === 'longBreak'
-          ? '素晴らしい！15分の長い休憩です'
-          : '素晴らしい！5分休憩しましょう',
+      message: nextPhase === 'longBreak' ? '長い休憩に入ります' : '休憩しましょう',
       color: 'green',
     },
     break: {
@@ -70,10 +71,20 @@ export function showPhaseCompleteNotification(
   currentPhase: PomodoroPhase,
   nextPhase: PomodoroPhase,
 ) {
-  const config = getPhaseCompleteConfig(currentPhase, nextPhase)
+  const now = Date.now()
 
-  // Mantine通知
+  // デバウンス: 1秒以内の重複通知を防ぐ
+  if (now - lastNotificationTime < NOTIFICATION_DEBOUNCE_MS) {
+    return
+  }
+
+  lastNotificationTime = now
+  const config = getPhaseCompleteConfig(currentPhase, nextPhase)
+  const notificationId = `pomodoro-phase-${currentPhase}-to-${nextPhase}`
+
+  // Mantine通知（IDを付けて重複を防ぐ）
   notifications.show({
+    id: notificationId,
     title: config.title,
     message: config.message,
     color: config.color,
@@ -86,6 +97,7 @@ export function showPhaseCompleteNotification(
       body: config.message,
       icon: '/favicon.ico',
       badge: '/favicon.ico',
+      tag: notificationId, // 同じtagの通知は置き換えられる
     })
 
     // 通知を3秒後に自動クローズ
