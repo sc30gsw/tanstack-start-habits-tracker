@@ -47,7 +47,13 @@ export function GlobalAmbientPlayer() {
                 )
               })}
 
-              <Menu.Divider />
+              <Menu.Divider
+                style={{
+                  visibility: isPlaying ? 'visible' : 'hidden',
+                  height: isPlaying ? 'auto' : 0,
+                  margin: isPlaying ? undefined : 0,
+                }}
+              />
               <Stack
                 gap="xs"
                 p="xs"
@@ -55,6 +61,7 @@ export function GlobalAmbientPlayer() {
                   visibility: isPlaying ? 'visible' : 'hidden',
                   height: isPlaying ? 'auto' : 0,
                   overflow: 'hidden',
+                  padding: isPlaying ? undefined : 0,
                 }}
               >
                 <Text size="xs" fw={500}>
