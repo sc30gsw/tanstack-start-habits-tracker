@@ -19,13 +19,14 @@ import type { HabitTable, RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
+const HTML_TAG_REGEX = /<[^>]*>/g
+
 type DateDetailProps = {
   selectedDateRecord: RecordEntity | null
   habitId: HabitTable['id']
 }
 
 export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
-  console.log('🚀 ~ DateDetail ~ selectedDateRecord:', selectedDateRecord)
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
   const selectedDate = getValidatedDate(searchParams?.selectedDate)
@@ -36,6 +37,16 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
   const textColor = 'gray.6'
+
+  const hasNotes = (html?: string | null) => {
+    if (!html) {
+      return false
+    }
+
+    const textContent = html.replace(HTML_TAG_REGEX, '').trim()
+
+    return textContent.length > 0
+  }
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm" id={RECORD_FORM_HASH_TARGET}>
@@ -141,7 +152,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                 </Badge>
               )}
             </Group>
-            {selectedDateRecord.notes && (
+            {hasNotes(selectedDateRecord.notes) && (
               <Stack gap="xs">
                 <Text size="sm" fw={500} c={textColor}>
                   メモ・感想
@@ -160,7 +171,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                         : '1px solid var(--mantine-color-gray-2)',
                   }}
                 >
-                  <RichTextDisplay html={selectedDateRecord.notes} />
+                  <RichTextDisplay html={selectedDateRecord.notes || ''} />
                 </div>
               </Stack>
             )}
