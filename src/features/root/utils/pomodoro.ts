@@ -20,7 +20,8 @@ export function determineNextPhase(
   longBreakInterval: number,
 ) {
   if (currentPhase === 'focus') {
-    const shouldLongBreak = (completedPomodoros + 1) % longBreakInterval === 0
+    // 完了したポモドーロ数が長い休憩の間隔の倍数なら長い休憩
+    const shouldLongBreak = completedPomodoros % longBreakInterval === 0
 
     return shouldLongBreak ? 'longBreak' : 'break'
   }
