@@ -95,32 +95,32 @@ export function NotificationsForm() {
         <TextInput
           label="日次リマインダー時刻"
           placeholder="09:00"
-          description="カスタムリマインダー通知を送信する時刻 (HH:mm形式、日本時間)"
+          description="カスタムリマインダー通知を送信する時刻 (HH:mm形式)"
           disabled={!form.values.notificationsEnabled || isPending}
           {...form.getInputProps('dailyReminderTime')}
         />
 
         <Text size="sm" c="dimmed" mt="md" mb="xs">
-          以下の通知は 9:00、13:00、17:00、21:00（日本時間）に送信されます
+          以下の通知は 9:00、13:00、17:00、21:00 に送信されます
         </Text>
 
         <Switch
           label="未完了習慣のリマインダー"
-          description="未完了の習慣がある場合に通知（9時、13時、17時、21時）"
+          description="未完了の習慣がある場合に通知"
           disabled={!form.values.notificationsEnabled || isPending}
           {...form.getInputProps('incompleteReminderEnabled', { type: 'checkbox' })}
         />
 
         <Switch
           label="スキップした習慣のリマインダー"
-          description="スキップした習慣がある場合に通知（9時、13時、17時、21時）"
+          description="スキップした習慣がある場合に通知"
           disabled={!form.values.notificationsEnabled || isPending}
           {...form.getInputProps('skippedReminderEnabled', { type: 'checkbox' })}
         />
 
         <Switch
           label="予定された習慣のリマインダー"
-          description="実行予定の習慣がある場合に通知（9時、13時、17時、21時）"
+          description="実行予定の習慣がある場合に通知"
           disabled={!form.values.notificationsEnabled || isPending}
           {...form.getInputProps('scheduledReminderEnabled', { type: 'checkbox' })}
         />
