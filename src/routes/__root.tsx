@@ -12,6 +12,7 @@ import { QueryProvider } from '~/components/providers/query-provider'
 import { Header } from '~/components/ui/header'
 import { getCurrentUser, getCurrentUserPasskey } from '~/features/auth/server/server-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
+import { useNotificationGenerator } from '~/features/notifications/hooks/use-notification-generator'
 import { theme } from '~/theme'
 
 export const Route = createRootRoute({
@@ -75,6 +76,10 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  // Initialize notification generator for logged-in users only
+  // The hook itself will check if notifications are enabled
+  useNotificationGenerator()
+
   return (
     <ClientOnly>
       <AppShell header={{ height: 60 }} padding="md">

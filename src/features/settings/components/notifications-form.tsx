@@ -1,4 +1,4 @@
-import { Button, Stack, Switch, TextInput } from '@mantine/core'
+import { Button, Stack, Switch, Text, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
@@ -95,28 +95,32 @@ export function NotificationsForm() {
         <TextInput
           label="日次リマインダー時刻"
           placeholder="09:00"
-          description="毎日の習慣リマインダーを送信する時刻 (HH:mm形式)"
+          description="カスタムリマインダー通知を送信する時刻 (HH:mm形式、日本時間)"
           disabled={!form.values.notificationsEnabled || isPending}
           {...form.getInputProps('dailyReminderTime')}
         />
 
+        <Text size="sm" c="dimmed" mt="md" mb="xs">
+          以下の通知は 9:00、13:00、17:00、21:00（日本時間）に送信されます
+        </Text>
+
         <Switch
           label="未完了習慣のリマインダー"
-          description="未完了の習慣がある場合に通知します"
+          description="未完了の習慣がある場合に通知（9時、13時、17時、21時）"
           disabled={!form.values.notificationsEnabled || isPending}
           {...form.getInputProps('incompleteReminderEnabled', { type: 'checkbox' })}
         />
 
         <Switch
           label="スキップした習慣のリマインダー"
-          description="スキップした習慣がある場合に通知します"
+          description="スキップした習慣がある場合に通知（9時、13時、17時、21時）"
           disabled={!form.values.notificationsEnabled || isPending}
           {...form.getInputProps('skippedReminderEnabled', { type: 'checkbox' })}
         />
 
         <Switch
           label="予定された習慣のリマインダー"
-          description="実行予定の習慣がある場合に通知します"
+          description="実行予定の習慣がある場合に通知（9時、13時、17時、21時）"
           disabled={!form.values.notificationsEnabled || isPending}
           {...form.getInputProps('scheduledReminderEnabled', { type: 'checkbox' })}
         />
