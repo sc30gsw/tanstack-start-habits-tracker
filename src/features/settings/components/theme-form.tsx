@@ -58,9 +58,9 @@ export function ThemeForm() {
           {...form.getInputProps('theme')}
         >
           <Stack mt="xs" gap="sm">
-            <Radio value="light" label="ライトモード" />
-            <Radio value="dark" label="ダークモード" />
-            <Radio value="auto" label="システム設定に従う" />
+            <Radio value="light" label="ライトモード" disabled={isPending} />
+            <Radio value="dark" label="ダークモード" disabled={isPending} />
+            <Radio value="auto" label="システム設定に従う" disabled={isPending} />
           </Stack>
         </Radio.Group>
 
