@@ -1,4 +1,4 @@
-import { Badge, Button, Group, Progress, Stack, Text, Title } from '@mantine/core'
+import { Badge, Button, Group, Progress, Skeleton, Stack, Text, Title } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import {
@@ -68,8 +68,28 @@ export function PomodoroTimer({
   const location = useLocation()
 
   const [displayTime, setDisplayTime] = useState(pausedElapsed)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   const phaseTransitionHandledRef = useRef(false)
+  const previousPhaseRef = useRef(phase)
+  const previousStartTimeRef = useRef(startTime)
+
+  // フェーズが変わったときに遷移状態を開始
+  useEffect(() => {
+    if (previousPhaseRef.current !== phase) {
+      setIsTransitioning(true)
+      previousPhaseRef.current = phase
+      setDisplayTime(0)
+    }
+  }, [phase])
+
+  // 新しいタイマーが開始されたら遷移状態を解除
+  useEffect(() => {
+    if (startTime !== null && previousStartTimeRef.current !== startTime) {
+      previousStartTimeRef.current = startTime
+      setIsTransitioning(false)
+    }
+  }, [startTime])
 
   // 状態値の最新の参照を保持
   const stateRef = useRef({
@@ -109,7 +129,7 @@ export function PomodoroTimer({
 
   // フェーズの時間設定（分→秒変換）
   const phaseDuration = getCurrentPhaseDuration(phase, settings) * SECONDS_PER_MINUTE
-  const remainingTime = phaseDuration - displayTime
+  const remainingTime = Math.max(0, phaseDuration - displayTime)
   const progress = phaseDuration > 0 ? (displayTime / phaseDuration) * 100 : 0
 
   // タイマーロジック
@@ -401,11 +421,21 @@ export function PomodoroTimer({
 
       {/* タイマー表示 */}
       <Stack align="center" gap="xs">
-        <Title order={1} style={{ fontSize: '3rem', fontWeight: 700, fontFamily: 'monospace' }}>
-          {formatTime(phase === 'waiting' ? 0 : remainingTime)}
-        </Title>
+        {isTransitioning ? (
+          <Skeleton height={60} width={200} radius="md" />
+        ) : (
+          <Title order={1} style={{ fontSize: '3rem', fontWeight: 700, fontFamily: 'monospace' }}>
+            {formatTime(phase === 'waiting' ? 0 : remainingTime)}
+          </Title>
+        )}
         <Text size="sm" c="dimmed">
-          {isRunning ? '実行中...' : phase === 'waiting' ? '開始してください' : '一時停止中'}
+          {isTransitioning
+            ? '次のフェーズへ...'
+            : isRunning
+              ? '実行中...'
+              : phase === 'waiting'
+                ? '開始してください'
+                : '一時停止中'}
         </Text>
       </Stack>
 
