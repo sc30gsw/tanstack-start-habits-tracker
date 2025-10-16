@@ -23,7 +23,7 @@ const typeColors = {
   reminder: 'blue',
   habit_incomplete: 'yellow',
   habit_skipped: 'orange',
-  habit_scheduled: 'grape',
+  habit_scheduled: 'red',
   achievement: 'green',
   streak: 'teal',
   level_up: 'violet',
