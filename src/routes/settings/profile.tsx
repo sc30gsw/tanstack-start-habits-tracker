@@ -4,7 +4,7 @@ import { Suspense } from 'react'
 import { ProfileForm } from '~/features/settings/components/profile-form'
 import { SettingsLayout } from '~/features/settings/components/settings-layout'
 
-export const Route = createFileRoute('/settings/')({
+export const Route = createFileRoute('/settings/profile')({
   component: RouteComponent,
 })
 

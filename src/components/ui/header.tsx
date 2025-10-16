@@ -111,7 +111,7 @@ export function Header() {
                     <Menu.Item
                       leftSection={<IconSettings size={14} />}
                       component={Link}
-                      to="/settings"
+                      to="/settings/profile"
                     >
                       設定
                     </Menu.Item>
@@ -214,7 +214,7 @@ export function Header() {
                     <Menu.Item
                       leftSection={<IconSettings size={14} />}
                       component={Link}
-                      to="/settings"
+                      to="/settings/profile"
                     >
                       設定
                     </Menu.Item>

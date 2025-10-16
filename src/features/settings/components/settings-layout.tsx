@@ -12,28 +12,24 @@ import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react'
 
 const NAV_ITEMS = [
   {
-    href: '/settings',
+    href: '/settings/profile',
     label: 'プロフィール',
     icon: IconUser,
-    exact: true,
   },
   {
     href: '/settings/theme',
     label: 'テーマ',
     icon: IconMoon,
-    exact: false,
   },
   {
     href: '/settings/notifications',
     label: '通知',
     icon: IconBell,
-    exact: false,
   },
   {
     href: '/settings/account',
     label: 'アカウント',
     icon: IconTrash,
-    exact: false,
   },
 ] as const satisfies readonly Record<
   string,
@@ -52,9 +48,7 @@ export function SettingsLayout({ children }: Record<'children', ReactNode>) {
             設定
           </Text>
           {NAV_ITEMS.map((item) => {
-            const isActive = item.exact
-              ? currentPath === item.href
-              : currentPath.startsWith(item.href)
+            const isActive = currentPath === item.href
 
             return (
               <NavLink

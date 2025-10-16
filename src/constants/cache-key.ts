@@ -6,3 +6,4 @@ export const GET_NOTIFICATIONS_CACHE_KEY = 'getNotifications'
 export const GET_UNREAD_NOTIFICATIONS_COUNT_CACHE_KEY = 'getUnreadNotificationsCount'
 
 export const GET_USER_SETTINGS_CACHE_KEY = 'getUserSettings'
+export const GET_USER_PROFILE_CACHE_KEY = 'getUserProfile'

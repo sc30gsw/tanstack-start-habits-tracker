@@ -1,82 +1,83 @@
 import { ActionIcon, useComputedColorScheme, useMantineColorScheme } from '@mantine/core'
-import { IconDeviceDesktop, IconMoon, IconSun } from '@tabler/icons-react'
+import { IconMoon, IconSun } from '@tabler/icons-react'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+import { GET_USER_SETTINGS_CACHE_KEY } from '~/constants/cache-key'
+import { settingsDto } from '~/features/settings/server/settings-functions'
 
 type ThemeMode = 'light' | 'dark' | 'auto'
+type DisplayMode = 'light' | 'dark'
 
 export function ThemeToggle() {
   const { setColorScheme } = useMantineColorScheme()
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: false })
-  const [themeMode, setThemeMode] = useState<ThemeMode>('auto')
+
+  // Get DB settings
+  const { data: settings } = useSuspenseQuery({
+    queryKey: [GET_USER_SETTINGS_CACHE_KEY],
+    queryFn: () => settingsDto.getUserSettings(),
+  })
+
+  const dbTheme = (settings?.theme as ThemeMode) ?? 'auto'
+  const isAutoMode = dbTheme === 'auto'
+
+  // Local state for auto mode toggle (light/dark only)
+  const [localDisplayMode, setLocalDisplayMode] = useState<DisplayMode>('light')
 
   useEffect(() => {
-    // Get theme preference from localStorage on mount
-    const savedTheme = localStorage.getItem('theme-mode') as ThemeMode
-    if (savedTheme) {
-      setThemeMode(savedTheme)
-      if (savedTheme === 'auto') {
-        setColorScheme('auto')
+    if (isAutoMode) {
+      // In auto mode, use localStorage for temporary light/dark preference
+      const savedDisplay = localStorage.getItem('theme-display') as DisplayMode
+      if (savedDisplay === 'light' || savedDisplay === 'dark') {
+        setLocalDisplayMode(savedDisplay)
+        setColorScheme(savedDisplay)
       } else {
-        setColorScheme(savedTheme)
+        // Default to system preference
+        setColorScheme('auto')
+        setLocalDisplayMode(computedColorScheme === 'dark' ? 'dark' : 'light')
       }
+    } else {
+      // DB has explicit setting, use it
+      setColorScheme(dbTheme)
+      setLocalDisplayMode(dbTheme)
     }
-  }, [setColorScheme])
+  }, [dbTheme, isAutoMode, setColorScheme, computedColorScheme])
 
   const handleToggleTheme = () => {
-    let nextMode: ThemeMode
-
-    switch (themeMode) {
-      case 'light':
-        nextMode = 'dark'
-        break
-      case 'dark':
-        nextMode = 'auto'
-        break
-      default:
-        nextMode = 'light'
-        break
+    if (!isAutoMode) {
+      // DB設定がある場合は変更不可
+      return
     }
 
-    setThemeMode(nextMode)
-    localStorage.setItem('theme-mode', nextMode)
+    // Auto modeの場合のみlight/darkをトグル
+    const nextMode: DisplayMode = localDisplayMode === 'light' ? 'dark' : 'light'
 
-    if (nextMode === 'auto') {
-      setColorScheme('auto')
-    } else {
-      setColorScheme(nextMode)
-    }
+    setLocalDisplayMode(nextMode)
+    localStorage.setItem('theme-display', nextMode)
+    setColorScheme(nextMode)
   }
 
   const getIcon = () => {
-    switch (themeMode) {
-      case 'light':
-        return <IconSun size={18} />
-      case 'dark':
-        return <IconMoon size={18} />
-      case 'auto':
-        return <IconDeviceDesktop size={18} />
-    }
+    return localDisplayMode === 'light' ? <IconSun size={18} /> : <IconMoon size={18} />
   }
 
   const getTitle = () => {
-    switch (themeMode) {
-      case 'light':
-        return 'ライトモード'
-      case 'dark':
-        return 'ダークモード'
-      default:
-        return 'システム設定に従う'
+    if (!isAutoMode) {
+      return `${localDisplayMode === 'light' ? 'ライトモード' : 'ダークモード'}（設定で固定）`
     }
+    return localDisplayMode === 'light' ? 'ライトモードに切り替え' : 'ダークモードに切り替え'
   }
 
   return (
     <ActionIcon
       variant="subtle"
-      color={computedColorScheme === 'dark' ? 'yellow' : 'blue'}
+      color={localDisplayMode === 'dark' ? 'yellow' : 'blue'}
       onClick={handleToggleTheme}
       title={getTitle()}
       aria-label="テーマを切り替え"
       size="lg"
+      disabled={!isAutoMode}
+      style={{ cursor: isAutoMode ? 'pointer' : 'not-allowed' }}
     >
       {getIcon()}
     </ActionIcon>
