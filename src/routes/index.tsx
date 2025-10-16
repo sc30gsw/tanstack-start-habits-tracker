@@ -20,9 +20,12 @@ import { recordDto } from '~/features/habits/server/record-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { getDataFetchDateRange } from '~/features/habits/utils/completion-rate-utils'
 import { DailyHabitList } from '~/features/home/components/daily-habit-list'
+import { HomeBadgeCollection } from '~/features/home/components/home-badge-collection'
 import { HomeCalendarView } from '~/features/home/components/home-calendar-view'
 import { HomeHeatmapView } from '~/features/home/components/home-heatmap-view'
+import { HomeOverallLevelCard } from '~/features/home/components/home-overall-level-card'
 import { ShareHabitsModal } from '~/features/home/components/share-habits-modal'
+import { homeLevelInfoDto } from '~/features/home/server/home-level-functions'
 import { shareDto } from '~/features/home/server/share-functions'
 
 dayjs.locale('ja')
@@ -40,7 +43,7 @@ export const Route = createFileRoute('/')({
     // ヒートマップ(今日から1年分) + カレンダーグリッド(42日分)の範囲を取得
     const { dateFrom, dateTo } = getDataFetchDateRange(context.search.currentMonth)
 
-    const [habitsResult, recordsResult, shareDataResult] = await Promise.all([
+    const [habitsResult, recordsResult, shareDataResult, homeAggregatedLevel] = await Promise.all([
       habitDto.getHabits(),
       recordDto.getRecords({
         data: {
@@ -49,12 +52,14 @@ export const Route = createFileRoute('/')({
         },
       }),
       shareDto.getCompletedHabitsForShare({ data: { date: selectedDate } }),
+      homeLevelInfoDto.getHomeAggregatedLevel(),
     ])
 
     return {
       habits: habitsResult,
       records: recordsResult,
       shareData: shareDataResult,
+      homeAggregatedLevel,
     }
   },
 })
@@ -90,7 +95,6 @@ function Home() {
           </Text>
         </div>
 
-        {/* 統計情報 */}
         <Group gap="lg">
           <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
             <Text c="dimmed" size="sm" mb="xs">
@@ -132,7 +136,6 @@ function Home() {
           </Card>
         </Group>
 
-        {/* アクション */}
         <Card withBorder padding="lg">
           <Stack gap="md">
             <Text size="lg" fw={500}>
@@ -151,13 +154,13 @@ function Home() {
           </Stack>
         </Card>
 
-        {/* カレンダービュー */}
+        <HomeOverallLevelCard />
+        <HomeBadgeCollection />
+
         <HomeCalendarView />
 
-        {/* ヒートマップ */}
         <HomeHeatmapView />
 
-        {/* 選択日の完了習慣 - 統一されたCardデザイン */}
         <Card withBorder padding="lg">
           <Stack gap="lg">
             <Group justify="space-between" align="center">
@@ -207,7 +210,6 @@ function Home() {
           </Stack>
         </Card>
 
-        {/* 説明 */}
         <Card withBorder padding="lg">
           <Stack gap="sm">
             <Text size="lg" fw={500}>

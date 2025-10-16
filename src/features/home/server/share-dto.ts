@@ -77,4 +77,6 @@ const getCompletedHabitsForShare = createServerFn({ method: 'POST' })
 
 export const shareDto = {
   getCompletedHabitsForShare,
-} as const
+} as const satisfies {
+  getCompletedHabitsForShare: typeof getCompletedHabitsForShare
+}
