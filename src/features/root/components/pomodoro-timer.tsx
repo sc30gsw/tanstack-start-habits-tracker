@@ -69,7 +69,6 @@ export function PomodoroTimer({
 
   const [displayTime, setDisplayTime] = useState(pausedElapsed)
 
-  const lastPhaseRef = useRef<PomodoroPhase>(phase)
   const phaseTransitionHandledRef = useRef(false)
 
   // 状態値の最新の参照を保持
@@ -122,12 +121,19 @@ export function PomodoroTimer({
       return
     }
 
+    // 現在のフェーズの時間を取得（useEffect内で計算）
+    const currentPhaseDuration = getCurrentPhaseDuration(phase, settings) * SECONDS_PER_MINUTE
+
     const interval = setInterval(() => {
       const now = Date.now()
       const elapsed = Math.floor((now - startTime) / MILLISECONDS_PER_SECOND) + pausedElapsed
 
       // フェーズ完了チェック（1回のみ実行）
-      if (elapsed >= phaseDuration && phaseDuration > 0 && !phaseTransitionHandledRef.current) {
+      if (
+        elapsed >= currentPhaseDuration &&
+        currentPhaseDuration > 0 &&
+        !phaseTransitionHandledRef.current
+      ) {
         phaseTransitionHandledRef.current = true
         clearInterval(interval)
 
@@ -195,29 +201,14 @@ export function PomodoroTimer({
     }, STOPWATCH_UPDATE_INTERVAL_MS)
 
     return () => clearInterval(interval)
-  }, [
-    isRunning,
-    startTime,
-    pausedElapsed,
-    phaseDuration,
-    settings.longBreakInterval,
-    navigate,
-    location.pathname,
-  ])
+  }, [isRunning, startTime, pausedElapsed, phase, settings, navigate, location.pathname])
 
-  // タイマーが再開されたときにフラグをリセット（startTimeが変わったとき）
+  // タイマーが再開されたときにフラグをリセット（startTimeが変わったときのみ）
   useEffect(() => {
     if (startTime) {
       phaseTransitionHandledRef.current = false
     }
-  }, [startTime, phase, currentSet, completedPomodoros])
-
-  // フェーズが変わったときの記録
-  useEffect(() => {
-    if (lastPhaseRef.current !== phase) {
-      lastPhaseRef.current = phase
-    }
-  }, [phase, currentSet, completedPomodoros])
+  }, [startTime])
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / SECONDS_PER_MINUTE)
@@ -447,9 +438,7 @@ export function PomodoroTimer({
             onClick={handleStart}
             disabled={!habitId || !isSettingsValid}
           >
-            {getStartButtonLabel(
-              determineNextPhase('break', completedPomodoros, settings.longBreakInterval),
-            )}
+            {getStartButtonLabel('focus')}
           </Button>
           {accumulatedTime > 0 && (
             <>

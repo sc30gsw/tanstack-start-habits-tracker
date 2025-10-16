@@ -20,11 +20,18 @@ export function determineNextPhase(
 ) {
   if (currentPhase === 'focus') {
     // 完了したポモドーロ数が長い休憩の間隔の倍数なら長い休憩
+    // completedPomodorosは既に+1されているため、そのまま判定
     const shouldLongBreak = completedPomodoros % longBreakInterval === 0
 
     return shouldLongBreak ? 'longBreak' : 'break'
   }
 
+  // 休憩終了後は必ず集中時間に戻る
+  if (currentPhase === 'break' || currentPhase === 'longBreak') {
+    return 'focus'
+  }
+
+  // waiting状態からの開始
   return 'focus'
 }
 
