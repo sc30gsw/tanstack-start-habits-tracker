@@ -13,6 +13,8 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
+export const CALENDAR_ID = 'calendar'
+
 export function HomeCalendarView() {
   const apiRoute = getRouteApi('/')
   const searchParams = apiRoute.useSearch()
@@ -24,7 +26,7 @@ export function HomeCalendarView() {
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
   return (
-    <Card withBorder padding="lg" radius="md" shadow="sm">
+    <Card id={CALENDAR_ID} withBorder padding="lg" radius="md" shadow="sm">
       <Stack gap="sm">
         <Group justify="space-between" align="center">
           <Group gap="xs" align="center">
@@ -42,6 +44,7 @@ export function HomeCalendarView() {
                   ...prev,
                   calendarView: v as SearchParams['calendarView'],
                 }),
+                hash: CALENDAR_ID,
               })
             }
             data={[

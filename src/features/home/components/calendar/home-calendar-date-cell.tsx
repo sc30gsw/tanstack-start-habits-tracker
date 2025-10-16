@@ -1,10 +1,11 @@
-import { Card, type CSSProperties, Stack, Text } from '@mantine/core'
+import { Box, Card, type CSSProperties, Flex, Stack, Text } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
+import { CALENDAR_ID } from '~/features/home/components/home-calendar-view'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -52,6 +53,7 @@ type HomeCalendarDateCellProps = {
   date: dayjs.Dayjs
   isCurrentMonth?: boolean
   variant: 'month' | 'week'
+  showWeekday?: boolean
 }
 
 // Home専用の日付セルコンポーネント（簡素化版）
@@ -59,6 +61,7 @@ export function HomeCalendarDateCell({
   date,
   isCurrentMonth = true,
   variant,
+  showWeekday = false,
 }: HomeCalendarDateCellProps) {
   const apiRoute = getRouteApi('/')
   const searchParams = apiRoute.useSearch()
@@ -87,9 +90,12 @@ export function HomeCalendarDateCell({
   if (variant === 'month') {
     return (
       <Card
-        onClick={() =>
-          navigate({ search: (prev) => ({ ...prev, selectedDate: date.format('YYYY-MM-DD') }) })
-        }
+        onClick={() => {
+          navigate({
+            search: (prev) => ({ ...prev, selectedDate: date.format('YYYY-MM-DD') }),
+            hash: CALENDAR_ID,
+          })
+        }}
         padding="xs"
         withBorder
         style={{
@@ -112,22 +118,37 @@ export function HomeCalendarDateCell({
           {completedRecords.length > 0 && (
             <Stack gap={1} mt={4}>
               {completedRecords.slice(0, 3).map((record) => (
-                <Text
+                <Flex
                   key={record.id}
-                  size="9px"
+                  gap={4}
+                  align="center"
                   style={{
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'rgba(34,139,230,0.1)',
-                    padding: '1px 3px',
-                    borderRadius: '2px',
-                    textAlign: 'left',
                   }}
-                  title={record.habit?.name}
                 >
-                  {record.habit?.name}
-                </Text>
+                  <Box
+                    w={3}
+                    h={14}
+                    style={{
+                      backgroundColor: `var(--mantine-color-${record.habit?.color ?? 'blue'}-6)`,
+                      borderRadius: '2px',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Text
+                    size="9px"
+                    ta="left"
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      flex: 1,
+                    }}
+                    title={record.habit?.name}
+                  >
+                    {record.habit?.name}
+                  </Text>
+                </Flex>
               ))}
               {completedRecords.length > 3 && (
                 <Text size="8px" c="dimmed" ta="center">
@@ -156,50 +177,68 @@ export function HomeCalendarDateCell({
         boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
         minHeight: '80px',
       }}
-      onClick={() =>
+      onClick={() => {
         navigate({
           search: (prev) => ({
             ...prev,
             selectedDate: date.format('YYYY-MM-DD'),
           }),
+          hash: CALENDAR_ID,
         })
-      }
+      }}
     >
       <Stack gap={2} align="stretch">
-        <Text
-          size="xs"
-          c={
-            isSelected
-              ? 'white' // 選択時は白文字で視認性を確保
-              : dateType === 'sunday'
-                ? 'red.7'
-                : dateType === 'saturday'
-                  ? 'blue.7'
-                  : 'dimmed'
-          }
-        >
-          {date.format('dd')}
-        </Text>
+        {showWeekday && (
+          <Text
+            size="xs"
+            c={
+              isSelected
+                ? 'white'
+                : dateType === 'sunday'
+                  ? 'red.7'
+                  : dateType === 'saturday'
+                    ? 'blue.7'
+                    : 'dimmed'
+            }
+          >
+            {date.format('dd')}
+          </Text>
+        )}
         <Text fw={500}>{date.date()}</Text>
         {completedRecords.length > 0 && (
           <Stack gap={1} mt={4}>
             {completedRecords.slice(0, 3).map((record) => (
-              <Text
+              <Flex
                 key={record.id}
-                size="9px"
+                gap={4}
+                align="center"
                 style={{
                   overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : 'rgba(34,139,230,0.1)',
-                  padding: '1px 3px',
-                  borderRadius: '2px',
-                  textAlign: 'left',
                 }}
-                title={record.habit?.name}
               >
-                {record.habit?.name}
-              </Text>
+                <Box
+                  w={3}
+                  h={14}
+                  style={{
+                    backgroundColor: `var(--mantine-color-${record.habit?.color ?? 'blue'}-6)`,
+                    borderRadius: '2px',
+                    flexShrink: 0,
+                  }}
+                />
+                <Text
+                  size="9px"
+                  ta="left"
+                  style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    flex: 1,
+                  }}
+                  title={record.habit?.name}
+                >
+                  {record.habit?.name}
+                </Text>
+              </Flex>
             ))}
             {completedRecords.length > 3 && (
               <Text size="8px" c="dimmed" ta="center">

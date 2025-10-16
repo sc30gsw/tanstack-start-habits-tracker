@@ -1,4 +1,4 @@
-import { Card, Stack, Text } from '@mantine/core'
+import { Box, Card, Flex, Stack, Text } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
@@ -35,17 +35,36 @@ export function HomeDayView() {
             </Text>
             <Stack gap={2}>
               {completedRecords.map((record) => (
-                <Text
+                <Flex
                   key={record.id}
-                  size="sm"
+                  gap={6}
+                  align="center"
                   style={{
-                    backgroundColor: 'rgba(34,139,230,0.1)',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
+                    overflow: 'hidden',
                   }}
                 >
-                  {record.habit?.name}
-                </Text>
+                  <Box
+                    w={4}
+                    h={18}
+                    style={{
+                      backgroundColor: `var(--mantine-color-${record.habit?.color ?? 'blue'}-6)`,
+                      borderRadius: '2px',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Text
+                    size="sm"
+                    ta="left"
+                    style={{
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {record.habit?.name}
+                  </Text>
+                </Flex>
               ))}
             </Stack>
           </Stack>
