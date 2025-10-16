@@ -6,7 +6,7 @@ import { SettingsLayout } from '~/features/settings/components/settings-layout'
 import { ThemeForm } from '~/features/settings/components/theme-form'
 
 const searchSchema = z.object({
-  theme: z.enum(['light', 'dark', 'auto']).default('auto'),
+  theme: z.enum(['light', 'dark', 'auto']).default('auto').catch('auto'),
 })
 
 export type ThemeRouteSearch = z.infer<typeof searchSchema>
