@@ -2,7 +2,6 @@ import type { InferSelectModel } from 'drizzle-orm'
 import type { habitLevels } from '~/db/schema'
 import type { HomeAggregatedLevel } from '~/features/home/types/home-level'
 
-const LEVEL_THRESHOLDS = [0, 11, 31, 61, 101] as const satisfies readonly number[]
 const MAX_PROGRESS = 100
 
 export function calculateHomeAggregatedLevel(levels: InferSelectModel<typeof habitLevels>[]) {
@@ -38,25 +37,14 @@ export function calculateHomeAggregatedLevel(levels: InferSelectModel<typeof hab
   } as const
 }
 
-export function calculateHomeLevelProgress(totalLevel: HomeAggregatedLevel['totalLevel']) {
-  let currentThresholdIndex = 0
-
-  for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
-    if (totalLevel >= LEVEL_THRESHOLDS[i]) {
-      currentThresholdIndex = i
-    } else {
-      break
-    }
-  }
-
-  if (currentThresholdIndex === LEVEL_THRESHOLDS.length - 1) {
-    return MAX_PROGRESS
-  }
-
-  const currentThreshold = LEVEL_THRESHOLDS[currentThresholdIndex]
-  const nextThreshold = LEVEL_THRESHOLDS[currentThresholdIndex + 1]
-  const rangeSize = nextThreshold - currentThreshold
-  const progress = totalLevel - currentThreshold
+export function calculateHomeLevelProgress(
+  totalLevel: HomeAggregatedLevel['totalLevel'],
+  currentTierMinLevel: number,
+  currentTierMaxLevel: number,
+) {
+  // 現在の段階内での進捗を計算
+  const rangeSize = currentTierMaxLevel - currentTierMinLevel + 1
+  const progress = totalLevel - currentTierMinLevel
 
   return Math.round((progress / rangeSize) * MAX_PROGRESS)
 }
