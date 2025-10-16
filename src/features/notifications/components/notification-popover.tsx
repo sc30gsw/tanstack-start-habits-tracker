@@ -1,5 +1,5 @@
 import { ActionIcon, Button, Group, Popover, ScrollArea, Stack, Text } from '@mantine/core'
-import { IconBell, IconBellOff, IconCheck } from '@tabler/icons-react'
+import { IconBell, IconBellOff, IconCheck, IconTrash } from '@tabler/icons-react'
 import { Suspense, useState } from 'react'
 import { NotificationItem } from '~/features/notifications/components/notification-item'
 import { useNotifications } from '~/features/notifications/hooks/use-notifications'
@@ -57,9 +57,16 @@ export function NotificationPopover() {
 }
 
 function NotificationPopoverContent() {
-  const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const {
+    notifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    deleteAllReadNotifications,
+  } = useNotifications()
 
   const hasUnread = notifications.some((n) => n.readAt === null)
+  const hasRead = notifications.some((n) => n.readAt !== null)
 
   if (notifications.length === 0) {
     return (
@@ -86,18 +93,33 @@ function NotificationPopoverContent() {
         <Text size="sm" fw={600} c="dark">
           通知
         </Text>
-        {hasUnread && (
-          <Button
-            variant="subtle"
-            size="compact-xs"
-            leftSection={<IconCheck size={14} />}
-            onClick={async () => {
-              await markAllAsRead()
-            }}
-          >
-            すべて既読
-          </Button>
-        )}
+        <Group gap="xs">
+          {hasUnread && (
+            <Button
+              variant="subtle"
+              size="compact-xs"
+              leftSection={<IconCheck size={14} />}
+              onClick={async () => {
+                await markAllAsRead()
+              }}
+            >
+              すべて既読
+            </Button>
+          )}
+          {hasRead && (
+            <Button
+              variant="subtle"
+              size="compact-xs"
+              color="red"
+              leftSection={<IconTrash size={14} />}
+              onClick={async () => {
+                await deleteAllReadNotifications()
+              }}
+            >
+              既読を削除
+            </Button>
+          )}
+        </Group>
       </Group>
 
       <ScrollArea h={450} type="auto">

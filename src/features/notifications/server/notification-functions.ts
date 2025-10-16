@@ -1,24 +1,47 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
+import type { Session } from 'better-auth'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import { and, desc, eq } from 'drizzle-orm'
+import { and, desc, eq, lt } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { db } from '~/db'
 import { habits, notifications, records } from '~/db/schema'
 import { auth } from '~/lib/auth'
 
-// Configure dayjs for JST timezone
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-/**
- * Get current date in JST timezone (YYYY-MM-DD format)
- */
-function getTodayInJST(): string {
+function getTodayInJST() {
   return dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
+}
+
+const AUTO_DELETE_POLICY = {
+  reminder: 2,
+  habit_incomplete: 2,
+  habit_skipped: 2,
+  habit_scheduled: 2,
+  achievement: 30,
+} as const satisfies Record<string, number>
+
+async function cleanupOldNotifications(userId: Session['userId']) {
+  const now = dayjs()
+
+  for (const [type, daysToKeep] of Object.entries(AUTO_DELETE_POLICY)) {
+    const cutoffDate = now.subtract(daysToKeep, 'days').toISOString()
+
+    await db
+      .delete(notifications)
+      .where(
+        and(
+          eq(notifications.userId, userId),
+          eq(notifications.type, type as keyof typeof AUTO_DELETE_POLICY),
+          lt(notifications.createdAt, cutoffDate),
+        ),
+      )
+  }
 }
 
 const getNotifications = createServerFn({ method: 'GET' }).handler(async () => {
@@ -147,6 +170,20 @@ const deleteNotification = createServerFn({ method: 'POST' })
     return { success: true }
   })
 
+const deleteAllReadNotifications = createServerFn({ method: 'POST' }).handler(async () => {
+  const session = await auth.api.getSession(getRequest())
+
+  if (!session?.user) {
+    throw new Error('Unauthorized')
+  }
+
+  await db
+    .delete(notifications)
+    .where(and(eq(notifications.userId, session.user.id), eq(notifications.isRead, true)))
+
+  return { success: true }
+})
+
 const createNotificationSchema = z.object({
   title: z.string().min(1),
   message: z.string().min(1),
@@ -165,6 +202,8 @@ const createNotification = createServerFn({ method: 'POST' })
     if (!session?.user) {
       throw new Error('Unauthorized')
     }
+
+    await cleanupOldNotifications(session.user.id)
 
     const notificationId = nanoid()
 
@@ -264,6 +303,7 @@ export const notificationDto = {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
+  deleteAllReadNotifications,
   createNotification,
   getTodayHabitStatuses,
 } as const satisfies {
@@ -272,6 +312,7 @@ export const notificationDto = {
   markNotificationAsRead: typeof markNotificationAsRead
   markAllNotificationsAsRead: typeof markAllNotificationsAsRead
   deleteNotification: typeof deleteNotification
+  deleteAllReadNotifications: typeof deleteAllReadNotifications
   createNotification: typeof createNotification
   getTodayHabitStatuses: typeof getTodayHabitStatuses
 }

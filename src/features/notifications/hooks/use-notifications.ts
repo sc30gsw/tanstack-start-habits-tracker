@@ -84,6 +84,22 @@ export function useNotifications() {
     }
   }
 
+  // Delete all read notifications
+  const deleteAllReadNotifications = async () => {
+    try {
+      await notificationDto.deleteAllReadNotifications()
+
+      // Invalidate queries to refetch
+      queryClient.invalidateQueries({ queryKey: [GET_NOTIFICATIONS_CACHE_KEY] })
+      queryClient.invalidateQueries({
+        queryKey: [GET_NOTIFICATIONS_CACHE_KEY, GET_UNREAD_NOTIFICATIONS_COUNT_CACHE_KEY],
+      })
+    } catch (error) {
+      console.error('Failed to delete all read notifications:', error)
+      throw error
+    }
+  }
+
   return {
     notifications,
     unreadCount,
@@ -93,5 +109,6 @@ export function useNotifications() {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    deleteAllReadNotifications,
   } as const
 }

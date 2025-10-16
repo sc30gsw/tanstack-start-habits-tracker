@@ -74,7 +74,7 @@ export function NotificationItem({ notification, onMarkAsRead, onDelete }: Notif
               {typeLabels[notification.type ?? 'reminder'] || notification.type}
             </Badge>
             {notification.habit && (
-              <Badge size="sm" color={notification.habit.color ?? 'blue'} variant="dot">
+              <Badge size="sm" color={notification.habit.color ?? 'blue'} variant="dot" tt="none">
                 {notification.habit.name}
               </Badge>
             )}
