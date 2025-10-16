@@ -1,40 +1,41 @@
 import { Button, Stack, Switch, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
-import { getRouteApi, useRouter } from '@tanstack/react-router'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useTransition } from 'react'
+import { z } from 'zod/v4'
+import { GET_USER_SETTINGS_CACHE_KEY } from '~/constants/cache-key'
 import { settingsDto } from '~/features/settings/server/settings-functions'
-import {
-  type NotificationSettingsSchema,
-  notificationSettingsSchema,
-} from '~/routes/settings/notifications'
+
+const notificationSettingsSchema = z.object({
+  notificationsEnabled: z.boolean(),
+  dailyReminderTime: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, '有効な時刻を入力してください (HH:mm)'),
+  incompleteReminderEnabled: z.boolean(),
+  skippedReminderEnabled: z.boolean(),
+  scheduledReminderEnabled: z.boolean(),
+})
+
+type NotificationSettingsSchema = z.infer<typeof notificationSettingsSchema>
 
 export function NotificationsForm() {
   const [isPending, startTransition] = useTransition()
-  const routeApi = getRouteApi('/settings/notifications')
-  const router = useRouter()
-  const searchParams = routeApi.useSearch()
-  const navigate = routeApi.useNavigate()
-  const { dbSettings } = routeApi.useRouteContext()
 
-  const currentValues = {
-    notificationsEnabled: searchParams.notificationsEnabled ?? false,
-    dailyReminderTime: searchParams.dailyReminderTime ?? '09:00',
-    incompleteReminderEnabled: searchParams.incompleteReminderEnabled ?? false,
-    skippedReminderEnabled: searchParams.skippedReminderEnabled ?? false,
-    scheduledReminderEnabled: searchParams.scheduledReminderEnabled ?? false,
-  } as const satisfies NotificationSettingsSchema
+  const queryClient = useQueryClient()
+  const { data: settings, refetch } = useSuspenseQuery({
+    queryKey: [GET_USER_SETTINGS_CACHE_KEY],
+    queryFn: () => settingsDto.getUserSettings(),
+  })
 
-  const isDirty =
-    currentValues.notificationsEnabled !== dbSettings.notificationsEnabled ||
-    currentValues.dailyReminderTime !== dbSettings.dailyReminderTime ||
-    currentValues.incompleteReminderEnabled !== dbSettings.incompleteReminderEnabled ||
-    currentValues.skippedReminderEnabled !== dbSettings.skippedReminderEnabled ||
-    currentValues.scheduledReminderEnabled !== dbSettings.scheduledReminderEnabled
-
-  const form = useForm<Required<NotificationSettingsSchema>>({
-    mode: 'controlled',
-    initialValues: currentValues,
+  const form = useForm<NotificationSettingsSchema>({
+    initialValues: {
+      notificationsEnabled: settings?.notificationsEnabled ?? false,
+      dailyReminderTime: settings?.dailyReminderTime ?? '09:00',
+      incompleteReminderEnabled: settings?.incompleteReminderEnabled ?? false,
+      skippedReminderEnabled: settings?.skippedReminderEnabled ?? false,
+      scheduledReminderEnabled: settings?.scheduledReminderEnabled ?? false,
+    },
     validate: (values) => {
       const result = notificationSettingsSchema.safeParse(values)
 
@@ -56,26 +57,10 @@ export function NotificationsForm() {
     },
   })
 
-  // フォームの値が変わったらクエリパラメータを更新
-  const updateSearchParam = <K extends keyof Required<NotificationSettingsSchema>>(
-    key: K,
-    value: Required<NotificationSettingsSchema>[K],
-  ) => {
-    navigate({
-      search: (prev) => ({ ...prev, [key]: value }),
-    })
-  }
-
-  const handleSubmit = async () => {
-    const result = form.validate()
-
-    if (result.hasErrors) {
-      return
-    }
-
+  const handleSubmit = form.onSubmit(async (values) => {
     startTransition(async () => {
       try {
-        await settingsDto.updateNotificationSettings({ data: currentValues })
+        await settingsDto.updateNotificationSettings({ data: values })
 
         notifications.show({
           title: '成功',
@@ -83,8 +68,10 @@ export function NotificationsForm() {
           color: 'green',
         })
 
-        // TanStack Routerでリフレッシュ
-        router.invalidate()
+        // キャッシュを無効化してリフェッチ
+        await queryClient.invalidateQueries({ queryKey: [GET_USER_SETTINGS_CACHE_KEY] })
+        form.resetDirty()
+        await refetch()
       } catch (error) {
         notifications.show({
           title: 'エラー',
@@ -93,58 +80,47 @@ export function NotificationsForm() {
         })
       }
     })
-  }
+  })
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        handleSubmit()
-      }}
-    >
+    <form onSubmit={handleSubmit}>
       <Stack gap="md">
         <Switch
           label="通知を有効にする"
           description="習慣リマインダー通知を受け取ります"
-          checked={currentValues.notificationsEnabled}
-          onChange={(e) => updateSearchParam('notificationsEnabled', e.currentTarget.checked)}
+          {...form.getInputProps('notificationsEnabled', { type: 'checkbox' })}
         />
 
         <TextInput
           label="日次リマインダー時刻"
           placeholder="09:00"
           description="毎日の習慣リマインダーを送信する時刻 (HH:mm形式)"
-          disabled={!currentValues.notificationsEnabled}
-          value={currentValues.dailyReminderTime}
-          onChange={(e) => updateSearchParam('dailyReminderTime', e.currentTarget.value)}
-          error={form.errors.dailyReminderTime}
+          disabled={!form.values.notificationsEnabled}
+          {...form.getInputProps('dailyReminderTime')}
         />
 
         <Switch
           label="未完了習慣のリマインダー"
           description="未完了の習慣がある場合に通知します"
-          disabled={!currentValues.notificationsEnabled}
-          checked={currentValues.incompleteReminderEnabled}
-          onChange={(e) => updateSearchParam('incompleteReminderEnabled', e.currentTarget.checked)}
+          disabled={!form.values.notificationsEnabled}
+          {...form.getInputProps('incompleteReminderEnabled', { type: 'checkbox' })}
         />
 
         <Switch
           label="スキップした習慣のリマインダー"
           description="スキップした習慣がある場合に通知します"
-          disabled={!currentValues.notificationsEnabled}
-          checked={currentValues.skippedReminderEnabled}
-          onChange={(e) => updateSearchParam('skippedReminderEnabled', e.currentTarget.checked)}
+          disabled={!form.values.notificationsEnabled}
+          {...form.getInputProps('skippedReminderEnabled', { type: 'checkbox' })}
         />
 
         <Switch
           label="予定された習慣のリマインダー"
           description="実行予定の習慣がある場合に通知します"
-          disabled={!currentValues.notificationsEnabled}
-          checked={currentValues.scheduledReminderEnabled}
-          onChange={(e) => updateSearchParam('scheduledReminderEnabled', e.currentTarget.checked)}
+          disabled={!form.values.notificationsEnabled}
+          {...form.getInputProps('scheduledReminderEnabled', { type: 'checkbox' })}
         />
 
-        <Button type="submit" loading={isPending} disabled={!isDirty} fullWidth mt="md">
+        <Button type="submit" loading={isPending} disabled={!form.isDirty()} fullWidth mt="md">
           変更を保存
         </Button>
       </Stack>

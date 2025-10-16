@@ -1,31 +1,34 @@
 import { Button, Radio, Stack } from '@mantine/core'
+import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
-import { useSuspenseQuery } from '@tanstack/react-query'
-import { getRouteApi } from '@tanstack/react-router'
-import { type ComponentProps, useTransition } from 'react'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useTransition } from 'react'
 import { GET_USER_SETTINGS_CACHE_KEY } from '~/constants/cache-key'
 import { settingsDto } from '~/features/settings/server/settings-functions'
-import type { ThemeRouteSearch } from '~/routes/settings/theme'
+
+type ThemeFormValues = {
+  theme: 'light' | 'dark' | 'auto'
+}
 
 export function ThemeForm() {
-  const routeApi = getRouteApi('/settings/theme')
-  const { theme } = routeApi.useSearch()
-
-  const navigate = routeApi.useNavigate()
-
   const [isPending, startTransition] = useTransition()
 
+  const queryClient = useQueryClient()
   const { data: settings, refetch } = useSuspenseQuery({
     queryKey: [GET_USER_SETTINGS_CACHE_KEY],
     queryFn: () => settingsDto.getUserSettings(),
   })
 
-  const handleSubmit: ComponentProps<'form'>['onSubmit'] = (e) => {
-    e.preventDefault()
+  const form = useForm<ThemeFormValues>({
+    initialValues: {
+      theme: (settings?.theme as ThemeFormValues['theme']) ?? 'auto',
+    },
+  })
 
+  const handleSubmit = form.onSubmit(async (values) => {
     startTransition(async () => {
       try {
-        await settingsDto.updateTheme({ data: { theme } })
+        await settingsDto.updateTheme({ data: { theme: values.theme } })
 
         notifications.show({
           title: '成功',
@@ -33,6 +36,8 @@ export function ThemeForm() {
           color: 'green',
         })
 
+        await queryClient.invalidateQueries({ queryKey: [GET_USER_SETTINGS_CACHE_KEY] })
+        form.resetDirty()
         await refetch()
       } catch (error) {
         notifications.show({
@@ -42,9 +47,7 @@ export function ThemeForm() {
         })
       }
     })
-  }
-
-  const isDirty = theme !== settings?.theme
+  })
 
   return (
     <form onSubmit={handleSubmit}>
@@ -52,12 +55,7 @@ export function ThemeForm() {
         <Radio.Group
           label="カラーテーマを選択"
           description="アプリケーションの外観テーマを変更できます"
-          value={theme}
-          onChange={(value) => {
-            navigate({
-              search: (prev) => ({ ...prev, theme: value as ThemeRouteSearch['theme'] }),
-            })
-          }}
+          {...form.getInputProps('theme')}
         >
           <Stack mt="xs" gap="sm">
             <Radio value="light" label="ライトモード" />
@@ -66,7 +64,7 @@ export function ThemeForm() {
           </Stack>
         </Radio.Group>
 
-        <Button type="submit" loading={isPending} disabled={!isDirty} fullWidth mt="md">
+        <Button type="submit" loading={isPending} disabled={!form.isDirty()} fullWidth mt="md">
           変更を保存
         </Button>
       </Stack>
