@@ -4,7 +4,7 @@ const HOME_HABITS_BADGES = [
   {
     level: 5,
     title: '習慣の一歩',
-    icon: 'IconFootsteps',
+    icon: 'IconCircleDot',
     color: 'blue',
     type: 'habits',
   },
@@ -73,7 +73,7 @@ const HOME_STREAK_BADGES = [
   {
     level: 100,
     title: '100日ストリーク',
-    icon: 'IconFireHydrant',
+    icon: 'IconBolt',
     color: 'red',
     type: 'streak',
   },
@@ -111,7 +111,7 @@ const HOME_HOURS_BADGES = [
   {
     level: 5000,
     title: '5000時間達成',
-    icon: 'IconCalendarEvent',
+    icon: 'IconHourglass',
     color: 'violet',
     type: 'hours',
   },
@@ -139,8 +139,8 @@ export const HOME_BADGES_BY_CATEGORY = {
 } as const satisfies Record<'habits' | 'days' | 'streak' | 'hours', readonly HomeBadge[]>
 
 export const HOME_BADGE_CATEGORY_LABELS = {
-  habits: '習慣数',
-  days: '完了日数',
-  streak: '継続日数',
-  hours: '作業時間',
+  habits: '登録習慣数',
+  days: '累計達成日数',
+  streak: '最長連続日数',
+  hours: '累計作業時間',
 } as const satisfies Record<keyof typeof HOME_BADGES_BY_CATEGORY, string>

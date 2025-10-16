@@ -1,12 +1,24 @@
-import { Anchor, Badge, Card, Group, Progress, SimpleGrid, Stack, Text, Title, Tooltip, useComputedColorScheme } from '@mantine/core'
+import {
+  Anchor,
+  Badge,
+  Card,
+  Group,
+  Progress,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+  Tooltip,
+  useComputedColorScheme,
+} from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { IconInfoCircle, IconTrophy } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
+import { getIconComponent } from '~/features/habits/utils/icon-mapper'
 import {
   HOME_BADGE_CATEGORY_LABELS,
   HOME_BADGES_BY_CATEGORY,
 } from '~/features/home/constants/home-badges'
-import { getIconComponent } from '~/features/habits/utils/icon-mapper'
 import {
   calculateBadgeCompletionRate,
   getHomeBadgesByCategory,
@@ -39,21 +51,22 @@ export function HomeBadgeCollection() {
     }
 
     const renderBadgeInfo = (
-      badge: 
-        | typeof HOME_BADGES_BY_CATEGORY.habits[number]
-        | typeof HOME_BADGES_BY_CATEGORY.days[number]
-        | typeof HOME_BADGES_BY_CATEGORY.streak[number]
-        | typeof HOME_BADGES_BY_CATEGORY.hours[number],
+      badge:
+        | (typeof HOME_BADGES_BY_CATEGORY.habits)[number]
+        | (typeof HOME_BADGES_BY_CATEGORY.days)[number]
+        | (typeof HOME_BADGES_BY_CATEGORY.streak)[number]
+        | (typeof HOME_BADGES_BY_CATEGORY.hours)[number],
       category: keyof typeof badgesByCategory,
     ) => {
       const Icon = getIconComponent(badge.icon)
-      const thresholdLabel = category === 'habits' 
-        ? `${badge.level}個達成`
-        : category === 'days'
-        ? `${badge.level}日達成`
-        : category === 'streak'
-        ? `${badge.level}日継続`
-        : `${badge.level}時間達成`
+      const thresholdLabel =
+        category === 'habits'
+          ? `${badge.level}個達成`
+          : category === 'days'
+            ? `${badge.level}日達成`
+            : category === 'streak'
+              ? `${badge.level}日継続`
+              : `${badge.level}時間達成`
 
       return (
         <Card
@@ -113,38 +126,38 @@ export function HomeBadgeCollection() {
           <Card padding="lg" radius="md" withBorder bg={bgColor}>
             <Stack gap="md">
               <Text size="sm" c={textColor}>
-                バッジは、習慣達成の特定のマイルストーンに到達したときに獲得できる勲章です。4つのカテゴリーがあります。
+                バッジは、習慣の達成状況に応じて獲得できる称号です。4つのカテゴリーで様々な目標を達成しましょう。
               </Text>
               <Stack gap="xs">
                 <Text size="sm" fw={600} c={titleColor}>
-                  📊 習慣数バッジ
+                  📊 登録習慣数バッジ
                 </Text>
                 <Text size="xs" c={textColor}>
-                  登録した習慣の総数に応じて獲得できます。
+                  登録した習慣の総数が増えるごとに獲得できます。
                 </Text>
               </Stack>
               <Stack gap="xs">
                 <Text size="sm" fw={600} c={titleColor}>
-                  📅 完了日数バッジ
+                  📅 累計達成日数バッジ
                 </Text>
                 <Text size="xs" c={textColor}>
-                  習慣を完了した累計日数に応じて獲得できます。
+                  すべての習慣で完了した日数の合計が増えるごとに獲得できます。
                 </Text>
               </Stack>
               <Stack gap="xs">
                 <Text size="sm" fw={600} c={titleColor}>
-                  🔥 継続日数バッジ
+                  🔥 最長連続日数バッジ
                 </Text>
                 <Text size="xs" c={textColor}>
-                  連続して習慣を実行した最長記録に応じて獲得できます。
+                  習慣を連続して実行した最長記録が伸びるごとに獲得できます。
                 </Text>
               </Stack>
               <Stack gap="xs">
                 <Text size="sm" fw={600} c={titleColor}>
-                  ⏱️ 作業時間バッジ
+                  ⏱️ 累計作業時間バッジ
                 </Text>
                 <Text size="xs" c={textColor}>
-                  習慣に費やした総時間に応じて獲得できます。
+                  すべての習慣に費やした時間の合計が増えるごとに獲得できます。
                 </Text>
               </Stack>
             </Stack>
@@ -155,7 +168,7 @@ export function HomeBadgeCollection() {
               <Group gap="xs">
                 <IconTrophy size={24} color="var(--mantine-color-blue-6)" />
                 <Text size="lg" fw={600} c={titleColor}>
-                  習慣数バッジ一覧
+                  登録習慣数バッジ一覧
                 </Text>
               </Group>
               <SimpleGrid cols={{ base: 2, xs: 3, sm: 4 }} spacing="md">
@@ -167,7 +180,7 @@ export function HomeBadgeCollection() {
               <Group gap="xs">
                 <IconTrophy size={24} color="var(--mantine-color-green-6)" />
                 <Text size="lg" fw={600} c={titleColor}>
-                  完了日数バッジ一覧
+                  累計達成日数バッジ一覧
                 </Text>
               </Group>
               <SimpleGrid cols={{ base: 2, xs: 3, sm: 4 }} spacing="md">
@@ -179,7 +192,7 @@ export function HomeBadgeCollection() {
               <Group gap="xs">
                 <IconTrophy size={24} color="var(--mantine-color-orange-6)" />
                 <Text size="lg" fw={600} c={titleColor}>
-                  継続日数バッジ一覧
+                  最長連続日数バッジ一覧
                 </Text>
               </Group>
               <SimpleGrid cols={{ base: 2, xs: 3, sm: 4 }} spacing="md">
@@ -191,7 +204,7 @@ export function HomeBadgeCollection() {
               <Group gap="xs">
                 <IconTrophy size={24} color="var(--mantine-color-violet-6)" />
                 <Text size="lg" fw={600} c={titleColor}>
-                  作業時間バッジ一覧
+                  累計作業時間バッジ一覧
                 </Text>
               </Group>
               <SimpleGrid cols={{ base: 2, xs: 3, sm: 4 }} spacing="md">
@@ -222,7 +235,7 @@ export function HomeBadgeCollection() {
               <IconInfoCircle size={16} />
               バッジとは?
             </Anchor>
-            <Badge size="lg" color="violet" variant="light">
+            <Badge size="lg" color="blue" variant="light">
               {unlockedCount}/{totalCount}
             </Badge>
           </Group>
@@ -232,22 +245,22 @@ export function HomeBadgeCollection() {
         <Stack gap="xs">
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
-              達成率
+              バッジ獲得進捗
             </Text>
-            <Text size="sm" fw={600}>
-              {completionRate}%
+            <Text size="sm" fw={600} c="blue">
+              {unlockedCount}/{totalCount}個 ({completionRate}%)
             </Text>
           </Group>
           <div className="relative overflow-hidden">
             <Progress
               value={completionRate}
-              color="violet"
+              color="blue"
               size="lg"
               radius="md"
               styles={{
                 section: {
                   background:
-                    'linear-gradient(90deg, var(--mantine-color-violet-5) 0%, var(--mantine-color-violet-7) 50%, var(--mantine-color-violet-5) 100%)',
+                    'linear-gradient(90deg, var(--mantine-color-blue-5) 0%, var(--mantine-color-blue-7) 50%, var(--mantine-color-blue-5) 100%)',
                   backgroundSize: '200% 100%',
                   animation: 'shimmer 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
                   position: 'relative',
@@ -286,30 +299,27 @@ export function HomeBadgeCollection() {
                 <SimpleGrid cols={4} spacing="xs">
                   {badges.map((badge) => {
                     const BadgeIcon = getIconComponent(badge.icon)
-                    const getUnitLabel = () => {
-                      switch (category) {
-                        case 'habits':
-                          return '個'
-                        case 'days':
-                          return '日'
-                        case 'streak':
-                          return '日'
-                        case 'hours':
-                          return '時間'
-                        default:
-                          return ''
-                      }
-                    }
-                    const unitLabel = getUnitLabel()
                     
+                    const getTooltipLabel = () => {
+                      if (badge.unlocked) {
+                        return `🎉 ${badge.title} - 獲得済み`
+                      }
+                      
+                      const statusText = category === 'habits' 
+                        ? `あと${badge.remainingValue}個の習慣を登録`
+                        : category === 'days'
+                        ? `あと${badge.remainingValue}日達成`
+                        : category === 'streak'
+                        ? `あと${badge.remainingValue}日連続`
+                        : `あと${badge.remainingValue}時間作業`
+                      
+                      return `${badge.title} - ${statusText}で獲得`
+                    }
+
                     return (
                       <Tooltip
                         key={`${badge.type}-${badge.level}`}
-                        label={
-                          badge.unlocked
-                            ? `${badge.title} (達成)`
-                            : `${badge.title} (未達成: あと${badge.remainingValue}${unitLabel})`
-                        }
+                        label={getTooltipLabel()}
                         withArrow
                       >
                         <Card

@@ -1,9 +1,19 @@
-import { Anchor, Badge, Card, Group, Progress, Stack, Text, Title, useComputedColorScheme } from '@mantine/core'
+import {
+  Anchor,
+  Badge,
+  Card,
+  Group,
+  Progress,
+  Stack,
+  Text,
+  Title,
+  useComputedColorScheme,
+} from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { IconInfoCircle, IconStar } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
-import { getHomeLevelInfo, HOME_LEVEL_TITLES } from '~/features/home/constants/home-level-titles'
 import { getIconComponent } from '~/features/habits/utils/icon-mapper'
+import { getHomeLevelInfo, HOME_LEVEL_TITLES } from '~/features/home/constants/home-level-titles'
 import { calculateHomeLevelProgress } from '~/features/home/utils/home-level-utils'
 
 export function HomeOverallLevelCard() {
@@ -38,7 +48,7 @@ export function HomeOverallLevelCard() {
       return computedColorScheme === 'dark' ? `${color}.3` : `${color}.9`
     }
 
-    const renderLevelInfo = (level: typeof HOME_LEVEL_TITLES[number], prevMaxLevel: number) => {
+    const renderLevelInfo = (level: (typeof HOME_LEVEL_TITLES)[number], prevMaxLevel: number) => {
       const Icon = getIconComponent(level.info.icon)
       const startLevel = prevMaxLevel + 1
 
@@ -101,7 +111,8 @@ export function HomeOverallLevelCard() {
                   section: {
                     background: `linear-gradient(90deg, var(--mantine-color-${level.info.color}-5) 0%, var(--mantine-color-${level.info.color}-7) 50%, var(--mantine-color-${level.info.color}-5) 100%)`,
                     backgroundSize: '200% 100%',
-                    animation: 'shimmer 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
+                    animation:
+                      'shimmer 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
                     position: 'relative',
                   },
                 }}
@@ -135,14 +146,22 @@ export function HomeOverallLevelCard() {
           <Card padding="lg" radius="md" withBorder bg={bgColor}>
             <Stack gap="md">
               <Text size="sm" c={textColor}>
-                総合レベルは、全ての習慣の達成状況を合計したものです。各習慣には継続レベルと時間レベルがあり、それらを合計した値が総合レベルになります。
+                総合レベルは、あなたの習慣達成状況を総合的に評価した指標です。各習慣の継続レベル（達成日数）と時間レベル（作業時間）を合計して算出されます。
               </Text>
               <Stack gap="xs">
                 <Text size="sm" fw={600} c={titleColor}>
-                  📊 総合レベルの計算方法
+                  📊 総合レベルの計算式
                 </Text>
                 <Text size="xs" c={textColor}>
-                  総合レベル = 各習慣の(継続レベル + 時間レベル)の合計
+                  総合レベル = すべての習慣の（継続レベル + 時間レベル）の合計
+                </Text>
+              </Stack>
+              <Stack gap="xs">
+                <Text size="sm" fw={600} c={titleColor}>
+                  🎯 レベルアップするには
+                </Text>
+                <Text size="xs" c={textColor}>
+                  習慣を継続して達成日数を増やしたり、作業時間を積み重ねることで総合レベルが上がり、新しい称号を獲得できます。
                 </Text>
               </Stack>
             </Stack>
@@ -208,9 +227,9 @@ export function HomeOverallLevelCard() {
           <Stack gap="xs">
             <Group justify="space-between">
               <Text size="sm" c="dimmed">
-                総合Lv {homeAggregatedLevel.totalLevel} / {nextLevelInfo.minLevel}
+                現在 総合Lv.{homeAggregatedLevel.totalLevel} / 次のレベル Lv.{nextLevelInfo.minLevel}
               </Text>
-              <Text size="sm" fw={600}>
+              <Text size="sm" fw={600} c={levelInfo.info.color}>
                 {progressPercent}%
               </Text>
             </Group>
@@ -224,7 +243,8 @@ export function HomeOverallLevelCard() {
                   section: {
                     background: `linear-gradient(90deg, var(--mantine-color-${levelInfo.info.color}-5) 0%, var(--mantine-color-${levelInfo.info.color}-7) 50%, var(--mantine-color-${levelInfo.info.color}-5) 100%)`,
                     backgroundSize: '200% 100%',
-                    animation: 'shimmer 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
+                    animation:
+                      'shimmer 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite',
                     position: 'relative',
                   },
                 }}
@@ -239,7 +259,7 @@ export function HomeOverallLevelCard() {
               />
             </div>
             <Text size="xs" c="dimmed" ta="right">
-              次: {nextLevelInfo.info.title} (Lv.{nextLevelInfo.minLevel})
+              次の称号: {nextLevelInfo.info.title} (あと{nextLevelInfo.minLevel - homeAggregatedLevel.totalLevel}レベル)
             </Text>
           </Stack>
         )}
@@ -253,23 +273,23 @@ export function HomeOverallLevelCard() {
         <Group grow>
           <Stack gap={4}>
             <Text size="xs" c="dimmed" ta="center">
-              習慣数
+              登録習慣
             </Text>
             <Text size="xl" fw={700} ta="center" c="blue">
-              {homeAggregatedLevel.totalHabits}
+              {homeAggregatedLevel.totalHabits}個
             </Text>
           </Stack>
           <Stack gap={4}>
             <Text size="xs" c="dimmed" ta="center">
-              完了日数
+              累計達成
             </Text>
             <Text size="xl" fw={700} ta="center" c="green">
-              {homeAggregatedLevel.totalCompletionDays}
+              {homeAggregatedLevel.totalCompletionDays}日
             </Text>
           </Stack>
           <Stack gap={4}>
             <Text size="xs" c="dimmed" ta="center">
-              最長継続
+              最長連続
             </Text>
             <Text size="xl" fw={700} ta="center" c="orange">
               {homeAggregatedLevel.longestStreak}日
@@ -277,7 +297,7 @@ export function HomeOverallLevelCard() {
           </Stack>
           <Stack gap={4}>
             <Text size="xs" c="dimmed" ta="center">
-              総時間
+              累計時間
             </Text>
             <Text size="xl" fw={700} ta="center" c="violet">
               {Math.floor(homeAggregatedLevel.totalHoursDecimal)}h
