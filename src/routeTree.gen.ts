@@ -11,10 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as HabitsIndexRouteImport } from './routes/habits/index'
 import { Route as FocusIndexRouteImport } from './routes/focus/index'
 import { Route as CheckoutIndexRouteImport } from './routes/checkout/index'
+import { Route as SettingsThemeRouteImport } from './routes/settings/theme'
+import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
+import { Route as SettingsNotificationsRouteImport } from './routes/settings/notifications'
+import { Route as SettingsAccountRouteImport } from './routes/settings/account'
 import { Route as HabitsHabitIdRouteImport } from './routes/habits/$habitId'
 import { Route as CustomerPortalRouteImport } from './routes/customer/portal'
 import { Route as CheckoutSuccessRouteImport } from './routes/checkout/success'
@@ -34,11 +37,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsIndexRoute = SettingsIndexRouteImport.update({
-  id: '/settings/',
-  path: '/settings/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const HabitsIndexRoute = HabitsIndexRouteImport.update({
   id: '/habits/',
   path: '/habits/',
@@ -52,6 +50,26 @@ const FocusIndexRoute = FocusIndexRouteImport.update({
 const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
   id: '/checkout/',
   path: '/checkout/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsThemeRoute = SettingsThemeRouteImport.update({
+  id: '/settings/theme',
+  path: '/settings/theme',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsProfileRoute = SettingsProfileRouteImport.update({
+  id: '/settings/profile',
+  path: '/settings/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsNotificationsRoute = SettingsNotificationsRouteImport.update({
+  id: '/settings/notifications',
+  path: '/settings/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsAccountRoute = SettingsAccountRouteImport.update({
+  id: '/settings/account',
+  path: '/settings/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HabitsHabitIdRoute = HabitsHabitIdRouteImport.update({
@@ -105,10 +123,13 @@ export interface FileRoutesByFullPath {
   '/checkout/success': typeof CheckoutSuccessRoute
   '/customer/portal': typeof CustomerPortalRoute
   '/habits/$habitId': typeof HabitsHabitIdRoute
+  '/settings/account': typeof SettingsAccountRoute
+  '/settings/notifications': typeof SettingsNotificationsRoute
+  '/settings/profile': typeof SettingsProfileRoute
+  '/settings/theme': typeof SettingsThemeRoute
   '/checkout': typeof CheckoutIndexRoute
   '/focus': typeof FocusIndexRoute
   '/habits': typeof HabitsIndexRoute
-  '/settings': typeof SettingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -121,10 +142,13 @@ export interface FileRoutesByTo {
   '/checkout/success': typeof CheckoutSuccessRoute
   '/customer/portal': typeof CustomerPortalRoute
   '/habits/$habitId': typeof HabitsHabitIdRoute
+  '/settings/account': typeof SettingsAccountRoute
+  '/settings/notifications': typeof SettingsNotificationsRoute
+  '/settings/profile': typeof SettingsProfileRoute
+  '/settings/theme': typeof SettingsThemeRoute
   '/checkout': typeof CheckoutIndexRoute
   '/focus': typeof FocusIndexRoute
   '/habits': typeof HabitsIndexRoute
-  '/settings': typeof SettingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -138,10 +162,13 @@ export interface FileRoutesById {
   '/checkout/success': typeof CheckoutSuccessRoute
   '/customer/portal': typeof CustomerPortalRoute
   '/habits/$habitId': typeof HabitsHabitIdRoute
+  '/settings/account': typeof SettingsAccountRoute
+  '/settings/notifications': typeof SettingsNotificationsRoute
+  '/settings/profile': typeof SettingsProfileRoute
+  '/settings/theme': typeof SettingsThemeRoute
   '/checkout/': typeof CheckoutIndexRoute
   '/focus/': typeof FocusIndexRoute
   '/habits/': typeof HabitsIndexRoute
-  '/settings/': typeof SettingsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -156,10 +183,13 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/customer/portal'
     | '/habits/$habitId'
+    | '/settings/account'
+    | '/settings/notifications'
+    | '/settings/profile'
+    | '/settings/theme'
     | '/checkout'
     | '/focus'
     | '/habits'
-    | '/settings'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -172,10 +202,13 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/customer/portal'
     | '/habits/$habitId'
+    | '/settings/account'
+    | '/settings/notifications'
+    | '/settings/profile'
+    | '/settings/theme'
     | '/checkout'
     | '/focus'
     | '/habits'
-    | '/settings'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -188,10 +221,13 @@ export interface FileRouteTypes {
     | '/checkout/success'
     | '/customer/portal'
     | '/habits/$habitId'
+    | '/settings/account'
+    | '/settings/notifications'
+    | '/settings/profile'
+    | '/settings/theme'
     | '/checkout/'
     | '/focus/'
     | '/habits/'
-    | '/settings/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -201,10 +237,13 @@ export interface RootRouteChildren {
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   CustomerPortalRoute: typeof CustomerPortalRoute
   HabitsHabitIdRoute: typeof HabitsHabitIdRoute
+  SettingsAccountRoute: typeof SettingsAccountRoute
+  SettingsNotificationsRoute: typeof SettingsNotificationsRoute
+  SettingsProfileRoute: typeof SettingsProfileRoute
+  SettingsThemeRoute: typeof SettingsThemeRoute
   CheckoutIndexRoute: typeof CheckoutIndexRoute
   FocusIndexRoute: typeof FocusIndexRoute
   HabitsIndexRoute: typeof HabitsIndexRoute
-  SettingsIndexRoute: typeof SettingsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -222,13 +261,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/': {
-      id: '/settings/'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/habits/': {
@@ -250,6 +282,34 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/theme': {
+      id: '/settings/theme'
+      path: '/settings/theme'
+      fullPath: '/settings/theme'
+      preLoaderRoute: typeof SettingsThemeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/profile': {
+      id: '/settings/profile'
+      path: '/settings/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof SettingsProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/notifications': {
+      id: '/settings/notifications'
+      path: '/settings/notifications'
+      fullPath: '/settings/notifications'
+      preLoaderRoute: typeof SettingsNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/account': {
+      id: '/settings/account'
+      path: '/settings/account'
+      fullPath: '/settings/account'
+      preLoaderRoute: typeof SettingsAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/habits/$habitId': {
@@ -335,10 +395,13 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   CustomerPortalRoute: CustomerPortalRoute,
   HabitsHabitIdRoute: HabitsHabitIdRoute,
+  SettingsAccountRoute: SettingsAccountRoute,
+  SettingsNotificationsRoute: SettingsNotificationsRoute,
+  SettingsProfileRoute: SettingsProfileRoute,
+  SettingsThemeRoute: SettingsThemeRoute,
   CheckoutIndexRoute: CheckoutIndexRoute,
   FocusIndexRoute: FocusIndexRoute,
   HabitsIndexRoute: HabitsIndexRoute,
-  SettingsIndexRoute: SettingsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

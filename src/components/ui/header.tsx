@@ -8,6 +8,7 @@ import {
 } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense } from 'react'
+import { NotificationPopover } from '~/features/notifications/components/notification-popover'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
@@ -78,6 +79,8 @@ export function Header() {
                   習慣を記録する
                 </Button>
 
+                <NotificationPopover />
+
                 <ThemeToggle />
 
                 <Menu shadow="md" width={200}>
@@ -108,7 +111,7 @@ export function Header() {
                     <Menu.Item
                       leftSection={<IconSettings size={14} />}
                       component={Link}
-                      to="/settings"
+                      to="/settings/profile"
                     >
                       設定
                     </Menu.Item>
@@ -164,6 +167,7 @@ export function Header() {
                 >
                   <IconClock size={16} />
                 </Button>
+                <NotificationPopover />
                 <ThemeToggle />
                 <Menu shadow="md" width={200}>
                   <Menu.Target>
@@ -210,7 +214,7 @@ export function Header() {
                     <Menu.Item
                       leftSection={<IconSettings size={14} />}
                       component={Link}
-                      to="/settings"
+                      to="/settings/profile"
                     >
                       設定
                     </Menu.Item>

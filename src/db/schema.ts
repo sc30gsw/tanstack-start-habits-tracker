@@ -136,12 +136,65 @@ export const passkeys = sqliteTable('passkeys', {
 export const settings = sqliteTable('settings', {
   id: text().primaryKey(),
   theme: text().default('auto'), // 'light' | 'dark' | 'auto'
+
+  // Notification settings
+  notificationsEnabled: integer('notifications_enabled', { mode: 'boolean' }).default(false),
+  dailyReminderTime: text('daily_reminder_time').default('09:00'), // HH:mm format
+  incompleteReminderEnabled: integer('incomplete_reminder_enabled', { mode: 'boolean' }).default(
+    true,
+  ),
+  skippedReminderEnabled: integer('skipped_reminder_enabled', { mode: 'boolean' }).default(true),
+  scheduledReminderEnabled: integer('scheduled_reminder_enabled', { mode: 'boolean' }).default(
+    true,
+  ),
+
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
 })
+
+// Notifications table for in-app reminders
+export const notifications = sqliteTable('notifications', {
+  id: text().primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+
+  // Notification content
+  title: text().notNull(),
+  message: text().notNull(),
+  type: text()
+    .$type<'reminder' | 'habit_incomplete' | 'habit_skipped' | 'habit_scheduled' | 'achievement'>()
+    .default('reminder'),
+
+  // Related habit and record
+  habitId: text('habit_id').references(() => habits.id, { onDelete: 'cascade' }),
+  recordId: text('record_id').references(() => records.id, { onDelete: 'cascade' }),
+
+  // Notification state
+  isRead: integer('is_read', { mode: 'boolean' }).default(false),
+
+  // Timestamps
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  readAt: text('read_at'),
+})
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  habit: one(habits, {
+    fields: [notifications.habitId],
+    references: [habits.id],
+  }),
+  record: one(records, {
+    fields: [notifications.recordId],
+    references: [records.id],
+  }),
+}))
 
 // Habit Levels table for tracking habit progression
 export const habitLevels = sqliteTable(
@@ -184,6 +237,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   records: many(records),
   settings: many(settings),
   habitLevels: many(habitLevels),
+  notifications: many(notifications),
 }))
 
 export const habitsRelations = relations(habits, ({ one, many }) => ({
