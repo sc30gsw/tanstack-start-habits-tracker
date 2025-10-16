@@ -2,7 +2,7 @@ import { Card, Skeleton, Stack, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { z } from 'zod/v4'
-import SettingsLayout from '~/features/settings/components/settings-layout'
+import { SettingsLayout } from '~/features/settings/components/settings-layout'
 import { ThemeForm } from '~/features/settings/components/theme-form'
 
 const searchSchema = z.object({

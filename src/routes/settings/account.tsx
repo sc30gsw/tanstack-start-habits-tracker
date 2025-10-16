@@ -1,7 +1,7 @@
 import { Card, Stack, Text, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { AccountDeleteButton } from '~/features/settings/components/account-delete-button'
-import SettingsLayout from '~/features/settings/components/settings-layout'
+import { SettingsLayout } from '~/features/settings/components/settings-layout'
 
 export const Route = createFileRoute('/settings/account')({
   component: RouteComponent,
