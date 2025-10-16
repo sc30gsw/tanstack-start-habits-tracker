@@ -288,8 +288,8 @@ export function useNotificationGenerator() {
       for (const habit of incompleteHabits) {
         await notificationDto.createNotification({
           data: {
-            title: `未完了: ${habit.name}`,
-            message: '開始した習慣がまだ完了していません。記録を完了させましょう！',
+            title: `予定中: ${habit.name}`,
+            message: '今日の習慣を実行しましょう！継続が力になります。',
             type: 'habit_incomplete',
             habitId: habit.id,
           },
@@ -347,7 +347,7 @@ export function useNotificationGenerator() {
         await notificationDto.createNotification({
           data: {
             title: `${habit.name}をやりませんか？`,
-            message: 'まだ記録がありません。今日も習慣を続けて、目標達成を目指しましょう！',
+            message: 'まだ予定を立てていません。今日も習慣を続けて、目標達成を目指しましょう！',
             type: 'habit_scheduled',
             habitId: habit.id,
           },

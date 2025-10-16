@@ -11,9 +11,9 @@ dayjs.extend(timezone)
 
 const typeLabels = {
   reminder: 'リマインダー',
-  habit_incomplete: '未完了',
+  habit_incomplete: '予定中',
   habit_skipped: 'スキップ',
-  habit_scheduled: '予定',
+  habit_scheduled: '未予定',
   achievement: '達成',
   streak: '継続',
   level_up: 'レベルアップ',
