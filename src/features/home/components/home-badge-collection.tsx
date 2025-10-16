@@ -299,20 +299,21 @@ export function HomeBadgeCollection() {
                 <SimpleGrid cols={4} spacing="xs">
                   {badges.map((badge) => {
                     const BadgeIcon = getIconComponent(badge.icon)
-                    
+
                     const getTooltipLabel = () => {
                       if (badge.unlocked) {
                         return `🎉 ${badge.title} - 獲得済み`
                       }
-                      
-                      const statusText = category === 'habits' 
-                        ? `あと${badge.remainingValue}個の習慣を登録`
-                        : category === 'days'
-                        ? `あと${badge.remainingValue}日達成`
-                        : category === 'streak'
-                        ? `あと${badge.remainingValue}日連続`
-                        : `あと${badge.remainingValue}時間作業`
-                      
+
+                      const statusText =
+                        category === 'habits'
+                          ? `あと${badge.remainingValue}個の習慣を登録`
+                          : category === 'days'
+                            ? `あと${badge.remainingValue}日達成`
+                            : category === 'streak'
+                              ? `あと${badge.remainingValue}日連続`
+                              : `あと${badge.remainingValue}時間作業`
+
                       return `${badge.title} - ${statusText}で獲得`
                     }
 

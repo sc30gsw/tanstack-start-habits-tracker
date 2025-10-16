@@ -227,7 +227,8 @@ export function HomeOverallLevelCard() {
           <Stack gap="xs">
             <Group justify="space-between">
               <Text size="sm" c="dimmed">
-                現在 総合Lv.{homeAggregatedLevel.totalLevel} / 次のレベル Lv.{nextLevelInfo.minLevel}
+                現在 総合Lv.{homeAggregatedLevel.totalLevel} / 次のレベル Lv.
+                {nextLevelInfo.minLevel}
               </Text>
               <Text size="sm" fw={600} c={levelInfo.info.color}>
                 {progressPercent}%
@@ -259,7 +260,8 @@ export function HomeOverallLevelCard() {
               />
             </div>
             <Text size="xs" c="dimmed" ta="right">
-              次の称号: {nextLevelInfo.info.title} (あと{nextLevelInfo.minLevel - homeAggregatedLevel.totalLevel}レベル)
+              次の称号: {nextLevelInfo.info.title} (あと
+              {nextLevelInfo.minLevel - homeAggregatedLevel.totalLevel}レベル)
             </Text>
           </Stack>
         )}
