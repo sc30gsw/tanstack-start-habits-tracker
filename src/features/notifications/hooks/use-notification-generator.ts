@@ -1,36 +1,47 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
 import { useEffect, useRef } from 'react'
 import { GET_USER_SETTINGS_CACHE_KEY } from '~/constants/cache-key'
 import { settingsDto } from '~/features/settings/server/settings-functions'
 import { notificationDto } from '../server/notification-functions'
 
-/**
- * Notification schedule times (HH:mm format)
- * 9:00, 13:00, 17:00, 21:00 (4-hour intervals)
- */
-const NOTIFICATION_TIMES = ['09:00', '13:00', '17:00', '21:00'] as const satisfies readonly string[]
+// Configure dayjs for JST timezone
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 /**
- * Hook to generate notifications based on user settings and habits status
- * This hook checks for incomplete, skipped, and scheduled habits
- * and creates notifications at scheduled times (9:00, 13:00, 17:00, 21:00)
+ * Default notification times in JST (9:00, 13:00, 17:00, 21:00)
+ */
+const DEFAULT_NOTIFICATION_TIMES = ['09:00', '13:00', '17:00', '21:00'] as const
+
+/**
+ * Hook to generate notifications based on user settings
+ * Sends reminder notifications at:
+ * - 9:00, 13:00, 17:00, 21:00 JST (default times) - habit status notifications
+ * - User's custom daily reminder time JST - general reminder only
+ *
+ * Note: This is a client-side hook that only works when the app is open.
+ * For production, consider using a server-side cron job or scheduled task.
  */
 export function useNotificationGenerator() {
-  const lastCheckRef = useRef<string | null>(null)
+  const lastDefaultCheckRef = useRef<string | null>(null)
+  const lastCustomCheckRef = useRef<string | null>(null)
 
-  // Fetch user settings
-  const { data: settings } = useSuspenseQuery({
+  // Fetch user settings (use useQuery instead of useSuspenseQuery to handle unauthenticated users)
+  const { data: settings } = useQuery({
     queryKey: [GET_USER_SETTINGS_CACHE_KEY],
     queryFn: () => settingsDto.getUserSettings(),
     refetchInterval: 60000, // Refetch every minute
+    retry: false, // Don't retry if user is not authenticated
   })
 
   // Check if notifications are enabled
   const notificationsEnabled = settings?.notificationsEnabled ?? false
 
   useEffect(() => {
-    if (!notificationsEnabled) {
+    if (!notificationsEnabled || !settings) {
       return
     }
 
@@ -42,7 +53,9 @@ export function useNotificationGenerator() {
     // Initial check
     checkAndGenerateNotifications()
 
-    return () => clearInterval(intervalId)
+    return () => {
+      clearInterval(intervalId)
+    }
   }, [notificationsEnabled, settings])
 
   /**
@@ -53,60 +66,93 @@ export function useNotificationGenerator() {
       return
     }
 
-    const now = dayjs()
+    // Get current time in JST
+    const now = dayjs().tz('Asia/Tokyo')
     const currentTime = now.format('HH:mm')
     const currentDate = now.format('YYYY-MM-DD')
 
-    // Check if current time matches any notification schedule
-    const isScheduledTime = NOTIFICATION_TIMES.includes(
-      currentTime as (typeof NOTIFICATION_TIMES)[number],
+    // Check default notification times (9:00, 13:00, 17:00, 21:00 JST)
+    const isDefaultTime = DEFAULT_NOTIFICATION_TIMES.includes(
+      currentTime as (typeof DEFAULT_NOTIFICATION_TIMES)[number],
     )
 
-    if (!isScheduledTime) {
-      return
+    if (isDefaultTime) {
+      const checkKey = `${currentDate}_${currentTime}_default`
+      if (lastDefaultCheckRef.current !== checkKey) {
+        lastDefaultCheckRef.current = checkKey
+        await generateDefaultTimeNotifications(currentTime, settings)
+      }
     }
 
-    // Prevent duplicate notifications in the same minute
-    const checkKey = `${currentDate}_${currentTime}`
-    if (lastCheckRef.current === checkKey) {
-      return
-    }
-    lastCheckRef.current = checkKey
-
-    try {
-      // Generate daily reminder notification
-      if (currentTime === settings.dailyReminderTime) {
-        await generateDailyReminder()
+    // Check custom reminder time
+    const isCustomTime = settings.dailyReminderTime === currentTime
+    if (isCustomTime) {
+      const checkKey = `${currentDate}_${currentTime}_custom`
+      if (lastCustomCheckRef.current !== checkKey) {
+        lastCustomCheckRef.current = checkKey
+        await generateCustomReminderNotification()
       }
-
-      // Generate habit-specific notifications
-      if (settings.incompleteReminderEnabled) {
-        await generateIncompleteHabitNotifications()
-      }
-
-      if (settings.skippedReminderEnabled) {
-        await generateSkippedHabitNotifications()
-      }
-
-      if (settings.scheduledReminderEnabled) {
-        await generateScheduledHabitNotifications()
-      }
-    } catch (error) {
-      console.error('Failed to generate notifications:', error)
     }
   }
 
   /**
-   * Generate daily reminder notification
+   * Generate notifications for default times (9:00, 13:00, 17:00, 21:00)
+   * These include habit status notifications
    */
-  const generateDailyReminder = async () => {
-    await notificationDto.createNotification({
-      data: {
-        title: '今日の習慣を確認しましょう',
-        message: '習慣の実行状況を記録して、継続的な成長を目指しましょう！',
-        type: 'reminder',
-      },
-    })
+  const generateDefaultTimeNotifications = async (
+    time: string,
+    userSettings: Awaited<ReturnType<typeof settingsDto.getUserSettings>>,
+  ) => {
+    const timeMessages: Record<string, string> = {
+      '09:00': '今日の習慣を始めましょう！朝の習慣を実行する時間です。',
+      '13:00': 'お昼の習慣チェック！午前中の習慣を記録しましたか？',
+      '17:00': '夕方の習慣確認！今日の目標達成まであと少しです。',
+      '21:00': '今日の習慣を振り返りましょう。まだ実行していない習慣はありませんか？',
+    }
+
+    try {
+      // Always send the main reminder
+      await notificationDto.createNotification({
+        data: {
+          title: '今日の習慣を確認しましょう',
+          message: timeMessages[time] || '習慣の実行状況を記録して、継続的な成長を目指しましょう！',
+          type: 'reminder',
+        },
+      })
+
+      // Generate habit-specific notifications if enabled
+      if (userSettings.incompleteReminderEnabled) {
+        await generateIncompleteHabitNotifications()
+      }
+
+      if (userSettings.skippedReminderEnabled) {
+        await generateSkippedHabitNotifications()
+      }
+
+      if (userSettings.scheduledReminderEnabled) {
+        await generateScheduledHabitNotifications()
+      }
+    } catch (error) {
+      console.error('Failed to generate default time notifications:', error)
+    }
+  }
+
+  /**
+   * Generate custom reminder notification (user-set time)
+   * Only sends a general reminder, no habit status notifications
+   */
+  const generateCustomReminderNotification = async () => {
+    try {
+      await notificationDto.createNotification({
+        data: {
+          title: 'リマインダー',
+          message: '設定した時刻になりました。今日の習慣を確認しましょう！',
+          type: 'reminder',
+        },
+      })
+    } catch (error) {
+      console.error('Failed to generate custom reminder:', error)
+    }
   }
 
   /**
@@ -114,16 +160,28 @@ export function useNotificationGenerator() {
    * Incomplete = records with 'active' status or no record for today
    */
   const generateIncompleteHabitNotifications = async () => {
-    // TODO: Fetch today's incomplete habits
-    // This would require a new server function to fetch habits with incomplete records
-    // For now, we'll generate a generic notification
-    await notificationDto.createNotification({
-      data: {
-        title: '未完了の習慣があります',
-        message: '今日実行予定の習慣を確認してください',
-        type: 'habit_incomplete',
-      },
-    })
+    try {
+      const habitStatuses = await notificationDto.getTodayHabitStatuses()
+      const incompleteHabits = habitStatuses.incomplete
+
+      if (incompleteHabits.length === 0) {
+        return
+      }
+
+      // Generate a notification for each incomplete habit
+      for (const habit of incompleteHabits) {
+        await notificationDto.createNotification({
+          data: {
+            title: `未完了: ${habit.name}`,
+            message: '開始した習慣がまだ完了していません。記録を完了させましょう！',
+            type: 'habit_incomplete',
+            habitId: habit.id,
+          },
+        })
+      }
+    } catch (error) {
+      console.error('Failed to generate incomplete habit notifications:', error)
+    }
   }
 
   /**
@@ -131,15 +189,28 @@ export function useNotificationGenerator() {
    * Skipped = records with 'skipped' status
    */
   const generateSkippedHabitNotifications = async () => {
-    // TODO: Fetch today's skipped habits
-    // This would require a new server function to fetch habits with skipped status
-    await notificationDto.createNotification({
-      data: {
-        title: 'スキップした習慣があります',
-        message: 'まだ時間があります。今日の習慣を実行しましょう！',
-        type: 'habit_skipped',
-      },
-    })
+    try {
+      const habitStatuses = await notificationDto.getTodayHabitStatuses()
+      const skippedHabits = habitStatuses.skipped
+
+      if (skippedHabits.length === 0) {
+        return
+      }
+
+      // Generate a notification for each skipped habit
+      for (const habit of skippedHabits) {
+        await notificationDto.createNotification({
+          data: {
+            title: `スキップ: ${habit.name}`,
+            message: 'この習慣をスキップしました。明日は実行できるよう頑張りましょう！',
+            type: 'habit_skipped',
+            habitId: habit.id,
+          },
+        })
+      }
+    } catch (error) {
+      console.error('Failed to generate skipped habit notifications:', error)
+    }
   }
 
   /**
@@ -147,15 +218,28 @@ export function useNotificationGenerator() {
    * Scheduled = habits that have no record for today
    */
   const generateScheduledHabitNotifications = async () => {
-    // TODO: Fetch habits with no records for today
-    // This would require a new server function
-    await notificationDto.createNotification({
-      data: {
-        title: '実行予定の習慣があります',
-        message: '今日実行する習慣を記録しましょう',
-        type: 'habit_scheduled',
-      },
-    })
+    try {
+      const habitStatuses = await notificationDto.getTodayHabitStatuses()
+      const scheduledHabits = habitStatuses.scheduled
+
+      if (scheduledHabits.length === 0) {
+        return
+      }
+
+      // Generate a notification for each scheduled habit
+      for (const habit of scheduledHabits) {
+        await notificationDto.createNotification({
+          data: {
+            title: `予定: ${habit.name}`,
+            message: 'この習慣はまだ実行されていません。今日の目標を達成しましょう！',
+            type: 'habit_scheduled',
+            habitId: habit.id,
+          },
+        })
+      }
+    } catch (error) {
+      console.error('Failed to generate scheduled habit notifications:', error)
+    }
   }
 
   return {

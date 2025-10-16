@@ -1,11 +1,25 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
 import { and, desc, eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { db } from '~/db'
-import { notifications } from '~/db/schema'
+import { habits, notifications, records } from '~/db/schema'
 import { auth } from '~/lib/auth'
+
+// Configure dayjs for JST timezone
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+/**
+ * Get current date in JST timezone (YYYY-MM-DD format)
+ */
+function getTodayInJST(): string {
+  return dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
+}
 
 const getNotifications = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await auth.api.getSession(getRequest())
@@ -169,6 +183,81 @@ const createNotification = createServerFn({ method: 'POST' })
     return { success: true, notificationId }
   })
 
+/**
+ * Get today's habit statuses for notification generation
+ * Returns habits categorized by their status for today (JST timezone)
+ */
+const getTodayHabitStatuses = createServerFn({ method: 'GET' }).handler(async () => {
+  const session = await auth.api.getSession(getRequest())
+
+  if (!session?.user) {
+    throw new Error('Unauthorized')
+  }
+
+  const todayJST = getTodayInJST()
+
+  // Get all user's habits
+  const userHabits = await db.query.habits.findMany({
+    where: eq(habits.userId, session.user.id),
+    columns: {
+      id: true,
+      name: true,
+      color: true,
+    },
+  })
+
+  // Get today's records for these habits
+  const todayRecords = await db.query.records.findMany({
+    where: and(eq(records.userId, session.user.id), eq(records.date, todayJST)),
+    columns: {
+      id: true,
+      habitId: true,
+      status: true,
+    },
+  })
+
+  // Create a map of habitId -> record
+  const recordMap = new Map(todayRecords.map((record) => [record.habitId, record]))
+
+  // Categorize habits by status
+  const incompleteHabits: typeof userHabits = []
+  const skippedHabits: typeof userHabits = []
+  const scheduledHabits: typeof userHabits = []
+  const completedHabits: typeof userHabits = []
+
+  for (const habit of userHabits) {
+    const record = recordMap.get(habit.id)
+
+    if (!record) {
+      // No record for today = scheduled
+      scheduledHabits.push(habit)
+      continue
+    }
+
+    switch (record.status) {
+      case 'completed':
+        completedHabits.push(habit)
+        break
+
+      case 'skipped':
+        skippedHabits.push(habit)
+        break
+
+      case 'active':
+        incompleteHabits.push(habit)
+        break
+    }
+  }
+
+  return {
+    todayJST,
+    incomplete: incompleteHabits,
+    skipped: skippedHabits,
+    scheduled: scheduledHabits,
+    completed: completedHabits,
+  }
+})
+
 export const notificationDto = {
   getNotifications,
   getUnreadNotificationsCount,
@@ -176,6 +265,7 @@ export const notificationDto = {
   markAllNotificationsAsRead,
   deleteNotification,
   createNotification,
+  getTodayHabitStatuses,
 } as const satisfies {
   getNotifications: typeof getNotifications
   getUnreadNotificationsCount: typeof getUnreadNotificationsCount
@@ -183,4 +273,5 @@ export const notificationDto = {
   markAllNotificationsAsRead: typeof markAllNotificationsAsRead
   deleteNotification: typeof deleteNotification
   createNotification: typeof createNotification
+  getTodayHabitStatuses: typeof getTodayHabitStatuses
 }
