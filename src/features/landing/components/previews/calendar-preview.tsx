@@ -1,4 +1,5 @@
 import { ActionIcon, Box, Card, Flex, Group, Stack, Text } from '@mantine/core'
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 
 const WEEK_DAYS = ['日', '月', '火', '水', '木', '金', '土'] as const satisfies readonly string[]
 
@@ -27,11 +28,13 @@ export function CalendarPreview() {
       {/* ヘッダー */}
       <Group justify="space-between" align="center" mb={4}>
         <ActionIcon variant="subtle" aria-label="前月">
-          ‹
+          <IconChevronLeft size={16} />
         </ActionIcon>
-        <Text fw={500}>2025年01月</Text>
+        <Text fw={500} c="dimmed">
+          2025年01月
+        </Text>
         <ActionIcon variant="subtle" aria-label="翌月">
-          ›
+          <IconChevronRight size={16} />
         </ActionIcon>
       </Group>
 
@@ -75,10 +78,11 @@ export function CalendarPreview() {
                       opacity: 0.35,
                       minWidth: 34,
                       minHeight: '80px',
-                      backgroundColor: 'transparent',
+                      backgroundColor: '#1a1a1a',
+                      borderColor: '#2a2a2a',
                     }}
                   >
-                    <Text size="sm" fw={500}>
+                    <Text size="sm" fw={500} c="gray.6">
                       {dayNumber - 31}
                     </Text>
                   </Card>
@@ -99,6 +103,8 @@ export function CalendarPreview() {
                     opacity: isCurrentMonth ? 1 : 0.35,
                     minWidth: 34,
                     minHeight: '80px',
+                    backgroundColor: '#1a1a1a',
+                    borderColor: hasRecords ? 'var(--mantine-color-blue-6)' : '#2a2a2a',
                     border: hasRecords ? '2px solid var(--mantine-color-blue-6)' : undefined,
                     boxShadow: hasRecords ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
                     transition: 'all 0.2s ease',
@@ -113,7 +119,7 @@ export function CalendarPreview() {
                   }}
                 >
                   <Stack gap={2} align="stretch">
-                    <Text size="sm" fw={500}>
+                    <Text size="sm" fw={500} c={hasRecords ? 'blue.6' : 'gray.4'}>
                       {dayData.day}
                     </Text>
                     {hasRecords && (
@@ -139,6 +145,7 @@ export function CalendarPreview() {
                             <Text
                               size="9px"
                               ta="left"
+                              c="dimmed"
                               style={{
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',

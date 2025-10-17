@@ -17,7 +17,13 @@ export function StatsPreview() {
   return (
     <Stack gap="lg" style={{ width: '100%' }}>
       {/* 週間パフォーマンスグラフカード */}
-      <Card withBorder padding="lg" radius="md" shadow="sm">
+      <Card
+        withBorder
+        padding="lg"
+        radius="md"
+        shadow="sm"
+        style={{ backgroundColor: '#1a1a1a', borderColor: '#2a2a2a' }}
+      >
         <Stack gap="md">
           <Text size="sm" c="dimmed">
             週間パフォーマンス
@@ -95,6 +101,8 @@ export function StatsPreview() {
             shadow="sm"
             style={{
               flex: '1 1 200px',
+              backgroundColor: '#1a1a1a',
+              borderColor: '#2a2a2a',
               transition: 'all 0.3s ease',
             }}
             styles={{
@@ -119,9 +127,15 @@ export function StatsPreview() {
       </Group>
 
       {/* 習慣別パフォーマンスカード */}
-      <Card withBorder padding="lg" radius="md" shadow="sm">
+      <Card
+        withBorder
+        padding="lg"
+        radius="md"
+        shadow="sm"
+        style={{ backgroundColor: '#1a1a1a', borderColor: '#2a2a2a' }}
+      >
         <Stack gap="md">
-          <Text size="lg" fw={600}>
+          <Text size="lg" fw={600} c="dimmed">
             習慣別パフォーマンス
           </Text>
 
@@ -137,7 +151,7 @@ export function StatsPreview() {
                 gap="md"
                 style={{
                   padding: '0.75rem',
-                  backgroundColor: 'var(--mantine-color-gray-0)',
+                  backgroundColor: '#0f0f0f',
                   borderRadius: '8px',
                 }}
               >

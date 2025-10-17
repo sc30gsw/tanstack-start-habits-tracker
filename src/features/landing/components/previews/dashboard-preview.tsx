@@ -28,6 +28,8 @@ export function DashboardPreview() {
             style={{
               flex: '1 1 200px',
               minWidth: '200px',
+              backgroundColor: '#1a1a1a',
+              borderColor: '#2a2a2a',
               transition: 'all 0.3s ease',
             }}
             styles={{
@@ -53,9 +55,15 @@ export function DashboardPreview() {
       </Group>
 
       {/* 習慣の進捗カード */}
-      <Card withBorder padding="lg" radius="md" shadow="sm">
+      <Card
+        withBorder
+        padding="lg"
+        radius="md"
+        shadow="sm"
+        style={{ backgroundColor: '#1a1a1a', borderColor: '#2a2a2a' }}
+      >
         <Stack gap="md">
-          <Text size="lg" fw={600}>
+          <Text size="lg" fw={600} c="dimmed">
             今週の習慣進捗
           </Text>
 
@@ -82,7 +90,13 @@ export function DashboardPreview() {
           { label: '平均時間', value: '42分', color: 'green' },
           { label: '最長連続', value: '45日', color: 'orange' },
         ].map((stat) => (
-          <Card key={stat.label} withBorder padding="md" radius="md" style={{ flex: '1 1 150px' }}>
+          <Card
+            key={stat.label}
+            withBorder
+            padding="md"
+            radius="md"
+            style={{ flex: '1 1 150px', backgroundColor: '#1a1a1a', borderColor: '#2a2a2a' }}
+          >
             <Stack gap={4}>
               <Text size="xs" c="dimmed">
                 {stat.label}
