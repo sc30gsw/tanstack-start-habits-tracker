@@ -1,6 +1,11 @@
 import { DndContext, type DragEndEvent } from '@dnd-kit/core'
 import { Alert, Group, Stack, Text, useComputedColorScheme } from '@mantine/core'
-import { IconAlertTriangle, IconCheck, IconX } from '@tabler/icons-react'
+import {
+  IconAlertTriangle,
+  IconCheck,
+  IconCircleDashed,
+  IconPlayerSkipForward,
+} from '@tabler/icons-react'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { filter, groupBy, pipe } from 'remeda'
@@ -206,9 +211,9 @@ export function DailyHabitList() {
             <DroppableZone id="scheduled">
               <div>
                 <Group gap="xs" align="center" mb="sm">
-                  <IconCheck size={18} color="var(--mantine-color-blue-6)" />
+                  <IconCircleDashed size={18} color="var(--mantine-color-blue-6)" />
                   <Text size="md" fw={500} c="blue.6">
-                    📋 予定中 ({scheduledHabits.length})
+                    予定中 ({scheduledHabits.length})
                   </Text>
                 </Group>
 
@@ -241,7 +246,7 @@ export function DailyHabitList() {
                 <Group gap="xs" align="center">
                   <IconCheck size={18} color="var(--mantine-color-green-6)" />
                   <Text size="md" fw={500} c="green.6">
-                    ✅ 完了済み ({completedHabits.length})
+                    完了済み ({completedHabits.length})
                   </Text>
                 </Group>
                 {completedHabits.length > 0 && (
@@ -279,9 +284,9 @@ export function DailyHabitList() {
             <DroppableZone id="skipped">
               <div>
                 <Group gap="xs" align="center" mb="sm">
-                  <IconX size={18} color="var(--mantine-color-orange-6)" />
+                  <IconPlayerSkipForward size={18} color="var(--mantine-color-orange-6)" />
                   <Text size="md" fw={500} c="orange.6">
-                    ⏭️ スキップ ({skippedHabits.length})
+                    スキップ ({skippedHabits.length})
                   </Text>
                 </Group>
 
@@ -311,7 +316,7 @@ export function DailyHabitList() {
                 <Group gap="xs" align="center" mb="sm">
                   <IconAlertTriangle size={18} color="var(--mantine-color-gray-6)" />
                   <Text size="md" fw={500} c="gray.6">
-                    ➕ 未予定 ({unscheduledHabits.length})
+                    未完了 ({unscheduledHabits.length})
                   </Text>
                 </Group>
 
@@ -336,7 +341,6 @@ export function DailyHabitList() {
           </>
         )}
 
-        {/* 統計情報（常に表示） */}
         <HabitPriorityFilterPaper habitsWithRecords={habitsWithRecords} />
       </Stack>
     </DndContext>
