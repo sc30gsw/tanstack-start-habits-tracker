@@ -129,7 +129,10 @@ export function useNotificationGenerator() {
       if (lastDefaultCheckRef.current !== checkKey) {
         lastDefaultCheckRef.current = checkKey
 
-        await generateDefaultTimeNotifications(currentTime, settings)
+        await generateDefaultTimeNotifications(
+          currentTime as Parameters<typeof generateDefaultTimeNotifications>[0],
+          settings,
+        )
       }
     }
 
@@ -216,15 +219,15 @@ export function useNotificationGenerator() {
    * These include habit status notifications
    */
   const generateDefaultTimeNotifications = async (
-    time: string,
+    time: '09:00' | '13:00' | '17:00' | '21:00',
     userSettings: Awaited<ReturnType<typeof settingsDto.getUserSettings>>,
   ) => {
-    const timeMessages: Record<string, string> = {
+    const timeMessages = {
       '09:00': '今日の習慣を始めましょう！朝の習慣を実行する時間です。',
       '13:00': 'お昼の習慣チェック！午前中の習慣を記録しましたか？',
       '17:00': '夕方の習慣確認！今日の目標達成まであと少しです。',
       '21:00': '今日の習慣を振り返りましょう。まだ実行していない習慣はありませんか？',
-    }
+    } as const satisfies Record<string, string>
 
     try {
       // Always send the main reminder
