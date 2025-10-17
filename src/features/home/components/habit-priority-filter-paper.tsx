@@ -10,17 +10,13 @@ export function HabitPriorityFilterPaper({
   'habitsWithRecords',
   { habit: HabitEntity; record: RecordEntity; isCompleted: boolean }[]
 >) {
-  // 優先度フィルタ用のstate
   const routeApi = getRouteApi('/')
   const searchParams = routeApi.useSearch()
   const navigate = routeApi.useNavigate()
 
-  // 一意なIDを生成
   const filterId = useId()
 
-  // 現在選択されているフィルタに基づいた完了率を計算
   const completionStats = useMemo(() => {
-    // habitsWithRecordsは既にフィルタリング済みなのでそのまま使用
     const completed = habitsWithRecords.filter((h) => h.isCompleted).length
     const total = habitsWithRecords.length
     const rate = total > 0 ? Math.round((completed / total) * 100) : 0

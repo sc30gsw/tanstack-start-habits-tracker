@@ -20,6 +20,12 @@ import { DraggableHabitCard } from '~/features/home/components/draggable-habit-c
 import { DroppableZone } from '~/features/home/components/droppable-zone'
 import { HabitPriorityFilterPaper } from '~/features/home/components/habit-priority-filter-paper'
 
+const DROPZONE_IDS = {
+  SCHEDULED: 'scheduled',
+  SKIPPED: 'skipped',
+  UNSCHEDULED: 'unscheduled',
+} as const satisfies Record<string, string>
+
 export function DailyHabitList() {
   const apiRoute = getRouteApi('/')
   const searchParams = apiRoute.useSearch()
@@ -31,7 +37,6 @@ export function DailyHabitList() {
 
   const { habits, records } = apiRoute.useLoaderData()
 
-  // 選択された日付の記録をマップ化
   const recordsMap =
     records.data?.reduce(
       (acc, record) => {
@@ -43,14 +48,11 @@ export function DailyHabitList() {
       {} as Record<string, RecordEntity>,
     ) ?? {}
 
-  // 習慣と記録を結合し、優先度フィルタリングを適用
   const habitsWithRecords = pipe(
     habits.data ?? [],
     filter((habit) => {
-      // 優先度フィルタリング
       const filterValue = searchParams.habitFilter
 
-      // フィルター未設定、'all'、undefinedの場合はすべて表示
       if (!filterValue || filterValue === 'all') {
         return true
       }
@@ -73,7 +75,6 @@ export function DailyHabitList() {
       }),
   )
 
-  // 4つのステータスに分類
   const habitsByStatus = pipe(
     habitsWithRecords,
     groupBy((h) => {
@@ -117,9 +118,9 @@ export function DailyHabitList() {
 
   const formatDate = dayjs(selectedDate).format('YYYY年MM月DD日（dd）')
 
-  // フィルタリング状態に応じたメッセージ
   const getFilterMessage = () => {
     const filterValue = searchParams.habitFilter
+
     if (!filterValue || filterValue === 'all') {
       return '習慣が登録されていません。習慣管理ページから新しい習慣を追加してください。'
     }
@@ -153,10 +154,11 @@ export function DailyHabitList() {
 
     try {
       switch (over.id) {
-        case 'scheduled':
+        case DROPZONE_IDS.SCHEDULED:
           await scheduleHabit({ data: { habitId: habitData.habit.id, date } })
           break
-        case 'skipped':
+
+        case DROPZONE_IDS.SKIPPED:
           await skipHabit({
             data: {
               habitId: habitData.habit.id,
@@ -164,12 +166,23 @@ export function DailyHabitList() {
             },
           })
           break
-        case 'unscheduled':
+
+        case DROPZONE_IDS.UNSCHEDULED:
           await unscheduleHabit({ data: { habitId: habitData.habit.id, date } })
           break
       }
 
-      // UI更新
+      // hashがある場合はクリアしてからinvalidate
+      if (window.location.hash) {
+        await router.navigate({
+          to: '.',
+          search: (prev) => prev,
+          hash: undefined,
+          replace: true,
+          resetScroll: false,
+        })
+      }
+
       router.invalidate()
     } catch (error) {
       console.error('Failed to update habit status:', error)
@@ -186,7 +199,6 @@ export function DailyHabitList() {
           </Text>
         </Group>
 
-        {/* 習慣が0件の場合の表示 */}
         {habitsWithRecords.length === 0 ? (
           <Alert
             icon={<IconAlertTriangle size={16} />}
@@ -206,9 +218,7 @@ export function DailyHabitList() {
           </Alert>
         ) : (
           <>
-            {/* 予定中の習慣 */}
-            {/** biome-ignore lint/correctness/useUniqueElementIds: If it is unique ID drag-and-drop will not work properly */}
-            <DroppableZone id="scheduled">
+            <DroppableZone id={DROPZONE_IDS.SCHEDULED}>
               <div>
                 <Group gap="xs" align="center" mb="sm">
                   <IconCircleDashed size={18} color="var(--mantine-color-blue-6)" />
@@ -279,9 +289,7 @@ export function DailyHabitList() {
               )}
             </Stack>
 
-            {/* スキップした習慣 */}
-            {/** biome-ignore lint/correctness/useUniqueElementIds: If it is unique ID drag-and-drop will not work properly */}
-            <DroppableZone id="skipped">
+            <DroppableZone id={DROPZONE_IDS.SKIPPED}>
               <div>
                 <Group gap="xs" align="center" mb="sm">
                   <IconPlayerSkipForward size={18} color="var(--mantine-color-orange-6)" />
@@ -309,9 +317,7 @@ export function DailyHabitList() {
               </div>
             </DroppableZone>
 
-            {/* 未予定の習慣 */}
-            {/** biome-ignore lint/correctness/useUniqueElementIds: If it is unique ID drag-and-drop will not work properly */}
-            <DroppableZone id="unscheduled">
+            <DroppableZone id={DROPZONE_IDS.UNSCHEDULED}>
               <div>
                 <Group gap="xs" align="center" mb="sm">
                   <IconAlertTriangle size={18} color="var(--mantine-color-gray-6)" />
