@@ -18,7 +18,6 @@ import { theme } from '~/theme'
 export const Route = createRootRoute({
   validateSearch: searchSchema,
   beforeLoad: async ({ location, search }) => {
-    // 認証が不要なパブリックルート
     const result = await getCurrentUser()
 
     const publicRoutes = [
@@ -34,7 +33,6 @@ export const Route = createRootRoute({
       return { session: result.user }
     }
 
-    // セッションチェック
     if (!result.success) {
       throw redirect({
         to: '/auth/sign-in',

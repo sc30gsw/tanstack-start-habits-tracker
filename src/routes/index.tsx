@@ -10,7 +10,7 @@ import {
   Text,
   Title,
 } from '@mantine/core'
-import { IconChartLine, IconCheck, IconCloudUpload, IconEdit, IconShare } from '@tabler/icons-react'
+import { IconShare } from '@tabler/icons-react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ja'
@@ -76,7 +76,6 @@ function Home() {
   const totalHabits = habits.success ? (habits.data?.length ?? 0) : 0
   const totalRecords = records.success ? (records.data?.length ?? 0) : 0
 
-  // 選択された日付の完了数を計算
   const completedOnSelectedDate = records.success
     ? (records.data?.filter((r) => r.date === selectedDate && r.status === 'completed').length ?? 0)
     : 0
@@ -207,40 +206,6 @@ function Home() {
             <Divider />
 
             <DailyHabitList />
-          </Stack>
-        </Card>
-
-        <Card withBorder padding="lg">
-          <Stack gap="sm">
-            <Text size="lg" fw={500}>
-              主な機能
-            </Text>
-            <Stack gap="xs">
-              <Group gap="xs" align="flex-start">
-                <IconEdit size={20} color="var(--mantine-color-blue-6)" />
-                <Text>
-                  <strong>習慣管理:</strong> 新しい習慣を作成・編集・削除
-                </Text>
-              </Group>
-              <Group gap="xs" align="flex-start">
-                <IconCheck size={20} color="var(--mantine-color-green-6)" />
-                <Text>
-                  <strong>日次記録:</strong> 習慣の実行状況と時間を記録
-                </Text>
-              </Group>
-              <Group gap="xs" align="flex-start">
-                <IconChartLine size={20} color="var(--mantine-color-violet-6)" />
-                <Text>
-                  <strong>可視化:</strong> ヒートマップとカレンダーで継続状況を確認
-                </Text>
-              </Group>
-              <Group gap="xs" align="flex-start">
-                <IconCloudUpload size={20} color="var(--mantine-color-teal-6)" />
-                <Text>
-                  <strong>自動保存:</strong> 記録は自動的にクラウドに保存
-                </Text>
-              </Group>
-            </Stack>
           </Stack>
         </Card>
       </Stack>
