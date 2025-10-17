@@ -13,11 +13,16 @@ import { Header } from '~/components/ui/header'
 import { getCurrentUser, getCurrentUserPasskey } from '~/features/auth/server/server-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { useNotificationGenerator } from '~/features/notifications/hooks/use-notification-generator'
+import type { FileRouteTypes } from '~/routeTree.gen'
 import { theme } from '~/theme'
 
 export const Route = createRootRoute({
   validateSearch: searchSchema,
   beforeLoad: async ({ location, search }) => {
+    if (location.pathname === '/') {
+      return { search, isAuthenticated: false }
+    }
+
     const result = await getCurrentUser()
 
     const publicRoutes = [
@@ -25,12 +30,12 @@ export const Route = createRootRoute({
       '/auth/sign-up',
       '/auth/sign-out',
       '/auth/passkey-setup',
-    ] as const satisfies readonly string[]
+    ] as const satisfies FileRouteTypes['fullPaths'][]
 
     const isPublicRoute = publicRoutes.includes(location.pathname as (typeof publicRoutes)[number])
 
     if (isPublicRoute) {
-      return { session: result.user }
+      return { session: result.user, search, isAuthenticated: !!result.user }
     }
 
     if (!result.success) {
@@ -45,7 +50,7 @@ export const Route = createRootRoute({
       throw redirect({ to: '/auth/passkey-setup' })
     }
 
-    return { session: result.user }
+    return { session: result.user, search, isAuthenticated: !!result.user }
   },
 
   head: () => ({
@@ -73,21 +78,36 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
-function RootComponent() {
+function AuthenticatedLayout() {
   // Initialize notification generator for logged-in users only
-  // The hook itself will check if notifications are enabled
   useNotificationGenerator()
 
   return (
-    <ClientOnly>
-      <AppShell header={{ height: 60 }} padding="md">
-        <Header />
+    <AppShell header={{ height: 60 }} padding="md">
+      <Header />
+      <AppShell.Main>
+        <Outlet />
+      </AppShell.Main>
+    </AppShell>
+  )
+}
 
-        <AppShell.Main>
-          <Outlet />
-        </AppShell.Main>
-      </AppShell>
-    </ClientOnly>
+function UnauthenticatedLayout() {
+  return (
+    <AppShell header={{ height: 60 }} padding="md">
+      <Header />
+      <AppShell.Main>
+        <Outlet />
+      </AppShell.Main>
+    </AppShell>
+  )
+}
+
+function RootComponent() {
+  const { isAuthenticated } = Route.useRouteContext()
+
+  return (
+    <ClientOnly>{isAuthenticated ? <AuthenticatedLayout /> : <UnauthenticatedLayout />}</ClientOnly>
   )
 }
 

@@ -27,6 +27,11 @@ import { HomeOverallLevelCard } from '~/features/home/components/home-overall-le
 import { ShareHabitsModal } from '~/features/home/components/share-habits-modal'
 import { homeLevelInfoDto } from '~/features/home/server/home-level-functions'
 import { shareDto } from '~/features/home/server/share-functions'
+import { CTASection } from '~/features/landing/components/cta-section'
+import { FeaturesSection } from '~/features/landing/components/features-section'
+import { HeroSection } from '~/features/landing/components/hero-section'
+import { HowItWorksSection } from '~/features/landing/components/how-it-works-section'
+import { LandingFooter } from '~/features/landing/components/landing-footer'
 
 dayjs.locale('ja')
 
@@ -37,6 +42,17 @@ export const Route = createFileRoute('/')({
     return { search }
   },
   loader: async ({ context }) => {
+    if (!context.session) {
+      return {
+        isAuthenticated: false,
+        habits: { success: false, data: [] },
+        records: { success: false, data: [] },
+        shareData: { success: false, data: [] },
+        homeAggregatedLevel: null,
+      }
+    }
+
+    // If authenticated, load full dashboard data
     const today = dayjs().format('YYYY-MM-DD')
     const selectedDate = context.search.selectedDate ?? today
 
@@ -56,6 +72,7 @@ export const Route = createFileRoute('/')({
     ])
 
     return {
+      isAuthenticated: true,
       habits: habitsResult,
       records: recordsResult,
       shareData: shareDataResult,
@@ -65,9 +82,24 @@ export const Route = createFileRoute('/')({
 })
 
 function Home() {
-  const { habits, records } = Route.useLoaderData()
+  const loaderData = Route.useLoaderData()
   const navigate = Route.useNavigate()
   const searchParams = Route.useSearch()
+  const copyId = useId()
+
+  if (!loaderData.isAuthenticated) {
+    return (
+      <>
+        <HeroSection />
+        <FeaturesSection />
+        <HowItWorksSection />
+        <CTASection />
+        <LandingFooter />
+      </>
+    )
+  }
+
+  const { habits, records } = loaderData
 
   const today = dayjs().format('YYYY-MM-DD')
   // 選択された日付を取得（未選択の場合は今日）
@@ -79,8 +111,6 @@ function Home() {
   const completedOnSelectedDate = records.success
     ? (records.data?.filter((r) => r.date === selectedDate && r.status === 'completed').length ?? 0)
     : 0
-
-  const copyId = useId()
 
   return (
     <Container size="lg" py="xl">

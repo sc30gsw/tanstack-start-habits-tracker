@@ -12,10 +12,18 @@ export function ThemeToggle() {
   const { setColorScheme } = useMantineColorScheme()
   const computedColorScheme = useComputedColorScheme('light', { getInitialValueInEffect: false })
 
-  // Get DB settings
+  // Get DB settings (use useQuery to handle unauthenticated users)
   const { data: settings } = useSuspenseQuery({
     queryKey: [GET_USER_SETTINGS_CACHE_KEY],
-    queryFn: () => settingsDto.getUserSettings(),
+    queryFn: async () => {
+      try {
+        return await settingsDto.getUserSettings()
+      } catch {
+        // Return null for unauthenticated users
+        return null
+      }
+    },
+    retry: false,
   })
 
   const dbTheme = (settings?.theme as ThemeMode) ?? 'auto'
