@@ -83,7 +83,7 @@ function HabitDetailPage() {
       : []
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="fluid" px="xl" py="xl">
       <Stack gap="md">
         <Group justify="space-between" align="center">
           <Title order={1} c={titleColor}>
