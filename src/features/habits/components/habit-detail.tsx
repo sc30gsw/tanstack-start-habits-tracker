@@ -1,7 +1,9 @@
 import { Grid, Stack, Tabs } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
 import { IconChartBar, IconDashboard } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { CalendarView } from '~/features/habits/components/calendar/calendar-view'
 import { DateDetail } from '~/features/habits/components/calendar/date-detail'
 import { TrendsChart } from '~/features/habits/components/chart/trends-chart'
@@ -42,60 +44,86 @@ export function HabitDetail() {
     }
   }
 
+  // Check if screen is desktop (md breakpoint = 768px in Mantine)
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+
+  // Left panel content
+  const leftPanelContent = (
+    <Stack gap="md">
+      {recordMap && (
+        <CalendarView selectedDateRecord={selectedDateRecord || null} recordMap={recordMap} />
+      )}
+      <DateDetail selectedDateRecord={selectedDateRecord || null} habitId={habit.data?.id ?? ''} />
+    </Stack>
+  )
+
+  // Right panel content
+  const rightPanelContent = (
+    <Tabs value={detailTab} onChange={handleTabChange} variant="pills">
+      <Tabs.List grow>
+        <Tabs.Tab value="dashboard" leftSection={<IconDashboard size={16} />}>
+          ダッシュボード
+        </Tabs.Tab>
+        <Tabs.Tab value="analytics" leftSection={<IconChartBar size={16} />}>
+          分析
+        </Tabs.Tab>
+      </Tabs.List>
+
+      <Tabs.Panel value="dashboard" pt="lg">
+        <Stack gap="lg">
+          <HabitInfoCard />
+          <HabitLevelCard />
+        </Stack>
+      </Tabs.Panel>
+
+      <Tabs.Panel value="analytics" pt="lg">
+        <Stack gap="lg">
+          {records.data && (
+            <>
+              <TrendsChart records={records.data} habitColor={habit.data?.color as HabitColor} />
+              <HeatmapSection records={records.data} habitColor={habit.data?.color as HabitColor} />
+            </>
+          )}
+        </Stack>
+      </Tabs.Panel>
+    </Tabs>
+  )
+
   return (
     <Stack gap="lg">
-      <Grid gutter="md">
-        {/* 左サイドバー: カレンダー＋記録フォーム */}
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <Stack gap="md">
-            {recordMap && (
-              <CalendarView selectedDateRecord={selectedDateRecord || null} recordMap={recordMap} />
-            )}
-            <DateDetail
-              selectedDateRecord={selectedDateRecord || null}
-              habitId={habit.data?.id ?? ''}
-            />
-          </Stack>
-        </Grid.Col>
+      {isDesktop ? (
+        <PanelGroup direction="horizontal" autoSaveId="habit-detail-layout">
+          {/* Left Panel - Calendar & Form */}
+          <Panel defaultSize={33} minSize={20} maxSize={50}>
+            {leftPanelContent}
+          </Panel>
 
-        {/* 右メインエリア: タブコンテンツ */}
-        <Grid.Col span={{ base: 12, md: 8 }}>
-          <Tabs value={detailTab} onChange={handleTabChange} variant="pills">
-            <Tabs.List grow>
-              <Tabs.Tab value="dashboard" leftSection={<IconDashboard size={16} />}>
-                ダッシュボード
-              </Tabs.Tab>
-              <Tabs.Tab value="analytics" leftSection={<IconChartBar size={16} />}>
-                分析
-              </Tabs.Tab>
-            </Tabs.List>
+          {/* Resize Handle */}
+          <PanelResizeHandle
+            className="habit-detail-resize-handle"
+            style={{
+              transition: 'background-color 0.2s ease',
+              cursor: 'col-resize',
+              position: 'relative',
+            }}
+          />
 
-            <Tabs.Panel value="dashboard" pt="lg">
-              <Stack gap="lg">
-                <HabitInfoCard />
-                <HabitLevelCard />
-              </Stack>
-            </Tabs.Panel>
-
-            <Tabs.Panel value="analytics" pt="lg">
-              <Stack gap="lg">
-                {records.data && (
-                  <>
-                    <TrendsChart
-                      records={records.data}
-                      habitColor={habit.data?.color as HabitColor}
-                    />
-                    <HeatmapSection
-                      records={records.data}
-                      habitColor={habit.data?.color as HabitColor}
-                    />
-                  </>
-                )}
-              </Stack>
-            </Tabs.Panel>
-          </Tabs>
-        </Grid.Col>
-      </Grid>
+          {/* Right Panel - Tabs */}
+          <Panel
+            minSize={50}
+            style={{
+              paddingLeft: '12px',
+            }}
+          >
+            {rightPanelContent}
+          </Panel>
+        </PanelGroup>
+      ) : (
+        <Grid gutter="lg">
+          <Grid.Col span={12}>{leftPanelContent}</Grid.Col>
+          <Grid.Col span={12}>{rightPanelContent}</Grid.Col>
+        </Grid>
+      )}
     </Stack>
   )
 }
