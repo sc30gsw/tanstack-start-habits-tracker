@@ -26,6 +26,7 @@ export function HabitDetail() {
 
   const recordMap = records.data?.reduce<Record<string, RecordEntity>>((acc, r) => {
     acc[r.date] = r
+
     return acc
   }, {})
 
@@ -44,10 +45,8 @@ export function HabitDetail() {
     }
   }
 
-  // Check if screen is desktop (md breakpoint = 768px in Mantine)
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
-  // Left panel content
   const leftPanelContent = (
     <Stack gap="md">
       {recordMap && (
@@ -56,8 +55,6 @@ export function HabitDetail() {
       <DateDetail selectedDateRecord={selectedDateRecord || null} habitId={habit.data?.id ?? ''} />
     </Stack>
   )
-
-  // Right panel content
   const rightPanelContent = (
     <Tabs value={detailTab} onChange={handleTabChange} variant="pills">
       <Tabs.List grow>
@@ -93,26 +90,24 @@ export function HabitDetail() {
     <Stack gap="lg">
       {isDesktop ? (
         <PanelGroup direction="horizontal" autoSaveId="habit-detail-layout">
-          {/* Left Panel - Calendar & Form */}
-          <Panel defaultSize={33} minSize={20} maxSize={50}>
+          <Panel defaultSize={33} minSize={20} maxSize={50} style={{ paddingRight: 12 }}>
             {leftPanelContent}
           </Panel>
 
-          {/* Resize Handle */}
           <PanelResizeHandle
             className="habit-detail-resize-handle"
             style={{
+              width: '2px',
               transition: 'background-color 0.2s ease',
               cursor: 'col-resize',
               position: 'relative',
             }}
           />
 
-          {/* Right Panel - Tabs */}
           <Panel
             minSize={50}
             style={{
-              paddingLeft: '12px',
+              paddingLeft: 12,
             }}
           >
             {rightPanelContent}
