@@ -85,6 +85,13 @@
       "when": 1760477720735,
       "tag": "0011_giant_dracula",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1760742175642,
+      "tag": "0012_quiet_golden_guardian",
+      "breakpoints": true
     }
   ]
 }

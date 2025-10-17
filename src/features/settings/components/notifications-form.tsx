@@ -1,4 +1,5 @@
-import { Button, Stack, Switch, Text, TextInput } from '@mantine/core'
+import { Button, Stack, Switch, Text } from '@mantine/core'
+import { TimePicker } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
@@ -9,9 +10,10 @@ import { settingsDto } from '~/features/settings/server/settings-functions'
 
 const notificationSettingsSchema = z.object({
   notificationsEnabled: z.boolean(),
+  customReminderEnabled: z.boolean(),
   dailyReminderTime: z
     .string()
-    .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, '有効な時刻を入力してください (HH:mm)'),
+    .regex(/^([01]?\d|2[0-3]):([0-5]\d)$/, '有効な時刻を入力してください (HH:mm)'),
   incompleteReminderEnabled: z.boolean(),
   skippedReminderEnabled: z.boolean(),
   scheduledReminderEnabled: z.boolean(),
@@ -31,6 +33,7 @@ export function NotificationsForm() {
   const form = useForm<NotificationSettingsSchema>({
     initialValues: {
       notificationsEnabled: settings?.notificationsEnabled ?? false,
+      customReminderEnabled: settings?.customReminderEnabled ?? false,
       dailyReminderTime: settings?.dailyReminderTime ?? '09:00',
       incompleteReminderEnabled: settings?.incompleteReminderEnabled ?? false,
       skippedReminderEnabled: settings?.skippedReminderEnabled ?? false,
@@ -92,12 +95,20 @@ export function NotificationsForm() {
           {...form.getInputProps('notificationsEnabled', { type: 'checkbox' })}
         />
 
-        <TextInput
-          label="日次リマインダー時刻"
-          placeholder="09:00"
-          description="カスタムリマインダー通知を送信する時刻 (HH:mm形式)"
+        <Switch
+          label="カスタムリマインダーを有効にする"
+          description="指定した時刻にリマインダー通知を送信します"
           disabled={!form.values.notificationsEnabled || isPending}
-          {...form.getInputProps('dailyReminderTime')}
+          {...form.getInputProps('customReminderEnabled', { type: 'checkbox' })}
+        />
+
+        <NotificationTimePicker
+          disabled={
+            !form.values.notificationsEnabled || !form.values.customReminderEnabled || isPending
+          }
+          value={form.values.dailyReminderTime}
+          onChange={(value) => form.setFieldValue('dailyReminderTime', value ?? '')}
+          error={form.errors.dailyReminderTime}
         />
 
         <Text size="sm" c="dimmed" mt="md" mb="xs">
@@ -130,5 +141,27 @@ export function NotificationsForm() {
         </Button>
       </Stack>
     </form>
+  )
+}
+
+type NotificationTimePickerProps = {
+  disabled: boolean
+  value: NotificationSettingsSchema['dailyReminderTime']
+  onChange: (value: NotificationSettingsSchema['dailyReminderTime']) => void
+  error?: ReturnType<typeof useForm<NotificationSettingsSchema>>['errors']['dailyReminderTime']
+}
+
+function NotificationTimePicker({ disabled, value, onChange, error }: NotificationTimePickerProps) {
+  return (
+    <TimePicker
+      label="日次リマインダー時刻"
+      description="カスタムリマインダー通知を送信する時刻 (24時間形式)"
+      disabled={disabled}
+      withDropdown
+      clearable
+      value={value}
+      onChange={onChange}
+      error={error}
+    />
   )
 }

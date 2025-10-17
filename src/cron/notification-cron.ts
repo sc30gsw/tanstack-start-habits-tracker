@@ -68,7 +68,8 @@ export async function runNotificationCron() {
       }
 
       // Check if current time matches custom reminder time
-      const isCustomTime = userSetting.dailyReminderTime === currentTimeStr
+      const isCustomTime =
+        userSetting.customReminderEnabled && userSetting.dailyReminderTime === currentTimeStr
 
       if (isCustomTime) {
         await generateCustomReminderNotification(userSetting.userId)

@@ -1,0 +1,1 @@
+ALTER TABLE `settings` ADD `custom_reminder_enabled` integer DEFAULT false;

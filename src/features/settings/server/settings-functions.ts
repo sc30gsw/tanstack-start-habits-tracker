@@ -26,6 +26,7 @@ const getUserSettings = createServerFn({ method: 'GET' }).handler(async () => {
         userId: session.user.id,
         theme: 'auto',
         notificationsEnabled: false,
+        customReminderEnabled: false,
         dailyReminderTime: '09:00',
         incompleteReminderEnabled: true,
         skippedReminderEnabled: true,
@@ -65,6 +66,7 @@ const updateTheme = createServerFn({ method: 'POST' })
         userId: session.user.id,
         theme: data.theme,
         notificationsEnabled: false,
+        customReminderEnabled: false,
         dailyReminderTime: '09:00',
         incompleteReminderEnabled: true,
         skippedReminderEnabled: true,
@@ -84,7 +86,10 @@ const updateTheme = createServerFn({ method: 'POST' })
 
 const updateNotificationSettingsSchema = z.object({
   notificationsEnabled: z.boolean(),
-  dailyReminderTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Invalid time format (HH:mm)'),
+  customReminderEnabled: z.boolean(),
+  dailyReminderTime: z
+    .string()
+    .regex(/^([01]?\d|2[0-3]):([0-5]\d)$/, 'Invalid time format (HH:mm)'),
   incompleteReminderEnabled: z.boolean(),
   skippedReminderEnabled: z.boolean(),
   scheduledReminderEnabled: z.boolean(),
@@ -113,6 +118,7 @@ const updateNotificationSettings = createServerFn({ method: 'POST' })
         userId: session.user.id,
         theme: 'auto',
         notificationsEnabled: data.notificationsEnabled,
+        customReminderEnabled: data.customReminderEnabled,
         dailyReminderTime: data.dailyReminderTime,
         incompleteReminderEnabled: data.incompleteReminderEnabled,
         skippedReminderEnabled: data.skippedReminderEnabled,
@@ -123,6 +129,7 @@ const updateNotificationSettings = createServerFn({ method: 'POST' })
         .update(settings)
         .set({
           notificationsEnabled: data.notificationsEnabled,
+          customReminderEnabled: data.customReminderEnabled,
           dailyReminderTime: data.dailyReminderTime,
           incompleteReminderEnabled: data.incompleteReminderEnabled,
           skippedReminderEnabled: data.skippedReminderEnabled,

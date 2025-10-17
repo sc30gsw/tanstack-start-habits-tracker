@@ -139,6 +139,7 @@ export const settings = sqliteTable('settings', {
 
   // Notification settings
   notificationsEnabled: integer('notifications_enabled', { mode: 'boolean' }).default(false),
+  customReminderEnabled: integer('custom_reminder_enabled', { mode: 'boolean' }).default(false),
   dailyReminderTime: text('daily_reminder_time').default('09:00'), // HH:mm format
   incompleteReminderEnabled: integer('incomplete_reminder_enabled', { mode: 'boolean' }).default(
     true,

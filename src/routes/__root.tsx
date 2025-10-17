@@ -3,6 +3,7 @@ import { createRootRoute, HeadContent, Outlet, redirect, Scripts } from '@tansta
 import appCss from '../styles.css?url'
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
+import '@mantine/dates/styles.css'
 
 import { AppShell, ColorSchemeScript, MantineProvider } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
