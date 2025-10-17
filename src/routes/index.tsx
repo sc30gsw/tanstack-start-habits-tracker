@@ -12,6 +12,8 @@ import {
 } from '@mantine/core'
 import { IconShare } from '@tabler/icons-react'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { createServerFn } from '@tanstack/react-start'
+import { getRequest } from '@tanstack/react-start/server'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ja'
 import { useId } from 'react'
@@ -36,17 +38,28 @@ import { MarqueeSection } from '~/features/landing/components/marquee-section'
 import { ProductShowcaseSection } from '~/features/landing/components/product-showcase-section'
 import { TestimonialsSection } from '~/features/landing/components/testimonials-section'
 import { ValuePropositionsSection } from '~/features/landing/components/value-propositions-section'
+import { auth } from '~/lib/auth'
 
 dayjs.locale('ja')
+
+const getSession = createServerFn({ method: 'GET' }).handler(async () => {
+  const session = await auth.api.getSession(getRequest())
+
+  return session
+})
 
 export const Route = createFileRoute('/')({
   validateSearch: searchSchema,
   component: Home,
-  beforeLoad: async ({ search }) => {
-    return { search }
+  beforeLoad: async ({ search, context }) => {
+    const session = await getSession()
+
+    context.isAuthenticated = !!session?.user
+
+    return { search, context }
   },
   loader: async ({ context }) => {
-    if (!context.session) {
+    if (!context.isAuthenticated) {
       return {
         isAuthenticated: false,
         habits: { success: false, data: [] },
