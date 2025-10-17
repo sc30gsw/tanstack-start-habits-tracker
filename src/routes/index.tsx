@@ -51,7 +51,7 @@ export const Route = createFileRoute('/')({
         isAuthenticated: false,
         habits: { success: false, data: [] },
         records: { success: false, data: [] },
-        shareData: { success: false, data: [] },
+        shareData: { success: false, data: [], error: 'Something wen wrong' },
         homeAggregatedLevel: null,
       }
     }

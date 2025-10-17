@@ -1,4 +1,4 @@
-import { Box, Button, Container, Stack, Text, Title } from '@mantine/core'
+import { Box, Container, Stack, Text, Title } from '@mantine/core'
 import { Link } from '@tanstack/react-router'
 
 export function CTASection() {
@@ -86,32 +86,12 @@ export function CTASection() {
             </Text>
           </Stack>
 
-          <Button
-            component={Link}
+          <Link
             to="/auth/sign-up"
-            size="xl"
-            variant="gradient"
-            gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-            style={{
-              fontSize: '1.3rem',
-              padding: '2rem 4.5rem',
-              borderRadius: '60px',
-              boxShadow: '0 16px 48px rgba(74, 144, 226, 0.5)',
-              marginTop: '2rem',
-              fontWeight: 700,
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-            styles={{
-              root: {
-                '&:hover': {
-                  transform: 'translateY(-6px) scale(1.05)',
-                  boxShadow: '0 20px 60px rgba(74, 144, 226, 0.6)',
-                },
-              },
-            }}
+            className="hover:-translate-y-1.5 mt-8 inline-block rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-10 py-5 font-bold text-lg text-white shadow-[0_16px_48px_rgba(74,144,226,0.5)] transition-all duration-300 ease-out hover:scale-105 hover:shadow-[0_20px_60px_rgba(74,144,226,0.6)] md:px-16 md:py-7 md:text-xl"
           >
             無料で始める
-          </Button>
+          </Link>
 
           <Text
             size="sm"

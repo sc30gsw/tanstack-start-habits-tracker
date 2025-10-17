@@ -1,4 +1,4 @@
-import { Box, Button, Container, Group, Stack, Text, Title } from '@mantine/core'
+import { Box, Container, Group, Stack, Text, Title } from '@mantine/core'
 import { Link } from '@tanstack/react-router'
 
 export function HeroSection() {
@@ -118,57 +118,18 @@ export function HeroSection() {
 
           {/* CTA Buttons */}
           <Group gap="lg" mt="3rem">
-            <Button
-              component={Link}
+            <Link
               to="/auth/sign-up"
-              size="xl"
-              variant="gradient"
-              gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-              style={{
-                fontSize: '1.2rem',
-                padding: '2rem 4rem',
-                borderRadius: '60px',
-                boxShadow: '0 12px 40px rgba(74, 144, 226, 0.4)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                fontWeight: 700,
-              }}
-              styles={{
-                root: {
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 16px 48px rgba(74, 144, 226, 0.6)',
-                  },
-                },
-              }}
+              className="hover:-translate-y-1 inline-block rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-8 py-4 font-bold text-base text-white shadow-[0_12px_40px_rgba(74,144,226,0.4)] transition-all duration-300 ease-out hover:shadow-[0_16px_48px_rgba(74,144,226,0.6)] md:px-12 md:py-6 md:text-lg"
             >
               無料で始める
-            </Button>
-            <Button
-              component={Link}
+            </Link>
+            <Link
               to="/auth/sign-in"
-              size="xl"
-              variant="outline"
-              style={{
-                fontSize: '1.2rem',
-                padding: '2rem 4rem',
-                borderRadius: '60px',
-                borderColor: '#444',
-                color: '#e0e0e0',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                fontWeight: 600,
-              }}
-              styles={{
-                root: {
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                    borderColor: '#666',
-                    transform: 'translateY(-2px)',
-                  },
-                },
-              }}
+              className="hover:-translate-y-0.5 inline-block rounded-full border-2 border-gray-600 px-8 py-4 font-semibold text-base text-white transition-all duration-300 ease-out hover:border-gray-500 hover:bg-white/10 md:px-12 md:py-6 md:text-lg"
             >
               ログイン
-            </Button>
+            </Link>
           </Group>
 
           {/* Trust Badge */}
