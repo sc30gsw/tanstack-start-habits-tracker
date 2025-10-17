@@ -13,7 +13,7 @@ const notificationSettingsSchema = z.object({
   customReminderEnabled: z.boolean(),
   dailyReminderTime: z
     .string()
-    .regex(/^([01]?\d|2[0-3]):([0-5]\d)$/, '有効な時刻を入力してください (HH:mm)'),
+    .regex(/^([01]?\d|2[0-3]):([0-5]\d)$/, '時刻を入力してください（24時間形式: 例）14:00）'),
   incompleteReminderEnabled: z.boolean(),
   skippedReminderEnabled: z.boolean(),
   scheduledReminderEnabled: z.boolean(),
@@ -155,7 +155,7 @@ function NotificationTimePicker({ disabled, value, onChange, error }: Notificati
   return (
     <TimePicker
       label="日次リマインダー時刻"
-      description="カスタムリマインダー通知を送信する時刻 (24時間形式)"
+      description="カスタムリマインダー通知を送信する時刻"
       disabled={disabled}
       withDropdown
       clearable
