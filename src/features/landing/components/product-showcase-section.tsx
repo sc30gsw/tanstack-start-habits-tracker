@@ -1,5 +1,9 @@
 import { Box, Button, Container, Group, Stack, Text, Title } from '@mantine/core'
 import { useState } from 'react'
+import { CalendarPreview } from './previews/calendar-preview'
+import { DashboardPreview } from './previews/dashboard-preview'
+import { HeatmapPreview } from './previews/heatmap-preview'
+import { StatsPreview } from './previews/stats-preview'
 
 const TABS = [
   {
@@ -162,49 +166,22 @@ export function ProductShowcaseSection() {
                 </Text>
               </Stack>
 
-              {/* Placeholder for Demo Content */}
+              {/* Demo Content */}
               <Box
                 style={{
                   width: '100%',
-                  height: '350px',
+                  minHeight: '400px',
                   backgroundColor: '#0f0f0f',
                   borderRadius: '16px',
                   border: '1px solid #2a2a2a',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  padding: '2rem',
+                  animation: 'fadeIn 0.5s ease-in-out',
                 }}
               >
-                <Stack align="center" gap="md">
-                  <Box
-                    style={{
-                      width: '80px',
-                      height: '80px',
-                      background:
-                        'linear-gradient(135deg, rgba(74, 144, 226, 0.2), rgba(56, 189, 248, 0.2))',
-                      borderRadius: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: '2rem',
-                        fontWeight: 700,
-                        color: '#4a90e2',
-                      }}
-                    >
-                      {currentTab.id === 'dashboard' && '📊'}
-                      {currentTab.id === 'heatmap' && '🔥'}
-                      {currentTab.id === 'calendar' && '📅'}
-                      {currentTab.id === 'stats' && '📈'}
-                    </Text>
-                  </Box>
-                  <Text size="lg" style={{ color: '#666' }}>
-                    {currentTab.label} プレビュー
-                  </Text>
-                </Stack>
+                {currentTab.id === 'dashboard' && <DashboardPreview />}
+                {currentTab.id === 'heatmap' && <HeatmapPreview />}
+                {currentTab.id === 'calendar' && <CalendarPreview />}
+                {currentTab.id === 'stats' && <StatsPreview />}
               </Box>
 
               {/* Feature Tags */}
@@ -231,6 +208,22 @@ export function ProductShowcaseSection() {
           </Box>
         </Stack>
       </Container>
+
+      {/* Animations */}
+      <style>
+        {`
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
+      </style>
     </Container>
   )
 }
