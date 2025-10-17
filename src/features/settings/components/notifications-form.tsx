@@ -8,16 +8,28 @@ import { z } from 'zod/v4'
 import { GET_USER_SETTINGS_CACHE_KEY } from '~/constants/cache-key'
 import { settingsDto } from '~/features/settings/server/settings-functions'
 
-const notificationSettingsSchema = z.object({
-  notificationsEnabled: z.boolean(),
-  customReminderEnabled: z.boolean(),
-  dailyReminderTime: z
-    .string()
-    .regex(/^([01]?\d|2[0-3]):([0-5]\d)$/, '時刻を入力してください（24時間形式: 例）14:00）'),
-  incompleteReminderEnabled: z.boolean(),
-  skippedReminderEnabled: z.boolean(),
-  scheduledReminderEnabled: z.boolean(),
-})
+const notificationSettingsSchema = z
+  .object({
+    notificationsEnabled: z.boolean(),
+    customReminderEnabled: z.boolean(),
+    dailyReminderTime: z.string(),
+    incompleteReminderEnabled: z.boolean(),
+    skippedReminderEnabled: z.boolean(),
+    scheduledReminderEnabled: z.boolean(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.customReminderEnabled) {
+      const timeRegex = /^([01]?\d|2[0-3]):([0-5]\d)$/
+
+      if (!data.dailyReminderTime || !timeRegex.test(data.dailyReminderTime)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: '時刻を入力してください（24時間形式: 例）14:00）',
+          path: ['dailyReminderTime'],
+        })
+      }
+    }
+  })
 
 type NotificationSettingsSchema = z.infer<typeof notificationSettingsSchema>
 
@@ -34,7 +46,7 @@ export function NotificationsForm() {
     initialValues: {
       notificationsEnabled: settings?.notificationsEnabled ?? false,
       customReminderEnabled: settings?.customReminderEnabled ?? false,
-      dailyReminderTime: settings?.dailyReminderTime ?? '09:00',
+      dailyReminderTime: settings?.dailyReminderTime ?? '',
       incompleteReminderEnabled: settings?.incompleteReminderEnabled ?? false,
       skippedReminderEnabled: settings?.skippedReminderEnabled ?? false,
       scheduledReminderEnabled: settings?.scheduledReminderEnabled ?? false,
@@ -71,7 +83,6 @@ export function NotificationsForm() {
           color: 'green',
         })
 
-        // キャッシュを無効化してリフェッチ
         await queryClient.invalidateQueries({ queryKey: [GET_USER_SETTINGS_CACHE_KEY] })
         form.resetDirty()
         await refetch()
