@@ -26,14 +26,11 @@ export function HabitList() {
     number
   >
 
-  // フィルタリングとソートのロジック
   const processedHabits = pipe(
     habits,
-    // フィルタリング
     filter((habit) => {
       const filterValue = searchParams.habitFilter
 
-      // フィルター未設定、'all'、undefinedの場合はすべて表示
       if (!filterValue || filterValue === 'all') {
         return true
       }
@@ -44,14 +41,12 @@ export function HabitList() {
 
       return habit.priority === filterValue
     }),
-    // ソート
     (habits) =>
       searchParams.habitSort === 'priority'
         ? sortBy(habits, (habit) => priorityOrder[habit.priority ?? 'null'])
         : habits,
   )
 
-  // フィルター結果が0件の場合の表示
   if (processedHabits.length === 0) {
     const getFilterMessage = () => {
       const filterValue = searchParams.habitFilter

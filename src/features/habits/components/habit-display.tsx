@@ -25,10 +25,13 @@ export function HabitDisplay({ habit, onEdit, useTransition }: HabitDisplayProps
     switch (priority) {
       case 'high':
         return { label: '高', color: 'red', icon: <IconFlag size={12} /> }
+
       case 'middle':
         return { label: '中', color: 'yellow', icon: <IconFlag size={12} /> }
+
       case 'low':
         return { label: '低', color: 'blue', icon: <IconFlag size={12} /> }
+
       default:
         return { label: 'なし', color: 'gray', icon: <IconFlag size={12} /> }
     }

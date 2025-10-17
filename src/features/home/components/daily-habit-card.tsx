@@ -42,6 +42,7 @@ function getStatusConfig(status: RecordStatus | 'unscheduled') {
         icon: IconX,
         variant: 'outline' as const,
       }
+
     default:
       return {
         color: 'blue',
@@ -76,6 +77,7 @@ export function DailyHabitCard({ habit, record }: DailyHabitCardProps) {
       case 'completed':
       case 'skipped':
         return computedColorScheme === 'dark' ? 'dark.8' : 'gray.1'
+
       case 'unscheduled':
         return computedColorScheme === 'dark' ? 'dark.7' : 'gray.1'
 

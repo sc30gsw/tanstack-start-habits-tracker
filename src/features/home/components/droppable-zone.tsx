@@ -10,20 +10,24 @@ function getStatusIcon(id: DropZoneId) {
   switch (id) {
     case 'completed':
       return { Icon: IconCheck, color: '#40c057', label: '完了' }
+
     case 'skipped':
       return { Icon: IconPlayerSkipForward, color: '#fd7e14', label: 'スキップ' }
+
     case 'scheduled':
     case 'active':
       return { Icon: IconCircleDashed, color: '#339af0', label: '進行中' }
+
     case 'unscheduled':
       return { Icon: IconX, color: '#868e96', label: '未完了' }
+
     default:
       return { Icon: IconCircleDashed, color: '#339af0', label: '進行中' }
   }
 }
 
 type DroppableZoneProps = {
-  id: string
+  id: Parameters<typeof useDroppable>[0]['id']
   children: ReactNode
   disabled?: boolean
 }
