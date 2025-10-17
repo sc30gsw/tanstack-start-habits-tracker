@@ -32,6 +32,10 @@ import { FeaturesSection } from '~/features/landing/components/features-section'
 import { HeroSection } from '~/features/landing/components/hero-section'
 import { HowItWorksSection } from '~/features/landing/components/how-it-works-section'
 import { LandingFooter } from '~/features/landing/components/landing-footer'
+import { MarqueeSection } from '~/features/landing/components/marquee-section'
+import { ProductShowcaseSection } from '~/features/landing/components/product-showcase-section'
+import { TestimonialsSection } from '~/features/landing/components/testimonials-section'
+import { ValuePropositionsSection } from '~/features/landing/components/value-propositions-section'
 
 dayjs.locale('ja')
 
@@ -91,8 +95,12 @@ function Home() {
     return (
       <>
         <HeroSection />
+        <ProductShowcaseSection />
+        <ValuePropositionsSection />
         <FeaturesSection />
+        <MarqueeSection />
         <HowItWorksSection />
+        <TestimonialsSection />
         <CTASection />
         <LandingFooter />
       </>

@@ -1,86 +1,171 @@
-import { Box, Container, Stack, Text, Timeline, Title } from '@mantine/core'
-import { IconCircle1, IconCircle2, IconCircle3 } from '@tabler/icons-react'
+import { Box, Container, Grid, Stack, Text, ThemeIcon, Title } from '@mantine/core'
+import { IconCircleCheck, IconFlame, IconTrendingUp } from '@tabler/icons-react'
+
+const STEPS = [
+  {
+    number: '01',
+    title: '習慣を登録',
+    description:
+      '追跡したい習慣を作成します。名前、説明、カスタムカラーを設定して、あなただけの習慣リストを作りましょう。',
+    icon: IconCircleCheck,
+    color: '#4a90e2',
+  },
+  {
+    number: '02',
+    title: '毎日記録',
+    description:
+      '習慣を実行したら、ワンクリックで記録。取り組んだ時間も記録できるので、どれだけ頑張ったかが一目瞭然です。',
+    icon: IconFlame,
+    color: '#f59e0b',
+  },
+  {
+    number: '03',
+    title: '継続を可視化',
+    description:
+      'ヒートマップとカレンダーで継続状況を確認。視覚的なフィードバックがモチベーションを高め、習慣を続けやすくします。',
+    icon: IconTrendingUp,
+    color: '#10b981',
+  },
+] as const
 
 export function HowItWorksSection() {
   return (
     <Container
       fluid
       style={{
-        backgroundColor: '#f8f9fa',
-        padding: '80px 0',
+        backgroundColor: '#fafafa',
+        padding: '120px 0',
       }}
     >
-      <Container size="lg">
+      <Container size="xl">
         <Stack align="center" gap="xl">
-          <Stack align="center" gap="md" style={{ maxWidth: '700px' }}>
+          <Stack align="center" gap="md" style={{ maxWidth: '700px', marginBottom: '3rem' }}>
             <Title
               order={2}
               style={{
-                fontSize: 'clamp(2rem, 5vw, 3rem)',
-                fontWeight: 700,
+                fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+                fontWeight: 800,
                 textAlign: 'center',
                 color: '#1a1a1a',
+                letterSpacing: '-0.02em',
               }}
             >
               使い方はシンプル
             </Title>
-            <Text size="lg" c="dimmed" style={{ textAlign: 'center' }}>
+            <Text
+              size="lg"
+              style={{
+                textAlign: 'center',
+                color: '#666',
+                fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+              }}
+            >
               3つのステップで、今日から習慣形成をスタート
             </Text>
           </Stack>
 
-          <Box mt="xl" style={{ width: '100%', maxWidth: '600px' }}>
-            <Timeline
-              active={2}
-              bulletSize={60}
-              lineWidth={3}
-              color="blue"
-              styles={{
-                itemBullet: {
-                  boxShadow: '0 4px 12px rgba(74, 144, 226, 0.3)',
-                },
-              }}
-            >
-              <Timeline.Item
-                bullet={<IconCircle1 size={24} />}
-                title={
-                  <Title order={3} size="h4" fw={600} mb="xs">
-                    習慣を登録
-                  </Title>
-                }
+          <Stack gap="5rem" style={{ width: '100%', maxWidth: '1000px' }}>
+            {STEPS.map((step, index) => (
+              <Grid
+                key={index}
+                gutter="xl"
+                align="center"
+                style={{
+                  flexDirection: index % 2 === 0 ? 'row' : 'row-reverse',
+                }}
               >
-                <Text c="dimmed" size="sm">
-                  追跡したい習慣を作成します。名前、説明、カスタムカラーを設定して、あなただけの習慣リストを作りましょう。
-                </Text>
-              </Timeline.Item>
+                {/* Icon Side */}
+                <Grid.Col span={{ base: 12, md: 5 }}>
+                  <Box
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Box
+                      style={{
+                        width: '200px',
+                        height: '200px',
+                        background: `linear-gradient(135deg, ${step.color}20, ${step.color}05)`,
+                        borderRadius: '24px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        border: `2px solid ${step.color}30`,
+                      }}
+                    >
+                      <ThemeIcon
+                        size={100}
+                        radius="xl"
+                        style={{
+                          backgroundColor: step.color,
+                          boxShadow: `0 12px 32px ${step.color}40`,
+                        }}
+                      >
+                        <step.icon size={50} stroke={2} />
+                      </ThemeIcon>
 
-              <Timeline.Item
-                bullet={<IconCircle2 size={24} />}
-                title={
-                  <Title order={3} size="h4" fw={600} mb="xs">
-                    毎日記録
-                  </Title>
-                }
-              >
-                <Text c="dimmed" size="sm">
-                  習慣を実行したら、ワンクリックで記録。取り組んだ時間も記録できるので、どれだけ頑張ったかが一目瞭然です。
-                </Text>
-              </Timeline.Item>
+                      {/* Step Number Badge */}
+                      <Box
+                        style={{
+                          position: 'absolute',
+                          top: '-15px',
+                          right: '-15px',
+                          width: '60px',
+                          height: '60px',
+                          backgroundColor: 'white',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: `3px solid ${step.color}`,
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: '1.5rem',
+                            fontWeight: 800,
+                            color: step.color,
+                          }}
+                        >
+                          {step.number}
+                        </Text>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Grid.Col>
 
-              <Timeline.Item
-                bullet={<IconCircle3 size={24} />}
-                title={
-                  <Title order={3} size="h4" fw={600} mb="xs">
-                    継続を可視化
-                  </Title>
-                }
-              >
-                <Text c="dimmed" size="sm">
-                  ヒートマップとカレンダーで継続状況を確認。視覚的なフィードバックがモチベーションを高め、習慣を続けやすくします。
-                </Text>
-              </Timeline.Item>
-            </Timeline>
-          </Box>
+                {/* Content Side */}
+                <Grid.Col span={{ base: 12, md: 7 }}>
+                  <Stack gap="md" style={{ textAlign: index % 2 === 0 ? 'left' : 'right' }}>
+                    <Title
+                      order={3}
+                      style={{
+                        fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+                        fontWeight: 700,
+                        color: '#1a1a1a',
+                      }}
+                    >
+                      {step.title}
+                    </Title>
+                    <Text
+                      size="lg"
+                      style={{
+                        color: '#666',
+                        lineHeight: 1.8,
+                        fontSize: 'clamp(1rem, 2vw, 1.1rem)',
+                      }}
+                    >
+                      {step.description}
+                    </Text>
+                  </Stack>
+                </Grid.Col>
+              </Grid>
+            ))}
+          </Stack>
         </Stack>
       </Container>
     </Container>

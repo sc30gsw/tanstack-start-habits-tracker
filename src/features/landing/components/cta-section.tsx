@@ -6,52 +6,83 @@ export function CTASection() {
     <Container
       fluid
       style={{
-        background: 'linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%)',
-        padding: '100px 0',
+        background: 'linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%)',
+        padding: '120px 0',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Background decoration */}
+      {/* 3D Sphere Decorations */}
       <Box
         style={{
           position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '1000px',
-          height: '1000px',
-          background: 'radial-gradient(circle, rgba(74, 144, 226, 0.15) 0%, transparent 70%)',
+          top: '20%',
+          left: '10%',
+          width: '500px',
+          height: '500px',
+          background:
+            'radial-gradient(circle at 40% 40%, rgba(74, 144, 226, 0.15), transparent 70%)',
           borderRadius: '50%',
-          filter: 'blur(150px)',
+          filter: 'blur(100px)',
+          animation: 'pulse 6s ease-in-out infinite',
+        }}
+      />
+      <Box
+        style={{
+          position: 'absolute',
+          bottom: '20%',
+          right: '10%',
+          width: '400px',
+          height: '400px',
+          background:
+            'radial-gradient(circle at 60% 60%, rgba(56, 189, 248, 0.12), transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(80px)',
+          animation: 'pulse 8s ease-in-out infinite 2s',
         }}
       />
 
-      <Container size="md" style={{ position: 'relative', zIndex: 1 }}>
+      <Container size="lg" style={{ position: 'relative', zIndex: 1 }}>
         <Stack align="center" gap="xl">
-          <Stack align="center" gap="md">
+          <Stack align="center" gap="md" style={{ maxWidth: '800px' }}>
+            <Text
+              size="sm"
+              style={{
+                color: '#4a90e2',
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                fontWeight: 600,
+                marginBottom: '1rem',
+              }}
+            >
+              始めましょう
+            </Text>
             <Title
               order={2}
               style={{
-                fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-                fontWeight: 700,
+                fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+                fontWeight: 800,
                 color: 'white',
                 textAlign: 'center',
-                lineHeight: 1.2,
+                lineHeight: 1.1,
+                letterSpacing: '-0.02em',
               }}
             >
-              今日から始めよう
+              早期アクセスに参加
             </Title>
             <Text
               size="xl"
-              c="dimmed"
               style={{
                 textAlign: 'center',
                 color: '#b0b0b0',
+                fontSize: 'clamp(1rem, 2.5vw, 1.3rem)',
                 maxWidth: '600px',
+                marginTop: '1rem',
               }}
             >
-              無料アカウントを作成して、習慣形成の旅を始めましょう。 登録は1分で完了します。
+              無料アカウントを作成して、習慣形成の旅を始めましょう。
+              <br />
+              登録は1分で完了します。
             </Text>
           </Stack>
 
@@ -62,17 +93,19 @@ export function CTASection() {
             variant="gradient"
             gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
             style={{
-              fontSize: '1.2rem',
-              padding: '1.75rem 4rem',
-              borderRadius: '50px',
-              boxShadow: '0 12px 32px rgba(74, 144, 226, 0.4)',
-              marginTop: '1rem',
+              fontSize: '1.3rem',
+              padding: '2rem 4.5rem',
+              borderRadius: '60px',
+              boxShadow: '0 16px 48px rgba(74, 144, 226, 0.5)',
+              marginTop: '2rem',
+              fontWeight: 700,
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
             styles={{
               root: {
                 '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 16px 40px rgba(74, 144, 226, 0.5)',
+                  transform: 'translateY(-6px) scale(1.05)',
+                  boxShadow: '0 20px 60px rgba(74, 144, 226, 0.6)',
                 },
               },
             }}
@@ -80,11 +113,33 @@ export function CTASection() {
             無料で始める
           </Button>
 
-          <Text size="sm" c="dimmed" style={{ color: '#888', marginTop: '1rem' }}>
+          <Text
+            size="sm"
+            style={{
+              color: '#666',
+              marginTop: '2rem',
+              fontSize: '0.95rem',
+              letterSpacing: '0.05em',
+            }}
+          >
             クレジットカード不要 • いつでもキャンセル可能
           </Text>
         </Stack>
       </Container>
+
+      {/* CSS Animation */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0.3;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1.1);
+          }
+        }
+      `}</style>
     </Container>
   )
 }
