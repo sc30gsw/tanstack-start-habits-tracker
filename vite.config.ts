@@ -7,11 +7,13 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [
-    cloudflare({ viteEnvironment: { name: 'ssr' } }),
+    cloudflare({ 
+      viteEnvironment: { name: 'ssr' },
+      persistState: true,
+    }),
     tanstackStart(),
     viteReact(),
     tailwindcss(),
-    // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),

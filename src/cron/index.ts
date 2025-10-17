@@ -5,12 +5,29 @@ import { runNotificationCron } from './notification-cron'
  * This is called by Cloudflare Workers' scheduled trigger
  */
 export async function handleScheduledEvent(event: Record<'scheduledTime', number>) {
-  console.log(`🕐 Scheduled event triggered at ${new Date(event.scheduledTime).toISOString()}`)
+  const timestamp = new Date(event.scheduledTime).toISOString()
+  console.log(`🕐 [CRON START] Scheduled event triggered at ${timestamp}`)
+  console.log(`🕐 [CRON START] Event details:`, JSON.stringify(event, null, 2))
 
   try {
+    console.log(`🕐 [CRON] About to run notification cron...`)
     await runNotificationCron()
+    console.log(`✅ [CRON SUCCESS] Notification cron completed successfully`)
   } catch (error) {
-    console.error('❌ Scheduled event failed:', error)
+    console.error('❌ [CRON ERROR] Scheduled event failed')
+    console.error('❌ [CRON ERROR] Error type:', error?.constructor?.name)
+    console.error(
+      '❌ [CRON ERROR] Error message:',
+      error instanceof Error ? error.message : String(error),
+    )
+    console.error(
+      '❌ [CRON ERROR] Error stack:',
+      error instanceof Error ? error.stack : 'No stack trace',
+    )
+    console.error(
+      '❌ [CRON ERROR] Full error object:',
+      JSON.stringify(error, Object.getOwnPropertyNames(error), 2),
+    )
     throw error
   }
 }

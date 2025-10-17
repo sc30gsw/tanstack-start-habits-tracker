@@ -3,8 +3,11 @@
   "name": "habit-tracker-app",
   "compatibility_date": "2025-09-27",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
+  "main": "worker-entry.ts",
   "triggers": {
     "crons": ["* * * * *"]
+  },
+  "observability": {
+    "enabled": true
   }
 }
