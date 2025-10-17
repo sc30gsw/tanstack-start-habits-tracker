@@ -155,11 +155,10 @@ const levelTabValidator = z
 /**
  * 詳細タブのバリデーション
  * - dashboard: ダッシュボード（情報＋レベル）
- * - records: 記録（カレンダー＋トレンドチャート - 連動）
- * - heatmap: 年間記録（ヒートマップ - 1年分固定表示）
+ * - analytics: 分析（ヒートマップ＋トレンドチャート）
  */
 const detailTabValidator = z
-  .enum(['dashboard', 'records', 'heatmap'])
+  .enum(['dashboard', 'analytics'])
   .optional()
   .catch((_) => {
     return 'dashboard'

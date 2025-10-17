@@ -1,5 +1,5 @@
 import { Grid, Stack, Tabs } from '@mantine/core'
-import { IconCalendarStats, IconDashboard, IconFlame } from '@tabler/icons-react'
+import { IconChartBar, IconDashboard } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { CalendarView } from '~/features/habits/components/calendar/calendar-view'
@@ -32,7 +32,7 @@ export function HabitDetail() {
     : null
 
   const handleTabChange = (value: string | null) => {
-    if (value && (value === 'dashboard' || value === 'records' || value === 'heatmap')) {
+    if (value && (value === 'dashboard' || value === 'analytics')) {
       navigate({
         search: (prev) => ({
           ...prev,
@@ -44,76 +44,58 @@ export function HabitDetail() {
 
   return (
     <Stack gap="lg">
-      <Tabs value={detailTab} onChange={handleTabChange} variant="pills">
-        <Grid gutter="xs">
-          <Grid.Col span={{ base: 4, xs: 4 }}>
-            <Tabs.Tab
-              value="dashboard"
-              leftSection={<IconDashboard size={16} />}
-              style={{ width: '100%' }}
-            >
-              ダッシュボード
-            </Tabs.Tab>
-          </Grid.Col>
-          <Grid.Col span={{ base: 4, xs: 4 }}>
-            <Tabs.Tab
-              value="records"
-              leftSection={<IconCalendarStats size={16} />}
-              style={{ width: '100%' }}
-            >
-              記録
-            </Tabs.Tab>
-          </Grid.Col>
-          <Grid.Col span={{ base: 4, xs: 4 }}>
-            <Tabs.Tab
-              value="heatmap"
-              leftSection={<IconFlame size={16} />}
-              style={{ width: '100%' }}
-            >
-              年間記録
-            </Tabs.Tab>
-          </Grid.Col>
-        </Grid>
-
-        <Tabs.Panel value="dashboard" pt="lg">
-          <Stack gap="lg">
-            <HabitInfoCard />
-            <HabitLevelCard />
-          </Stack>
-        </Tabs.Panel>
-
-        <Tabs.Panel value="records" pt="lg">
-          <Stack gap="lg">
-            <Grid>
-              <Grid.Col span={{ base: 12, md: 6 }}>
-                {recordMap && (
-                  <CalendarView
-                    selectedDateRecord={selectedDateRecord || null}
-                    recordMap={recordMap}
-                  />
-                )}
-              </Grid.Col>
-
-              <Grid.Col span={{ base: 12, md: 6 }}>
-                <DateDetail
-                  selectedDateRecord={selectedDateRecord || null}
-                  habitId={habit.data?.id ?? ''}
-                />
-              </Grid.Col>
-            </Grid>
-
-            {records.data && (
-              <TrendsChart records={records.data} habitColor={habit.data?.color as HabitColor} />
+      <Grid gutter="md">
+        {/* 左サイドバー: カレンダー＋記録フォーム */}
+        <Grid.Col span={{ base: 12, md: 4 }}>
+          <Stack gap="md">
+            {recordMap && (
+              <CalendarView selectedDateRecord={selectedDateRecord || null} recordMap={recordMap} />
             )}
+            <DateDetail
+              selectedDateRecord={selectedDateRecord || null}
+              habitId={habit.data?.id ?? ''}
+            />
           </Stack>
-        </Tabs.Panel>
+        </Grid.Col>
 
-        <Tabs.Panel value="heatmap" pt="lg">
-          {records.data && (
-            <HeatmapSection records={records.data} habitColor={habit.data?.color as HabitColor} />
-          )}
-        </Tabs.Panel>
-      </Tabs>
+        {/* 右メインエリア: タブコンテンツ */}
+        <Grid.Col span={{ base: 12, md: 8 }}>
+          <Tabs value={detailTab} onChange={handleTabChange} variant="pills">
+            <Tabs.List grow>
+              <Tabs.Tab value="dashboard" leftSection={<IconDashboard size={16} />}>
+                ダッシュボード
+              </Tabs.Tab>
+              <Tabs.Tab value="analytics" leftSection={<IconChartBar size={16} />}>
+                分析
+              </Tabs.Tab>
+            </Tabs.List>
+
+            <Tabs.Panel value="dashboard" pt="lg">
+              <Stack gap="lg">
+                <HabitInfoCard />
+                <HabitLevelCard />
+              </Stack>
+            </Tabs.Panel>
+
+            <Tabs.Panel value="analytics" pt="lg">
+              <Stack gap="lg">
+                {records.data && (
+                  <>
+                    <TrendsChart
+                      records={records.data}
+                      habitColor={habit.data?.color as HabitColor}
+                    />
+                    <HeatmapSection
+                      records={records.data}
+                      habitColor={habit.data?.color as HabitColor}
+                    />
+                  </>
+                )}
+              </Stack>
+            </Tabs.Panel>
+          </Tabs>
+        </Grid.Col>
+      </Grid>
     </Stack>
   )
 }
