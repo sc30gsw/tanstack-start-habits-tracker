@@ -155,9 +155,7 @@ function Home() {
 
         <HomeOverallLevelCard />
         <HomeBadgeCollection />
-
         <HomeCalendarView />
-
         <HomeHeatmapView />
 
         <Card withBorder padding="lg">
