@@ -13,6 +13,7 @@ dayjs.locale('ja')
 export function ProfileCard() {
   const routeApi = getRouteApi('/settings/profile')
   const { user, homeAggregatedLevel } = routeApi.useLoaderData()
+
   const [opened, { open, close }] = useDisclosure(false)
   const isMobile = useMediaQuery('(max-width: 768px)')
 
