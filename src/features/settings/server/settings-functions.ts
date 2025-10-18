@@ -84,16 +84,28 @@ const updateTheme = createServerFn({ method: 'POST' })
     return { success: true, theme: data.theme }
   })
 
-const updateNotificationSettingsSchema = z.object({
-  notificationsEnabled: z.boolean(),
-  customReminderEnabled: z.boolean(),
-  dailyReminderTime: z
-    .string()
-    .regex(/^([01]?\d|2[0-3]):([0-5]\d)$/, 'Invalid time format (HH:mm)'),
-  incompleteReminderEnabled: z.boolean(),
-  skippedReminderEnabled: z.boolean(),
-  scheduledReminderEnabled: z.boolean(),
-})
+const updateNotificationSettingsSchema = z
+  .object({
+    notificationsEnabled: z.boolean(),
+    customReminderEnabled: z.boolean(),
+    dailyReminderTime: z.string(),
+    incompleteReminderEnabled: z.boolean(),
+    skippedReminderEnabled: z.boolean(),
+    scheduledReminderEnabled: z.boolean(),
+  })
+  .superRefine((data, ctx) => {
+    // カスタムリマインダーが有効な場合のみ時刻の検証を行う
+    if (data.customReminderEnabled) {
+      const timeRegex = /^([01]?\d|2[0-3]):([0-5]\d)$/
+      if (!data.dailyReminderTime || !timeRegex.test(data.dailyReminderTime)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Invalid time format (HH:mm)',
+          path: ['dailyReminderTime'],
+        })
+      }
+    }
+  })
 
 type UpdateNotificationSettingsInput = z.infer<typeof updateNotificationSettingsSchema>
 
