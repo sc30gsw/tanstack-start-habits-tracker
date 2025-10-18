@@ -1,11 +1,13 @@
-import { Button, Stack, Switch, Text } from '@mantine/core'
+import { Badge, Button, Checkbox, Divider, Group, Stack, Switch, Text } from '@mantine/core'
 import { TimePicker } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { getRouteApi } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { z } from 'zod/v4'
 import { GET_USER_SETTINGS_CACHE_KEY } from '~/constants/cache-key'
+import { habitDto } from '~/features/habits/server/habit-functions'
 import { settingsDto } from '~/features/settings/server/settings-functions'
 
 const notificationSettingsSchema = z
@@ -16,6 +18,12 @@ const notificationSettingsSchema = z
     incompleteReminderEnabled: z.boolean(),
     skippedReminderEnabled: z.boolean(),
     scheduledReminderEnabled: z.boolean(),
+    habitNotifications: z.array(
+      z.object({
+        habitId: z.string(),
+        enabled: z.boolean(),
+      }),
+    ),
   })
   .superRefine((data, ctx) => {
     if (data.customReminderEnabled) {
@@ -42,6 +50,12 @@ export function NotificationsForm() {
     queryFn: () => settingsDto.getUserSettings(),
   })
 
+  const routeApi = getRouteApi('/settings/notifications')
+  const habitsResult = routeApi.useLoaderData()
+
+  const habits = (habitsResult?.success ? habitsResult.data : []) || []
+  console.log('🚀 ~ NotificationsForm ~ habits:', habits)
+
   const form = useForm<NotificationSettingsSchema>({
     initialValues: {
       notificationsEnabled: settings?.notificationsEnabled ?? false,
@@ -50,6 +64,10 @@ export function NotificationsForm() {
       incompleteReminderEnabled: settings?.incompleteReminderEnabled ?? false,
       skippedReminderEnabled: settings?.skippedReminderEnabled ?? false,
       scheduledReminderEnabled: settings?.scheduledReminderEnabled ?? false,
+      habitNotifications: habits.map((habit) => ({
+        habitId: habit.id,
+        enabled: habit.notificationsEnabled ?? true,
+      })),
     },
     validate: (values) => {
       const result = notificationSettingsSchema.safeParse(values)
@@ -75,7 +93,27 @@ export function NotificationsForm() {
   const handleSubmit = form.onSubmit(async (values) => {
     startTransition(async () => {
       try {
-        await settingsDto.updateNotificationSettings({ data: values })
+        await settingsDto.updateNotificationSettings({
+          data: {
+            notificationsEnabled: values.notificationsEnabled,
+            customReminderEnabled: values.customReminderEnabled,
+            dailyReminderTime: values.dailyReminderTime,
+            incompleteReminderEnabled: values.incompleteReminderEnabled,
+            skippedReminderEnabled: values.skippedReminderEnabled,
+            scheduledReminderEnabled: values.scheduledReminderEnabled,
+          },
+        })
+
+        await Promise.all(
+          values.habitNotifications.map(({ habitId, enabled }) =>
+            habitDto.updateHabitNotificationSetting({
+              data: {
+                habitId,
+                notificationsEnabled: enabled,
+              },
+            }),
+          ),
+        )
 
         notifications.show({
           title: '成功',
@@ -146,6 +184,51 @@ export function NotificationsForm() {
           disabled={!form.values.notificationsEnabled || isPending}
           {...form.getInputProps('scheduledReminderEnabled', { type: 'checkbox' })}
         />
+
+        {habits.length > 0 && (
+          <>
+            <Divider my="md" />
+
+            <Text size="sm" fw={600} mb="xs">
+              習慣ごとの通知設定
+            </Text>
+            <Text size="xs" c="dimmed" mb="md">
+              通知を受け取りたい習慣を選択してください（デフォルト：すべて有効）
+            </Text>
+
+            <Stack gap="xs">
+              {habits.map((habit) => {
+                const habitNotificationMap = new Map(
+                  form.values.habitNotifications.map((h) => [h.habitId, h.enabled])
+                )
+
+                return (
+                  <Group key={habit.id} gap="sm" wrap="nowrap">
+                    <Checkbox
+                      checked={habitNotificationMap.get(habit.id) ?? true}
+                      onChange={(e) => {
+                        const newValue = e.currentTarget.checked
+
+                        form.setFieldValue(
+                          'habitNotifications',
+                          form.values.habitNotifications.map((h) =>
+                            h.habitId === habit.id 
+                              ? { ...h, enabled: newValue }
+                              : h
+                          )
+                        )
+                      }}
+                      disabled={!form.values.notificationsEnabled || isPending}
+                    />
+                    <Badge size="sm" color={habit.color ?? 'blue'} variant="dot">
+                      {habit.name}
+                    </Badge>
+                  </Group>
+                )
+              })}
+            </Stack>
+          </>
+        )}
 
         <Button type="submit" loading={isPending} disabled={!form.isDirty()} fullWidth mt="md">
           変更を保存

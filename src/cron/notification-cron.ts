@@ -144,10 +144,10 @@ async function generateIncompleteHabitNotifications(userId: Session['userId']) {
   try {
     const today = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
 
-    // Get user's habits
-    const userHabits = await db.select().from(habits).where(eq(habits.userId, userId))
+    const userHabits = await db.query.habits.findMany({
+      where: and(eq(habits.userId, userId), eq(habits.notificationsEnabled, true)),
+    })
 
-    // Get today's records
     const todayRecords = await db
       .select()
       .from(records)
@@ -156,7 +156,6 @@ async function generateIncompleteHabitNotifications(userId: Session['userId']) {
 
     const recordMap = new Map(todayRecords.map((r) => [r.records.habitId, r.records]))
 
-    // Find incomplete habits (active status or no record)
     for (const habit of userHabits) {
       const record = recordMap.get(habit.id)
 
@@ -187,8 +186,11 @@ async function generateSkippedHabitNotifications(userId: Session['userId']) {
   try {
     const today = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
 
-    // Get user's habits with direct DB query
-    const userHabits = await db.select().from(habits).where(eq(habits.userId, userId))
+    // Get user's habits (only those with notifications enabled)
+    const userHabits = await db
+      .select()
+      .from(habits)
+      .where(and(eq(habits.userId, userId), eq(habits.notificationsEnabled, true)))
 
     // Get today's records with direct DB query
     const todayRecords = await db
@@ -226,8 +228,11 @@ async function generateScheduledHabitNotifications(userId: Session['userId']) {
   try {
     const today = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
 
-    // Get user's habits with direct DB query
-    const userHabits = await db.select().from(habits).where(eq(habits.userId, userId))
+    // Get user's habits (only those with notifications enabled)
+    const userHabits = await db
+      .select()
+      .from(habits)
+      .where(and(eq(habits.userId, userId), eq(habits.notificationsEnabled, true)))
 
     // Get today's records with direct DB query
     const todayRecords = await db

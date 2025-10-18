@@ -1,0 +1,1 @@
+ALTER TABLE `habits` ADD `notifications_enabled` integer DEFAULT true NOT NULL;

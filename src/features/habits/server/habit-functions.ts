@@ -250,6 +250,7 @@ const deleteHabit = createServerFn({ method: 'POST' })
 const getHabits = createServerFn({ method: 'GET' }).handler(async () => {
   try {
     const session = await auth.api.getSession(getRequest())
+
     if (!session) {
       return { success: false, error: 'Unauthorized' }
     }
@@ -267,7 +268,7 @@ const getHabits = createServerFn({ method: 'GET' }).handler(async () => {
 
       return {
         ...parsedHabit,
-        color: parsedHabit.color || 'blue', // nullの場合デフォルト値を設定
+        color: parsedHabit.color || 'blue',
         created_at: new Date(parsedHabit.created_at),
         updated_at: new Date(parsedHabit.updated_at),
       } as const satisfies HabitEntity
@@ -341,16 +342,50 @@ const getHabitById = createServerFn({ method: 'GET' })
     }
   })
 
+const updateHabitNotificationSettingSchema = z.object({
+  habitId: z.string(),
+  notificationsEnabled: z.boolean(),
+})
+
+const updateHabitNotificationSetting = createServerFn({ method: 'POST' })
+  .inputValidator(updateHabitNotificationSettingSchema)
+  .handler(async ({ data }) => {
+    const session = await auth.api.getSession(getRequest())
+
+    if (!session?.user) {
+      throw new Error('Unauthorized')
+    }
+
+    const habit = await db.query.habits.findFirst({
+      where: and(eq(habits.id, data.habitId), eq(habits.userId, session.user.id)),
+    })
+
+    if (!habit) {
+      throw new Error('Habit not found')
+    }
+
+    await db
+      .update(habits)
+      .set({
+        notificationsEnabled: data.notificationsEnabled,
+      })
+      .where(eq(habits.id, data.habitId))
+
+    return { success: true }
+  })
+
 export const habitDto = {
   createHabit,
   updateHabit,
   deleteHabit,
   getHabits,
   getHabitById,
+  updateHabitNotificationSetting,
 } as const satisfies {
   createHabit: typeof createHabit
   updateHabit: typeof updateHabit
   deleteHabit: typeof deleteHabit
   getHabits: typeof getHabits
   getHabitById: typeof getHabitById
+  updateHabitNotificationSetting: typeof updateHabitNotificationSetting
 }

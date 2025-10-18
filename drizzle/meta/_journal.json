@@ -92,6 +92,13 @@
       "when": 1760742175642,
       "tag": "0012_quiet_golden_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1760782093989,
+      "tag": "0013_glamorous_namor",
+      "breakpoints": true
     }
   ]
 }

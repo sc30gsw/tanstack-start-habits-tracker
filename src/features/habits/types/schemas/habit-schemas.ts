@@ -85,6 +85,7 @@ export const habitSchema = z.object({
     .nullable()
     .transform((val) => val ?? 'blue'),
   priority: habitPrioritySchema,
+  notificationsEnabled: z.boolean(),
   created_at: z.string(),
   updated_at: z.string(),
 })
