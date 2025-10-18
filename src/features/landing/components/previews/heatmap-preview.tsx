@@ -145,7 +145,13 @@ export function HeatmapPreview() {
           { label: '今年の完了', value: '287', unit: '回', color: 'blue' },
           { label: '継続率', value: '79', unit: '%', color: 'grape' },
         ].map((stat) => (
-          <Card key={stat.label} withBorder padding="md" radius="md" style={{ flex: '1 1 180px', backgroundColor: '#1a1a1a', borderColor: '#2a2a2a' }}>
+          <Card
+            key={stat.label}
+            withBorder
+            padding="md"
+            radius="md"
+            style={{ flex: '1 1 180px', backgroundColor: '#1a1a1a', borderColor: '#2a2a2a' }}
+          >
             <Stack gap={4}>
               <Text size="xs" c="dimmed">
                 {stat.label}

@@ -10,7 +10,9 @@ export const habits = sqliteTable(
     description: text(),
     color: text().default('blue'),
     priority: text().$type<'high' | 'middle' | 'low' | null>(),
-    notificationsEnabled: integer('notifications_enabled', { mode: 'boolean' }).default(true).notNull(),
+    notificationsEnabled: integer('notifications_enabled', { mode: 'boolean' })
+      .default(true)
+      .notNull(),
     createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
     userId: text('user_id')
