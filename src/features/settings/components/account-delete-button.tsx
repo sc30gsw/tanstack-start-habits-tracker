@@ -1,6 +1,7 @@
-import { Button, Stack, Text } from '@mantine/core'
+import { Button, Group, Stack, Text, ThemeIcon } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
+import { IconAlertTriangle, IconTrash } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { profileDto } from '~/features/profile/server/profile-functions'
@@ -13,7 +14,16 @@ export function AccountDeleteButton() {
 
   const handleDeleteAccount = () => {
     modals.openConfirmModal({
-      title: 'アカウント削除の確認',
+      title: (
+        <Group gap="xs">
+          <ThemeIcon color="red" size="lg" radius="xl">
+            <IconAlertTriangle size={20} />
+          </ThemeIcon>
+          <Text fw={600} size="lg">
+            アカウント削除の確認
+          </Text>
+        </Group>
+      ),
       children: (
         <Stack gap="md">
           <Text size="sm">アカウントを削除すると、すべてのデータが完全に削除されます。</Text>
@@ -24,7 +34,8 @@ export function AccountDeleteButton() {
         </Stack>
       ),
       labels: { confirm: '削除する', cancel: 'キャンセル' },
-      confirmProps: { color: 'red' },
+      confirmProps: { color: 'red', leftSection: <IconTrash size={16} /> },
+      cancelProps: { variant: 'default' },
       onConfirm: () => {
         startTransition(async () => {
           try {
@@ -58,6 +69,8 @@ export function AccountDeleteButton() {
       loading={isPending}
       disabled={isPending}
       fullWidth
+      leftSection={<IconTrash size={18} />}
+      size="md"
     >
       アカウントを削除
     </Button>

@@ -1,7 +1,7 @@
 import { ActionIcon, Badge, Button, Group, Text, Tooltip } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconEdit, IconFlag, IconTrash } from '@tabler/icons-react'
+import { IconAlertTriangle, IconEdit, IconFlag, IconTrash } from '@tabler/icons-react'
 import { Link, useRouter } from '@tanstack/react-router'
 import type { useTransition } from 'react'
 import { useHabitColor } from '~/features/habits/hooks/use-habit-color'
@@ -41,7 +41,12 @@ export function HabitDisplay({ habit, onEdit, useTransition }: HabitDisplayProps
 
   const handleDelete = async () => {
     modals.openConfirmModal({
-      title: '習慣の削除',
+      title: (
+        <Group gap="xs">
+          <IconAlertTriangle size={20} color="var(--mantine-color-red-6)" />
+          <Text>習慣の削除</Text>
+        </Group>
+      ),
       children: (
         <Text size="sm">
           本当に削除しますか？ <br />

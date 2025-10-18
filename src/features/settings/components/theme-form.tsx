@@ -1,8 +1,9 @@
-import { Button, Radio, Stack } from '@mantine/core'
+import { Button, Group, Radio, Stack, Text, useMantineColorScheme } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
+import { IconDeviceDesktop, IconDeviceFloppy, IconMoon, IconSun } from '@tabler/icons-react'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
-import { useTransition } from 'react'
+import { useEffect, useTransition } from 'react'
 import { GET_USER_SETTINGS_CACHE_KEY } from '~/constants/cache-key'
 import { settingsDto } from '~/features/settings/server/settings-functions'
 
@@ -12,6 +13,7 @@ type ThemeFormValues = {
 
 export function ThemeForm() {
   const [isPending, startTransition] = useTransition()
+  const { setColorScheme } = useMantineColorScheme()
 
   const queryClient = useQueryClient()
   const { data: settings, refetch } = useSuspenseQuery({
@@ -24,6 +26,11 @@ export function ThemeForm() {
       theme: (settings?.theme as ThemeFormValues['theme']) ?? 'auto',
     },
   })
+
+  // リアルタイムでテーマを反映
+  useEffect(() => {
+    setColorScheme(form.values.theme)
+  }, [form.values.theme, setColorScheme])
 
   const handleSubmit = form.onSubmit(async (values) => {
     startTransition(async () => {
@@ -58,13 +65,47 @@ export function ThemeForm() {
           {...form.getInputProps('theme')}
         >
           <Stack mt="xs" gap="sm">
-            <Radio value="light" label="ライトモード" disabled={isPending} />
-            <Radio value="dark" label="ダークモード" disabled={isPending} />
-            <Radio value="auto" label="システム設定に従う" disabled={isPending} />
+            <Radio
+              value="light"
+              label={
+                <Group gap="xs">
+                  <IconSun size={18} />
+                  <Text>ライトモード</Text>
+                </Group>
+              }
+              disabled={isPending}
+            />
+            <Radio
+              value="dark"
+              label={
+                <Group gap="xs">
+                  <IconMoon size={18} />
+                  <Text>ダークモード</Text>
+                </Group>
+              }
+              disabled={isPending}
+            />
+            <Radio
+              value="auto"
+              label={
+                <Group gap="xs">
+                  <IconDeviceDesktop size={18} />
+                  <Text>システム設定に従う</Text>
+                </Group>
+              }
+              disabled={isPending}
+            />
           </Stack>
         </Radio.Group>
 
-        <Button type="submit" loading={isPending} disabled={!form.isDirty()} fullWidth mt="md">
+        <Button
+          type="submit"
+          loading={isPending}
+          disabled={!form.isDirty()}
+          fullWidth
+          mt="md"
+          leftSection={<IconDeviceFloppy size={18} />}
+        >
           変更を保存
         </Button>
       </Stack>

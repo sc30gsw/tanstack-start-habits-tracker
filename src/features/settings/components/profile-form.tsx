@@ -1,6 +1,7 @@
 import { Button, Stack, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
+import { IconDeviceFloppy, IconMail, IconUser } from '@tabler/icons-react'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useTransition } from 'react'
 import { z } from 'zod/v4'
@@ -79,6 +80,7 @@ export function ProfileForm() {
           placeholder="あなたの名前"
           required
           disabled={isPending}
+          leftSection={<IconUser size={18} />}
           {...form.getInputProps('name')}
         />
 
@@ -88,10 +90,18 @@ export function ProfileForm() {
           type="email"
           required
           disabled={isPending}
+          leftSection={<IconMail size={18} />}
           {...form.getInputProps('email')}
         />
 
-        <Button type="submit" loading={isPending} disabled={!form.isDirty()} fullWidth mt="md">
+        <Button
+          type="submit"
+          loading={isPending}
+          disabled={!form.isDirty()}
+          fullWidth
+          mt="md"
+          leftSection={<IconDeviceFloppy size={18} />}
+        >
           変更を保存
         </Button>
       </Stack>

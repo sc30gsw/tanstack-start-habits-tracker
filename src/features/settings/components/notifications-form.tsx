@@ -1,8 +1,9 @@
-import { Box, Button, Checkbox, Divider, Group, Stack, Switch, Text } from '@mantine/core'
+import { Badge, Box, Button, Checkbox, Divider, Group, Stack, Switch, Text } from '@mantine/core'
 import { TimePicker } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { useListState } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
+import { IconDeviceFloppy, IconFlag } from '@tabler/icons-react'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
 import { useTransition } from 'react'
@@ -43,6 +44,23 @@ export function NotificationsForm() {
   const [isPending, startTransition] = useTransition()
   const { getHabitColor } = useHabitColor()
 
+  // 優先度の表示設定
+  const getPriorityConfig = (priority: string | null) => {
+    switch (priority) {
+      case 'high':
+        return { label: '高', color: 'red', icon: <IconFlag size={12} /> }
+
+      case 'middle':
+        return { label: '中', color: 'yellow', icon: <IconFlag size={12} /> }
+
+      case 'low':
+        return { label: '低', color: 'blue', icon: <IconFlag size={12} /> }
+
+      default:
+        return { label: 'なし', color: 'gray', icon: <IconFlag size={12} /> }
+    }
+  }
+
   const queryClient = useQueryClient()
   const { data: settings, refetch } = useSuspenseQuery({
     queryKey: [GET_USER_SETTINGS_CACHE_KEY],
@@ -60,6 +78,7 @@ export function NotificationsForm() {
     habitName: habit.name,
     habitColor: habit.color,
     habitDescription: habit.description,
+    habitPriority: habit.priority,
     checked: habit.notificationsEnabled ?? true,
   }))
 
@@ -231,14 +250,24 @@ export function NotificationsForm() {
                         style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
                       />
                       <Box style={{ flex: 1 }}>
-                        <Group gap="sm" align="center" wrap="nowrap">
-                          <Box
-                            className={classes.colorDot}
-                            style={{
-                              backgroundColor: getHabitColor(item.habitColor as HabitColor),
-                            }}
-                          />
-                          <Text className={classes.habitName}>{item.habitName}</Text>
+                        <Group gap="sm" align="center" wrap="nowrap" justify="space-between">
+                          <Group gap="sm" align="center" wrap="nowrap">
+                            <Box
+                              className={classes.colorDot}
+                              style={{
+                                backgroundColor: getHabitColor(item.habitColor as HabitColor),
+                              }}
+                            />
+                            <Text className={classes.habitName}>{item.habitName}</Text>
+                          </Group>
+                          <Badge
+                            size="sm"
+                            variant="light"
+                            color={getPriorityConfig(item.habitPriority).color}
+                            leftSection={getPriorityConfig(item.habitPriority).icon}
+                          >
+                            優先度: {getPriorityConfig(item.habitPriority).label}
+                          </Badge>
                         </Group>
                         {item.habitDescription && (
                           <Text className={classes.habitDescription}>{item.habitDescription}</Text>
@@ -258,6 +287,7 @@ export function NotificationsForm() {
           disabled={!form.isDirty() && !habitNotificationsChanged}
           fullWidth
           mt="md"
+          leftSection={<IconDeviceFloppy size={18} />}
         >
           変更を保存
         </Button>
