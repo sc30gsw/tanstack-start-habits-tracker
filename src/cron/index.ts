@@ -37,7 +37,8 @@ export async function handleScheduledEvent(event: Record<'scheduledTime', number
  * Run: bun run src/cron/index.ts
  */
 if (import.meta.main) {
-  console.log('🧪 Running notification cron locally...\n')
-  await runNotificationCron()
+  console.log('🧪 Running notification cron in TEST MODE...\n')
+  console.log('   This will generate all notification types regardless of time\n')
+  await runNotificationCron({ testMode: true })
   console.log('\n✅ Local cron test completed')
 }
