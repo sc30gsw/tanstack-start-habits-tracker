@@ -61,6 +61,12 @@ export function ProfileCard() {
             </Avatar>
           </Group>
 
+          <Stack gap="xs" px="lg" mb="md">
+            <Text size="xl" fw={700} ta="center">
+              {user.name}
+            </Text>
+          </Stack>
+
           <Group justify="center" gap="xs" mb="lg" px="lg">
             <IconCalendar size={16} color="var(--mantine-color-dimmed)" />
             <Text size="sm" c="dimmed">
