@@ -168,6 +168,10 @@ export function NotificationItem({
             to={getNotificationLink(notification)}
             className="flex items-center gap-1 text-blue-600 text-xs hover:underline"
             onClick={() => {
+              if (!isRead) {
+                onMarkAsRead(notification.id)
+              }
+
               setTimeout(() => {
                 onNavigate?.()
               }, 500)
