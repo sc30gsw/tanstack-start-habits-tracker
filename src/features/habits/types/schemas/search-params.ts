@@ -114,6 +114,8 @@ const detailTabValidator = z
 
 const qValidator = z.string().optional().catch('')
 
+const presetValidator = dateStringValidator
+
 export const searchSchema = z.object({
   selectedDate: dateStringValidator,
   calendarView: calendarViewValidator,
@@ -133,6 +135,7 @@ export const searchSchema = z.object({
   levelTab: levelTabValidator,
   detailTab: detailTabValidator,
   q: qValidator,
+  preset: presetValidator,
 })
 
 export type SearchParams = z.infer<typeof searchSchema>
@@ -175,5 +178,6 @@ export function getDefaultSearchParams() {
     levelTab: 'overview',
     detailTab: 'dashboard',
     q: '',
+    preset: dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD'),
   }
 }

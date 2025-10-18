@@ -1,17 +1,17 @@
-import { ActionIcon, Group, Stack, Text } from '@mantine/core'
+import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { chunk } from 'remeda'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
+import { getDatePresets, WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 import { HomeCalendarDateCell } from '~/features/home/components/calendar/home-calendar-date-cell'
+import { CALENDAR_ID } from '~/features/home/components/home-calendar-view'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
-
-const WEEK_DAYS = ['日', '月', '火', '水', '木', '金', '土'] as const satisfies readonly string[]
 
 function generateMonthDates(currentMonth: dayjs.Dayjs) {
   const monthStart = currentMonth.startOf('month')
@@ -50,9 +50,56 @@ export function HomeMonthView() {
   const weeks = createWeekGroups(monthDates)
 
   const navigate = apiRoute.useNavigate()
+  const allPresets = getDatePresets()
+
+  const datePresets = allPresets.reduce(
+    (acc, preset) => {
+      if (!acc.some((p) => p.value === preset.value)) {
+        acc.push({ value: preset.value, label: preset.label })
+      }
+      return acc
+    },
+    [] as Record<'value' | 'label', string>[],
+  )
+
+  const handlePresetChange = (value: string | null) => {
+    if (value) {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          selectedDate: value,
+          currentMonth: dayjs(value).format('YYYY-MM'),
+          preset: value,
+        }),
+        hash: CALENDAR_ID,
+      })
+    } else {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          preset: undefined,
+        }),
+        hash: CALENDAR_ID,
+      })
+    }
+  }
 
   return (
     <Stack gap={4}>
+      <Select
+        placeholder="日付プリセットを選択"
+        data={datePresets.map((preset) => ({
+          value: preset.value,
+          label: preset.label,
+        }))}
+        value={searchParams?.preset || dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')}
+        onChange={handlePresetChange}
+        comboboxProps={{ transitionProps: { transition: 'pop', duration: 200 } }}
+        clearable
+        searchable
+        size="xs"
+      />
+
       <Group justify="space-between" mb={4}>
         <ActionIcon
           variant="subtle"
@@ -62,7 +109,9 @@ export function HomeMonthView() {
               search: (prev) => ({
                 ...prev,
                 currentMonth: currentMonth.subtract(1, 'month').format('YYYY-MM'),
+                preset: undefined,
               }),
+              hash: CALENDAR_ID,
             })
           }}
         >
@@ -77,7 +126,9 @@ export function HomeMonthView() {
               search: (prev) => ({
                 ...prev,
                 currentMonth: currentMonth.add(1, 'month').format('YYYY-MM'),
+                preset: undefined,
               }),
+              hash: CALENDAR_ID,
             })
           }}
         >

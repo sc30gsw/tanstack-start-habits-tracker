@@ -11,26 +11,24 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
-// シンプルなカレンダーセルの色定数
 const CELL_COLORS = {
-  // 選択時の色
   selected: {
     backgroundColor: 'var(--mantine-color-blue-6)',
     borderColor: 'var(--mantine-color-blue-8)',
   },
-  // 通常時の色
   normal: {
     borderColor: 'transparent',
   },
-} as const
+} as const satisfies Record<
+  string,
+  { backgroundColor?: CSSProperties['backgroundColor']; borderColor: CSSProperties['borderColor'] }
+>
 
-// シンプルなセルスタイルの型定義
 type CellStyleState = {
   isSelected: boolean
   dateType: ReturnType<typeof getDateType>
 }
 
-// 背景色とボーダー色を決定する純粋関数（簡素化版）
 function getCellBackgroundStyle(state: CellStyleState) {
   const { isSelected, dateType } = state
 
@@ -41,14 +39,12 @@ function getCellBackgroundStyle(state: CellStyleState) {
     }
   }
 
-  // 通常時は土日・祝日の色分けのみ
   return {
     backgroundColor: getDateColor(dateType, false, false), // 記録なしとして扱う
     borderColor: CELL_COLORS.normal.borderColor,
   }
 }
 
-// カレンダー日付セルコンポーネントのProps型定義（簡素化）
 type HomeCalendarDateCellProps = {
   date: dayjs.Dayjs
   isCurrentMonth?: boolean
@@ -56,7 +52,6 @@ type HomeCalendarDateCellProps = {
   showWeekday?: boolean
 }
 
-// Home専用の日付セルコンポーネント（簡素化版）
 export function HomeCalendarDateCell({
   date,
   isCurrentMonth = true,
@@ -86,7 +81,6 @@ export function HomeCalendarDateCell({
 
   const textColor = getDateTextColor(dateType, isSelected, false) // 記録なしとして扱う
 
-  // 月表示用のコンテンツ
   if (variant === 'month') {
     return (
       <Card
@@ -162,7 +156,6 @@ export function HomeCalendarDateCell({
     )
   }
 
-  // 週表示用のコンテンツ
   return (
     <Card
       withBorder
