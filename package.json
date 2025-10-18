@@ -9,7 +9,7 @@
     "serve": "vite preview",
     "deploy": "wrangler deploy",
     "cf:dev": "wrangler dev",
-    "cf:build": "rm -rf .wrangler && vite build && wrangler deploy",
+    "cf:build": "rm -rf dist .wrangler && vite build && wrangler deploy",
     "test": "vitest run",
     "tsc": "tsc --noEmit",
     "lint": "biome lint --write ./src ./tests",
