@@ -1,6 +1,6 @@
 import { Avatar, Box, Button, Card, Divider, Group, Image, Stack, Text } from '@mantine/core'
 import { useDisclosure, useMediaQuery } from '@mantine/hooks'
-import { IconCalendar, IconMail, IconPencil } from '@tabler/icons-react'
+import { IconCalendar, IconPencil } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ja'
@@ -60,18 +60,6 @@ export function ProfileCard() {
               {user?.name?.slice(0, 2).toUpperCase()}
             </Avatar>
           </Group>
-
-          <Stack gap="xs" px="lg" mb="md">
-            <Text size="xl" fw={700} ta="center">
-              {user.name}
-            </Text>
-            <Group justify="center" gap="xs">
-              <IconMail size={16} color="var(--mantine-color-dimmed)" />
-              <Text size="sm" c="dimmed">
-                {user.email}
-              </Text>
-            </Group>
-          </Stack>
 
           <Group justify="center" gap="xs" mb="lg" px="lg">
             <IconCalendar size={16} color="var(--mantine-color-dimmed)" />
