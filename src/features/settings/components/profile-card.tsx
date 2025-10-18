@@ -1,5 +1,5 @@
-import { Avatar, Button, Card, Divider, Group, Image, Stack, Text } from '@mantine/core'
-import { useDisclosure } from '@mantine/hooks'
+import { Avatar, Box, Button, Card, Divider, Group, Image, Stack, Text } from '@mantine/core'
+import { useDisclosure, useMediaQuery } from '@mantine/hooks'
 import { IconCalendar, IconMail, IconPencil } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -14,6 +14,7 @@ export function ProfileCard() {
   const routeApi = getRouteApi('/settings/profile')
   const { user, homeAggregatedLevel } = routeApi.useLoaderData()
   const [opened, { open, close }] = useDisclosure(false)
+  const isMobile = useMediaQuery('(max-width: 768px)')
 
   const joinedDate = dayjs(user.createdAt).format('YYYY年M月')
 
@@ -28,49 +29,56 @@ export function ProfileCard() {
           />
         </Card.Section>
 
-        <Group justify="center" mt="-60px" mb="md" px="lg">
-          <Avatar
-            src={user?.image}
-            size={120}
-            radius="50%"
-            color="blue"
+        <Box style={{ position: 'relative' }}>
+          <Button
+            variant="outline"
+            radius="xl"
+            onClick={open}
+            leftSection={!isMobile ? <IconPencil size={16} /> : undefined}
             style={{
-              border: '4px solid var(--mantine-color-body)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              position: 'absolute',
+              top: 8,
+              right: 16,
+              zIndex: 1,
             }}
           >
-            {user?.name?.slice(0, 2).toUpperCase()}
-          </Avatar>
-        </Group>
+            {isMobile ? <IconPencil size={20} /> : 'プロフィールを編集'}
+          </Button>
 
-        <Stack gap="xs" px="lg" mb="md">
-          <Group justify="center" gap="xs">
+          <Group justify="center" mt="-60px" mb="md" px="lg">
+            <Avatar
+              src={user?.image}
+              size={120}
+              radius="50%"
+              color="blue"
+              style={{
+                border: '4px solid var(--mantine-color-body)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              }}
+            >
+              {user?.name?.slice(0, 2).toUpperCase()}
+            </Avatar>
+          </Group>
+
+          <Stack gap="xs" px="lg" mb="md">
             <Text size="xl" fw={700} ta="center">
               {user.name}
             </Text>
-            <Button
-              variant="subtle"
-              size="compact-sm"
-              onClick={open}
-              leftSection={<IconPencil size={14} />}
-            >
-              編集
-            </Button>
-          </Group>
-          <Group justify="center" gap="xs">
-            <IconMail size={16} color="var(--mantine-color-dimmed)" />
+            <Group justify="center" gap="xs">
+              <IconMail size={16} color="var(--mantine-color-dimmed)" />
+              <Text size="sm" c="dimmed">
+                {user.email}
+              </Text>
+            </Group>
+          </Stack>
+
+          <Group justify="center" gap="xs" mb="lg" px="lg">
+            <IconCalendar size={16} color="var(--mantine-color-dimmed)" />
             <Text size="sm" c="dimmed">
-              {user.email}
+              {joinedDate}から利用中
             </Text>
           </Group>
-        </Stack>
-
-        <Group justify="center" gap="xs" mb="lg" px="lg">
-          <IconCalendar size={16} color="var(--mantine-color-dimmed)" />
-          <Text size="sm" c="dimmed">
-            {joinedDate}から利用中
-          </Text>
-        </Group>
+        </Box>
 
         <Divider />
 
