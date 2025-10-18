@@ -4,7 +4,7 @@ import type { Session } from 'better-auth'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import { and, desc, eq, lt } from 'drizzle-orm'
+import { and, count, desc, eq, lt } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { db } from '~/db'
@@ -76,12 +76,12 @@ const getUnreadNotificationsCount = createServerFn({ method: 'GET' }).handler(as
     throw new Error('Unauthorized')
   }
 
-  const unreadCount = await db
-    .select({ count: notifications.id })
+  const result = await db
+    .select({ count: count() })
     .from(notifications)
     .where(and(eq(notifications.userId, session.user.id), eq(notifications.isRead, false)))
 
-  return unreadCount.length
+  return result[0].count
 })
 
 const markAsReadSchema = z.object({

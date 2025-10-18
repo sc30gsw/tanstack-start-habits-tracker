@@ -34,12 +34,17 @@ const TIME_MESSAGES = {
  * Main cron job function - runs every minute
  * Checks all users' notification settings and generates notifications
  */
-export async function runNotificationCron() {
+export async function runNotificationCron(options?: Partial<Record<'testMode', boolean>>) {
   const currentTime = dayjs().tz('Asia/Tokyo')
   const currentTimeStr = currentTime.format('HH:mm')
   const currentDate = currentTime.format('YYYY-MM-DD')
 
+  const testMode = options?.testMode ?? false
+
   console.log(`🔔 [Notification Cron] Running at ${currentTimeStr} JST (${currentDate})`)
+  if (testMode) {
+    console.log(`   🧪 TEST MODE: Will generate all notification types regardless of time`)
+  }
 
   try {
     // Get all users with notifications enabled
@@ -58,12 +63,13 @@ export async function runNotificationCron() {
         currentTimeStr as (typeof DEFAULT_NOTIFICATION_TIMES)[number],
       )
 
-      if (isDefaultTime) {
-        await generateDefaultTimeNotifications(
-          userSetting.userId,
-          currentTimeStr as (typeof DEFAULT_NOTIFICATION_TIMES)[number],
-          userSetting,
-        )
+      if (isDefaultTime || testMode) {
+        const time = isDefaultTime
+          ? (currentTimeStr as (typeof DEFAULT_NOTIFICATION_TIMES)[number])
+          : '09:00' // Use 09:00 as default in test mode
+
+        await generateDefaultTimeNotifications(userSetting.userId, time, userSetting)
+
         notificationsCreated++
       }
 
@@ -71,7 +77,7 @@ export async function runNotificationCron() {
       const isCustomTime =
         userSetting.customReminderEnabled && userSetting.dailyReminderTime === currentTimeStr
 
-      if (isCustomTime) {
+      if (isCustomTime || (testMode && userSetting.customReminderEnabled)) {
         await generateCustomReminderNotification(userSetting.userId)
         notificationsCreated++
       }
@@ -144,10 +150,10 @@ async function generateIncompleteHabitNotifications(userId: Session['userId']) {
   try {
     const today = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
 
-    // Get user's habits
-    const userHabits = await db.select().from(habits).where(eq(habits.userId, userId))
+    const userHabits = await db.query.habits.findMany({
+      where: and(eq(habits.userId, userId), eq(habits.notificationsEnabled, true)),
+    })
 
-    // Get today's records
     const todayRecords = await db
       .select()
       .from(records)
@@ -156,7 +162,6 @@ async function generateIncompleteHabitNotifications(userId: Session['userId']) {
 
     const recordMap = new Map(todayRecords.map((r) => [r.records.habitId, r.records]))
 
-    // Find incomplete habits (active status or no record)
     for (const habit of userHabits) {
       const record = recordMap.get(habit.id)
 
@@ -187,8 +192,11 @@ async function generateSkippedHabitNotifications(userId: Session['userId']) {
   try {
     const today = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
 
-    // Get user's habits with direct DB query
-    const userHabits = await db.select().from(habits).where(eq(habits.userId, userId))
+    // Get user's habits (only those with notifications enabled)
+    const userHabits = await db
+      .select()
+      .from(habits)
+      .where(and(eq(habits.userId, userId), eq(habits.notificationsEnabled, true)))
 
     // Get today's records with direct DB query
     const todayRecords = await db
@@ -226,8 +234,11 @@ async function generateScheduledHabitNotifications(userId: Session['userId']) {
   try {
     const today = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
 
-    // Get user's habits with direct DB query
-    const userHabits = await db.select().from(habits).where(eq(habits.userId, userId))
+    // Get user's habits (only those with notifications enabled)
+    const userHabits = await db
+      .select()
+      .from(habits)
+      .where(and(eq(habits.userId, userId), eq(habits.notificationsEnabled, true)))
 
     // Get today's records with direct DB query
     const todayRecords = await db
