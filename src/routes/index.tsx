@@ -120,7 +120,7 @@ function Home() {
     )
   }
 
-  const { habits, records } = loaderData
+  const { habits, records, homeAggregatedLevel } = loaderData
 
   const today = dayjs().format('YYYY-MM-DD')
   // 選択された日付を取得（未選択の場合は今日）
@@ -204,8 +204,12 @@ function Home() {
           </Stack>
         </Card>
 
-        <HomeOverallLevelCard />
-        <HomeBadgeCollection />
+        {homeAggregatedLevel && (
+          <>
+            <HomeOverallLevelCard homeAggregatedLevel={homeAggregatedLevel} />
+            <HomeBadgeCollection homeAggregatedLevel={homeAggregatedLevel} />
+          </>
+        )}
         <HomeCalendarView />
         <HomeHeatmapView />
 

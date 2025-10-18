@@ -86,8 +86,8 @@ export function ProfileCard() {
         <Stack gap="md" p="lg">
           {homeAggregatedLevel && (
             <>
-              <HomeOverallLevelCard />
-              <HomeBadgeCollection />
+              <HomeOverallLevelCard homeAggregatedLevel={homeAggregatedLevel} />
+              <HomeBadgeCollection homeAggregatedLevel={homeAggregatedLevel} />
             </>
           )}
         </Stack>
