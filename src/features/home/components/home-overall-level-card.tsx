@@ -11,13 +11,14 @@ import {
 } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { IconInfoCircle, IconStar } from '@tabler/icons-react'
-import { getRouteApi } from '@tanstack/react-router'
+import { getRouteApi, useLocation } from '@tanstack/react-router'
 import { getIconComponent } from '~/features/habits/utils/icon-mapper'
 import { getHomeLevelInfo, HOME_LEVEL_TITLES } from '~/features/home/constants/home-level-titles'
 import { calculateHomeLevelProgress } from '~/features/home/utils/home-level-utils'
 
 export function HomeOverallLevelCard() {
-  const routeApi = getRouteApi('/')
+  const location = useLocation()
+  const routeApi = getRouteApi(location.pathname === '/' ? '/' : '/settings/profile')
   const { homeAggregatedLevel } = routeApi.useLoaderData()
   const computedColorScheme = useComputedColorScheme('light')
 

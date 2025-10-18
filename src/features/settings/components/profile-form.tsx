@@ -1,11 +1,10 @@
-import { Button, Stack, TextInput } from '@mantine/core'
+import { Button, Stack, TextInput, Title } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
 import { IconDeviceFloppy, IconMail, IconUser } from '@tabler/icons-react'
-import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { getRouteApi } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { z } from 'zod/v4'
-import { GET_USER_PROFILE_CACHE_KEY } from '~/constants/cache-key'
 import { profileDto } from '~/features/profile/server/profile-functions'
 
 const profileSchema = z.object({
@@ -16,13 +15,10 @@ const profileSchema = z.object({
 type ProfileFormSchema = z.infer<typeof profileSchema>
 
 export function ProfileForm() {
-  const [isPending, startTransition] = useTransition()
-  const queryClient = useQueryClient()
+  const routeApi = getRouteApi('/settings/profile')
+  const { user } = routeApi.useLoaderData()
 
-  const { data: user, refetch } = useSuspenseQuery({
-    queryKey: [GET_USER_PROFILE_CACHE_KEY],
-    queryFn: () => profileDto.getUserProfile(),
-  })
+  const [isPending, startTransition] = useTransition()
 
   const form = useForm<ProfileFormSchema>({
     initialValues: {
@@ -59,9 +55,7 @@ export function ProfileForm() {
           color: 'green',
         })
 
-        await queryClient.invalidateQueries({ queryKey: [GET_USER_PROFILE_CACHE_KEY] })
         form.resetDirty()
-        await refetch()
       } catch (error) {
         notifications.show({
           title: 'エラー',
@@ -75,6 +69,8 @@ export function ProfileForm() {
   return (
     <form onSubmit={handleSubmit}>
       <Stack gap="md">
+        <Title order={3}>プロフィール編集</Title>
+
         <TextInput
           label="名前"
           placeholder="あなたの名前"

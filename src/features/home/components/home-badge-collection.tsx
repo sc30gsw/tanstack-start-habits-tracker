@@ -13,7 +13,7 @@ import {
 } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { IconInfoCircle, IconTrophy } from '@tabler/icons-react'
-import { getRouteApi } from '@tanstack/react-router'
+import { getRouteApi, useLocation } from '@tanstack/react-router'
 import { getIconComponent } from '~/features/habits/utils/icon-mapper'
 import {
   HOME_BADGE_CATEGORY_LABELS,
@@ -25,11 +25,21 @@ import {
 } from '~/features/home/utils/home-badge-utils'
 
 export function HomeBadgeCollection() {
-  const routeApi = getRouteApi('/')
+  const location = useLocation()
+  const routeApi = getRouteApi(location.pathname === '/' ? '/' : '/settings/profile')
   const { homeAggregatedLevel } = routeApi.useLoaderData()
   const computedColorScheme = useComputedColorScheme('light')
 
-  const badgesByCategory = getHomeBadgesByCategory(homeAggregatedLevel)
+  const badgesByCategory = getHomeBadgesByCategory(
+    homeAggregatedLevel ?? {
+      totalLevel: 0,
+      totalHabits: 0,
+      totalCompletionDays: 0,
+      totalHoursDecimal: 0,
+      longestStreak: 0,
+      currentStreak: 0,
+    },
+  )
   const allBadges = [
     ...badgesByCategory.habits,
     ...badgesByCategory.days,
