@@ -127,28 +127,26 @@ export function RecordForm({
     // スキップ状態かつメモが空の場合、メモ入力を促す
     if (values.status === 'skipped' && !values.notes?.trim()) {
       modals.openConfirmModal({
-        title: 'スキップの記録について',
+        title: 'スキップの理由を記録しませんか？',
         children: (
           <Text size="sm">
-            習慣をスキップした理由や今後の改善点をメモに記録しませんか？
+            なぜスキップしたのか、どうすれば改善できるかを記録することで、
             <br />
-            記録することで習慣の継続に役立ちます。
+            今後の習慣継続に役立ちます。
           </Text>
         ),
         labels: {
-          confirm: 'メモを記入する',
+          confirm: '理由を記入する',
           cancel: existingRecord ? 'このまま更新' : 'このまま保存',
         },
         confirmProps: { color: 'blue' },
         onConfirm: () => {
           // メモ欄にフォーカスを当てる（モーダルが閉じてからフォーカス）
           setTimeout(() => {
-            const textarea = document.querySelector(
-              'textarea[placeholder*="今日の感想"]',
-            ) as HTMLTextAreaElement
-            if (textarea) {
-              textarea.focus()
-              textarea.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            const editor = document.querySelector('.tiptap.ProseMirror') as HTMLElement
+            if (editor) {
+              editor.focus()
+              editor.scrollIntoView({ behavior: 'smooth', block: 'center' })
             }
           }, 100)
         },
@@ -332,12 +330,18 @@ export function RecordForm({
         </Group>
         <Stack gap="xs">
           <Text size="sm" fw={500}>
-            メモ・感想
+            実施内容・振り返り
           </Text>
           <RichTextEditor
             content={editorContent}
             onChange={setEditorContent}
-            placeholder="今日の感想や具体的に何をやったかを記録..."
+            placeholder="例：
+・ランニング 30分（5km）
+・ストレッチ 10分
+
+できなかった部分：
+・筋トレは時間がなくてスキップ
+・明日は朝の時間を使って取り組む"
             disabled={isPending}
           />
         </Stack>
