@@ -1,10 +1,15 @@
 import { AppShell, Avatar, Button, Group, Menu, Text } from '@mantine/core'
 import {
+  IconCheck,
   IconClock,
   IconCreditCard,
   IconHeadphones,
+  IconHome,
+  IconLogin,
   IconLogout,
+  IconRocket,
   IconSettings,
+  IconUserPlus,
 } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense } from 'react'
@@ -32,7 +37,13 @@ export function Header() {
           <Group gap="md" visibleFrom="sm">
             {session ? (
               <>
-                <Button component={Link} to="/" variant="subtle" size="sm">
+                <Button
+                  component={Link}
+                  to="/"
+                  variant="subtle"
+                  size="sm"
+                  leftSection={<IconHome size={16} />}
+                >
                   ホーム
                 </Button>
                 <Button
@@ -46,6 +57,7 @@ export function Header() {
                   }
                   variant="subtle"
                   size="sm"
+                  leftSection={<IconCheck size={16} />}
                 >
                   習慣管理
                 </Button>
@@ -58,7 +70,13 @@ export function Header() {
                 >
                   Focus Zone
                 </Button>
-                <Button component={Link} to="/checkout" variant="subtle" size="sm">
+                <Button
+                  component={Link}
+                  to="/checkout"
+                  variant="subtle"
+                  size="sm"
+                  leftSection={<IconRocket size={16} />}
+                >
                   プラン
                 </Button>
 
@@ -138,10 +156,21 @@ export function Header() {
             ) : (
               <>
                 <ThemeToggle />
-                <Button component={Link} to="/auth/sign-in" variant="subtle" size="sm">
+                <Button
+                  component={Link}
+                  to="/auth/sign-in"
+                  variant="subtle"
+                  size="sm"
+                  leftSection={<IconLogin size={16} />}
+                >
                   ログイン
                 </Button>
-                <Button component={Link} to="/auth/sign-up" size="sm">
+                <Button
+                  component={Link}
+                  to="/auth/sign-up"
+                  size="sm"
+                  leftSection={<IconUserPlus size={16} />}
+                >
                   新規登録
                 </Button>
               </>
@@ -185,7 +214,7 @@ export function Header() {
                   <Menu.Dropdown>
                     <Menu.Label>{session.user.name || session.user.email}</Menu.Label>
                     <Menu.Divider />
-                    <Menu.Item component={Link} to="/">
+                    <Menu.Item component={Link} to="/" leftSection={<IconHome size={14} />}>
                       ホーム
                     </Menu.Item>
                     <Menu.Item
@@ -197,6 +226,7 @@ export function Header() {
                           habitSort: 'all',
                         } as any
                       }
+                      leftSection={<IconCheck size={14} />}
                     >
                       習慣管理
                     </Menu.Item>
@@ -207,7 +237,11 @@ export function Header() {
                     >
                       Focus Zone
                     </Menu.Item>
-                    <Menu.Item component={Link} to="/checkout">
+                    <Menu.Item
+                      component={Link}
+                      to="/checkout"
+                      leftSection={<IconRocket size={14} />}
+                    >
                       プラン
                     </Menu.Item>
                     <Menu.Divider />
@@ -242,10 +276,21 @@ export function Header() {
             {!session && (
               <Group gap="xs">
                 <ThemeToggle />
-                <Button component={Link} to="/auth/sign-in" variant="subtle" size="xs">
+                <Button
+                  component={Link}
+                  to="/auth/sign-in"
+                  variant="subtle"
+                  size="xs"
+                  leftSection={<IconLogin size={14} />}
+                >
                   ログイン
                 </Button>
-                <Button component={Link} to="/auth/sign-up" size="xs">
+                <Button
+                  component={Link}
+                  to="/auth/sign-up"
+                  size="xs"
+                  leftSection={<IconUserPlus size={14} />}
+                >
                   登録
                 </Button>
               </Group>
