@@ -5,12 +5,11 @@
  * - Custom scheduled handler for cron jobs
  */
 
-// Import the TanStack Start server handler
-// @ts-ignore - Generated file at build time
-import tanstackHandler from './dist/server/index.js'
+// Import TanStack Start's server handler directly
+import tanstackHandler from '@tanstack/react-start/server-entry'
 
 // Import our cron handler
-import { handleScheduledEvent } from './src/cron/index.ts'
+import { handleScheduledEvent } from './src/cron/index'
 
 // Export a single default object with both fetch and scheduled handlers
 export default {
