@@ -21,6 +21,10 @@ export function HomeOverallLevelCard() {
   const { homeAggregatedLevel } = routeApi.useLoaderData()
   const computedColorScheme = useComputedColorScheme('light')
 
+  if (!homeAggregatedLevel) {
+    return null
+  }
+
   const levelInfo = getHomeLevelInfo(homeAggregatedLevel.totalLevel)
   const progressPercent = calculateHomeLevelProgress(
     homeAggregatedLevel.totalLevel,
