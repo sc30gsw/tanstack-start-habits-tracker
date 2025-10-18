@@ -1,5 +1,6 @@
-import { Avatar, Card, Divider, Group, Image, Stack, Text } from '@mantine/core'
-import { IconCalendar, IconMail } from '@tabler/icons-react'
+import { Avatar, Button, Card, Divider, Group, Image, Stack, Text } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { IconCalendar, IconMail, IconPencil } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ja'
@@ -12,6 +13,7 @@ dayjs.locale('ja')
 export function ProfileCard() {
   const routeApi = getRouteApi('/settings/profile')
   const { user, homeAggregatedLevel } = routeApi.useLoaderData()
+  const [opened, { open, close }] = useDisclosure(false)
 
   const joinedDate = dayjs(user.createdAt).format('YYYY年M月')
 
@@ -42,9 +44,19 @@ export function ProfileCard() {
         </Group>
 
         <Stack gap="xs" px="lg" mb="md">
-          <Text size="xl" fw={700} ta="center">
-            {user.name}
-          </Text>
+          <Group justify="center" gap="xs">
+            <Text size="xl" fw={700} ta="center">
+              {user.name}
+            </Text>
+            <Button
+              variant="subtle"
+              size="compact-sm"
+              onClick={open}
+              leftSection={<IconPencil size={14} />}
+            >
+              編集
+            </Button>
+          </Group>
           <Group justify="center" gap="xs">
             <IconMail size={16} color="var(--mantine-color-dimmed)" />
             <Text size="sm" c="dimmed">
@@ -72,11 +84,9 @@ export function ProfileCard() {
         </Stack>
 
         <Divider />
-
-        <Card.Section withBorder inheritPadding py="md">
-          <ProfileForm />
-        </Card.Section>
       </Stack>
+
+      <ProfileForm opened={opened} onClose={close} />
     </Card>
   )
 }

@@ -1,7 +1,7 @@
-import { Button, Stack, TextInput, Title } from '@mantine/core'
+import { Button, Group, Modal, Stack, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
-import { IconDeviceFloppy, IconMail, IconUser } from '@tabler/icons-react'
+import { IconDeviceFloppy, IconMail, IconUser, IconX } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { z } from 'zod/v4'
@@ -14,7 +14,12 @@ const profileSchema = z.object({
 
 type ProfileFormSchema = z.infer<typeof profileSchema>
 
-export function ProfileForm() {
+type ProfileFormProps = {
+  opened: boolean
+  onClose: () => void
+}
+
+export function ProfileForm({ opened, onClose }: ProfileFormProps) {
   const routeApi = getRouteApi('/settings/profile')
   const { user } = routeApi.useLoaderData()
 
@@ -56,6 +61,7 @@ export function ProfileForm() {
         })
 
         form.resetDirty()
+        onClose()
       } catch (error) {
         notifications.show({
           title: 'エラー',
@@ -67,40 +73,52 @@ export function ProfileForm() {
   })
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Stack gap="md" px="lg">
-        <Title order={3}>プロフィール編集</Title>
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title="プロフィールを編集"
+      size="md"
+      centered
+      closeButtonProps={{
+        icon: <IconX size={20} />,
+      }}
+    >
+      <form onSubmit={handleSubmit}>
+        <Stack gap="md">
+          <TextInput
+            label="名前"
+            placeholder="あなたの名前"
+            required
+            disabled={isPending}
+            leftSection={<IconUser size={18} />}
+            {...form.getInputProps('name')}
+          />
 
-        <TextInput
-          label="名前"
-          placeholder="あなたの名前"
-          required
-          disabled={isPending}
-          leftSection={<IconUser size={18} />}
-          {...form.getInputProps('name')}
-        />
+          <TextInput
+            label="メールアドレス"
+            placeholder="email@example.com"
+            type="email"
+            required
+            disabled={isPending}
+            leftSection={<IconMail size={18} />}
+            {...form.getInputProps('email')}
+          />
 
-        <TextInput
-          label="メールアドレス"
-          placeholder="email@example.com"
-          type="email"
-          required
-          disabled={isPending}
-          leftSection={<IconMail size={18} />}
-          {...form.getInputProps('email')}
-        />
-
-        <Button
-          type="submit"
-          loading={isPending}
-          disabled={!form.isDirty()}
-          fullWidth
-          mt="md"
-          leftSection={<IconDeviceFloppy size={18} />}
-        >
-          変更を保存
-        </Button>
-      </Stack>
-    </form>
+          <Group justify="flex-end" mt="md">
+            <Button variant="subtle" onClick={onClose} disabled={isPending}>
+              キャンセル
+            </Button>
+            <Button
+              type="submit"
+              loading={isPending}
+              disabled={!form.isDirty()}
+              leftSection={<IconDeviceFloppy size={18} />}
+            >
+              保存
+            </Button>
+          </Group>
+        </Stack>
+      </form>
+    </Modal>
   )
 }
