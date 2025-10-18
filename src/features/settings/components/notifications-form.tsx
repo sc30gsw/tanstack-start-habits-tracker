@@ -1,4 +1,4 @@
-import { Badge, Button, Checkbox, Divider, Group, Stack, Switch, Text } from '@mantine/core'
+import { Button, Checkbox, Divider, Group, Stack, Switch, Text } from '@mantine/core'
 import { TimePicker } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
@@ -18,12 +18,7 @@ const notificationSettingsSchema = z
     incompleteReminderEnabled: z.boolean(),
     skippedReminderEnabled: z.boolean(),
     scheduledReminderEnabled: z.boolean(),
-    habitNotifications: z.array(
-      z.object({
-        habitId: z.string(),
-        enabled: z.boolean(),
-      }),
-    ),
+    habitNotifications: z.record(z.string(), z.boolean()),
   })
   .superRefine((data, ctx) => {
     if (data.customReminderEnabled) {
@@ -54,7 +49,6 @@ export function NotificationsForm() {
   const habitsResult = routeApi.useLoaderData()
 
   const habits = (habitsResult?.success ? habitsResult.data : []) || []
-  console.log('🚀 ~ NotificationsForm ~ habits:', habits)
 
   const form = useForm<NotificationSettingsSchema>({
     initialValues: {
@@ -64,10 +58,14 @@ export function NotificationsForm() {
       incompleteReminderEnabled: settings?.incompleteReminderEnabled ?? false,
       skippedReminderEnabled: settings?.skippedReminderEnabled ?? false,
       scheduledReminderEnabled: settings?.scheduledReminderEnabled ?? false,
-      habitNotifications: habits.map((habit) => ({
-        habitId: habit.id,
-        enabled: habit.notificationsEnabled ?? true,
-      })),
+      habitNotifications: habits.reduce(
+        (acc, habit) => {
+          acc[habit.id] = habit.notificationsEnabled ?? true
+
+          return acc
+        },
+        {} as Record<string, boolean>,
+      ),
     },
     validate: (values) => {
       const result = notificationSettingsSchema.safeParse(values)
@@ -105,7 +103,7 @@ export function NotificationsForm() {
         })
 
         await Promise.all(
-          values.habitNotifications.map(({ habitId, enabled }) =>
+          Object.entries(values.habitNotifications).map(([habitId, enabled]) =>
             habitDto.updateHabitNotificationSetting({
               data: {
                 habitId,
@@ -197,35 +195,18 @@ export function NotificationsForm() {
             </Text>
 
             <Stack gap="xs">
-              {habits.map((habit) => {
-                const habitNotificationMap = new Map(
-                  form.values.habitNotifications.map((h) => [h.habitId, h.enabled])
-                )
-
-                return (
-                  <Group key={habit.id} gap="sm" wrap="nowrap">
-                    <Checkbox
-                      checked={habitNotificationMap.get(habit.id) ?? true}
-                      onChange={(e) => {
-                        const newValue = e.currentTarget.checked
-
-                        form.setFieldValue(
-                          'habitNotifications',
-                          form.values.habitNotifications.map((h) =>
-                            h.habitId === habit.id 
-                              ? { ...h, enabled: newValue }
-                              : h
-                          )
-                        )
-                      }}
-                      disabled={!form.values.notificationsEnabled || isPending}
-                    />
-                    <Badge size="sm" color={habit.color ?? 'blue'} variant="dot">
-                      {habit.name}
-                    </Badge>
-                  </Group>
-                )
-              })}
+              {habits.map((habit) => (
+                <Group key={habit.id} gap="sm" wrap="nowrap">
+                  <Checkbox
+                    label={habit.name}
+                    checked={form.values.habitNotifications[habit.id] ?? true}
+                    onChange={(e) => {
+                      form.setFieldValue(`habitNotifications.${habit.id}`, e.currentTarget.checked)
+                    }}
+                    disabled={!form.values.notificationsEnabled || isPending}
+                  />
+                </Group>
+              ))}
             </Stack>
           </>
         )}
