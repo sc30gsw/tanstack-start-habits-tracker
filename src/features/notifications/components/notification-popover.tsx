@@ -1,4 +1,15 @@
-import { ActionIcon, Button, Group, Popover, ScrollArea, Stack, Text } from '@mantine/core'
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Group,
+  Paper,
+  Popover,
+  ScrollArea,
+  Skeleton,
+  Stack,
+  Text,
+} from '@mantine/core'
 import { IconBell, IconBellOff, IconCheck, IconTrash } from '@tabler/icons-react'
 import { Suspense, useState } from 'react'
 import { NotificationItem } from '~/features/notifications/components/notification-item'
@@ -24,13 +35,13 @@ export function NotificationPopover() {
         <ActionIcon variant="subtle" size="lg" onClick={() => setOpened((o) => !o)} pos="relative">
           <IconBell size={20} />
           {unreadCount > 0 && (
-            <div
+            <Box
+              pos="absolute"
+              top={2}
+              right={2}
+              bg="red.6"
+              c="white"
               style={{
-                position: 'absolute',
-                top: 2,
-                right: 2,
-                backgroundColor: 'var(--mantine-color-red-6)',
-                color: 'white',
                 borderRadius: '50%',
                 width: 18,
                 height: 18,
@@ -42,21 +53,21 @@ export function NotificationPopover() {
               }}
             >
               {unreadCount > 99 ? '99+' : unreadCount}
-            </div>
+            </Box>
           )}
         </ActionIcon>
       </Popover.Target>
 
       <Popover.Dropdown p={0} style={{ border: '1px solid var(--mantine-color-gray-3)' }}>
         <Suspense fallback={<NotificationPopoverLoading />}>
-          <NotificationPopoverContent />
+          <NotificationPopoverContent onClose={() => setOpened(false)} />
         </Suspense>
       </Popover.Dropdown>
     </Popover>
   )
 }
 
-function NotificationPopoverContent() {
+function NotificationPopoverContent({ onClose }: Record<'onClose', () => void>) {
   const {
     notifications,
     markAsRead,
@@ -130,6 +141,7 @@ function NotificationPopoverContent() {
               notification={notification}
               onMarkAsRead={markAsRead}
               onDelete={deleteNotification}
+              onNavigate={onClose}
             />
           ))}
         </Stack>
@@ -140,10 +152,61 @@ function NotificationPopoverContent() {
 
 function NotificationPopoverLoading() {
   return (
-    <Stack p="md" align="center" gap="xs">
-      <Text size="sm" c="dimmed">
-        読み込み中...
-      </Text>
+    <Stack gap={0}>
+      <Group
+        justify="space-between"
+        p="md"
+        pb="xs"
+        style={{
+          borderBottom: '1px solid var(--mantine-color-gray-2)',
+          backgroundColor: 'var(--mantine-color-gray-0)',
+        }}
+      >
+        <Skeleton height={20} width={60} />
+        <Group gap="xs">
+          <Skeleton height={24} width={100} />
+        </Group>
+      </Group>
+
+      <ScrollArea h={450} type="auto">
+        <Stack gap="xs" p="sm">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Paper
+              key={index}
+              p="sm"
+              withBorder
+              radius="md"
+              style={{
+                borderColor: 'var(--mantine-color-gray-3)',
+              }}
+            >
+              <Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
+                <Stack gap="xs" style={{ flex: 1, minWidth: 0 }}>
+                  <Group gap="xs" wrap="wrap">
+                    <Skeleton height={22} width={80} radius="sm" />
+                    <Skeleton height={22} width={100} radius="sm" />
+                  </Group>
+
+                  <Group gap="xs" align="center" wrap="nowrap">
+                    <Skeleton height={18} style={{ flex: 1 }} />
+                    <Skeleton height={16} width={80} />
+                  </Group>
+
+                  <Skeleton height={16} width="100%" />
+                  <Skeleton height={16} width="60%" />
+
+                  <Skeleton height={14} width={120} />
+                </Stack>
+
+                <Group gap={4}>
+                  <Skeleton height={28} width={28} circle />
+                  <Skeleton height={28} width={28} circle />
+                </Group>
+              </Group>
+            </Paper>
+          ))}
+        </Stack>
+      </ScrollArea>
     </Stack>
   )
 }
