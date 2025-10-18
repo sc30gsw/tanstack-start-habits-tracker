@@ -22,8 +22,14 @@ export const Route = createFileRoute('/habits/')({
         .default(false)
         .catch(() => false),
     }),
-  loader: async () => {
-    const habitsResult = await habitDto.getHabits()
+  loader: async ({ context }) => {
+    const habitsResult = await habitDto.getHabits({
+      data: {
+        q: context.search.q || '',
+        habitSort: context.search.habitSort || 'all',
+        habitFilter: context.search.habitFilter || 'all',
+      },
+    })
 
     return habitsResult
   },

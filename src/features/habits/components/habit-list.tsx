@@ -1,7 +1,6 @@
-import { Alert, Card, Stack, Text } from '@mantine/core'
+import { Alert, Stack, Text } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
-import { filter, pipe, sortBy } from 'remeda'
 import { HabitCard } from '~/features/habits/components/habit-card'
 
 export function HabitList() {
@@ -12,58 +11,28 @@ export function HabitList() {
   const habits = habitsData.data ?? []
 
   if (habits.length === 0) {
-    return (
-      <Card withBorder>
-        <Text c="dimmed" ta="center">
-          まだ習慣が登録されていません
-        </Text>
-      </Card>
-    )
-  }
-
-  const priorityOrder = { high: 0, middle: 1, low: 2, null: 3 } as const satisfies Record<
-    string,
-    number
-  >
-
-  const processedHabits = pipe(
-    habits,
-    filter((habit) => {
+    const getEmptyMessage = () => {
       const filterValue = searchParams.habitFilter
+      const searchQuery = searchParams.q
 
-      if (!filterValue || filterValue === 'all') {
-        return true
+      if (searchQuery && searchQuery.trim() !== '') {
+        return `「${searchQuery}」に一致する習慣が見つかりませんでした。別のキーワードで検索するか、フィルターを変更してください。`
       }
 
-      if (filterValue === 'null') {
-        return habit.priority === null
+      if (filterValue && filterValue !== 'all') {
+        const filterLabels = {
+          high: '高優先度',
+          middle: '中優先度',
+          low: '低優先度',
+          null: '優先度なし',
+        } as const satisfies Record<string, string>
+
+        const filterLabel = filterLabels[filterValue as keyof typeof filterLabels] || filterValue
+
+        return `${filterLabel}の習慣が見つかりませんでした。フィルターを「全て」に変更するか、該当する優先度の習慣を作成してください。`
       }
 
-      return habit.priority === filterValue
-    }),
-    (habits) =>
-      searchParams.habitSort === 'priority'
-        ? sortBy(habits, (habit) => priorityOrder[habit.priority ?? 'null'])
-        : habits,
-  )
-
-  if (processedHabits.length === 0) {
-    const getFilterMessage = () => {
-      const filterValue = searchParams.habitFilter
-      if (!filterValue || filterValue === 'all') {
-        return '習慣が登録されていません。上の「新しい習慣を作成」ボタンから習慣を追加してください。'
-      }
-
-      const filterLabels = {
-        high: '高優先度',
-        middle: '中優先度',
-        low: '低優先度',
-        null: '優先度なし',
-      } as const satisfies Record<string, string>
-
-      const filterLabel = filterLabels[filterValue as keyof typeof filterLabels] || filterValue
-
-      return `${filterLabel}の習慣が見つかりませんでした。フィルターを「全て」に変更するか、該当する優先度の習慣を作成してください。`
+      return 'まだ習慣が登録されていません。上の「新しい習慣を作成」ボタンから習慣を追加してください。'
     }
 
     return (
@@ -80,7 +49,7 @@ export function HabitList() {
         }}
       >
         <Text size="sm" c="dimmed" style={{ textAlign: 'left', lineHeight: 1.5 }}>
-          {getFilterMessage()}
+          {getEmptyMessage()}
         </Text>
       </Alert>
     )
@@ -88,7 +57,7 @@ export function HabitList() {
 
   return (
     <Stack gap="sm">
-      {processedHabits.map((habit) => (
+      {habits.map((habit) => (
         <HabitCard key={habit.id} habit={habit} />
       ))}
     </Stack>

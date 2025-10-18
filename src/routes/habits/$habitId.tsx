@@ -40,7 +40,13 @@ export const Route = createFileRoute('/habits/$habitId')({
           date_to: dateTo,
         },
       }),
-      habitDto.getHabits(),
+      habitDto.getHabits({
+        data: {
+          q: '',
+          habitSort: 'all',
+          habitFilter: 'all',
+        },
+      }),
       db.query.habitLevels.findFirst({
         where: eq(habitLevels.habitId, params.habitId),
       }),

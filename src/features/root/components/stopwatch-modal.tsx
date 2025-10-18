@@ -155,7 +155,14 @@ export function StopwatchModal() {
 
   const { data: habitsResponse } = useSuspenseQuery({
     queryKey: [GET_HABITS_CACHE_KEY],
-    queryFn: () => habitDto.getHabits(),
+    queryFn: () =>
+      habitDto.getHabits({
+        data: {
+          q: '',
+          habitSort: 'all',
+          habitFilter: 'all',
+        },
+      }),
   })
 
   const habits: HabitEntity[] = habitsResponse?.data ?? []

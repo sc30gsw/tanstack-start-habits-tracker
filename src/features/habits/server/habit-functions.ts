@@ -3,7 +3,7 @@ import { getRequest } from '@tanstack/react-start/server'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNull, like, type SQL } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod/v4'
 import { db } from '~/db'
@@ -247,47 +247,82 @@ const deleteHabit = createServerFn({ method: 'POST' })
     }
   })
 
-const getHabits = createServerFn({ method: 'GET' }).handler(async () => {
-  try {
-    const session = await auth.api.getSession(getRequest())
+const getHabits = createServerFn({ method: 'GET' })
+  .inputValidator(
+    z.object({
+      q: z.string().optional().default(''),
+      habitSort: z.enum(['all', 'priority']).optional().default('all'),
+      habitFilter: z.enum(['all', 'high', 'middle', 'low', 'null']).optional().default('all'),
+    }),
+  )
+  .handler(async ({ data }) => {
+    try {
+      const session = await auth.api.getSession(getRequest())
 
-    if (!session) {
-      return { success: false, error: 'Unauthorized' }
-    }
+      if (!session) {
+        return { success: false, error: 'Unauthorized' }
+      }
 
-    const allHabits = await db.query.habits.findMany({
-      where: eq(habits.userId, session.user.id),
-    })
+      const { q, habitSort, habitFilter } = data
 
-    const habitEntities: HabitEntity[] = allHabits.map((habit) => {
-      const parsedHabit = habitSchema.parse({
-        ...habit,
-        created_at: habit.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
-        updated_at: habit.updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+      const conditions = [eq(habits.userId, session.user.id)] as const satisfies SQL<unknown>[]
+
+      if (q && q.trim() !== '') {
+        conditions.push(like(habits.name, `%${q}%`))
+      }
+
+      if (habitFilter && habitFilter !== 'all') {
+        if (habitFilter === 'null') {
+          conditions.push(isNull(habits.priority))
+        } else {
+          conditions.push(eq(habits.priority, habitFilter as 'high' | 'middle' | 'low'))
+        }
+      }
+
+      const allHabits = await db.query.habits.findMany({
+        where: and(...conditions),
+      })
+
+      if (habitSort === 'priority') {
+        const priorityOrder = { high: 0, middle: 1, low: 2, null: 3 } as const satisfies Record<
+          string,
+          number
+        >
+
+        allHabits.sort(
+          (a, b) => priorityOrder[a.priority ?? 'null'] - priorityOrder[b.priority ?? 'null'],
+        )
+      }
+
+      const habitEntities: HabitEntity[] = allHabits.map((habit) => {
+        const parsedHabit = habitSchema.parse({
+          ...habit,
+          created_at: habit.createdAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+          updated_at: habit.updatedAt ?? dayjs().tz('Asia/Tokyo').toISOString(),
+        })
+
+        return {
+          ...parsedHabit,
+          color: parsedHabit.color || 'blue',
+          created_at: new Date(parsedHabit.created_at),
+          updated_at: new Date(parsedHabit.updated_at),
+        } as const satisfies HabitEntity
       })
 
       return {
-        ...parsedHabit,
-        color: parsedHabit.color || 'blue',
-        created_at: new Date(parsedHabit.created_at),
-        updated_at: new Date(parsedHabit.updated_at),
-      } as const satisfies HabitEntity
-    })
+        success: true,
+        data: habitEntities,
+        total: habitEntities.length,
+      }
+    } catch (error) {
+      console.error('Error fetching habits:', error)
 
-    return {
-      success: true,
-      data: habitEntities,
-      total: habitEntities.length,
+      return {
+        success: false,
+        error: 'Failed to fetch habits',
+      }
     }
-  } catch (error) {
-    console.error('Error fetching habits:', error)
-
-    return {
-      success: false,
-      error: 'Failed to fetch habits',
-    }
-  }
-})
+  })
 
 const getHabitById = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ id: z.string().min(1) }))

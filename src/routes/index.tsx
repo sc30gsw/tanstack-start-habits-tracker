@@ -77,7 +77,13 @@ export const Route = createFileRoute('/')({
     const { dateFrom, dateTo } = getDataFetchDateRange(context.search.currentMonth)
 
     const [habitsResult, recordsResult, shareDataResult, homeAggregatedLevel] = await Promise.all([
-      habitDto.getHabits(),
+      habitDto.getHabits({
+        data: {
+          q: '',
+          habitSort: 'all',
+          habitFilter: 'all',
+        },
+      }),
       recordDto.getRecords({
         data: {
           date_from: dateFrom,

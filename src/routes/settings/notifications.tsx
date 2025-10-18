@@ -7,7 +7,13 @@ import { SettingsLayout } from '~/features/settings/components/settings-layout'
 
 export const Route = createFileRoute('/settings/notifications')({
   loader: async () => {
-    const habitsResult = await habitDto.getHabits()
+    const habitsResult = await habitDto.getHabits({
+      data: {
+        q: '',
+        habitSort: 'all',
+        habitFilter: 'all',
+      },
+    })
 
     return habitsResult
   },
