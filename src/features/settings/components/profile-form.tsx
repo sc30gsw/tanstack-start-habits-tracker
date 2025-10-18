@@ -68,7 +68,7 @@ export function ProfileForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Stack gap="md">
+      <Stack gap="md" px="lg">
         <Title order={3}>プロフィール編集</Title>
 
         <TextInput

@@ -31,6 +31,7 @@ export function ProfileCard() {
             src={user?.image}
             size={120}
             radius="50%"
+            color="blue"
             style={{
               border: '4px solid var(--mantine-color-body)',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
