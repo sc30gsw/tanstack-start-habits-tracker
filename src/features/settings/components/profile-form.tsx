@@ -5,7 +5,7 @@ import { IconDeviceFloppy, IconMail, IconUser, IconX } from '@tabler/icons-react
 import { getRouteApi } from '@tanstack/react-router'
 import { useTransition } from 'react'
 import { z } from 'zod/v4'
-import { profileDto } from '~/features/profile/server/profile-functions'
+import { profileDto } from '~/features/settings/server/profile-functions'
 
 const profileSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be less than 100 characters'),

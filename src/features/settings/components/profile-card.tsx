@@ -4,15 +4,15 @@ import { IconCalendar, IconPencil } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/ja'
-import { HomeBadgeCollection } from '~/features/home/components/home-badge-collection'
-import { HomeOverallLevelCard } from '~/features/home/components/home-overall-level-card'
+import { ProfileBadgeCollection } from '~/features/settings/components/profile-badge-collection'
 import { ProfileForm } from '~/features/settings/components/profile-form'
+import { ProfileOverallLevelCard } from '~/features/settings/components/profile-overall-level-card'
 
 dayjs.locale('ja')
 
 export function ProfileCard() {
   const routeApi = getRouteApi('/settings/profile')
-  const { user, homeAggregatedLevel } = routeApi.useLoaderData()
+  const { user } = routeApi.useLoaderData()
 
   const [opened, { open, close }] = useDisclosure(false)
   const isMobile = useMediaQuery('(max-width: 768px)')
@@ -78,12 +78,8 @@ export function ProfileCard() {
         <Divider />
 
         <Stack gap="md" p="lg">
-          {homeAggregatedLevel && (
-            <>
-              <HomeOverallLevelCard homeAggregatedLevel={homeAggregatedLevel} />
-              <HomeBadgeCollection homeAggregatedLevel={homeAggregatedLevel} />
-            </>
-          )}
+          <ProfileOverallLevelCard />
+          <ProfileBadgeCollection />
         </Stack>
 
         <Divider />

@@ -22,12 +22,9 @@ import { recordDto } from '~/features/habits/server/record-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import { getDataFetchDateRange } from '~/features/habits/utils/completion-rate-utils'
 import { DailyHabitList } from '~/features/home/components/daily-habit-list'
-import { HomeBadgeCollection } from '~/features/home/components/home-badge-collection'
 import { HomeCalendarView } from '~/features/home/components/home-calendar-view'
 import { HomeHeatmapView } from '~/features/home/components/home-heatmap-view'
-import { HomeOverallLevelCard } from '~/features/home/components/home-overall-level-card'
 import { ShareHabitsModal } from '~/features/home/components/share-habits-modal'
-import { homeLevelInfoDto } from '~/features/home/server/home-level-functions'
 import { shareDto } from '~/features/home/server/share-functions'
 import { CTASection } from '~/features/landing/components/cta-section'
 import { FeaturesSection } from '~/features/landing/components/features-section'
@@ -65,7 +62,6 @@ export const Route = createFileRoute('/')({
         habits: { success: false, data: [] },
         records: { success: false, data: [] },
         shareData: { success: false, data: [], error: 'Something wen wrong' },
-        homeAggregatedLevel: null,
       }
     }
 
@@ -76,7 +72,7 @@ export const Route = createFileRoute('/')({
     // ヒートマップ(今日から1年分) + カレンダーグリッド(42日分)の範囲を取得
     const { dateFrom, dateTo } = getDataFetchDateRange(context.search.currentMonth)
 
-    const [habitsResult, recordsResult, shareDataResult, homeAggregatedLevel] = await Promise.all([
+    const [habitsResult, recordsResult, shareDataResult] = await Promise.all([
       habitDto.getHabits({
         data: {
           q: '',
@@ -91,7 +87,6 @@ export const Route = createFileRoute('/')({
         },
       }),
       shareDto.getCompletedHabitsForShare({ data: { date: selectedDate } }),
-      homeLevelInfoDto.getHomeAggregatedLevel(),
     ])
 
     return {
@@ -99,7 +94,6 @@ export const Route = createFileRoute('/')({
       habits: habitsResult,
       records: recordsResult,
       shareData: shareDataResult,
-      homeAggregatedLevel,
     }
   },
 })
@@ -126,7 +120,7 @@ function Home() {
     )
   }
 
-  const { habits, records, homeAggregatedLevel } = loaderData
+  const { habits, records } = loaderData
 
   const today = dayjs().format('YYYY-MM-DD')
   // 選択された日付を取得（未選択の場合は今日）
@@ -210,15 +204,6 @@ function Home() {
           </Stack>
         </Card>
 
-        {homeAggregatedLevel && (
-          <>
-            <HomeOverallLevelCard homeAggregatedLevel={homeAggregatedLevel} />
-            <HomeBadgeCollection homeAggregatedLevel={homeAggregatedLevel} />
-          </>
-        )}
-        <HomeCalendarView />
-        <HomeHeatmapView />
-
         <Card withBorder padding="lg">
           <Stack gap="lg">
             <Group justify="space-between" align="center">
@@ -265,6 +250,9 @@ function Home() {
             <DailyHabitList />
           </Stack>
         </Card>
+
+        <HomeCalendarView />
+        <HomeHeatmapView />
       </Stack>
       <ShareHabitsModal copyId={copyId} />
     </Container>
