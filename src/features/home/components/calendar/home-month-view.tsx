@@ -1,22 +1,14 @@
-import type { SelectProps } from '@mantine/core'
-import { ActionIcon, Badge, Group, Select, Stack, Text } from '@mantine/core'
-import {
-  IconCalendar,
-  IconCalendarMonth,
-  IconCalendarWeek,
-  IconCheck,
-  IconChevronLeft,
-  IconChevronRight,
-  IconClock,
-} from '@tabler/icons-react'
+import { ActionIcon, Group, Stack, Text } from '@mantine/core'
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { chunk } from 'remeda'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
-import { getDateColor, getDatePresets, WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
+import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 import { HomeCalendarDateCell } from '~/features/home/components/calendar/home-calendar-date-cell'
+import { HomeCalendarPresetsCombobox } from '~/features/home/components/calendar/home-calendar-presets-combobox'
 import { CALENDAR_ID } from '~/features/home/components/home-calendar-view'
 
 dayjs.extend(utc)
@@ -48,14 +40,6 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
   return chunk(dates, 7)
 }
 
-const iconProps = { size: 16, stroke: 1.5 } as const satisfies Record<string, number>
-const groupIcons = {
-  basic: <IconCalendar {...iconProps} />,
-  week: <IconCalendarWeek {...iconProps} />,
-  month: <IconCalendarMonth {...iconProps} />,
-  year: <IconClock {...iconProps} />,
-} as const satisfies Record<string, React.ReactNode>
-
 export function HomeMonthView() {
   const apiRoute = getRouteApi('/')
   const searchParams = apiRoute.useSearch()
@@ -68,122 +52,10 @@ export function HomeMonthView() {
   const weeks = createWeekGroups(monthDates)
 
   const navigate = apiRoute.useNavigate()
-  const allPresets = Array.from(getDatePresets())
-
-  // valueから追加データを引くためのMap
-  const itemDataMap = new Map<
-    string,
-    {
-      dateStr: string
-      dayOfWeek: string
-      dateType: 'sunday' | 'saturday' | 'holiday' | 'weekday'
-      group: string
-    }
-  >()
-
-  // 全体で重複排除するためのSet
-  const seenValues = new Set<string>()
-
-  // Mantineの形式（value + labelのみ）に変換し、追加データはMapに保存
-  const selectData = allPresets
-    .map((preset) => {
-      const items = preset.items
-        .filter((item) => {
-          if (seenValues.has(item.value)) {
-            return false
-          }
-          seenValues.add(item.value)
-          return true
-        })
-        .map((item) => {
-          // 追加データをMapに保存
-          itemDataMap.set(item.value, {
-            dateStr: item.dateStr,
-            dayOfWeek: item.dayOfWeek,
-            dateType: item.dateType,
-            group: preset.group,
-          })
-
-          // Mantineが期待する形式（value + labelのみ）
-          return {
-            value: item.value,
-            label: item.label,
-          }
-        })
-
-      return {
-        group: preset.groupLabel,
-        items: items,
-      }
-    })
-    .filter((group) => group.items.length > 0)
-
-  // renderOptionでMapからデータを取得
-  const renderSelectOption: SelectProps['renderOption'] = ({ option, checked }) => {
-    const extraData = itemDataMap.get(option.value)
-
-    return (
-      <Group flex="1" gap="xs">
-        {extraData?.group && groupIcons[extraData.group as keyof typeof groupIcons]}
-        {option.label}
-        {extraData?.dateStr && <Text size="sm">{extraData.dateStr}</Text>}
-        {extraData?.dayOfWeek && extraData?.dateType && (
-          <Badge size="sm" color={getDateColor(extraData.dateType, undefined, undefined, 4)}>
-            {extraData.dayOfWeek}
-          </Badge>
-        )}
-        {checked && <IconCheck style={{ marginInlineStart: 'auto' }} stroke={1.5} size={16} />}
-      </Group>
-    )
-  }
-
-  const getSelectedIcon = () => {
-    const selectedValue = searchParams?.preset || dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
-
-    for (const preset of allPresets) {
-      if (preset.items.some((item) => item.value === selectedValue)) {
-        return groupIcons[preset.group]
-      }
-    }
-    return <IconCalendar size={18} stroke={1.5} />
-  }
-
-  const handlePresetChange = (value: string | null) => {
-    if (value) {
-      navigate({
-        search: (prev) => ({
-          ...prev,
-          selectedDate: value,
-          currentMonth: dayjs(value).format('YYYY-MM'),
-          preset: value,
-        }),
-        hash: CALENDAR_ID,
-      })
-    } else {
-      navigate({
-        search: (prev) => ({
-          ...prev,
-          preset: undefined,
-        }),
-        hash: CALENDAR_ID,
-      })
-    }
-  }
 
   return (
-    <Stack gap={4}>
-      <Select
-        placeholder="日付を選択 (昨日、今日、明日など)"
-        data={selectData}
-        value={searchParams?.preset || dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')}
-        onChange={handlePresetChange}
-        comboboxProps={{ transitionProps: { transition: 'pop', duration: 200 } }}
-        renderOption={renderSelectOption}
-        clearable
-        searchable
-        size="xs"
-        leftSection={getSelectedIcon()}
-      />
+    <Stack gap={16}>
+      <HomeCalendarPresetsCombobox />
 
       <Group justify="space-between" mb={4}>
         <ActionIcon
