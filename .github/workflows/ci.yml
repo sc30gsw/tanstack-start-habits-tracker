@@ -34,9 +34,36 @@ jobs:
 
       - name: Build
         run: bun run build
-
-      - name: Build for Cloudflare
-        run: bun run cf:build
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          VITE_TURSO_CONNECTION_URL: ${{ secrets.VITE_TURSO_CONNECTION_URL }}
+          VITE_TURSO_AUTH_TOKEN: ${{ secrets.VITE_TURSO_AUTH_TOKEN }}
+          VITE_BETTER_AUTH_URL: ${{ secrets.VITE_BETTER_AUTH_URL }}
+          VITE_BETTER_AUTH_SECRET: ${{ secrets.VITE_BETTER_AUTH_SECRET }}
+          VITE_GITHUB_CLIENT_ID: ${{ secrets.VITE_GITHUB_CLIENT_ID }}
+          VITE_GITHUB_CLIENT_SECRET: ${{ secrets.VITE_GITHUB_CLIENT_SECRET }}
+          VITE_PASSKEY_RP_ID: ${{ secrets.VITE_PASSKEY_RP_ID }}
+          VITE_PASSKEY_RP_NAME: ${{ secrets.VITE_PASSKEY_RP_NAME }}
+          VITE_POLAR_ACCESS_TOKEN: ${{ secrets.VITE_POLAR_ACCESS_TOKEN }}
+          VITE_POLAR_SERVER: ${{ secrets.VITE_POLAR_SERVER }}
+          VITE_POLAR_WEBHOOK_SECRET: ${{ secrets.VITE_POLAR_WEBHOOK_SECRET }}
+          VITE_POLAR_PRODUCT_ID: ${{ secrets.VITE_POLAR_PRODUCT_ID }}
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: deploy
+        env:
+          VITE_TURSO_CONNECTION_URL: ${{ secrets.VITE_TURSO_CONNECTION_URL }}
+          VITE_TURSO_AUTH_TOKEN: ${{ secrets.VITE_TURSO_AUTH_TOKEN }}
+          VITE_BETTER_AUTH_URL: ${{ secrets.VITE_BETTER_AUTH_URL }}
+          VITE_BETTER_AUTH_SECRET: ${{ secrets.VITE_BETTER_AUTH_SECRET }}
+          VITE_GITHUB_CLIENT_ID: ${{ secrets.VITE_GITHUB_CLIENT_ID }}
+          VITE_GITHUB_CLIENT_SECRET: ${{ secrets.VITE_GITHUB_CLIENT_SECRET }}
+          VITE_PASSKEY_RP_ID: ${{ secrets.VITE_PASSKEY_RP_ID }}
+          VITE_PASSKEY_RP_NAME: ${{ secrets.VITE_PASSKEY_RP_NAME }}
+          VITE_POLAR_ACCESS_TOKEN: ${{ secrets.VITE_POLAR_ACCESS_TOKEN }}
+          VITE_POLAR_SERVER: ${{ secrets.VITE_POLAR_SERVER }}
+          VITE_POLAR_WEBHOOK_SECRET: ${{ secrets.VITE_POLAR_WEBHOOK_SECRET }}
+          VITE_POLAR_PRODUCT_ID: ${{ secrets.VITE_POLAR_PRODUCT_ID }}
