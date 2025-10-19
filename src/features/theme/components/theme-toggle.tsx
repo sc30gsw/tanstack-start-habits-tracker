@@ -73,7 +73,8 @@ export function ThemeToggle() {
     if (!isAutoMode) {
       return `${localDisplayMode === 'light' ? 'ライトモード' : 'ダークモード'}（設定で固定）`
     }
-    return localDisplayMode === 'light' ? 'ライトモードに切り替え' : 'ダークモードに切り替え'
+
+    return localDisplayMode === 'light' ? 'ダークモードに切り替え' : 'ライトモードに切り替え'
   }
 
   return (
