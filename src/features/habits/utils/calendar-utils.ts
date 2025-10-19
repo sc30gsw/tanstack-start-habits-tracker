@@ -40,8 +40,9 @@ export function getDateType(date: dayjs.Dayjs) {
 
 export function getDateColor(
   dateType: ReturnType<typeof getDateType>,
-  isSelected: boolean,
-  hasRecord: boolean,
+  isSelected?: boolean,
+  hasRecord?: boolean,
+  colorStrength?: number,
 ) {
   if (isSelected) {
     return 'var(--mantine-color-blue-6)'
@@ -53,16 +54,16 @@ export function getDateColor(
 
   switch (dateType) {
     case 'sunday':
-      return 'var(--mantine-color-red-1)'
+      return `var(--mantine-color-red-${colorStrength ?? 1})`
 
     case 'holiday':
-      return 'var(--mantine-color-red-1)'
+      return `var(--mantine-color-red-${colorStrength ?? 1})`
 
     case 'saturday':
-      return 'var(--mantine-color-blue-1)'
+      return `var(--mantine-color-blue-${colorStrength ?? 1})`
 
     default:
-      return 'var(--mantine-color-gray-0)'
+      return `var(--mantine-color-gray-${colorStrength ?? 0})`
   }
 }
 
@@ -96,8 +97,14 @@ export function getDatePresets() {
   const formatDateLabel = (date: dayjs.Dayjs, baseLabel: string) => {
     const dateStr = date.format('YYYY-MM-DD')
     const dayOfWeek = WEEK_DAYS[date.day()]
+    const dateType = getDateType(date)
 
-    return `${baseLabel} (${dateStr} ${dayOfWeek})`
+    return {
+      label: baseLabel,
+      dateStr,
+      dayOfWeek,
+      dateType,
+    }
   }
 
   return [
@@ -107,15 +114,15 @@ export function getDatePresets() {
       items: [
         {
           value: today.subtract(1, 'day').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.subtract(1, 'day'), '昨日'),
+          ...formatDateLabel(today.subtract(1, 'day'), '昨日'),
         },
         {
           value: today.format('YYYY-MM-DD'),
-          label: formatDateLabel(today, '今日'),
+          ...formatDateLabel(today, '今日'),
         },
         {
           value: today.add(1, 'day').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.add(1, 'day'), '明日'),
+          ...formatDateLabel(today.add(1, 'day'), '明日'),
         },
       ],
     },
@@ -125,15 +132,15 @@ export function getDatePresets() {
       items: [
         {
           value: today.startOf('week').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.startOf('week'), '今週の開始'),
+          ...formatDateLabel(today.startOf('week'), '今週の開始'),
         },
         {
           value: today.subtract(1, 'week').startOf('week').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.subtract(1, 'week').startOf('week'), '先週の開始'),
+          ...formatDateLabel(today.subtract(1, 'week').startOf('week'), '先週の開始'),
         },
         {
           value: today.subtract(7, 'day').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.subtract(7, 'day'), '7日前'),
+          ...formatDateLabel(today.subtract(7, 'day'), '7日前'),
         },
       ],
     },
@@ -143,15 +150,15 @@ export function getDatePresets() {
       items: [
         {
           value: today.startOf('month').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.startOf('month'), '今月の初日'),
+          ...formatDateLabel(today.startOf('month'), '今月の初日'),
         },
         {
           value: today.subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.subtract(1, 'month').startOf('month'), '先月の初日'),
+          ...formatDateLabel(today.subtract(1, 'month').startOf('month'), '先月の初日'),
         },
         {
           value: today.subtract(30, 'day').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.subtract(30, 'day'), '30日前'),
+          ...formatDateLabel(today.subtract(30, 'day'), '30日前'),
         },
       ],
     },
@@ -161,13 +168,15 @@ export function getDatePresets() {
       items: [
         {
           value: today.startOf('year').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.startOf('year'), '今年の初日'),
+          ...formatDateLabel(today.startOf('year'), '今年の初日'),
         },
         {
           value: today.subtract(1, 'year').startOf('year').format('YYYY-MM-DD'),
-          label: formatDateLabel(today.subtract(1, 'year').startOf('year'), '去年の初日'),
+          ...formatDateLabel(today.subtract(1, 'year').startOf('year'), '去年の初日'),
         },
       ],
     },
-  ] as const satisfies readonly Record<string, string | Array<Record<string, string>>>[]
+  ] as const satisfies Readonly<
+    Record<string, string | Array<Record<string, string | ReturnType<typeof formatDateLabel>>>>[]
+  >
 }
