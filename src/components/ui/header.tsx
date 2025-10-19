@@ -58,7 +58,9 @@ export function Header() {
                   <Menu.Dropdown>
                     <Menu.Label c="dimmed">習慣機能</Menu.Label>
                     <Menu.Item
-                      leftSection={<IconList size={14} />}
+                      leftSection={
+                        <IconList size={14} style={{ color: 'var(--mantine-color-blue-6)' }} />
+                      }
                       component={Link}
                       to="/habits"
                       search={
@@ -67,12 +69,16 @@ export function Header() {
                           habitSort: 'all',
                         } as any
                       }
-                      color="blue"
                     >
                       習慣一覧
                     </Menu.Item>
                     <Menu.Item
-                      leftSection={<IconListDetails size={14} />}
+                      leftSection={
+                        <IconListDetails
+                          size={14}
+                          style={{ color: 'var(--mantine-color-cyan-6)' }}
+                        />
+                      }
                       component={Link}
                       to="/habits"
                       search={
@@ -81,12 +87,13 @@ export function Header() {
                           habitSort: 'all',
                         } as any
                       }
-                      color="cyan"
                     >
                       習慣詳細
                     </Menu.Item>
                     <Menu.Item
-                      leftSection={<IconClock size={14} />}
+                      leftSection={
+                        <IconClock size={14} style={{ color: 'var(--mantine-color-green-6)' }} />
+                      }
                       onClick={() => {
                         navigate({
                           to: location.pathname,
@@ -96,7 +103,6 @@ export function Header() {
                           }),
                         })
                       }}
-                      color="green"
                     >
                       習慣を記録
                     </Menu.Item>
@@ -218,7 +224,9 @@ export function Header() {
                   <Menu.Dropdown>
                     <Menu.Label c="dimmed">習慣機能</Menu.Label>
                     <Menu.Item
-                      leftSection={<IconList size={14} />}
+                      leftSection={
+                        <IconList size={14} style={{ color: 'var(--mantine-color-blue-6)' }} />
+                      }
                       component={Link}
                       to="/habits"
                       search={
@@ -227,12 +235,16 @@ export function Header() {
                           habitSort: 'all',
                         } as any
                       }
-                      color="blue"
                     >
                       習慣一覧
                     </Menu.Item>
                     <Menu.Item
-                      leftSection={<IconListDetails size={14} />}
+                      leftSection={
+                        <IconListDetails
+                          size={14}
+                          style={{ color: 'var(--mantine-color-cyan-6)' }}
+                        />
+                      }
                       component={Link}
                       to="/habits"
                       search={
@@ -241,12 +253,13 @@ export function Header() {
                           habitSort: 'all',
                         } as any
                       }
-                      color="cyan"
                     >
                       習慣詳細
                     </Menu.Item>
                     <Menu.Item
-                      leftSection={<IconClock size={14} />}
+                      leftSection={
+                        <IconClock size={14} style={{ color: 'var(--mantine-color-green-6)' }} />
+                      }
                       onClick={() => {
                         navigate({
                           to: location.pathname,
@@ -256,7 +269,6 @@ export function Header() {
                           }),
                         })
                       }}
-                      color="green"
                     >
                       習慣を記録
                     </Menu.Item>
