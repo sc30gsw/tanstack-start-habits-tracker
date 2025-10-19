@@ -1,14 +1,4 @@
-import {
-  AppShell,
-  Avatar,
-  Button,
-  FloatingIndicator,
-  Group,
-  Menu,
-  Text,
-  Tooltip,
-  UnstyledButton,
-} from '@mantine/core'
+import { AppShell, Avatar, Button, Group, Menu, Text, Tooltip } from '@mantine/core'
 import {
   IconClock,
   IconCreditCard,
@@ -25,6 +15,7 @@ import {
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense, useState } from 'react'
 import { NotificationPopover } from '~/features/notifications/components/notification-popover'
+import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
@@ -36,7 +27,6 @@ export function Header() {
 
   const { data: session } = authClient.useSession()
 
-  // FloatingIndicator用の状態管理
   const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null)
   const [controlsRefs, setControlsRefs] = useState<Record<string, HTMLElement | null>>({})
 
@@ -70,6 +60,7 @@ export function Header() {
 
   return (
     <>
+      _activeTab
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
           <Text component={Link} size="xl" fw={700} c="blue" to="/">
@@ -347,7 +338,6 @@ export function Header() {
           </Group>
         </Group>
       </AppShell.Header>
-
       <Suspense fallback={null}>
         <StopwatchModal />
       </Suspense>
