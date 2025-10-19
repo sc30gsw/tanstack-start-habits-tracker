@@ -6,9 +6,6 @@ import { getCurrentUser } from '~/features/auth/server/server-functions'
 import type { ShareDataResponse } from '~/features/home/types/share'
 import { getShareDataSchema } from '~/features/home/types/share'
 
-/**
- * 指定された日付の完了した習慣を共有用データとして取得する
- */
 const getCompletedHabitsForShare = createServerFn({ method: 'POST' })
   .inputValidator(getShareDataSchema)
   .handler(async ({ data }): Promise<ShareDataResponse> => {
@@ -27,8 +24,11 @@ const getCompletedHabitsForShare = createServerFn({ method: 'POST' })
       // 指定された日付の完了した記録と関連する習慣を取得
       const completedHabits = await db
         .select({
+          habitId: habits.id,
           habitName: habits.name,
+          habitColor: habits.color,
           notes: records.notes,
+          duration: records.duration_minutes,
         })
         .from(records)
         .innerJoin(habits, eq(records.habitId, habits.id))
@@ -41,25 +41,30 @@ const getCompletedHabitsForShare = createServerFn({ method: 'POST' })
         )
         .orderBy(habits.name)
 
-      // 習慣名でグループ化してメモをまとめる
+      // 習慣名でグループ化してメモと時間をまとめる
       const groupedData = completedHabits.reduce(
         (acc, habit) => {
-          const existingHabit = acc.find((h) => h.habitName === habit.habitName)
+          const existingHabit = acc.find((h) => h.habitId === habit.habitId)
 
           if (existingHabit) {
             if (habit.notes) {
               existingHabit.notes.push(habit.notes)
             }
+
+            existingHabit.duration = (existingHabit.duration ?? 0) + (habit.duration ?? 0)
           } else {
             acc.push({
+              habitId: habit.habitId,
               habitName: habit.habitName,
+              habitColor: habit.habitColor,
               notes: habit.notes ? [habit.notes] : [],
+              duration: habit.duration ?? 0,
             })
           }
 
           return acc
         },
-        [] as { habitName: string; notes: (string | null)[] }[],
+        [] as NonNullable<ShareDataResponse['data']>,
       )
 
       return {

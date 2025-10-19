@@ -1,14 +1,16 @@
+import type { InferSelectModel } from 'drizzle-orm'
 import { z } from 'zod/v4'
+import type { habits, records } from '~/db/schema'
 
 /**
  * 共有用習慣データの型定義
  */
 export type ShareHabitData = {
-  habitId: string
-  habitName: string
-  habitColor: string
-  notes: (string | null)[]
-  duration: number | null
+  habitId: InferSelectModel<typeof habits>['id']
+  habitName: InferSelectModel<typeof habits>['name']
+  habitColor: InferSelectModel<typeof habits>['color']
+  notes: InferSelectModel<typeof records>['notes'][]
+  duration: InferSelectModel<typeof records>['duration_minutes']
 }
 
 /**

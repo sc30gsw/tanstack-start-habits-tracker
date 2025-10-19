@@ -30,6 +30,7 @@ dayjs.tz.setDefault('Asia/Tokyo')
 const iconProps = { size: 16, stroke: 1.5 } as const satisfies Record<string, number>
 const groupIcons = {
   basic: <IconCalendar {...iconProps} />,
+  recent: <IconClock {...iconProps} />,
   week: <IconCalendarWeek {...iconProps} />,
   month: <IconCalendarMonth {...iconProps} />,
   year: <IconClock {...iconProps} />,
