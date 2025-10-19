@@ -1,10 +1,12 @@
 import { AppShell, Avatar, Button, Group, Menu, Text, Tooltip } from '@mantine/core'
 import {
+  IconChecklist,
   IconClock,
   IconCreditCard,
   IconHeadphones,
   IconHome,
   IconList,
+  IconListDetails,
   IconLogin,
   IconLogout,
   IconRocket,
@@ -14,7 +16,6 @@ import {
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { NotificationPopover } from '~/features/notifications/components/notification-popover'
-import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
@@ -47,23 +48,60 @@ export function Header() {
                 >
                   ホーム
                 </Button>
-                <Button
-                  component={Link}
-                  to="/habits"
-                  search={
-                    {
-                      habitFilter: 'all',
-                      habitSort: 'all',
-                    } as any
-                  }
-                  variant="subtle"
-                  size="sm"
-                  leftSection={<IconList size={16} />}
-                >
-                  習慣一覧
-                </Button>
 
-                <HabitSelectorPopover />
+                <Menu shadow="md" width={220}>
+                  <Menu.Target>
+                    <Button variant="subtle" size="sm" leftSection={<IconChecklist size={16} />}>
+                      習慣管理
+                    </Button>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Label c="dimmed">習慣機能</Menu.Label>
+                    <Menu.Item
+                      leftSection={<IconList size={14} />}
+                      component={Link}
+                      to="/habits"
+                      search={
+                        {
+                          habitFilter: 'all',
+                          habitSort: 'all',
+                        } as any
+                      }
+                      color="blue"
+                    >
+                      習慣一覧
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<IconListDetails size={14} />}
+                      component={Link}
+                      to="/habits"
+                      search={
+                        {
+                          habitFilter: 'all',
+                          habitSort: 'all',
+                        } as any
+                      }
+                      color="cyan"
+                    >
+                      習慣詳細
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<IconClock size={14} />}
+                      onClick={() => {
+                        navigate({
+                          to: location.pathname,
+                          search: (prev) => ({
+                            ...prev,
+                            stopwatchOpen: true,
+                          }),
+                        })
+                      }}
+                      color="green"
+                    >
+                      習慣を記録
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
 
                 <Button
                   component={Link}
@@ -72,7 +110,7 @@ export function Header() {
                   size="sm"
                   leftSection={<IconHeadphones size={16} />}
                 >
-                  Focus Zone
+                  Focus
                 </Button>
                 <Button
                   component={Link}
@@ -82,23 +120,6 @@ export function Header() {
                   leftSection={<IconRocket size={16} />}
                 >
                   プラン
-                </Button>
-
-                <Button
-                  variant="light"
-                  size="sm"
-                  leftSection={<IconClock size={16} />}
-                  onClick={() => {
-                    navigate({
-                      to: location.pathname,
-                      search: (prev) => ({
-                        ...prev,
-                        stopwatchOpen: true,
-                      }),
-                    })
-                  }}
-                >
-                  習慣を記録する
                 </Button>
 
                 <NotificationPopover />
@@ -185,24 +206,63 @@ export function Header() {
           <Group hiddenFrom="sm">
             {session && (
               <>
-                <Tooltip label="習慣を記録する" withArrow>
-                  <Button
-                    variant="light"
-                    size="xs"
-                    onClick={() => {
-                      navigate({
-                        to: location.pathname,
-                        search: (prev) => ({
-                          ...prev,
-                          stopwatchOpen: true,
-                        }),
-                      })
-                    }}
-                  >
-                    <IconClock size={16} />
-                  </Button>
-                </Tooltip>
-                <HabitSelectorPopover />
+                {/* モバイル用習慣メニュー */}
+                <Menu shadow="md" width={220}>
+                  <Menu.Target>
+                    <Tooltip label="習慣管理" withArrow>
+                      <Button variant="light" size="xs" color="blue">
+                        <IconChecklist size={16} />
+                      </Button>
+                    </Tooltip>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Label c="dimmed">習慣機能</Menu.Label>
+                    <Menu.Item
+                      leftSection={<IconList size={14} />}
+                      component={Link}
+                      to="/habits"
+                      search={
+                        {
+                          habitFilter: 'all',
+                          habitSort: 'all',
+                        } as any
+                      }
+                      color="blue"
+                    >
+                      習慣一覧
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<IconListDetails size={14} />}
+                      component={Link}
+                      to="/habits"
+                      search={
+                        {
+                          habitFilter: 'all',
+                          habitSort: 'all',
+                        } as any
+                      }
+                      color="cyan"
+                    >
+                      習慣詳細
+                    </Menu.Item>
+                    <Menu.Item
+                      leftSection={<IconClock size={14} />}
+                      onClick={() => {
+                        navigate({
+                          to: location.pathname,
+                          search: (prev) => ({
+                            ...prev,
+                            stopwatchOpen: true,
+                          }),
+                        })
+                      }}
+                      color="green"
+                    >
+                      習慣を記録
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+
                 <NotificationPopover />
                 <ThemeToggle />
                 <Menu shadow="md" width={200}>
@@ -226,23 +286,10 @@ export function Header() {
                     </Menu.Item>
                     <Menu.Item
                       component={Link}
-                      to="/habits"
-                      search={
-                        {
-                          habitFilter: 'all',
-                          habitSort: 'all',
-                        } as any
-                      }
-                      leftSection={<IconList size={14} />}
-                    >
-                      習慣一覧
-                    </Menu.Item>
-                    <Menu.Item
-                      component={Link}
                       to="/focus"
                       leftSection={<IconHeadphones size={14} />}
                     >
-                      Focus Zone
+                      Focus
                     </Menu.Item>
                     <Menu.Item
                       component={Link}
