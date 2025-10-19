@@ -109,8 +109,8 @@ export function getDatePresets() {
 
   return [
     {
-      group: 'basic',
-      groupLabel: '基本',
+      group: 'recent',
+      groupLabel: '最近',
       items: [
         {
           value: today.subtract(1, 'day').format('YYYY-MM-DD'),
