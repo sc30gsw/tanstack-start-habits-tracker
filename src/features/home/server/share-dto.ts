@@ -41,7 +41,6 @@ const getCompletedHabitsForShare = createServerFn({ method: 'POST' })
         )
         .orderBy(habits.name)
 
-      // 習慣名でグループ化してメモと時間をまとめる
       const groupedData = completedHabits.reduce(
         (acc, habit) => {
           const existingHabit = acc.find((h) => h.habitId === habit.habitId)

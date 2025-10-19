@@ -204,6 +204,8 @@ function Home() {
           </Stack>
         </Card>
 
+        <HomeCalendarView />
+
         <Card withBorder padding="lg">
           <Stack gap="lg">
             <Group justify="space-between" align="center">
@@ -251,7 +253,6 @@ function Home() {
           </Stack>
         </Card>
 
-        <HomeCalendarView />
         <HomeHeatmapView />
       </Stack>
       <ShareHabitsModal copyId={copyId} />
