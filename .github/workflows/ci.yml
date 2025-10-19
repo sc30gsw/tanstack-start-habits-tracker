@@ -49,12 +49,10 @@ jobs:
           VITE_POLAR_PRODUCT_ID: ${{ secrets.VITE_POLAR_PRODUCT_ID }}
 
       - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: deploy
+        run: bun run cf:build
         env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           VITE_TURSO_CONNECTION_URL: ${{ secrets.VITE_TURSO_CONNECTION_URL }}
           VITE_TURSO_AUTH_TOKEN: ${{ secrets.VITE_TURSO_AUTH_TOKEN }}
           VITE_BETTER_AUTH_URL: ${{ secrets.VITE_BETTER_AUTH_URL }}
