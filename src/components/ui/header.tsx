@@ -1,10 +1,21 @@
-import { AppShell, Avatar, Button, Group, Menu, Text, Tooltip } from '@mantine/core'
+import {
+  AppShell,
+  Avatar,
+  Button,
+  FloatingIndicator,
+  Group,
+  Menu,
+  Text,
+  Tooltip,
+  UnstyledButton,
+} from '@mantine/core'
 import {
   IconClock,
   IconCreditCard,
   IconHeadphones,
   IconHome,
   IconList,
+  IconListDetails,
   IconLogin,
   IconLogout,
   IconRocket,
@@ -12,9 +23,8 @@ import {
   IconUserPlus,
 } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { NotificationPopover } from '~/features/notifications/components/notification-popover'
-import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
@@ -25,6 +35,27 @@ export function Header() {
   const location = useLocation()
 
   const { data: session } = authClient.useSession()
+
+  // FloatingIndicator用の状態管理
+  const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null)
+  const [controlsRefs, setControlsRefs] = useState<Record<string, HTMLElement | null>>({})
+
+  const setControlRef = (name: string) => (node: HTMLElement | null) => {
+    controlsRefs[name] = node
+    setControlsRefs(controlsRefs)
+  }
+
+  // 現在のルートに基づいてアクティブなタブを決定
+  const getActiveTab = () => {
+    const pathname = location.pathname
+    if (pathname === '/') return 'home'
+    if (pathname.startsWith('/habits')) return 'habits'
+    if (pathname === '/focus') return 'focus'
+    if (pathname === '/checkout') return 'checkout'
+    return null
+  }
+
+  const activeTab = getActiveTab()
 
   return (
     <>
@@ -233,6 +264,7 @@ export function Header() {
                           habitSort: 'all',
                         } as any
                       }
+                      leftSection={<IconList size={14} />}
                     >
                       習慣一覧
                     </Menu.Item>
