@@ -133,7 +133,7 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
 
   const shareHtml = (() => {
     if (selectedHabits.length === 0) {
-      return '<p>今日は完了した習慣がありませんでした :sweat_smile:</p>'
+      return '<p style="color: var(--mantine-color-dimmed);">共有する習慣を選択してください</p>'
     }
 
     const habitHtmls = pipe(
@@ -252,121 +252,122 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
               {habitSelection.map((habit, index) => {
                 const habitText = generateHabitText(habit)
                 return (
-                  <Box
+                  <Tooltip
                     key={habit.habitId}
-                    className="habit-card-group"
-                    component="button"
-                    type="button"
-                    style={{
-                      all: 'unset',
-                      display: 'block',
-                      width: '100%',
-                      maxWidth: '100%',
-                      position: 'relative',
-                      background: habit.selected
-                        ? computedColorScheme === 'dark'
-                          ? 'linear-gradient(135deg, rgba(34, 139, 230, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%)'
-                          : 'linear-gradient(135deg, rgba(34, 139, 230, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%)'
-                        : computedColorScheme === 'dark'
-                          ? 'rgba(255, 255, 255, 0.05)'
-                          : 'rgba(0, 0, 0, 0.02)',
-                      borderRadius: '8px',
-                      padding: '12px 16px',
-                      border: habit.selected
-                        ? computedColorScheme === 'dark'
-                          ? '2px solid var(--mantine-color-blue-6)'
-                          : '2px solid var(--mantine-color-blue-5)'
-                        : computedColorScheme === 'dark'
-                          ? '1px solid var(--mantine-color-dark-4)'
-                          : '1px solid var(--mantine-color-gray-2)',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                      opacity: habit.selected ? 1 : 0.6,
-                      transition: 'all 0.2s ease',
-                      cursor: 'pointer',
-                      overflow: 'hidden',
-                    }}
-                    onClick={() => {
-                      habitSelectionHandlers.setItemProp(index, 'selected', !habit.selected)
-                    }}
+                    label={habit.selected ? 'クリックで共有から除外' : 'クリックで共有に含める'}
+                    withArrow
+                    position="top"
                   >
-                    <Group wrap="nowrap" align="flex-start" gap="sm" style={{ maxWidth: '100%' }}>
-                      <Tooltip
-                        label={habit.selected ? 'クリックで共有から除外' : 'クリックで共有に含める'}
-                        withArrow
-                        position="left"
-                      >
+                    <Box
+                      className="habit-card-group"
+                      component="button"
+                      type="button"
+                      style={{
+                        all: 'unset',
+                        display: 'block',
+                        position: 'relative',
+                        background: habit.selected
+                          ? computedColorScheme === 'dark'
+                            ? 'linear-gradient(135deg, rgba(34, 139, 230, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%)'
+                            : 'linear-gradient(135deg, rgba(34, 139, 230, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%)'
+                          : computedColorScheme === 'dark'
+                            ? 'rgba(255, 255, 255, 0.05)'
+                            : 'rgba(0, 0, 0, 0.02)',
+                        borderRadius: '8px',
+                        padding: '12px 16px',
+                        border: habit.selected
+                          ? computedColorScheme === 'dark'
+                            ? '2px solid var(--mantine-color-blue-6)'
+                            : '2px solid var(--mantine-color-blue-5)'
+                          : computedColorScheme === 'dark'
+                            ? '1px solid var(--mantine-color-dark-4)'
+                            : '1px solid var(--mantine-color-gray-2)',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                        opacity: habit.selected ? 1 : 0.6,
+                        transition: 'all 0.2s ease',
+                        cursor: 'pointer',
+                        overflow: 'hidden',
+                      }}
+                      onClick={() => {
+                        habitSelectionHandlers.setItemProp(index, 'selected', !habit.selected)
+                      }}
+                    >
+                      <Group wrap="nowrap" align="center" gap="sm" style={{ maxWidth: '100%' }}>
                         <Checkbox
                           checked={habit.selected}
                           onChange={() => {
                             habitSelectionHandlers.setItemProp(index, 'selected', !habit.selected)
                           }}
-                          style={{ cursor: 'pointer', marginTop: 2 }}
+                          size="md"
+                          style={{
+                            cursor: 'pointer',
+                          }}
                           onClick={(e) => e.stopPropagation()}
                         />
-                      </Tooltip>
 
-                      <Box style={{ flex: 1, minWidth: 0 }}>
-                        <Group justify="space-between" align="flex-start" wrap="nowrap">
-                          <Stack gap={0} style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                            <div
-                              style={{
-                                fontWeight: 600,
-                                fontSize: '14px',
-                                wordBreak: 'break-word',
-                                overflowWrap: 'break-word',
-                              }}
-                            >
-                              <RichTextDisplay
-                                html={`<ul><li>${habit.habitName} ${habit.duration}分</li></ul>`}
-                              />
-                            </div>
-                            {habit.notes && habit.notes.length > 0 && (
-                              <Box
-                                ml={16}
+                        <Box style={{ flex: 1, minWidth: 0 }}>
+                          <Group justify="space-between" align="flex-start" wrap="nowrap">
+                            <Stack gap={0} style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                              <div
                                 style={{
+                                  fontWeight: 600,
+                                  fontSize: '14px',
                                   wordBreak: 'break-word',
                                   overflowWrap: 'break-word',
-                                  maxWidth: '100%',
                                 }}
                               >
-                                {habit.notes
-                                  .filter((note): note is string => note !== null && note !== '')
-                                  .map((note, noteIndex) => (
-                                    <RichTextDisplay key={noteIndex} html={note} />
-                                  ))}
-                              </Box>
-                            )}
-                          </Stack>
-
-                          <CopyButton value={habitText} timeout={2000}>
-                            {({ copied, copy }) => (
-                              <Tooltip
-                                label={copied ? 'コピーしました' : 'この習慣をコピー'}
-                                withArrow
-                                position="left"
-                              >
-                                <ActionIcon
-                                  variant="subtle"
-                                  color={copied ? 'teal' : 'gray'}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    copy()
-                                  }}
-                                  className="habit-copy-button"
+                                <RichTextDisplay
+                                  html={`<ul><li>${habit.habitName} ${habit.duration}分</li></ul>`}
+                                />
+                              </div>
+                              {habit.notes && habit.notes.length > 0 && (
+                                <Box
+                                  ml={16}
                                   style={{
-                                    opacity: 0,
-                                    transition: 'opacity 0.2s ease',
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    maxWidth: '100%',
                                   }}
                                 >
-                                  {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                                </ActionIcon>
-                              </Tooltip>
-                            )}
-                          </CopyButton>
-                        </Group>
-                      </Box>
-                    </Group>
-                  </Box>
+                                  {habit.notes
+                                    .filter((note): note is string => note !== null && note !== '')
+                                    .map((note, noteIndex) => (
+                                      <RichTextDisplay key={noteIndex} html={note} />
+                                    ))}
+                                </Box>
+                              )}
+                            </Stack>
+
+                            <CopyButton value={habitText} timeout={2000}>
+                              {({ copied, copy }) => (
+                                <Tooltip
+                                  label={copied ? 'コピーしました' : 'この習慣をコピー'}
+                                  withArrow
+                                  position="left"
+                                >
+                                  <ActionIcon
+                                    variant="subtle"
+                                    color={copied ? 'teal' : 'gray'}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      copy()
+                                    }}
+                                    className="habit-copy-button"
+                                    style={{
+                                      opacity: 0,
+                                      transition: 'opacity 0.2s ease',
+                                    }}
+                                  >
+                                    {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                                  </ActionIcon>
+                                </Tooltip>
+                              )}
+                            </CopyButton>
+                          </Group>
+                        </Box>
+                      </Group>
+                    </Box>
+                  </Tooltip>
                 )
               })}
             </Stack>
