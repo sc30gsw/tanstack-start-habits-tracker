@@ -4,7 +4,7 @@ import { notifications } from '@mantine/notifications'
 import { IconAlertTriangle, IconTrash } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { useTransition } from 'react'
-import { profileDto } from '~/features/profile/server/profile-functions'
+import { profileDto } from '~/features/settings/server/profile-functions'
 
 export function AccountDeleteButton() {
   const routeApi = getRouteApi('/settings/account')
