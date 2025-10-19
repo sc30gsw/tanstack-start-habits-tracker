@@ -109,11 +109,13 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
         const notHaveNotes =
           !habit.notes || habit.notes.length === 0 || habit.notes.every((note) => !note)
 
+        const durationText = formatDuration(habit.duration ?? 0)
+
         if (notHaveNotes) {
-          return `• ${habit.habitName} ${habit.duration}分`
+          return `• ${habit.habitName} ${durationText}`
         }
 
-        const habitLine = `• ${habit.habitName} ${habit.duration}分`
+        const habitLine = `• ${habit.habitName} ${durationText}`
         const noteLines = pipe(
           habit.notes,
           filter((note): note is string => note !== null && note !== ''),
@@ -148,8 +150,10 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
         const notHaveNotes =
           !habit.notes || habit.notes.length === 0 || habit.notes.every((note) => !note)
 
+        const durationText = formatDuration(habit.duration ?? 0)
+
         if (notHaveNotes) {
-          return `<li><strong>${habit.habitName} ${habit.duration}分</strong></li>`
+          return `<li><strong>${habit.habitName} ${durationText}</strong></li>`
         }
 
         const noteHtmls = pipe(
@@ -164,7 +168,7 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
             ? noteHtmls
             : `<div>${noteHtmls}</div>`
 
-        return `<li><strong>${habit.habitName} ${habit.duration}分</strong>${wrappedNotes}</li>`
+        return `<li><strong>${habit.habitName} ${durationText}</strong>${wrappedNotes}</li>`
       }),
       join(''),
     )
@@ -184,11 +188,13 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
     const notHaveNotes =
       !habit.notes || habit.notes.length === 0 || habit.notes.every((note) => !note)
 
+    const durationText = formatDuration(habit.duration ?? 0)
+
     if (notHaveNotes) {
-      return `• ${habit.habitName} ${habit.duration}分`
+      return `• ${habit.habitName} ${durationText}`
     }
 
-    const habitLine = `• ${habit.habitName} ${habit.duration}分`
+    const habitLine = `• ${habit.habitName} ${durationText}`
 
     const noteLines = pipe(
       habit.notes,
@@ -327,7 +333,7 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
                                 }}
                               >
                                 <RichTextDisplay
-                                  html={`<ul><li>${habit.habitName} ${habit.duration}分</li></ul>`}
+                                  html={`<ul><li>${habit.habitName} ${formatDuration(habit.duration ?? 0)}</li></ul>`}
                                 />
                               </div>
                               {habit.notes && habit.notes.length > 0 && (
