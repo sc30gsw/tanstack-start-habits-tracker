@@ -9,6 +9,7 @@ import {
   Skeleton,
   Stack,
   Text,
+  Tooltip,
 } from '@mantine/core'
 import { IconBell, IconBellOff, IconCheck, IconTrash } from '@tabler/icons-react'
 import { Suspense, useState } from 'react'
@@ -32,30 +33,37 @@ export function NotificationPopover() {
       transitionProps={{ transition: 'pop', duration: 200 }}
     >
       <Popover.Target>
-        <ActionIcon variant="subtle" size="lg" onClick={() => setOpened((o) => !o)} pos="relative">
-          <IconBell size={20} />
-          {unreadCount > 0 && (
-            <Box
-              pos="absolute"
-              top={2}
-              right={2}
-              bg="red.6"
-              c="white"
-              style={{
-                borderRadius: '50%',
-                width: 18,
-                height: 18,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 10,
-                fontWeight: 600,
-              }}
-            >
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </Box>
-          )}
-        </ActionIcon>
+        <Tooltip label="通知" withArrow>
+          <ActionIcon
+            variant="subtle"
+            size="lg"
+            onClick={() => setOpened((o) => !o)}
+            pos="relative"
+          >
+            <IconBell size={20} />
+            {unreadCount > 0 && (
+              <Box
+                pos="absolute"
+                top={2}
+                right={2}
+                bg="red.6"
+                c="white"
+                style={{
+                  borderRadius: '50%',
+                  width: 18,
+                  height: 18,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 10,
+                  fontWeight: 600,
+                }}
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </Box>
+            )}
+          </ActionIcon>
+        </Tooltip>
       </Popover.Target>
 
       <Popover.Dropdown p={0} style={{ border: '1px solid var(--mantine-color-gray-3)' }}>

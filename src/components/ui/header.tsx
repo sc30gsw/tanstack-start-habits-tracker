@@ -1,6 +1,5 @@
-import { AppShell, Avatar, Button, Group, Menu, Text } from '@mantine/core'
+import { AppShell, Avatar, Button, Group, Menu, Text, Tooltip } from '@mantine/core'
 import {
-  IconCheck,
   IconClock,
   IconCreditCard,
   IconHeadphones,
@@ -13,6 +12,7 @@ import {
 } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense } from 'react'
+import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { NotificationPopover } from '~/features/notifications/components/notification-popover'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
@@ -57,10 +57,12 @@ export function Header() {
                   }
                   variant="subtle"
                   size="sm"
-                  leftSection={<IconCheck size={16} />}
                 >
                   習慣一覧
                 </Button>
+
+                <HabitSelectorPopover />
+
                 <Button
                   component={Link}
                   to="/focus"
@@ -181,21 +183,24 @@ export function Header() {
           <Group hiddenFrom="sm">
             {session && (
               <>
-                <Button
-                  variant="light"
-                  size="xs"
-                  onClick={() => {
-                    navigate({
-                      to: location.pathname,
-                      search: (prev) => ({
-                        ...prev,
-                        stopwatchOpen: true,
-                      }),
-                    })
-                  }}
-                >
-                  <IconClock size={16} />
-                </Button>
+                <Tooltip label="習慣を記録する" withArrow>
+                  <Button
+                    variant="light"
+                    size="xs"
+                    onClick={() => {
+                      navigate({
+                        to: location.pathname,
+                        search: (prev) => ({
+                          ...prev,
+                          stopwatchOpen: true,
+                        }),
+                      })
+                    }}
+                  >
+                    <IconClock size={16} />
+                  </Button>
+                </Tooltip>
+                <HabitSelectorPopover />
                 <NotificationPopover />
                 <ThemeToggle />
                 <Menu shadow="md" width={200}>
@@ -226,7 +231,6 @@ export function Header() {
                           habitSort: 'all',
                         } as any
                       }
-                      leftSection={<IconCheck size={14} />}
                     >
                       習慣一覧
                     </Menu.Item>

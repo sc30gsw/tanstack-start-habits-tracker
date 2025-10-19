@@ -1,4 +1,4 @@
-import { ActionIcon, useComputedColorScheme, useMantineColorScheme } from '@mantine/core'
+import { ActionIcon, Tooltip, useComputedColorScheme, useMantineColorScheme } from '@mantine/core'
 import { IconMoon, IconSun } from '@tabler/icons-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -77,17 +77,18 @@ export function ThemeToggle() {
   }
 
   return (
-    <ActionIcon
-      variant="subtle"
-      color={localDisplayMode === 'dark' ? 'yellow' : 'blue'}
-      onClick={handleToggleTheme}
-      title={getTitle()}
-      aria-label="テーマを切り替え"
-      size="lg"
-      disabled={!isAutoMode}
-      style={{ cursor: isAutoMode ? 'pointer' : 'not-allowed' }}
-    >
-      {getIcon()}
-    </ActionIcon>
+    <Tooltip label={getTitle()} withArrow>
+      <ActionIcon
+        variant="subtle"
+        color={localDisplayMode === 'dark' ? 'yellow' : 'blue'}
+        onClick={handleToggleTheme}
+        aria-label="テーマを切り替え"
+        size="lg"
+        disabled={!isAutoMode}
+        style={{ cursor: isAutoMode ? 'pointer' : 'not-allowed' }}
+      >
+        {getIcon()}
+      </ActionIcon>
+    </Tooltip>
   )
 }
