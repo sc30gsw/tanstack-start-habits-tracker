@@ -311,7 +311,12 @@ erDiagram
     users ||--o{ habits : owns
     users ||--o{ records : creates
     users ||--o{ settings : has
+    users ||--o{ notifications : receives
+    users ||--o{ habitLevels : tracks
     habits ||--o{ records : tracks
+    habits ||--o{ notifications : generates
+    habits ||--o{ habitLevels : hasLevel
+    records ||--o{ notifications : triggers
     users ||--o{ sessions : has
     users ||--o{ accounts : links
     users ||--o{ passkeys : registers
@@ -331,6 +336,8 @@ erDiagram
         text name UK
         text description
         text color
+        text priority
+        boolean notificationsEnabled
         text userId FK
         timestamp createdAt
         timestamp updatedAt
@@ -340,9 +347,37 @@ erDiagram
         text id PK
         text habitId FK
         text date
-        boolean completed
+        text status
         integer duration_minutes
         text notes
+        text userId FK
+        timestamp createdAt
+        timestamp updatedAt
+    }
+
+    notifications {
+        text id PK
+        text userId FK
+        text title
+        text message
+        text type
+        text habitId FK
+        text recordId FK
+        boolean isRead
+        timestamp createdAt
+        timestamp readAt
+    }
+
+    habitLevels {
+        text id PK
+        text habitId FK
+        integer uniqueCompletionDays
+        integer completionLevel
+        real totalHoursDecimal
+        integer hoursLevel
+        integer currentStreak
+        integer longestStreak
+        text lastActivityDate
         text userId FK
         timestamp createdAt
         timestamp updatedAt
@@ -351,6 +386,12 @@ erDiagram
     settings {
         text id PK
         text theme
+        boolean notificationsEnabled
+        boolean customReminderEnabled
+        text dailyReminderTime
+        boolean incompleteReminderEnabled
+        boolean skippedReminderEnabled
+        boolean scheduledReminderEnabled
         text userId FK
         timestamp createdAt
         timestamp updatedAt
@@ -401,15 +442,40 @@ erDiagram
 - 習慣の定義とメタデータを保存
 - ユーザーごとに分離（userId外部キー）
 - カスタムカラー対応
+- **priority**: 優先度管理（high/middle/low）
+- **notificationsEnabled**: 習慣ごとの通知有効化
 
 **records（記録テーブル）**
 - 日次の習慣実行記録
-- 完了状態、時間、メモを含む
+- **status**: 実行状態（'active' | 'completed' | 'skipped'）
+- 時間追跡とメモを含む
 - 同一習慣・同一日付のユニーク制約
+
+**notifications（通知テーブル）**
+- アプリ内通知の管理
+- 通知タイプ: `reminder`, `habit_scheduled`, `habit_active`, `habit_skipped`, `habit_incomplete`, `achievement`
+- 既読/未読状態の追跡（isRead, readAt）
+- 習慣・記録への関連付け
+- **自動削除ポリシー**: タイプ別保持期間（リマインダー/習慣通知: 2日、実績: 30日）
+
+**habitLevels（習慣レベルテーブル）**
+- 習慣ごとのレベル進行システム
+- **継続日数レベル**: uniqueCompletionDays（ユニーク完了日数）、completionLevel（レベル）
+- **総時間レベル**: totalHoursDecimal（総時間）、hoursLevel（レベル）
+- **ストリーク統計**: currentStreak（現在の連続記録）、longestStreak（最長連続記録）
+- **アクティビティ追跡**: lastActivityDate（最終アクティビティ日）
+- 習慣ごとに1レコード（habitId unique制約）
 
 **settings（設定テーブル）**
 - ユーザー設定とプリファレンス
-- テーマ設定などを保存
+- **テーマ設定**: light/dark/auto
+- **通知設定**:
+  - `notificationsEnabled`: 全体通知有効化
+  - `customReminderEnabled`: カスタムリマインダー有効化
+  - `dailyReminderTime`: 毎日のリマインダー時刻（HH:mm形式）
+  - `incompleteReminderEnabled`: 未完了習慣通知
+  - `skippedReminderEnabled`: スキップ習慣通知
+  - `scheduledReminderEnabled`: 予定習慣通知
 
 #### Better Auth テーブル
 
@@ -615,6 +681,9 @@ bun run lint            # Biomeリント（自動修正）
 bun run format          # Biomeコードフォーマット
 bun run check           # Biome包括的チェック
 
+# バックグラウンドジョブ
+bun run cron:test       # Cronジョブテスト実行（通知生成）
+
 # デプロイメント
 bun run deploy          # Cloudflare Workersへデプロイ
 bun run cf:build        # ビルド＆デプロイ
@@ -784,12 +853,21 @@ bun run deploy      # デプロイのみ
 - **リサイズ可能レイアウト**: react-resizable-panelsによる柔軟なUI
 - **日本の祝日対応**: @holiday-jp統合によるカレンダー機能強化
 
-### 11. DevOps＆デプロイメント
+### 11. バックグラウンドジョブと通知管理
+
+- **Cronジョブシステム**: 定期的な通知生成バックグラウンドジョブ
+- **時刻ベース通知**: デフォルト通知時刻（9:00, 13:00, 17:00, 21:00 JST）
+- **習慣ステータス追跡**: active/completed/skipped状態に基づく自動通知生成
+- **自動削除ポリシー**: タイプ別の通知保持期間管理（2日〜30日）
+- **タイムゾーン対応**: dayjs timezone/utcプラグインによる正確な時刻管理
+
+### 12. DevOps＆デプロイメント
 
 - **Cloudflare Workers**: サーバーレスアプリケーションのグローバルデプロイ
 - **環境管理**: ローカルと本番環境の設定
 - **CI/CD準備**: 自動デプロイ用スクリプトのセットアップ
 - **モニタリング**: エラーバウンダリとロギングの統合
+- **Cronジョブ実行**: `bun run cron:test`によるテストモード実行
 
 ---
 
