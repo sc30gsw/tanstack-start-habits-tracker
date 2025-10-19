@@ -11,7 +11,9 @@ import { Notifications } from '@mantine/notifications'
 import { ClientOnly } from '~/components/client-only'
 import { QueryProvider } from '~/components/providers/query-provider'
 import { Header } from '~/components/ui/header'
+import { Loader } from '~/components/ui/loader'
 import { getCurrentUser, getCurrentUserPasskey } from '~/features/auth/server/server-functions'
+import { habitDto } from '~/features/habits/server/habit-functions'
 import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import type { FileRouteTypes } from '~/routeTree.gen'
 import { theme } from '~/theme'
@@ -52,6 +54,19 @@ export const Route = createRootRoute({
 
     return { session: result.user, search, isAuthenticated: !!result.user }
   },
+
+  loader: async () => {
+    const habitsResult = await habitDto.getHabits({
+      data: { q: '', habitSort: 'all', habitFilter: 'all' },
+    })
+
+    if (!habitsResult.success) {
+      return { habits: [] }
+    }
+
+    return { habits: habitsResult.data }
+  },
+  pendingComponent: () => <Loader />,
 
   head: () => ({
     meta: [
