@@ -178,12 +178,20 @@ export function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormPr
 
         <Stack gap="xs">
           <Text size="sm" fw={500}>
-            {existingRecord ? 'メモ・感想（既存のメモに追記されます）' : 'メモ・感想'}
+            {existingRecord
+              ? '実施内容・振り返り（既存のメモに追記されます）'
+              : '実施内容・振り返り'}
           </Text>
           <RichTextEditor
             content={editorContent}
             onChange={setEditorContent}
-            placeholder="今日の感想や具体的に何をやったかを記録..."
+            placeholder="例：
+・ランニング 30分（5km）
+・ストレッチ 10分
+
+できなかった部分：
+・筋トレは時間がなくてスキップ
+・明日は朝の時間を使って取り組む"
             disabled={isPending}
           />
         </Stack>

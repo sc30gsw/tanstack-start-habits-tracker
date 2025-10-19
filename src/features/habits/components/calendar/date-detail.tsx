@@ -155,7 +155,7 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
             {hasNotes(selectedDateRecord.notes) && (
               <Stack gap="xs">
                 <Text size="sm" fw={500} c={textColor}>
-                  メモ・感想
+                  実施内容・振り返り
                 </Text>
                 <div
                   style={{
