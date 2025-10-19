@@ -193,7 +193,7 @@ function Home() {
             </Text>
             <Group gap="md">
               <Button component={Link} to="/habits" size="lg">
-                習慣管理
+                習慣一覧
               </Button>
               {totalHabits > 0 && (
                 <Badge variant="light" color="blue" size="lg">

@@ -122,7 +122,7 @@ export function DailyHabitList() {
     const filterValue = searchParams.habitFilter
 
     if (!filterValue || filterValue === 'all') {
-      return '習慣が登録されていません。習慣管理ページから新しい習慣を追加してください。'
+      return '習慣が登録されていません。習慣一覧ページから新しい習慣を追加してください。'
     }
 
     const filterLabels = {

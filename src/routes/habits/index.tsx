@@ -52,7 +52,7 @@ function HabitsPage() {
     <Container size="lg" py="xl">
       <Stack gap="lg">
         <Group justify="space-between" align="center">
-          <Title order={1}>習慣管理</Title>
+          <Title order={1}>習慣一覧</Title>
           <Button
             color="habit"
             onClick={() =>

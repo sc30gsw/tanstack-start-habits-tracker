@@ -59,7 +59,7 @@ export function Header() {
                   size="sm"
                   leftSection={<IconCheck size={16} />}
                 >
-                  習慣管理
+                  習慣一覧
                 </Button>
                 <Button
                   component={Link}
@@ -228,7 +228,7 @@ export function Header() {
                       }
                       leftSection={<IconCheck size={14} />}
                     >
-                      習慣管理
+                      習慣一覧
                     </Menu.Item>
                     <Menu.Item
                       component={Link}
