@@ -109,16 +109,16 @@ async function generateDefaultTimeNotifications(
     })
 
     // 2. Generate habit-specific notifications based on user settings
+    if (userSettings.scheduledReminderEnabled) {
+      await generateScheduledHabitNotifications(userId)
+    }
+
     if (userSettings.incompleteReminderEnabled) {
-      await generateIncompleteHabitNotifications(userId)
+      await generateActiveHabitNotifications(userId)
     }
 
     if (userSettings.skippedReminderEnabled) {
       await generateSkippedHabitNotifications(userId)
-    }
-
-    if (userSettings.scheduledReminderEnabled) {
-      await generateScheduledHabitNotifications(userId)
     }
   } catch (error) {
     console.error(`   ❌ Error generating default time notifications for user ${userId}:`, error)
@@ -144,9 +144,9 @@ async function generateCustomReminderNotification(userId: Session['userId']) {
 }
 
 /**
- * Generate notifications for incomplete habits
+ * Generate notifications for active (scheduled but not completed) habits
  */
-async function generateIncompleteHabitNotifications(userId: Session['userId']) {
+async function generateActiveHabitNotifications(userId: Session['userId']) {
   try {
     const today = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
 
@@ -165,23 +165,21 @@ async function generateIncompleteHabitNotifications(userId: Session['userId']) {
     for (const habit of userHabits) {
       const record = recordMap.get(habit.id)
 
-      if (!record || record.status === 'active') {
+      // Only notify for habits with status='active' (scheduled but not completed)
+      if (record && record.status === 'active') {
         await db.insert(notifications).values({
           id: nanoid(),
           userId,
           habitId: habit.id,
           title: `予定中: ${habit.name}`,
           message: '今日の習慣を実行しましょう！継続が力になります。',
-          type: 'habit_incomplete',
+          type: 'habit_active',
           isRead: false,
         })
       }
     }
   } catch (error) {
-    console.error(
-      `   ❌ Error generating incomplete habit notifications for user ${userId}:`,
-      error,
-    )
+    console.error(`   ❌ Error generating active habit notifications for user ${userId}:`, error)
   }
 }
 

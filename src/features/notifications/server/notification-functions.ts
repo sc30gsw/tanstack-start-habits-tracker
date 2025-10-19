@@ -20,9 +20,10 @@ function getTodayInJST() {
 
 const AUTO_DELETE_POLICY = {
   reminder: 2,
-  habit_incomplete: 2,
-  habit_skipped: 2,
   habit_scheduled: 2,
+  habit_active: 2,
+  habit_skipped: 2,
+  habit_incomplete: 2,
   achievement: 30,
 } as const satisfies Record<string, number>
 
@@ -187,7 +188,14 @@ const deleteAllReadNotifications = createServerFn({ method: 'POST' }).handler(as
 const createNotificationSchema = z.object({
   title: z.string().min(1),
   message: z.string().min(1),
-  type: z.enum(['reminder', 'habit_incomplete', 'habit_skipped', 'habit_scheduled', 'achievement']),
+  type: z.enum([
+    'reminder',
+    'habit_scheduled',
+    'habit_active',
+    'habit_skipped',
+    'habit_incomplete',
+    'achievement',
+  ]),
   habitId: z.string().optional(),
   recordId: z.string().optional(),
 })

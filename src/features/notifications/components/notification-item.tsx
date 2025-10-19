@@ -12,24 +12,33 @@ dayjs.extend(timezone)
 
 const typeLabels = {
   reminder: 'リマインダー',
-  habit_incomplete: '未完了',
+  habit_scheduled: '予定なし',
+  habit_active: '予定中',
   habit_skipped: 'スキップ',
-  habit_scheduled: '予定中',
+  habit_incomplete: '未完了',
   achievement: '達成',
-} as const satisfies Record<string, string>
+} as const satisfies Record<
+  NonNullable<InferSelectModel<typeof notificationsTable>['type']>,
+  string
+>
 
 const typeColors = {
   reminder: 'blue',
-  habit_incomplete: 'yellow',
-  habit_skipped: 'orange',
   habit_scheduled: 'red',
+  habit_active: 'yellow',
+  habit_skipped: 'orange',
+  habit_incomplete: 'red.8',
   achievement: 'green',
-} as const satisfies Record<string, string>
+} as const satisfies Record<
+  NonNullable<InferSelectModel<typeof notificationsTable>['type']>,
+  string
+>
 
 const HABIT_DETAIL_NOTIFICATION_TYPES = [
-  'habit_incomplete',
-  'habit_skipped',
   'habit_scheduled',
+  'habit_active',
+  'habit_skipped',
+  'habit_incomplete',
   'achievement',
 ] as const satisfies readonly InferSelectModel<typeof notificationsTable>['type'][]
 

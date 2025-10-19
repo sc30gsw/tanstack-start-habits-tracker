@@ -170,7 +170,14 @@ export const notifications = sqliteTable('notifications', {
   title: text().notNull(),
   message: text().notNull(),
   type: text()
-    .$type<'reminder' | 'habit_incomplete' | 'habit_skipped' | 'habit_scheduled' | 'achievement'>()
+    .$type<
+      | 'reminder'
+      | 'habit_scheduled'
+      | 'habit_active'
+      | 'habit_skipped'
+      | 'habit_incomplete'
+      | 'achievement'
+    >()
     .default('reminder'),
 
   // Related habit and record
