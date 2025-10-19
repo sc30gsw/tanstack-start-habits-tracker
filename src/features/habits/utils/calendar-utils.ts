@@ -93,29 +93,81 @@ export function getDateTextColor(
 export function getDatePresets() {
   const today = dayjs().tz('Asia/Tokyo')
 
+  const formatDateLabel = (date: dayjs.Dayjs, baseLabel: string) => {
+    const dateStr = date.format('YYYY-MM-DD')
+    const dayOfWeek = WEEK_DAYS[date.day()]
+
+    return `${baseLabel} (${dateStr} ${dayOfWeek})`
+  }
+
   return [
-    { value: today.subtract(1, 'day').format('YYYY-MM-DD'), label: '昨日' },
-    { value: today.format('YYYY-MM-DD'), label: '今日' },
-    { value: today.add(1, 'day').format('YYYY-MM-DD'), label: '明日' },
-
-    { value: today.startOf('week').format('YYYY-MM-DD'), label: '今週の開始' },
     {
-      value: today.subtract(1, 'week').startOf('week').format('YYYY-MM-DD'),
-      label: '先週の開始',
+      group: 'basic',
+      groupLabel: '基本',
+      items: [
+        {
+          value: today.subtract(1, 'day').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.subtract(1, 'day'), '昨日'),
+        },
+        {
+          value: today.format('YYYY-MM-DD'),
+          label: formatDateLabel(today, '今日'),
+        },
+        {
+          value: today.add(1, 'day').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.add(1, 'day'), '明日'),
+        },
+      ],
     },
-    { value: today.subtract(7, 'day').format('YYYY-MM-DD'), label: '7日前' },
-
-    { value: today.startOf('month').format('YYYY-MM-DD'), label: '今月の初日' },
     {
-      value: today.subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
-      label: '先月の初日',
+      group: 'week',
+      groupLabel: '週',
+      items: [
+        {
+          value: today.startOf('week').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.startOf('week'), '今週の開始'),
+        },
+        {
+          value: today.subtract(1, 'week').startOf('week').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.subtract(1, 'week').startOf('week'), '先週の開始'),
+        },
+        {
+          value: today.subtract(7, 'day').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.subtract(7, 'day'), '7日前'),
+        },
+      ],
     },
-    { value: today.subtract(30, 'day').format('YYYY-MM-DD'), label: '30日前' },
-
-    { value: today.startOf('year').format('YYYY-MM-DD'), label: '今年の初日' },
     {
-      value: today.subtract(1, 'year').startOf('year').format('YYYY-MM-DD'),
-      label: '去年の初日',
+      group: 'month',
+      groupLabel: '月',
+      items: [
+        {
+          value: today.startOf('month').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.startOf('month'), '今月の初日'),
+        },
+        {
+          value: today.subtract(1, 'month').startOf('month').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.subtract(1, 'month').startOf('month'), '先月の初日'),
+        },
+        {
+          value: today.subtract(30, 'day').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.subtract(30, 'day'), '30日前'),
+        },
+      ],
     },
-  ] as const satisfies readonly Record<string, string>[]
+    {
+      group: 'year',
+      groupLabel: '年',
+      items: [
+        {
+          value: today.startOf('year').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.startOf('year'), '今年の初日'),
+        },
+        {
+          value: today.subtract(1, 'year').startOf('year').format('YYYY-MM-DD'),
+          label: formatDateLabel(today.subtract(1, 'year').startOf('year'), '去年の初日'),
+        },
+      ],
+    },
+  ] as const satisfies readonly Record<string, string | Array<Record<string, string>>>[]
 }

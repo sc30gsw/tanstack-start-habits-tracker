@@ -1,4 +1,6 @@
 import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core'
+import type { SelectProps } from '@mantine/core'
+import { IconCalendar, IconCheck } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
@@ -38,6 +40,13 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
   return chunk(dates, 7)
 }
 
+const renderSelectOption: SelectProps['renderOption'] = ({ option, checked }) => (
+  <Group flex="1" gap="xs">
+    {option.label}
+    {checked && <IconCheck style={{ marginInlineStart: 'auto' }} stroke={1.5} size={16} />}
+  </Group>
+)
+
 export function HomeMonthView() {
   const apiRoute = getRouteApi('/')
   const searchParams = apiRoute.useSearch()
@@ -52,15 +61,22 @@ export function HomeMonthView() {
   const navigate = apiRoute.useNavigate()
   const allPresets = getDatePresets()
 
-  const datePresets = allPresets.reduce(
-    (acc, preset) => {
-      if (!acc.some((p) => p.value === preset.value)) {
-        acc.push({ value: preset.value, label: preset.label })
-      }
-      return acc
-    },
-    [] as Record<'value' | 'label', string>[],
-  )
+  const seenValues = new Set<string>()
+  const selectData = allPresets.map((preset) => ({
+    group: preset.groupLabel,
+    items: preset.items
+      .filter((item) => {
+        if (seenValues.has(item.value)) {
+          return false
+        }
+        seenValues.add(item.value)
+        return true
+      })
+      .map((item) => ({
+        value: item.value,
+        label: item.label,
+      })),
+  }))
 
   const handlePresetChange = (value: string | null) => {
     if (value) {
@@ -87,17 +103,16 @@ export function HomeMonthView() {
   return (
     <Stack gap={4}>
       <Select
-        placeholder="日付プリセットを選択"
-        data={datePresets.map((preset) => ({
-          value: preset.value,
-          label: preset.label,
-        }))}
+        placeholder="日付を選択 (昨日、今日、明日など)"
+        data={selectData}
         value={searchParams?.preset || dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')}
         onChange={handlePresetChange}
         comboboxProps={{ transitionProps: { transition: 'pop', duration: 200 } }}
+        renderOption={renderSelectOption}
         clearable
         searchable
         size="xs"
+        leftSection={<IconCalendar size={18} stroke={1.5} />}
       />
 
       <Group justify="space-between" mb={4}>
