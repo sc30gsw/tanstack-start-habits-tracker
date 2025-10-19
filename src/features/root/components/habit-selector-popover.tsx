@@ -11,7 +11,7 @@ import {
   TextInput,
   Tooltip,
 } from '@mantine/core'
-import { IconCheck, IconSearch } from '@tabler/icons-react'
+import { IconListDetails, IconSearch } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { type ComponentProps, useRef, useState } from 'react'
 import { funnel } from 'remeda'
@@ -100,10 +100,10 @@ export function HabitSelectorPopover() {
             variant="subtle"
             size="sm"
             onClick={() => setOpened((o) => !o)}
-            leftSection={<IconCheck size={16} />}
+            leftSection={<IconListDetails size={16} />}
             visibleFrom="sm"
           >
-            習慣を記録する
+            習慣詳細
           </Button>
         </Popover.Target>
 
@@ -119,7 +119,7 @@ export function HabitSelectorPopover() {
               }}
             >
               <Text size="sm" fw={600} c="dark">
-                習慣を記録する
+                習慣詳細
               </Text>
               <TextInput
                 placeholder="習慣を検索..."
@@ -154,7 +154,7 @@ export function HabitSelectorPopover() {
             <ScrollArea h={450} type="auto">
               {filteredByPriority.length === 0 ? (
                 <Stack p="md" align="center" gap="xs">
-                  <IconCheck size={48} style={{ opacity: 0.3 }} />
+                  <IconListDetails size={48} style={{ opacity: 0.3 }} />
                   <Text size="sm" c="dimmed" ta="center">
                     {habitsList.length === 0
                       ? '習慣が登録されていません'
@@ -242,9 +242,9 @@ export function HabitSelectorPopover() {
         transitionProps={{ transition: 'pop', duration: 200 }}
       >
         <Popover.Target>
-          <Tooltip label="習慣を記録する" withArrow>
+          <Tooltip label="習慣詳細" withArrow>
             <Button variant="light" size="xs" onClick={() => setOpened((o) => !o)} hiddenFrom="sm">
-              <IconCheck size={16} />
+              <IconListDetails size={16} />
             </Button>
           </Tooltip>
         </Popover.Target>
@@ -261,7 +261,7 @@ export function HabitSelectorPopover() {
               }}
             >
               <Text size="sm" fw={600} c="dark">
-                習慣を記録する
+                習慣詳細
               </Text>
               <TextInput
                 placeholder="習慣を検索..."
@@ -296,7 +296,7 @@ export function HabitSelectorPopover() {
             <ScrollArea h={400} type="auto">
               {filteredByPriority.length === 0 ? (
                 <Stack p="md" align="center" gap="xs">
-                  <IconCheck size={48} style={{ opacity: 0.3 }} />
+                  <IconListDetails size={48} style={{ opacity: 0.3 }} />
                   <Text size="sm" c="dimmed" ta="center">
                     {habitsList.length === 0
                       ? '習慣が登録されていません'
