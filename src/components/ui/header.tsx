@@ -5,7 +5,6 @@ import {
   IconHeadphones,
   IconHome,
   IconList,
-  IconListDetails,
   IconLogin,
   IconLogout,
   IconRocket,
@@ -13,7 +12,7 @@ import {
   IconUserPlus,
 } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
-import { Suspense, useState } from 'react'
+import { Suspense } from 'react'
 import { NotificationPopover } from '~/features/notifications/components/notification-popover'
 import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
@@ -27,40 +26,8 @@ export function Header() {
 
   const { data: session } = authClient.useSession()
 
-  const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null)
-  const [controlsRefs, setControlsRefs] = useState<Record<string, HTMLElement | null>>({})
-
-  const setControlRef = (name: string) => (node: HTMLElement | null) => {
-    controlsRefs[name] = node
-    setControlsRefs(controlsRefs)
-  }
-
-  const getActiveTab = () => {
-    const pathname = location.pathname
-
-    switch (true) {
-      case pathname === '/':
-        return 'home'
-
-      case pathname.startsWith('/habits'):
-        return 'habits'
-
-      case pathname === '/focus':
-        return 'focus'
-
-      case pathname === '/checkout':
-        return 'checkout'
-
-      default:
-        return null
-    }
-  }
-
-  const activeTab = getActiveTab()
-
   return (
     <>
-      _activeTab
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
           <Text component={Link} size="xl" fw={700} c="blue" to="/">
