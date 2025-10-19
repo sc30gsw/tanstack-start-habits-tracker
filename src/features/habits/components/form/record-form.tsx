@@ -2,7 +2,12 @@ import { Alert, Button, Group, NumberInput, Select, Stack, Text } from '@mantine
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
-import { IconAlertTriangle } from '@tabler/icons-react'
+import {
+  IconAlertTriangle,
+  IconCircleCheck,
+  IconClipboard,
+  IconPlayerSkipForward,
+} from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
@@ -10,7 +15,6 @@ import utc from 'dayjs/plugin/utc'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import 'dayjs/locale/ja'
 
-// dayjsプラグインと日本のロケールを設定
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.locale('ja')
@@ -91,32 +95,29 @@ export function RecordForm({
     }),
   })
 
-  // 未来の日付かどうかを判定
   const isFutureDate = useMemo(() => {
     const todayJST = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
     return date > todayJST
   }, [date])
 
-  // ステータス選択肢を未来の日付に応じて動的に変更
   const statusOptions = useMemo(() => {
     if (isFutureDate) {
-      return [{ value: 'active', label: '📋 予定中' }]
+      return [{ value: 'active', label: '予定中' }]
     }
+
     return [
-      { value: 'active', label: '📋 予定中' },
-      { value: 'completed', label: '✅ 完了' },
-      { value: 'skipped', label: '⏭️ スキップ' },
+      { value: 'active', label: '予定中' },
+      { value: 'completed', label: '完了' },
+      { value: 'skipped', label: 'スキップ' },
     ]
   }, [isFutureDate])
 
-  // 未来の日付では強制的に 'active' に設定
   useEffect(() => {
     if (isFutureDate && form.values.status !== 'active') {
       form.setFieldValue('status', 'active')
     }
   }, [isFutureDate, form])
 
-  // Sync editor content with form
   useEffect(() => {
     form.setFieldValue('notes', editorContent)
   }, [editorContent])
@@ -124,7 +125,6 @@ export function RecordForm({
   const handleSubmit = (values: FormValues) => {
     const durationMinutes = typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
 
-    // スキップ状態かつメモが空の場合、メモ入力を促す
     if (values.status === 'skipped' && !values.notes?.trim()) {
       modals.openConfirmModal({
         title: 'スキップの理由を記録しませんか？',
@@ -141,7 +141,6 @@ export function RecordForm({
         },
         confirmProps: { color: 'blue' },
         onConfirm: () => {
-          // メモ欄にフォーカスを当てる（モーダルが閉じてからフォーカス）
           setTimeout(() => {
             const editor = document.querySelector('.tiptap.ProseMirror') as HTMLElement
             if (editor) {
@@ -151,19 +150,16 @@ export function RecordForm({
           }, 100)
         },
         onCancel: () => {
-          // そのまま保存処理を実行
           executeSubmit(values, durationMinutes)
         },
       })
       return
     }
 
-    // 通常の保存処理
     executeSubmit(values, durationMinutes)
   }
 
   const executeSubmit = (values: FormValues, durationMinutes: number) => {
-    // 事前にZodバリデーションを実行してエラーをチェック
     const validationResult = createRecordSchema.safeParse({
       habitId,
       date,
@@ -173,7 +169,6 @@ export function RecordForm({
     })
 
     if (!validationResult.success) {
-      // Zodバリデーションエラーをフォームエラーとして表示（toast不要）
       const fieldErrors: Record<string, string> = {}
 
       for (const issue of validationResult.error.issues) {
@@ -223,7 +218,6 @@ export function RecordForm({
             color: 'green',
           })
         } else {
-          // サーバーエラーの場合はtoastとフォームエラー両方表示
           notifications.show({
             title: 'エラー',
             message: result.error || `記録の${existingRecord ? '更新' : '作成'}に失敗しました`,
@@ -232,7 +226,6 @@ export function RecordForm({
           form.setErrors({ durationMinutes: result.error || '記録の保存に失敗しました' })
         }
       } catch (_err) {
-        // ネットワークエラーなど予期しないエラーの場合
         notifications.show({
           title: 'エラー',
           message: '予期しないエラーが発生しました',
@@ -244,7 +237,6 @@ export function RecordForm({
     })
   }
 
-  // 分入力変更時に時間入力を同期
   const handleMinutesChange = (value: string | number) => {
     const minutes = typeof value === 'string' ? 0 : (value ?? 0)
     form.setFieldValue('durationMinutes', minutes)
@@ -256,7 +248,6 @@ export function RecordForm({
     }
   }
 
-  // 時間入力変更時に分入力を同期
   const handleHoursChange = (value: string | number) => {
     const hours = typeof value === 'string' ? 0 : (value ?? 0)
     form.setFieldValue('durationHours', hours)
@@ -299,6 +290,15 @@ export function RecordForm({
           disabled={isPending}
           error={form.errors.status}
           description={isFutureDate ? '未来の日付は予定中のみ選択可能です' : undefined}
+          leftSection={
+            form.values.status === 'completed' ? (
+              <IconCircleCheck size={16} />
+            ) : form.values.status === 'skipped' ? (
+              <IconPlayerSkipForward size={16} />
+            ) : (
+              <IconClipboard size={16} />
+            )
+          }
         />
         <Group gap="md">
           <NumberInput
