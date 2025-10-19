@@ -16,8 +16,11 @@ import { notifications } from '@mantine/notifications'
 import { IconCheck, IconCopy, IconShare } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import type { InferSelectModel } from 'drizzle-orm'
+import { useState } from 'react'
 import { filter, join, map, pipe } from 'remeda'
 import { RichTextDisplay } from '~/components/ui/rich-text-editor/rich-text-display'
+import type { habits } from '~/db/schema'
 import { htmlToShareText } from '~/utils/html-helpers'
 
 export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
@@ -37,6 +40,9 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
   }))
 
   const [habitSelection, habitSelectionHandlers] = useListState(initialHabitSelection)
+  const [hoveredCopyButton, setHoveredCopyButton] = useState<
+    InferSelectModel<typeof habits>['id'] | null
+  >(null)
 
   if (shareDataResponse.error || !shareDataResponse.data) {
     return (
@@ -94,7 +100,7 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
 
   const shareText = (() => {
     if (selectedHabits.length === 0) {
-      return '今日は完了した習慣がありませんでした :sweat_smile:'
+      return '今日は完了した習慣がありませんでした。'
     }
 
     const habitTexts = pipe(
@@ -251,12 +257,16 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
             <Stack gap="md">
               {habitSelection.map((habit, index) => {
                 const habitText = generateHabitText(habit)
+                const isHoveringCopyButton = hoveredCopyButton === habit.habitId
+
                 return (
                   <Tooltip
                     key={habit.habitId}
                     label={habit.selected ? 'クリックで共有から除外' : 'クリックで共有に含める'}
                     withArrow
                     position="top"
+                    className="habit-card-tooltip"
+                    disabled={isHoveringCopyButton}
                   >
                     <Box
                       className="habit-card-group"
@@ -352,6 +362,8 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
                                       e.stopPropagation()
                                       copy()
                                     }}
+                                    onMouseEnter={() => setHoveredCopyButton(habit.habitId)}
+                                    onMouseLeave={() => setHoveredCopyButton(null)}
                                     className="habit-copy-button"
                                     style={{
                                       opacity: 0,
