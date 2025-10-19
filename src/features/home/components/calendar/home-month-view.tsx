@@ -15,12 +15,7 @@ import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { chunk } from 'remeda'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
-import {
-  getDateColor,
-  getDatePresets,
-  type getDateType,
-  WEEK_DAYS,
-} from '~/features/habits/utils/calendar-utils'
+import { getDateColor, getDatePresets, WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 import { HomeCalendarDateCell } from '~/features/home/components/calendar/home-calendar-date-cell'
 import { CALENDAR_ID } from '~/features/home/components/home-calendar-view'
 
@@ -53,33 +48,13 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
   return chunk(dates, 7)
 }
 
-// TODO: グループごとにアイコンを表示する場合は以下を使用
-const iconProps = { size: 16, stroke: 1.5 }
-const _groupIcons: Record<string, React.ReactNode> = {
-  基本: <IconCalendar {...iconProps} />,
-  週: <IconCalendarWeek {...iconProps} />,
-  月: <IconCalendarMonth {...iconProps} />,
-  年: <IconClock {...iconProps} />,
-}
-
-const renderSelectOption: SelectProps['renderOption'] = ({ option, checked }) => {
-  const item: Record<'label' | 'value', string> &
-    Partial<Record<'dateStr' | 'dayOfWeek', string>> &
-    Partial<Record<'dateType', ReturnType<typeof getDateType>>> = option
-
-  return (
-    <Group flex="1" gap="xs">
-      {item.label}
-      {item.dateStr && <Text size="sm">{item.dateStr}</Text>}
-      {item.dayOfWeek && item.dateType && (
-        <Badge size="sm" color={getDateColor(item.dateType, undefined, undefined, 4)}>
-          {item.dayOfWeek}
-        </Badge>
-      )}
-      {checked && <IconCheck style={{ marginInlineStart: 'auto' }} stroke={1.5} size={16} />}
-    </Group>
-  )
-}
+const iconProps = { size: 16, stroke: 1.5 } as const satisfies Record<string, number>
+const groupIcons = {
+  basic: <IconCalendar {...iconProps} />,
+  week: <IconCalendarWeek {...iconProps} />,
+  month: <IconCalendarMonth {...iconProps} />,
+  year: <IconClock {...iconProps} />,
+} as const satisfies Record<string, React.ReactNode>
 
 export function HomeMonthView() {
   const apiRoute = getRouteApi('/')
@@ -93,21 +68,85 @@ export function HomeMonthView() {
   const weeks = createWeekGroups(monthDates)
 
   const navigate = apiRoute.useNavigate()
-  const allPresets = getDatePresets()
+  const allPresets = Array.from(getDatePresets())
 
+  // valueから追加データを引くためのMap
+  const itemDataMap = new Map<
+    string,
+    {
+      dateStr: string
+      dayOfWeek: string
+      dateType: 'sunday' | 'saturday' | 'holiday' | 'weekday'
+      group: string
+    }
+  >()
+
+  // 全体で重複排除するためのSet
   const seenValues = new Set<string>()
-  const selectData = allPresets.map((preset) => ({
-    group: preset.groupLabel,
-    items: preset.items.filter((item) => {
-      if (seenValues.has(item.value)) {
-        return false
+
+  // Mantineの形式（value + labelのみ）に変換し、追加データはMapに保存
+  const selectData = allPresets
+    .map((preset) => {
+      const items = preset.items
+        .filter((item) => {
+          if (seenValues.has(item.value)) {
+            return false
+          }
+          seenValues.add(item.value)
+          return true
+        })
+        .map((item) => {
+          // 追加データをMapに保存
+          itemDataMap.set(item.value, {
+            dateStr: item.dateStr,
+            dayOfWeek: item.dayOfWeek,
+            dateType: item.dateType,
+            group: preset.group,
+          })
+
+          // Mantineが期待する形式（value + labelのみ）
+          return {
+            value: item.value,
+            label: item.label,
+          }
+        })
+
+      return {
+        group: preset.groupLabel,
+        items: items,
       }
+    })
+    .filter((group) => group.items.length > 0)
 
-      seenValues.add(item.value)
+  // renderOptionでMapからデータを取得
+  const renderSelectOption: SelectProps['renderOption'] = ({ option, checked }) => {
+    const extraData = itemDataMap.get(option.value)
 
-      return true
-    }),
-  }))
+    return (
+      <Group flex="1" gap="xs">
+        {extraData?.group && groupIcons[extraData.group as keyof typeof groupIcons]}
+        {option.label}
+        {extraData?.dateStr && <Text size="sm">{extraData.dateStr}</Text>}
+        {extraData?.dayOfWeek && extraData?.dateType && (
+          <Badge size="sm" color={getDateColor(extraData.dateType, undefined, undefined, 4)}>
+            {extraData.dayOfWeek}
+          </Badge>
+        )}
+        {checked && <IconCheck style={{ marginInlineStart: 'auto' }} stroke={1.5} size={16} />}
+      </Group>
+    )
+  }
+
+  const getSelectedIcon = () => {
+    const selectedValue = searchParams?.preset || dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
+
+    for (const preset of allPresets) {
+      if (preset.items.some((item) => item.value === selectedValue)) {
+        return groupIcons[preset.group]
+      }
+    }
+    return <IconCalendar size={18} stroke={1.5} />
+  }
 
   const handlePresetChange = (value: string | null) => {
     if (value) {
@@ -143,7 +182,7 @@ export function HomeMonthView() {
         clearable
         searchable
         size="xs"
-        leftSection={<IconCalendar size={18} stroke={1.5} />}
+        leftSection={getSelectedIcon()}
       />
 
       <Group justify="space-between" mb={4}>

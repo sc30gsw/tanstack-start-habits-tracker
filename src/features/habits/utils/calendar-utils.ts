@@ -104,7 +104,7 @@ export function getDatePresets() {
       dateStr,
       dayOfWeek,
       dateType,
-    }
+    } as const
   }
 
   return [
