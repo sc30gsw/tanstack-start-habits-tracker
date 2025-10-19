@@ -1,15 +1,15 @@
-import type { SelectProps } from '@mantine/core'
-import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core'
-import { IconCalendar, IconCheck } from '@tabler/icons-react'
+import { ActionIcon, Group, Stack, Text } from '@mantine/core'
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { chunk } from 'remeda'
 import { CalendarDateCell } from '~/features/habits/components/calendar/calendar-date-cell'
+import { CalendarPresetsCombobox } from '~/features/habits/components/calendar/calendar-presets-combobox'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
-import { getDatePresets, WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
+import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -40,13 +40,6 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
   return chunk(dates, 7)
 }
 
-const renderSelectOption: SelectProps['renderOption'] = ({ option, checked }) => (
-  <Group flex="1" gap="xs">
-    {option.label}
-    {checked && <IconCheck style={{ marginInlineStart: 'auto' }} stroke={1.5} size={16} />}
-  </Group>
-)
-
 export function MonthView({ recordMap }: Record<'recordMap', Record<string, RecordEntity>>) {
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
@@ -59,59 +52,10 @@ export function MonthView({ recordMap }: Record<'recordMap', Record<string, Reco
   const weeks = createWeekGroups(monthDates)
 
   const navigate = apiRoute.useNavigate()
-  const allPresets = getDatePresets()
-
-  const seenValues = new Set<string>()
-  const selectData = allPresets.map((preset) => ({
-    group: preset.groupLabel,
-    items: preset.items
-      .filter((item) => {
-        if (seenValues.has(item.value)) {
-          return false
-        }
-        seenValues.add(item.value)
-        return true
-      })
-      .map((item) => ({
-        value: item.value,
-        label: item.label,
-      })),
-  }))
-
-  const handlePresetChange = (value: string | null) => {
-    if (value) {
-      navigate({
-        search: (prev) => ({
-          ...prev,
-          selectedDate: value,
-          currentMonth: dayjs(value).format('YYYY-MM'),
-          preset: value,
-        }),
-      })
-    } else {
-      navigate({
-        search: (prev) => ({
-          ...prev,
-          preset: undefined,
-        }),
-      })
-    }
-  }
 
   return (
-    <Stack gap={4}>
-      <Select
-        placeholder="日付を選択 (昨日、今日、明日など)"
-        data={selectData}
-        value={searchParams?.preset || dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')}
-        onChange={handlePresetChange}
-        comboboxProps={{ transitionProps: { transition: 'pop', duration: 200 } }}
-        renderOption={renderSelectOption}
-        clearable
-        searchable
-        size="xs"
-        leftSection={<IconCalendar size={18} stroke={1.5} />}
-      />
+    <Stack gap={16}>
+      <CalendarPresetsCombobox />
 
       <Group justify="space-between" mb={4}>
         <ActionIcon
@@ -127,7 +71,7 @@ export function MonthView({ recordMap }: Record<'recordMap', Record<string, Reco
             })
           }}
         >
-          ‹
+          <IconChevronLeft size={16} />
         </ActionIcon>
         <Text fw={500}>{currentMonth.format('YYYY年MM月')}</Text>
         <ActionIcon
@@ -143,7 +87,7 @@ export function MonthView({ recordMap }: Record<'recordMap', Record<string, Reco
             })
           }}
         >
-          ›
+          <IconChevronRight size={16} />
         </ActionIcon>
       </Group>
 
