@@ -222,7 +222,7 @@ function Home() {
         <Card withBorder padding="lg">
           <Stack gap="lg">
             <Group justify="space-between" align="center">
-              <Box>
+              <Box id={copyId}>
                 <Text size="xl" fw={600}>
                   {selectedDate === today
                     ? '今日の完了習慣'
@@ -236,7 +236,6 @@ function Home() {
               </Box>
               {completedOnSelectedDate > 0 && (
                 <Button
-                  id={copyId}
                   variant="gradient"
                   gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
                   size="sm"
@@ -245,7 +244,6 @@ function Home() {
                     navigate({
                       search: (prev) => ({ ...prev, open: true }),
                       hash: copyId,
-                      hashScrollIntoView: true,
                     })
                   }}
                   styles={{
@@ -268,7 +266,7 @@ function Home() {
           </Stack>
         </Card>
       </Stack>
-      <ShareHabitsModal />
+      <ShareHabitsModal copyId={copyId} />
     </Container>
   )
 }

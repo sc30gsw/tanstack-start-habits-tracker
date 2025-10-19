@@ -1,0 +1,37 @@
+.checkboxCard {
+  position: relative;
+  padding: var(--mantine-spacing-sm);
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+
+.checkboxCard[data-checked] {
+  border-color: var(--mantine-primary-color-filled);
+}
+
+.checkboxCard:hover:not([data-disabled]) {
+  background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+}
+
+.checkboxCard[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.checkboxCard[data-disabled]:hover {
+  background-color: transparent;
+}
+
+.colorDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.habitName {
+  font-weight: 500;
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.3;
+  color: var(--mantine-color-bright);
+}

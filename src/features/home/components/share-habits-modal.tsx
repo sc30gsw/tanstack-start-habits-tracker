@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Box,
   Button,
+  Checkbox,
   CopyButton,
   Group,
   Modal,
@@ -10,6 +11,7 @@ import {
   Tooltip,
   useComputedColorScheme,
 } from '@mantine/core'
+import { useListState } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import { IconCheck, IconCopy, IconShare } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
@@ -18,7 +20,7 @@ import { filter, join, map, pipe } from 'remeda'
 import { RichTextDisplay } from '~/components/ui/rich-text-editor/rich-text-display'
 import { htmlToShareText } from '~/utils/html-helpers'
 
-export function ShareHabitsModal() {
+export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
   const routeApi = getRouteApi('/')
   const navigate = routeApi.useNavigate()
   const searchParams = routeApi.useSearch()
@@ -28,6 +30,13 @@ export function ShareHabitsModal() {
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
   const { shareData: shareDataResponse } = routeApi.useLoaderData()
+
+  const initialHabitSelection = (shareDataResponse.data || []).map((habit) => ({
+    ...habit,
+    selected: true,
+  }))
+
+  const [habitSelection, habitSelectionHandlers] = useListState(initialHabitSelection)
 
   if (shareDataResponse.error || !shareDataResponse.data) {
     return (
@@ -39,6 +48,7 @@ export function ShareHabitsModal() {
               ...prev,
               open: false,
             }),
+            hash: copyId,
           })
         }}
         title={
@@ -57,7 +67,9 @@ export function ShareHabitsModal() {
   const today = dayjs().format('YYYY-MM-DD')
   const shareData = shareDataResponse.data
 
-  const totalDuration = shareData.reduce((sum, habit) => sum + (habit.duration ?? 0), 0)
+  const selectedHabits = habitSelection.filter((h) => h.selected)
+
+  const totalDuration = selectedHabits.reduce((sum, habit) => sum + (habit.duration ?? 0), 0)
 
   const formatDuration = (minutes: number) => {
     if (minutes === 0) {
@@ -81,12 +93,12 @@ export function ShareHabitsModal() {
   const totalDurationText = formatDuration(totalDuration)
 
   const shareText = (() => {
-    if (shareData.length === 0) {
+    if (selectedHabits.length === 0) {
       return '今日は完了した習慣がありませんでした :sweat_smile:'
     }
 
     const habitTexts = pipe(
-      shareData,
+      selectedHabits,
       map((habit) => {
         const notHaveNotes =
           !habit.notes || habit.notes.length === 0 || habit.notes.every((note) => !note)
@@ -120,12 +132,12 @@ export function ShareHabitsModal() {
   })()
 
   const shareHtml = (() => {
-    if (shareData.length === 0) {
+    if (selectedHabits.length === 0) {
       return '<p>今日は完了した習慣がありませんでした :sweat_smile:</p>'
     }
 
     const habitHtmls = pipe(
-      shareData,
+      selectedHabits,
       map((habit) => {
         const notHaveNotes =
           !habit.notes || habit.notes.length === 0 || habit.notes.every((note) => !note)
@@ -237,70 +249,124 @@ export function ShareHabitsModal() {
             </Text>
           ) : (
             <Stack gap="md">
-              {shareData.map((habit, index) => {
+              {habitSelection.map((habit, index) => {
                 const habitText = generateHabitText(habit)
                 return (
-                  <div
-                    key={index}
+                  <Box
+                    key={habit.habitId}
                     className="habit-card-group"
+                    component="button"
+                    type="button"
                     style={{
+                      all: 'unset',
+                      display: 'block',
+                      width: '100%',
+                      maxWidth: '100%',
                       position: 'relative',
-                      background:
-                        computedColorScheme === 'dark'
+                      background: habit.selected
+                        ? computedColorScheme === 'dark'
                           ? 'linear-gradient(135deg, rgba(34, 139, 230, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%)'
-                          : 'linear-gradient(135deg, rgba(34, 139, 230, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%)',
+                          : 'linear-gradient(135deg, rgba(34, 139, 230, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%)'
+                        : computedColorScheme === 'dark'
+                          ? 'rgba(255, 255, 255, 0.05)'
+                          : 'rgba(0, 0, 0, 0.02)',
                       borderRadius: '8px',
                       padding: '12px 16px',
-                      border:
-                        computedColorScheme === 'dark'
+                      border: habit.selected
+                        ? computedColorScheme === 'dark'
+                          ? '2px solid var(--mantine-color-blue-6)'
+                          : '2px solid var(--mantine-color-blue-5)'
+                        : computedColorScheme === 'dark'
                           ? '1px solid var(--mantine-color-dark-4)'
                           : '1px solid var(--mantine-color-gray-2)',
                       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                      opacity: habit.selected ? 1 : 0.6,
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      overflow: 'hidden',
+                    }}
+                    onClick={() => {
+                      habitSelectionHandlers.setItemProp(index, 'selected', !habit.selected)
                     }}
                   >
-                    <CopyButton value={habitText} timeout={2000}>
-                      {({ copied, copy }) => (
-                        <Tooltip
-                          label={copied ? 'コピーしました' : 'コピー'}
-                          withArrow
-                          position="left"
-                        >
-                          <ActionIcon
-                            variant="subtle"
-                            color={copied ? 'teal' : 'gray'}
-                            onClick={copy}
-                            className="habit-copy-button"
-                            style={{
-                              position: 'absolute',
-                              top: '8px',
-                              right: '8px',
-                              opacity: 0,
-                              transition: 'opacity 0.2s ease',
-                            }}
-                          >
-                            {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                          </ActionIcon>
-                        </Tooltip>
-                      )}
-                    </CopyButton>
-
-                    <Stack gap={0}>
-                      <div style={{ fontWeight: 600, fontSize: '14px' }}>
-                        <RichTextDisplay
-                          html={`<ul><li>${habit.habitName} ${habit.duration}分</li></ul>`}
+                    <Group wrap="nowrap" align="flex-start" gap="sm" style={{ maxWidth: '100%' }}>
+                      <Tooltip
+                        label={habit.selected ? 'クリックで共有から除外' : 'クリックで共有に含める'}
+                        withArrow
+                        position="left"
+                      >
+                        <Checkbox
+                          checked={habit.selected}
+                          onChange={() => {
+                            habitSelectionHandlers.setItemProp(index, 'selected', !habit.selected)
+                          }}
+                          style={{ cursor: 'pointer', marginTop: 2 }}
+                          onClick={(e) => e.stopPropagation()}
                         />
-                      </div>
-                      {habit.notes && habit.notes.length > 0 && (
-                        <Box ml={16}>
-                          {habit.notes
-                            .filter((note): note is string => note !== null && note !== '')
-                            .map((note, noteIndex) => (
-                              <RichTextDisplay key={noteIndex} html={note} />
-                            ))}
-                        </Box>
-                      )}
-                    </Stack>
-                  </div>
+                      </Tooltip>
+
+                      <Box style={{ flex: 1, minWidth: 0 }}>
+                        <Group justify="space-between" align="flex-start" wrap="nowrap">
+                          <Stack gap={0} style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                            <div
+                              style={{
+                                fontWeight: 600,
+                                fontSize: '14px',
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                              }}
+                            >
+                              <RichTextDisplay
+                                html={`<ul><li>${habit.habitName} ${habit.duration}分</li></ul>`}
+                              />
+                            </div>
+                            {habit.notes && habit.notes.length > 0 && (
+                              <Box
+                                ml={16}
+                                style={{
+                                  wordBreak: 'break-word',
+                                  overflowWrap: 'break-word',
+                                  maxWidth: '100%',
+                                }}
+                              >
+                                {habit.notes
+                                  .filter((note): note is string => note !== null && note !== '')
+                                  .map((note, noteIndex) => (
+                                    <RichTextDisplay key={noteIndex} html={note} />
+                                  ))}
+                              </Box>
+                            )}
+                          </Stack>
+
+                          <CopyButton value={habitText} timeout={2000}>
+                            {({ copied, copy }) => (
+                              <Tooltip
+                                label={copied ? 'コピーしました' : 'この習慣をコピー'}
+                                withArrow
+                                position="left"
+                              >
+                                <ActionIcon
+                                  variant="subtle"
+                                  color={copied ? 'teal' : 'gray'}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    copy()
+                                  }}
+                                  className="habit-copy-button"
+                                  style={{
+                                    opacity: 0,
+                                    transition: 'opacity 0.2s ease',
+                                  }}
+                                >
+                                  {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                          </CopyButton>
+                        </Group>
+                      </Box>
+                    </Group>
+                  </Box>
                 )
               })}
             </Stack>

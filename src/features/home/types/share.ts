@@ -4,8 +4,11 @@ import { z } from 'zod/v4'
  * 共有用習慣データの型定義
  */
 export type ShareHabitData = {
+  habitId: string
   habitName: string
+  habitColor: string
   notes: (string | null)[]
+  duration: number | null
 }
 
 /**

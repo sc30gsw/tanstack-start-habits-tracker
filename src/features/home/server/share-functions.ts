@@ -40,7 +40,9 @@ const getCompletedHabitsForShare = createServerFn({ method: 'GET' })
       const shareDataMap = new Map<
         string,
         {
+          habitId: string
           habitName: InferSelectModel<typeof habits>['name']
+          habitColor: InferSelectModel<typeof habits>['color']
           notes: InferSelectModel<typeof records>['notes'][]
           duration: InferSelectModel<typeof records>['duration_minutes']
         }
@@ -51,7 +53,9 @@ const getCompletedHabitsForShare = createServerFn({ method: 'GET' })
 
         if (!shareDataMap.has(habitId)) {
           shareDataMap.set(habitId, {
+            habitId: habitId,
             habitName: row.habits.name,
+            habitColor: row.habits.color,
             notes: [],
             duration: 0,
           })
