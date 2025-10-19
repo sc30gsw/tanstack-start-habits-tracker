@@ -1,13 +1,26 @@
-import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core'
 import type { SelectProps } from '@mantine/core'
-import { IconCalendar, IconCheck } from '@tabler/icons-react'
+import { ActionIcon, Badge, Group, Select, Stack, Text } from '@mantine/core'
+import {
+  IconCalendar,
+  IconCalendarMonth,
+  IconCalendarWeek,
+  IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
+  IconClock,
+} from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { chunk } from 'remeda'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
-import { getDatePresets, WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
+import {
+  getDateColor,
+  getDatePresets,
+  type getDateType,
+  WEEK_DAYS,
+} from '~/features/habits/utils/calendar-utils'
 import { HomeCalendarDateCell } from '~/features/home/components/calendar/home-calendar-date-cell'
 import { CALENDAR_ID } from '~/features/home/components/home-calendar-view'
 
@@ -40,12 +53,33 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
   return chunk(dates, 7)
 }
 
-const renderSelectOption: SelectProps['renderOption'] = ({ option, checked }) => (
-  <Group flex="1" gap="xs">
-    {option.label}
-    {checked && <IconCheck style={{ marginInlineStart: 'auto' }} stroke={1.5} size={16} />}
-  </Group>
-)
+// TODO: グループごとにアイコンを表示する場合は以下を使用
+const iconProps = { size: 16, stroke: 1.5 }
+const _groupIcons: Record<string, React.ReactNode> = {
+  基本: <IconCalendar {...iconProps} />,
+  週: <IconCalendarWeek {...iconProps} />,
+  月: <IconCalendarMonth {...iconProps} />,
+  年: <IconClock {...iconProps} />,
+}
+
+const renderSelectOption: SelectProps['renderOption'] = ({ option, checked }) => {
+  const item: Record<'label' | 'value', string> &
+    Partial<Record<'dateStr' | 'dayOfWeek', string>> &
+    Partial<Record<'dateType', ReturnType<typeof getDateType>>> = option
+
+  return (
+    <Group flex="1" gap="xs">
+      {item.label}
+      {item.dateStr && <Text size="sm">{item.dateStr}</Text>}
+      {item.dayOfWeek && item.dateType && (
+        <Badge size="sm" color={getDateColor(item.dateType, undefined, undefined, 4)}>
+          {item.dayOfWeek}
+        </Badge>
+      )}
+      {checked && <IconCheck style={{ marginInlineStart: 'auto' }} stroke={1.5} size={16} />}
+    </Group>
+  )
+}
 
 export function HomeMonthView() {
   const apiRoute = getRouteApi('/')
@@ -64,18 +98,15 @@ export function HomeMonthView() {
   const seenValues = new Set<string>()
   const selectData = allPresets.map((preset) => ({
     group: preset.groupLabel,
-    items: preset.items
-      .filter((item) => {
-        if (seenValues.has(item.value)) {
-          return false
-        }
-        seenValues.add(item.value)
-        return true
-      })
-      .map((item) => ({
-        value: item.value,
-        label: item.label,
-      })),
+    items: preset.items.filter((item) => {
+      if (seenValues.has(item.value)) {
+        return false
+      }
+
+      seenValues.add(item.value)
+
+      return true
+    }),
   }))
 
   const handlePresetChange = (value: string | null) => {
@@ -130,7 +161,7 @@ export function HomeMonthView() {
             })
           }}
         >
-          ‹
+          <IconChevronLeft size={16} />
         </ActionIcon>
         <Text fw={500}>{currentMonth.format('YYYY年MM月')}</Text>
         <ActionIcon
@@ -147,7 +178,7 @@ export function HomeMonthView() {
             })
           }}
         >
-          ›
+          <IconChevronRight size={16} />
         </ActionIcon>
       </Group>
 
