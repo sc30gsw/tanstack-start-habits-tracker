@@ -1,16 +1,13 @@
 import { ActionIcon, Box, Card, Flex, Group, Stack, Text } from '@mantine/core'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
-
-const WEEK_DAYS = ['日', '月', '火', '水', '木', '金', '土'] as const satisfies readonly string[]
+import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 
 export function CalendarPreview() {
-  // 31日分のカレンダーデータ生成
   const calendarDays = Array.from({ length: 31 }).map((_, i) => ({
     day: i + 1,
     records: Math.random() > 0.4 ? generateMockRecords() : [],
   }))
 
-  // モック記録データ生成
   function generateMockRecords() {
     const recordCount = Math.floor(Math.random() * 4) + 1
     const habitNames = ['朝の瞑想', '読書30分', '運動1時間', '日記を書く', '英語学習']
@@ -38,7 +35,6 @@ export function CalendarPreview() {
         </ActionIcon>
       </Group>
 
-      {/* 曜日ヘッダー */}
       <Group gap={4} justify="space-between" wrap="nowrap">
         {WEEK_DAYS.map((d, index) => (
           <Text

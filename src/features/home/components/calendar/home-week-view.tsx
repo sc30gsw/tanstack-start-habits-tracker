@@ -4,13 +4,12 @@ import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
+import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 import { HomeCalendarDateCell } from '~/features/home/components/calendar/home-calendar-date-cell'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
-
-const WEEK_DAYS = ['日', '月', '火', '水', '木', '金', '土'] as const satisfies readonly string[]
 
 export function HomeWeekView() {
   const apiRoute = getRouteApi('/')

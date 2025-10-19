@@ -1,6 +1,5 @@
 import { Box, Card, Group, type MantineColor, Stack, Text } from '@mantine/core'
-
-const WEEK_DAYS = ['月', '火', '水', '木', '金', '土', '日'] as const satisfies readonly string[]
+import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 
 const STAT_METRICS = [
   { label: '平均完了率', value: '82%', color: 'blue' },
@@ -9,14 +8,12 @@ const STAT_METRICS = [
 ] as const satisfies readonly { label: string; value: string; color: MantineColor }[]
 
 export function StatsPreview() {
-  // 週間パフォーマンスデータ
   const weeklyData = WEEK_DAYS.map(() => ({
     height: Math.random() * 80 + 20,
   }))
 
   return (
     <Stack gap="lg" style={{ width: '100%' }}>
-      {/* 週間パフォーマンスグラフカード */}
       <Card
         withBorder
         padding="lg"
@@ -126,7 +123,6 @@ export function StatsPreview() {
         ))}
       </Group>
 
-      {/* 習慣別パフォーマンスカード */}
       <Card
         withBorder
         padding="lg"

@@ -1,17 +1,19 @@
 import { ActionIcon, Group, Stack, Text } from '@mantine/core'
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { chunk } from 'remeda'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
+import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 import { HomeCalendarDateCell } from '~/features/home/components/calendar/home-calendar-date-cell'
+import { HomeCalendarPresetsCombobox } from '~/features/home/components/calendar/home-calendar-presets-combobox'
+import { CALENDAR_ID } from '~/features/home/components/home-calendar-view'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
-
-const WEEK_DAYS = ['日', '月', '火', '水', '木', '金', '土'] as const satisfies readonly string[]
 
 function generateMonthDates(currentMonth: dayjs.Dayjs) {
   const monthStart = currentMonth.startOf('month')
@@ -52,7 +54,9 @@ export function HomeMonthView() {
   const navigate = apiRoute.useNavigate()
 
   return (
-    <Stack gap={4}>
+    <Stack gap={16}>
+      <HomeCalendarPresetsCombobox />
+
       <Group justify="space-between" mb={4}>
         <ActionIcon
           variant="subtle"
@@ -62,11 +66,13 @@ export function HomeMonthView() {
               search: (prev) => ({
                 ...prev,
                 currentMonth: currentMonth.subtract(1, 'month').format('YYYY-MM'),
+                preset: undefined,
               }),
+              hash: CALENDAR_ID,
             })
           }}
         >
-          ‹
+          <IconChevronLeft size={16} />
         </ActionIcon>
         <Text fw={500}>{currentMonth.format('YYYY年MM月')}</Text>
         <ActionIcon
@@ -77,11 +83,13 @@ export function HomeMonthView() {
               search: (prev) => ({
                 ...prev,
                 currentMonth: currentMonth.add(1, 'month').format('YYYY-MM'),
+                preset: undefined,
               }),
+              hash: CALENDAR_ID,
             })
           }}
         >
-          ›
+          <IconChevronRight size={16} />
         </ActionIcon>
       </Group>
 
