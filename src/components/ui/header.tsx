@@ -45,14 +45,25 @@ export function Header() {
     setControlsRefs(controlsRefs)
   }
 
-  // 現在のルートに基づいてアクティブなタブを決定
   const getActiveTab = () => {
     const pathname = location.pathname
-    if (pathname === '/') return 'home'
-    if (pathname.startsWith('/habits')) return 'habits'
-    if (pathname === '/focus') return 'focus'
-    if (pathname === '/checkout') return 'checkout'
-    return null
+
+    switch (true) {
+      case pathname === '/':
+        return 'home'
+
+      case pathname.startsWith('/habits'):
+        return 'habits'
+
+      case pathname === '/focus':
+        return 'focus'
+
+      case pathname === '/checkout':
+        return 'checkout'
+
+      default:
+        return null
+    }
   }
 
   const activeTab = getActiveTab()
