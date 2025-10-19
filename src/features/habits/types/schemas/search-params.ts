@@ -116,6 +116,20 @@ const qValidator = z.string().optional().catch('')
 
 const habitSelectorQueryValidator = z.string().optional().catch('')
 
+const habitSelectorFilterValidator = z
+  .enum(['all', 'high', 'middle', 'low'])
+  .optional()
+  .catch((_) => {
+    return 'all'
+  })
+
+const habitSelectorSortValidator = z
+  .enum(['all', 'priority'])
+  .optional()
+  .catch((_) => {
+    return 'all'
+  })
+
 const presetValidator = dateStringValidator
 
 export const searchSchema = z.object({
@@ -138,6 +152,8 @@ export const searchSchema = z.object({
   detailTab: detailTabValidator,
   q: qValidator,
   habitSelectorQuery: habitSelectorQueryValidator,
+  habitSelectorFilter: habitSelectorFilterValidator,
+  habitSelectorSort: habitSelectorSortValidator,
   preset: presetValidator,
 })
 
@@ -182,6 +198,8 @@ export function getDefaultSearchParams() {
     detailTab: 'dashboard',
     q: '',
     habitSelectorQuery: '',
+    habitSelectorFilter: 'all',
+    habitSelectorSort: 'all',
     preset: dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD'),
   }
 }

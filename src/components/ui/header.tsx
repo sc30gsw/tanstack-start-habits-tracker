@@ -4,6 +4,7 @@ import {
   IconCreditCard,
   IconHeadphones,
   IconHome,
+  IconList,
   IconLogin,
   IconLogout,
   IconRocket,
@@ -12,8 +13,8 @@ import {
 } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { Suspense } from 'react'
-import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { NotificationPopover } from '~/features/notifications/components/notification-popover'
+import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
@@ -57,6 +58,7 @@ export function Header() {
                   }
                   variant="subtle"
                   size="sm"
+                  leftSection={<IconList size={16} />}
                 >
                   習慣一覧
                 </Button>

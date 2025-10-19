@@ -5,6 +5,7 @@ import {
   Paper,
   Popover,
   ScrollArea,
+  Select,
   Stack,
   Text,
   TextInput,
@@ -14,6 +15,7 @@ import { IconCheck, IconSearch } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import { type ComponentProps, useRef, useState } from 'react'
 import { funnel } from 'remeda'
+import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 
 const PRIORITY_COLOR = {
   high: 'red',
@@ -69,6 +71,15 @@ export function HabitSelectorPopover() {
     habit.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
+  const filterValue = search.habitSelectorFilter || 'all'
+  const filteredByPriority = filteredHabits.filter((habit) => {
+    if (filterValue === 'all') {
+      return true
+    }
+
+    return habit.priority === filterValue
+  })
+
   return (
     <>
       {/* デスクトップ版 */}
@@ -117,10 +128,31 @@ export function HabitSelectorPopover() {
                 onChange={handleSearchChange}
                 size="xs"
               />
+              <Select
+                label="優先度で絞り込み"
+                placeholder="優先度を選択"
+                value={search.habitSelectorFilter || 'all'}
+                onChange={(value) =>
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      habitSelectorFilter: value as SearchParams['habitSelectorFilter'],
+                    }),
+                  })
+                }
+                data={[
+                  { value: 'all', label: 'すべて表示' },
+                  { value: 'high', label: '高' },
+                  { value: 'middle', label: '中' },
+                  { value: 'low', label: '低' },
+                ]}
+                size="xs"
+                clearable={false}
+              />
             </Stack>
 
             <ScrollArea h={450} type="auto">
-              {filteredHabits.length === 0 ? (
+              {filteredByPriority.length === 0 ? (
                 <Stack p="md" align="center" gap="xs">
                   <IconCheck size={48} style={{ opacity: 0.3 }} />
                   <Text size="sm" c="dimmed" ta="center">
@@ -138,7 +170,7 @@ export function HabitSelectorPopover() {
                 </Stack>
               ) : (
                 <Stack gap="xs" p="sm">
-                  {filteredHabits.map((habit) => (
+                  {filteredByPriority.map((habit) => (
                     <Paper
                       key={habit.id}
                       p="sm"
@@ -238,10 +270,31 @@ export function HabitSelectorPopover() {
                 onChange={handleSearchChange}
                 size="xs"
               />
+              <Select
+                label="優先度で絞り込み"
+                placeholder="優先度を選択"
+                value={search.habitSelectorFilter || 'all'}
+                onChange={(value) =>
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      habitSelectorFilter: value as SearchParams['habitSelectorFilter'],
+                    }),
+                  })
+                }
+                data={[
+                  { value: 'all', label: 'すべて表示' },
+                  { value: 'high', label: '高' },
+                  { value: 'middle', label: '中' },
+                  { value: 'low', label: '低' },
+                ]}
+                size="xs"
+                clearable={false}
+              />
             </Stack>
 
             <ScrollArea h={400} type="auto">
-              {filteredHabits.length === 0 ? (
+              {filteredByPriority.length === 0 ? (
                 <Stack p="md" align="center" gap="xs">
                   <IconCheck size={48} style={{ opacity: 0.3 }} />
                   <Text size="sm" c="dimmed" ta="center">
@@ -259,7 +312,7 @@ export function HabitSelectorPopover() {
                 </Stack>
               ) : (
                 <Stack gap="xs" p="sm">
-                  {filteredHabits.map((habit) => (
+                  {filteredByPriority.map((habit) => (
                     <Paper
                       key={habit.id}
                       p="sm"
