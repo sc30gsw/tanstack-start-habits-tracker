@@ -80,9 +80,14 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
   )
 
   const filterValue = search.habitSelectorFilter || 'all'
+
   const filteredByPriority = filteredHabits.filter((habit) => {
     if (filterValue === 'all') {
       return true
+    }
+
+    if (filterValue === 'null') {
+      return habit.priority === null
     }
 
     return habit.priority === filterValue
@@ -186,6 +191,7 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
                   { value: 'high', label: '高' },
                   { value: 'middle', label: '中' },
                   { value: 'low', label: '低' },
+                  { value: 'null', label: '優先度なし' },
                 ]}
                 size="xs"
                 clearable={false}

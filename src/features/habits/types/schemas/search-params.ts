@@ -117,7 +117,7 @@ const qValidator = z.string().optional().catch('')
 const habitSelectorQueryValidator = z.string().optional().catch('')
 
 const habitSelectorFilterValidator = z
-  .enum(['all', 'high', 'middle', 'low'])
+  .enum(['all', 'high', 'middle', 'low', 'null'])
   .optional()
   .catch((_) => {
     return 'all'
