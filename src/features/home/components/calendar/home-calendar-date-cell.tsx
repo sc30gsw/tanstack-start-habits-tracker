@@ -145,7 +145,7 @@ export function HomeCalendarDateCell({
                 </Flex>
               ))}
               {completedRecords.length > 3 && (
-                <Text size="8px" c="dimmed" ta="center">
+                <Text size="8px" c={isSelected ? 'white' : 'dimmed'} ta="center">
                   +{completedRecords.length - 3}件
                 </Text>
               )}
@@ -221,6 +221,7 @@ export function HomeCalendarDateCell({
                 <Text
                   size="9px"
                   ta="left"
+                  c={isSelected ? 'white' : undefined}
                   style={{
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -234,7 +235,7 @@ export function HomeCalendarDateCell({
               </Flex>
             ))}
             {completedRecords.length > 3 && (
-              <Text size="8px" c="dimmed" ta="center">
+              <Text size="8px" c={isSelected ? 'white' : 'dimmed'} ta="center">
                 +{completedRecords.length - 3}件
               </Text>
             )}
