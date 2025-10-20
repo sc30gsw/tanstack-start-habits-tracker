@@ -230,6 +230,9 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
           .habit-card-group:hover .habit-copy-button {
             opacity: 1 !important;
           }
+          .preview-box-group:hover .preview-copy-button {
+            opacity: 1 !important;
+          }
         `}
       </style>
       <Modal
@@ -475,7 +478,9 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
             )
           ) : (
             <Box
+              className="preview-box-group"
               style={{
+                position: 'relative',
                 backgroundColor:
                   computedColorScheme === 'dark'
                     ? 'var(--mantine-color-dark-6)'
@@ -494,6 +499,36 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
                     : '0 2px 8px rgba(0, 0, 0, 0.1)',
               }}
             >
+              <CopyButton value={shareText} timeout={2000}>
+                {({ copied, copy }) => (
+                  <Tooltip
+                    label={copied ? 'コピーしました' : '共有プレビューをコピー'}
+                    withArrow
+                    position="left"
+                  >
+                    <ActionIcon
+                      variant="subtle"
+                      color={copied ? 'teal' : 'gray'}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        copy()
+                        handleCopySuccess()
+                      }}
+                      className="preview-copy-button"
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        zIndex: 1,
+                        opacity: 0,
+                        transition: 'opacity 0.2s ease',
+                      }}
+                    >
+                      {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                    </ActionIcon>
+                  </Tooltip>
+                )}
+              </CopyButton>
               <RichTextDisplay html={shareHtml} />
             </Box>
           )}
