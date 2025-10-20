@@ -2,13 +2,14 @@ import {
   ActionIcon,
   Box,
   Button,
-  Checkbox,
   CopyButton,
+  FloatingIndicator,
   Group,
   Modal,
   Stack,
   Text,
   Tooltip,
+  UnstyledButton,
   useComputedColorScheme,
 } from '@mantine/core'
 import { useListState } from '@mantine/hooks'
@@ -43,6 +44,14 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
   const [hoveredCopyButton, setHoveredCopyButton] = useState<
     InferSelectModel<typeof habits>['id'] | null
   >(null)
+  const [activeTab, setActiveTab] = useState<'cards' | 'preview'>('cards')
+  const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null)
+  const [controlsRefs, setControlsRefs] = useState<Record<string, HTMLButtonElement | null>>({})
+
+  const setControlRef = (name: string) => (node: HTMLButtonElement) => {
+    controlsRefs[name] = node
+    setControlsRefs(controlsRefs)
+  }
 
   if (shareDataResponse.error || !shareDataResponse.data) {
     return (
@@ -255,35 +264,106 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
             )}
           </Group>
 
-          {shareData.length === 0 ? (
-            <Text c="dimmed" fs="italic">
-              完了した習慣はありません
-            </Text>
-          ) : (
-            <Stack gap="md">
-              {habitSelection.map((habit, index) => {
-                const habitText = generateHabitText(habit)
-                const isHoveringCopyButton = hoveredCopyButton === habit.habitId
+          {/* Tab Navigation */}
+          <Box ref={setRootRef} pos="relative">
+            <Group
+              gap="xs"
+              style={{
+                backgroundColor:
+                  computedColorScheme === 'dark'
+                    ? 'var(--mantine-color-dark-6)'
+                    : 'var(--mantine-color-gray-0)',
+                padding: '4px',
+                borderRadius: '8px',
+              }}
+            >
+              <UnstyledButton
+                ref={setControlRef('cards')}
+                onClick={() => setActiveTab('cards')}
+                style={{
+                  flex: 1,
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  color:
+                    activeTab === 'cards'
+                      ? computedColorScheme === 'dark'
+                        ? 'var(--mantine-color-blue-4)'
+                        : 'var(--mantine-color-blue-6)'
+                      : computedColorScheme === 'dark'
+                        ? 'var(--mantine-color-gray-5)'
+                        : 'var(--mantine-color-gray-6)',
+                  fontWeight: activeTab === 'cards' ? 600 : 500,
+                  transition: 'color 0.2s ease',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                }}
+              >
+                個別習慣
+              </UnstyledButton>
+              <UnstyledButton
+                ref={setControlRef('preview')}
+                onClick={() => setActiveTab('preview')}
+                style={{
+                  flex: 1,
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  color:
+                    activeTab === 'preview'
+                      ? computedColorScheme === 'dark'
+                        ? 'var(--mantine-color-blue-4)'
+                        : 'var(--mantine-color-blue-6)'
+                      : computedColorScheme === 'dark'
+                        ? 'var(--mantine-color-gray-5)'
+                        : 'var(--mantine-color-gray-6)',
+                  fontWeight: activeTab === 'preview' ? 600 : 500,
+                  transition: 'color 0.2s ease',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                }}
+              >
+                共有プレビュー
+              </UnstyledButton>
+              <FloatingIndicator
+                target={controlsRefs[activeTab]}
+                parent={rootRef}
+                style={{
+                  backgroundColor:
+                    computedColorScheme === 'dark'
+                      ? 'rgba(34, 139, 230, 0.15)'
+                      : 'rgba(34, 139, 230, 0.1)',
+                  border:
+                    computedColorScheme === 'dark'
+                      ? '1px solid var(--mantine-color-blue-6)'
+                      : '1px solid var(--mantine-color-blue-5)',
+                  borderRadius: '6px',
+                }}
+              />
+            </Group>
+          </Box>
 
-                return (
-                  <Group key={habit.habitId} wrap="nowrap" align="center" gap="sm">
-                    <Checkbox
-                      checked={habit.selected}
-                      onChange={() => {
-                        habitSelectionHandlers.setItemProp(index, 'selected', !habit.selected)
-                      }}
-                      size="md"
-                      style={{
-                        cursor: 'pointer',
-                      }}
-                    />
+          {activeTab === 'cards' ? (
+            shareData.length === 0 ? (
+              <Text c="dimmed" fs="italic">
+                完了した習慣はありません
+              </Text>
+            ) : (
+              <Stack gap="md">
+                {habitSelection.map((habit, index) => {
+                  const habitText = generateHabitText(habit)
+                  const isHoveringCopyButton = hoveredCopyButton === habit.habitId
+
+                  return (
                     <Tooltip
-                      label={habit.selected ? 'クリックで共有から除外' : 'クリックで共有に含める'}
+                      key={habit.habitId}
+                      label={
+                        habit.selected
+                          ? 'クリックで共有プレビューから除外'
+                          : 'クリックで共有プレビューに含める'
+                      }
                       withArrow
                       position="top"
                       className="habit-card-tooltip"
                       disabled={isHoveringCopyButton}
-                      style={{ flex: 1 }}
                     >
                       <Box
                         className="habit-card-group"
@@ -293,7 +373,6 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
                           all: 'unset',
                           display: 'block',
                           position: 'relative',
-                          width: '100%',
                           background: habit.selected
                             ? computedColorScheme === 'dark'
                               ? 'linear-gradient(135deg, rgba(34, 139, 230, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%)'
@@ -390,16 +469,11 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
                         </Group>
                       </Box>
                     </Tooltip>
-                  </Group>
-                )
-              })}
-            </Stack>
-          )}
-
-          <Stack gap="md" mt="lg">
-            <Text size="md" c={titleColor} fw={600}>
-              共有テキストプレビュー
-            </Text>
+                  )
+                })}
+              </Stack>
+            )
+          ) : (
             <Box
               style={{
                 backgroundColor:
@@ -412,7 +486,7 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
                   computedColorScheme === 'dark'
                     ? '1px solid var(--mantine-color-dark-4)'
                     : '1px solid var(--mantine-color-gray-3)',
-                maxHeight: '200px',
+                maxHeight: '500px',
                 overflowY: 'auto',
                 boxShadow:
                   computedColorScheme === 'dark'
@@ -422,40 +496,42 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
             >
               <RichTextDisplay html={shareHtml} />
             </Box>
-          </Stack>
+          )}
 
-          <CopyButton value={shareText} timeout={2000}>
-            {({ copied, copy }) => (
-              <Tooltip
-                label={copied ? 'コピー済み' : 'クリップボードにコピー'}
-                withArrow
-                position="right"
-              >
-                <Button
-                  variant={copied ? 'filled' : 'gradient'}
-                  gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-                  color={copied ? 'teal' : undefined}
-                  onClick={() => {
-                    copy()
-                    handleCopySuccess()
-                  }}
-                  leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                  fullWidth
-                  styles={{
-                    root: {
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      },
-                    },
-                  }}
+          {activeTab === 'preview' && (
+            <CopyButton value={shareText} timeout={2000}>
+              {({ copied, copy }) => (
+                <Tooltip
+                  label={copied ? 'コピー済み' : 'クリップボードにコピー'}
+                  withArrow
+                  position="right"
                 >
-                  {copied ? 'コピー済み' : 'クリップボードにコピー'}
-                </Button>
-              </Tooltip>
-            )}
-          </CopyButton>
+                  <Button
+                    variant={copied ? 'filled' : 'gradient'}
+                    gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
+                    color={copied ? 'teal' : undefined}
+                    onClick={() => {
+                      copy()
+                      handleCopySuccess()
+                    }}
+                    leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                    fullWidth
+                    styles={{
+                      root: {
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                        },
+                      },
+                    }}
+                  >
+                    {copied ? 'コピー済み' : 'クリップボードにコピー'}
+                  </Button>
+                </Tooltip>
+              )}
+            </CopyButton>
+          )}
         </Stack>
       </Modal>
     </>
