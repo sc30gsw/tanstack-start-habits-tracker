@@ -1,7 +1,6 @@
 import {
   ActionIcon,
   Box,
-  Button,
   CopyButton,
   FloatingIndicator,
   Group,
@@ -531,41 +530,6 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
               </CopyButton>
               <RichTextDisplay html={shareHtml} />
             </Box>
-          )}
-
-          {activeTab === 'preview' && (
-            <CopyButton value={shareText} timeout={2000}>
-              {({ copied, copy }) => (
-                <Tooltip
-                  label={copied ? 'コピー済み' : 'クリップボードにコピー'}
-                  withArrow
-                  position="right"
-                >
-                  <Button
-                    variant={copied ? 'filled' : 'gradient'}
-                    gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-                    color={copied ? 'teal' : undefined}
-                    onClick={() => {
-                      copy()
-                      handleCopySuccess()
-                    }}
-                    leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                    fullWidth
-                    styles={{
-                      root: {
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                        },
-                      },
-                    }}
-                  >
-                    {copied ? 'コピー済み' : 'クリップボードにコピー'}
-                  </Button>
-                </Tooltip>
-              )}
-            </CopyButton>
           )}
         </Stack>
       </Modal>
