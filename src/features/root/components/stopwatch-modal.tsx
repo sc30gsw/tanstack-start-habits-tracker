@@ -13,6 +13,7 @@ import { modals } from '@mantine/modals'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, useLocation } from '@tanstack/react-router'
+import dayjs from 'dayjs'
 import type { InferSelectModel } from 'drizzle-orm'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import { GET_HABITS_CACHE_KEY } from '~/constants/cache-key'
@@ -25,6 +26,7 @@ import { FinishRecordForm } from '~/features/root/components/final-record-form'
 import { PomodoroSettingsForm } from '~/features/root/components/pomodoro-settings'
 import { PomodoroTimer } from '~/features/root/components/pomodoro-timer'
 import { StopwatchTimer } from '~/features/root/components/stopwatch-timer'
+import { stopwatchDto } from '~/features/root/server/stopwatch-functions'
 import type { PomodoroPhase, PomodoroSettings } from '~/features/root/types/stopwatch'
 import { requestNotificationPermission } from '~/features/root/utils/notifications'
 import { DEFAULT_POMODORO_SETTINGS } from '~/features/root/utils/pomodoro'
@@ -300,7 +302,7 @@ export function StopwatchModal() {
     setShouldStopAmbient(false)
   }
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     clearTimerState()
 
     setIsStateRestored(false)
@@ -338,6 +340,14 @@ export function StopwatchModal() {
     }
 
     if (currentMinutes === 0) {
+      // 既存記録の有無を確認
+      const today = dayjs().format('YYYY-MM-DD')
+
+      const existingRecordResponse = await stopwatchDto.getRecordByHabitAndDate({
+        data: { habitId: selectedHabitId!, date: today },
+      })
+      const hasExistingRecord = existingRecordResponse?.success && existingRecordResponse?.data
+
       modals.openConfirmModal({
         title: (
           <Group gap="xs">
@@ -354,6 +364,11 @@ export function StopwatchModal() {
               </Text>
               されます。
             </Text>
+            {!hasExistingRecord && (
+              <Text size="sm" c="orange" fw={600}>
+                ステータスは「スキップ」として記録されます。
+              </Text>
+            )}
             <Text size="sm" c="dimmed">
               このまま記録を続けますか？
             </Text>

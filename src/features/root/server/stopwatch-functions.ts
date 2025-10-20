@@ -14,9 +14,10 @@ const saveStopwatchRecordSchema = z.object({
   durationMinutes: z.number(),
   notes: z.string().optional(),
   date: z.string(),
+  status: z.enum(['completed', 'skipped']).optional().default('completed'),
 })
 
-export const saveStopwatchRecord = createServerFn({ method: 'POST' })
+const saveStopwatchRecord = createServerFn({ method: 'POST' })
   .inputValidator(saveStopwatchRecordSchema)
   .handler(async ({ data }) => {
     try {
@@ -53,7 +54,7 @@ export const saveStopwatchRecord = createServerFn({ method: 'POST' })
           .set({
             duration_minutes: newDuration,
             notes: newNotes,
-            status: 'completed',
+            status: data.status ?? 'completed',
             updatedAt: new Date().toISOString(),
           })
           .where(eq(records.id, existingRecord.id))
@@ -74,7 +75,7 @@ export const saveStopwatchRecord = createServerFn({ method: 'POST' })
           habitId: data.habitId,
           date: data.date,
           userId,
-          status: 'completed',
+          status: data.status ?? 'completed',
           duration_minutes: data.durationMinutes,
           notes: data.notes ?? null,
         })
