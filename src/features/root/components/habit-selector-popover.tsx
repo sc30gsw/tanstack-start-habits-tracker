@@ -65,6 +65,7 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
 
   const handleSearchChange: ComponentProps<typeof TextInput>['onChange'] = (e) => {
     const value = e.target.value
+
     setSearchValue(value)
     debouncerRef.current.call(value)
   }
@@ -100,27 +101,27 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
         clickOutsideEvents={[]}
         withinPortal={false}
       >
-      {target && (
-        <Popover.Target>
-          <div
-            style={{
-              position: 'fixed',
-              left: target.getBoundingClientRect().left,
-              top: target.getBoundingClientRect().bottom,
-              width: target.getBoundingClientRect().width,
-              height: 0,
-              pointerEvents: 'none',
-            }}
-          />
-        </Popover.Target>
-      )}
-      <Popover.Dropdown 
-        p={0} 
-        style={{ border: '1px solid var(--mantine-color-gray-3)' }}
-        onMouseDown={(e) => {
-          e.stopPropagation()
-        }}
-      >
+        {target && (
+          <Popover.Target>
+            <div
+              style={{
+                position: 'fixed',
+                left: target.getBoundingClientRect().left,
+                top: target.getBoundingClientRect().bottom,
+                width: target.getBoundingClientRect().width,
+                height: 0,
+                pointerEvents: 'none',
+              }}
+            />
+          </Popover.Target>
+        )}
+        <Popover.Dropdown
+          p={0}
+          style={{ border: '1px solid var(--mantine-color-gray-3)' }}
+          onMouseDown={(e) => {
+            e.stopPropagation()
+          }}
+        >
           <Stack gap={0}>
             <Stack
               p="md"
@@ -135,9 +136,9 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
                 <Text size="sm" fw={600} c="dark">
                   習慣詳細
                 </Text>
-                <ActionIcon 
-                  variant="subtle" 
-                  color="gray" 
+                <ActionIcon
+                  variant="subtle"
+                  color="gray"
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation()
@@ -213,18 +214,18 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
                         e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
                       }}
                       onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                      e.currentTarget.style.boxShadow = 'none'
-                    }}
-                    onClick={() => {
-                      navigate({
-                        to: '/habits/$habitId',
-                        params: { habitId: habit.id },
-                      })
-                      onClose()
-                    }}
-                  >
+                        e.currentTarget.style.backgroundColor = 'transparent'
+                        e.currentTarget.style.transform = 'translateY(0)'
+                        e.currentTarget.style.boxShadow = 'none'
+                      }}
+                      onClick={() => {
+                        navigate({
+                          to: '/habits/$habitId',
+                          params: { habitId: habit.id },
+                        })
+                        onClose()
+                      }}
+                    >
                       <Stack gap="xs">
                         <Group justify="space-between" align="flex-start" wrap="nowrap">
                           <Text size="sm" fw={600} lineClamp={1} style={{ flex: 1 }}>
@@ -246,13 +247,13 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
                         )}
                       </Stack>
                     </Paper>
-              ))}
-            </Stack>
-          )}
-        </ScrollArea>
-      </Stack>
-    </Popover.Dropdown>
-  </Popover>
-</Portal>
+                  ))}
+                </Stack>
+              )}
+            </ScrollArea>
+          </Stack>
+        </Popover.Dropdown>
+      </Popover>
+    </Portal>
   )
 }

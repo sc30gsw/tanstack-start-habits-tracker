@@ -1,4 +1,4 @@
-import { AppShell, Avatar, Button, Group, Menu, Text, Tooltip, useMediaQuery } from '@mantine/core'
+import { AppShell, Avatar, Button, Group, Menu, Text, Tooltip } from '@mantine/core'
 import {
   IconChecklist,
   IconClock,
@@ -14,7 +14,7 @@ import {
   IconUserPlus,
 } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useRef, useState } from 'react'
 import { NotificationPopover } from '~/features/notifications/components/notification-popover'
 import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
@@ -23,39 +23,27 @@ import { authClient } from '~/lib/auth-client'
 
 function HabitDetailsMenuItem() {
   const [opened, setOpened] = useState(false)
-  const [targetElement, setTargetElement] = useState<HTMLButtonElement | null>(null)
-  const isDesktop = useMediaQuery('(min-width: 768px)')
-  const wasDesktopRef = useRef(isDesktop)
-
-  useEffect(() => {
-    if (wasDesktopRef.current !== isDesktop) {
-      setOpened(false)
-      wasDesktopRef.current = isDesktop
-    }
-  }, [isDesktop])
+  const targetRef = useRef<HTMLButtonElement>(null)
 
   return (
     <>
       <Menu.Item
+        ref={targetRef}
         leftSection={<IconListDetails size={14} style={{ color: 'var(--mantine-color-cyan-6)' }} />}
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
-
-          setTargetElement(e.currentTarget)
           setOpened(true)
         }}
         closeMenuOnClick={false}
       >
         習慣詳細
       </Menu.Item>
-      {targetElement && (
-        <HabitSelectorPopover
-          opened={opened}
-          onClose={() => setOpened(false)}
-          target={targetElement}
-        />
-      )}
+      <HabitSelectorPopover
+        opened={opened}
+        onClose={() => setOpened(false)}
+        target={targetRef.current}
+      />
     </>
   )
 }
