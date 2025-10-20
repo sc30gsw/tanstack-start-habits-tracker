@@ -266,126 +266,131 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
                 const isHoveringCopyButton = hoveredCopyButton === habit.habitId
 
                 return (
-                  <Tooltip
-                    key={habit.habitId}
-                    label={habit.selected ? 'クリックで共有から除外' : 'クリックで共有に含める'}
-                    withArrow
-                    position="top"
-                    className="habit-card-tooltip"
-                    disabled={isHoveringCopyButton}
-                  >
-                    <Box
-                      className="habit-card-group"
-                      component="button"
-                      type="button"
-                      style={{
-                        all: 'unset',
-                        display: 'block',
-                        position: 'relative',
-                        background: habit.selected
-                          ? computedColorScheme === 'dark'
-                            ? 'linear-gradient(135deg, rgba(34, 139, 230, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%)'
-                            : 'linear-gradient(135deg, rgba(34, 139, 230, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%)'
-                          : computedColorScheme === 'dark'
-                            ? 'rgba(255, 255, 255, 0.05)'
-                            : 'rgba(0, 0, 0, 0.02)',
-                        borderRadius: '8px',
-                        padding: '12px 16px',
-                        border: habit.selected
-                          ? computedColorScheme === 'dark'
-                            ? '2px solid var(--mantine-color-blue-6)'
-                            : '2px solid var(--mantine-color-blue-5)'
-                          : computedColorScheme === 'dark'
-                            ? '1px solid var(--mantine-color-dark-4)'
-                            : '1px solid var(--mantine-color-gray-2)',
-                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                        opacity: habit.selected ? 1 : 0.6,
-                        transition: 'all 0.2s ease',
-                        cursor: 'pointer',
-                        overflow: 'hidden',
-                      }}
-                      onClick={() => {
+                  <Group key={habit.habitId} wrap="nowrap" align="center" gap="sm">
+                    <Checkbox
+                      checked={habit.selected}
+                      onChange={() => {
                         habitSelectionHandlers.setItemProp(index, 'selected', !habit.selected)
                       }}
+                      size="md"
+                      style={{
+                        cursor: 'pointer',
+                      }}
+                    />
+                    <Tooltip
+                      label={habit.selected ? 'クリックで共有から除外' : 'クリックで共有に含める'}
+                      withArrow
+                      position="top"
+                      className="habit-card-tooltip"
+                      disabled={isHoveringCopyButton}
+                      style={{ flex: 1 }}
                     >
-                      <Group wrap="nowrap" align="center" gap="sm" style={{ maxWidth: '100%' }}>
-                        <Checkbox
-                          checked={habit.selected}
-                          onChange={() => {
-                            habitSelectionHandlers.setItemProp(index, 'selected', !habit.selected)
-                          }}
-                          size="md"
-                          style={{
-                            cursor: 'pointer',
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-
-                        <Box style={{ flex: 1, minWidth: 0 }}>
-                          <Group justify="space-between" align="flex-start" wrap="nowrap">
-                            <Stack gap={0} style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                              <div
+                      <Box
+                        className="habit-card-group"
+                        component="button"
+                        type="button"
+                        style={{
+                          all: 'unset',
+                          display: 'block',
+                          position: 'relative',
+                          width: '100%',
+                          background: habit.selected
+                            ? computedColorScheme === 'dark'
+                              ? 'linear-gradient(135deg, rgba(34, 139, 230, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%)'
+                              : 'linear-gradient(135deg, rgba(34, 139, 230, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%)'
+                            : computedColorScheme === 'dark'
+                              ? 'rgba(255, 255, 255, 0.05)'
+                              : 'rgba(0, 0, 0, 0.02)',
+                          borderRadius: '8px',
+                          padding: '12px 16px',
+                          border: habit.selected
+                            ? computedColorScheme === 'dark'
+                              ? '2px solid var(--mantine-color-blue-6)'
+                              : '2px solid var(--mantine-color-blue-5)'
+                            : computedColorScheme === 'dark'
+                              ? '1px solid var(--mantine-color-dark-4)'
+                              : '1px solid var(--mantine-color-gray-2)',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                          opacity: habit.selected ? 1 : 0.6,
+                          transition: 'all 0.2s ease',
+                          cursor: 'pointer',
+                          maxHeight: '200px',
+                          overflow: 'auto',
+                        }}
+                        onClick={() => {
+                          habitSelectionHandlers.setItemProp(index, 'selected', !habit.selected)
+                        }}
+                      >
+                        <Group justify="space-between" align="flex-start" wrap="nowrap">
+                          <Stack
+                            gap={0}
+                            style={{
+                              flex: 1,
+                              minWidth: 0,
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontWeight: 600,
+                                fontSize: '14px',
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                              }}
+                            >
+                              <RichTextDisplay
+                                html={`<ul><li>${habit.habitName} ${formatDuration(habit.duration ?? 0)}</li></ul>`}
+                              />
+                            </div>
+                            {habit.notes && habit.notes.length > 0 && (
+                              <Box
+                                ml={16}
                                 style={{
-                                  fontWeight: 600,
-                                  fontSize: '14px',
                                   wordBreak: 'break-word',
                                   overflowWrap: 'break-word',
+                                  maxWidth: '100%',
                                 }}
                               >
-                                <RichTextDisplay
-                                  html={`<ul><li>${habit.habitName} ${formatDuration(habit.duration ?? 0)}</li></ul>`}
-                                />
-                              </div>
-                              {habit.notes && habit.notes.length > 0 && (
-                                <Box
-                                  ml={16}
+                                {habit.notes
+                                  .filter((note): note is string => note !== null && note !== '')
+                                  .map((note, noteIndex) => (
+                                    <RichTextDisplay key={noteIndex} html={note} />
+                                  ))}
+                              </Box>
+                            )}
+                          </Stack>
+
+                          <CopyButton value={habitText} timeout={2000}>
+                            {({ copied, copy }) => (
+                              <Tooltip
+                                label={copied ? 'コピーしました' : 'この習慣をコピー'}
+                                withArrow
+                                position="left"
+                              >
+                                <ActionIcon
+                                  variant="subtle"
+                                  color={copied ? 'teal' : 'gray'}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    copy()
+                                  }}
+                                  onMouseEnter={() => setHoveredCopyButton(habit.habitId)}
+                                  onMouseLeave={() => setHoveredCopyButton(null)}
+                                  className="habit-copy-button"
                                   style={{
-                                    wordBreak: 'break-word',
-                                    overflowWrap: 'break-word',
-                                    maxWidth: '100%',
+                                    opacity: 0,
+                                    transition: 'opacity 0.2s ease',
+                                    flexShrink: 0,
                                   }}
                                 >
-                                  {habit.notes
-                                    .filter((note): note is string => note !== null && note !== '')
-                                    .map((note, noteIndex) => (
-                                      <RichTextDisplay key={noteIndex} html={note} />
-                                    ))}
-                                </Box>
-                              )}
-                            </Stack>
-
-                            <CopyButton value={habitText} timeout={2000}>
-                              {({ copied, copy }) => (
-                                <Tooltip
-                                  label={copied ? 'コピーしました' : 'この習慣をコピー'}
-                                  withArrow
-                                  position="left"
-                                >
-                                  <ActionIcon
-                                    variant="subtle"
-                                    color={copied ? 'teal' : 'gray'}
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      copy()
-                                    }}
-                                    onMouseEnter={() => setHoveredCopyButton(habit.habitId)}
-                                    onMouseLeave={() => setHoveredCopyButton(null)}
-                                    className="habit-copy-button"
-                                    style={{
-                                      opacity: 0,
-                                      transition: 'opacity 0.2s ease',
-                                    }}
-                                  >
-                                    {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                                  </ActionIcon>
-                                </Tooltip>
-                              )}
-                            </CopyButton>
-                          </Group>
-                        </Box>
-                      </Group>
-                    </Box>
-                  </Tooltip>
+                                  {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                          </CopyButton>
+                        </Group>
+                      </Box>
+                    </Tooltip>
+                  </Group>
                 )
               })}
             </Stack>
