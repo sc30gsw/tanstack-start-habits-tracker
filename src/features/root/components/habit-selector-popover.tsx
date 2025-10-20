@@ -36,9 +36,15 @@ type HabitSelectorPopoverProps = {
   opened: boolean
   onClose: () => void
   target?: HTMLButtonElement | null
+  onNavigate?: () => void
 }
 
-export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorPopoverProps) {
+export function HabitSelectorPopover({
+  opened,
+  onClose,
+  target,
+  onNavigate,
+}: HabitSelectorPopoverProps) {
   const location = useLocation()
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
@@ -252,7 +258,11 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
                           to: '/habits/$habitId',
                           params: { habitId: habit.id },
                         })
-                        onClose()
+
+                        setTimeout(() => {
+                          onClose()
+                          onNavigate?.()
+                        }, 500)
                       }}
                     >
                       <Stack gap="xs">
