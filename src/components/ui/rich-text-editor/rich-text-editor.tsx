@@ -101,7 +101,7 @@ export function RichTextEditor({
       }).extend({
         addKeyboardShortcuts() {
           return {
-            'Shift-Enter': () => {
+            'Mod-Enter': () => {
               if (onSubmit) {
                 onSubmit()
                 return true
@@ -123,8 +123,8 @@ export function RichTextEditor({
               // Outdent list item (lift nested list)
               return this.editor.commands.liftListItem('listItem')
             },
-            'Shift-Enter': () => {
-              // Submit on Shift+Enter
+            'Mod-Enter': () => {
+              // Submit on Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux)
               if (onSubmit) {
                 onSubmit()
                 return true

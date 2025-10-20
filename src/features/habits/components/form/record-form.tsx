@@ -1,4 +1,4 @@
-import { Alert, Button, Group, NumberInput, Select, Stack, Text } from '@mantine/core'
+import { Alert, Button, Group, Kbd, NumberInput, Select, Stack, Text, Tooltip } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
@@ -6,6 +6,7 @@ import {
   IconAlertTriangle,
   IconCircleCheck,
   IconClipboard,
+  IconDeviceFloppy,
   IconPlayerSkipForward,
 } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
@@ -343,12 +344,36 @@ export function RecordForm({
 ・筋トレは時間がなくてスキップ
 ・明日は朝の時間を使って取り組む"
             disabled={isPending}
+            onSubmit={() => form.onSubmit((values: FormValues) => handleSubmit(values))()}
           />
         </Stack>
-        <Group gap="sm">
-          <Button type="submit" loading={isPending} disabled={isPending}>
-            {existingRecord ? '記録を更新' : '記録を保存'}
-          </Button>
+        <Group gap="sm" align="center">
+          <Tooltip
+            label={
+              <Stack gap={4} align="center">
+                <Text size="sm">Record now</Text>
+                <Group gap={4}>
+                  <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                    ⌘
+                  </Kbd>
+                  <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                    Return
+                  </Kbd>
+                </Group>
+              </Stack>
+            }
+            position="top"
+            withArrow
+          >
+            <Button
+              type="submit"
+              loading={isPending}
+              disabled={isPending}
+              leftSection={<IconDeviceFloppy size={18} />}
+            >
+              {existingRecord ? '記録を更新' : '記録を保存'}
+            </Button>
+          </Tooltip>
           <Button variant="outline" onClick={onCancel} disabled={isPending}>
             キャンセル
           </Button>

@@ -1,7 +1,8 @@
-import { Button, Group, Stack, Text } from '@mantine/core'
+import { Button, Group, Kbd, Stack, Text, Tooltip } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
+import { IconDeviceFloppy } from '@tabler/icons-react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -193,13 +194,37 @@ export function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormPr
 ・筋トレは時間がなくてスキップ
 ・明日は朝の時間を使って取り組む"
             disabled={isPending}
+            onSubmit={() => form.onSubmit(handleSubmit)()}
           />
         </Stack>
 
-        <Group gap="sm">
-          <Button type="submit" loading={isPending} disabled={isPending}>
-            記録する
-          </Button>
+        <Group gap="sm" align="center">
+          <Tooltip
+            label={
+              <Stack gap={4} align="center">
+                <Text size="sm">Record now</Text>
+                <Group gap={4}>
+                  <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                    ⌘
+                  </Kbd>
+                  <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                    Return
+                  </Kbd>
+                </Group>
+              </Stack>
+            }
+            position="top"
+            withArrow
+          >
+            <Button
+              type="submit"
+              loading={isPending}
+              disabled={isPending}
+              leftSection={<IconDeviceFloppy size={18} />}
+            >
+              記録する
+            </Button>
+          </Tooltip>
           <Button variant="outline" onClick={() => modals.closeAll()} disabled={isPending}>
             キャンセル
           </Button>
