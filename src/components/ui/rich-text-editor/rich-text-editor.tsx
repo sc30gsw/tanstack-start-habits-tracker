@@ -66,6 +66,7 @@ type RichTextEditorProps = {
   onChange: (html: string) => void
   placeholder?: string
   disabled?: boolean
+  onSubmit?: () => void
 }
 
 export function RichTextEditor({
@@ -73,6 +74,7 @@ export function RichTextEditor({
   onChange,
   placeholder = '今日の感想や具体的に何をやったかを記録...',
   disabled = false,
+  onSubmit,
 }: RichTextEditorProps) {
   const computedColorScheme = useComputedColorScheme('light')
 
@@ -96,10 +98,39 @@ export function RichTextEditor({
           keepAttributes: false,
         },
         listItem: false, // Disable default to use custom
+      }).extend({
+        addKeyboardShortcuts() {
+          return {
+            'Shift-Enter': () => {
+              if (onSubmit) {
+                onSubmit()
+                return true
+              }
+
+              return false
+            },
+          }
+        },
       }),
       ListItem.extend({
         addKeyboardShortcuts() {
           return {
+            Tab: () => {
+              // Indent list item (create nested list)
+              return this.editor.commands.sinkListItem('listItem')
+            },
+            'Shift-Tab': () => {
+              // Outdent list item (lift nested list)
+              return this.editor.commands.liftListItem('listItem')
+            },
+            'Shift-Enter': () => {
+              // Submit on Shift+Enter
+              if (onSubmit) {
+                onSubmit()
+                return true
+              }
+              return false
+            },
             Enter: () => {
               const { state } = this.editor
               const { $from } = state.selection

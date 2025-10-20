@@ -25,17 +25,13 @@
   margin: 0;
 }
 
-/* Hide trailing break paragraphs in read-only mode */
-.ProseMirror[contenteditable="false"] > p:last-child:has(br.ProseMirror-trailingBreak) {
+/* Hide only the trailing break itself in read-only mode, not the content */
+.ProseMirror[contenteditable="false"] > p:last-child > br.ProseMirror-trailingBreak:only-child {
   display: none;
 }
 
-.ProseMirror[contenteditable="false"] li > p:last-child:has(br.ProseMirror-trailingBreak) {
-  display: none;
-}
-
-.ProseMirror[contenteditable="false"] ul > p:has(br.ProseMirror-trailingBreak),
-.ProseMirror[contenteditable="false"] ol > p:has(br.ProseMirror-trailingBreak) {
+/* For list items, only hide the trailing br, not the paragraph itself */
+.ProseMirror[contenteditable="false"] li > p > br.ProseMirror-trailingBreak:only-child {
   display: none;
 }
 
@@ -71,6 +67,36 @@
 
 .ProseMirror ol {
   list-style-type: decimal;
+}
+
+/* Nested list styles - like Slack */
+.ProseMirror ul ul {
+  list-style-type: circle;
+  margin: 0.2em 0;
+}
+
+.ProseMirror ul ul ul {
+  list-style-type: square;
+}
+
+.ProseMirror ol ol {
+  list-style-type: lower-alpha;
+  margin: 0.2em 0;
+}
+
+.ProseMirror ol ol ol {
+  list-style-type: lower-roman;
+}
+
+/* Mixed nested lists */
+.ProseMirror ul ol {
+  list-style-type: lower-alpha;
+  margin: 0.2em 0;
+}
+
+.ProseMirror ol ul {
+  list-style-type: circle;
+  margin: 0.2em 0;
 }
 
 .ProseMirror li {
