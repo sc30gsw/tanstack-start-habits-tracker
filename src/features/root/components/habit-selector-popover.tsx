@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Badge,
+  Box,
   Group,
   Paper,
   Popover,
@@ -12,7 +13,7 @@ import {
   TextInput,
 } from '@mantine/core'
 import { IconListDetails, IconSearch, IconX } from '@tabler/icons-react'
-import { getRouteApi } from '@tanstack/react-router'
+import { getRouteApi, useLocation } from '@tanstack/react-router'
 import { type ComponentProps, useRef, useState } from 'react'
 import { funnel } from 'remeda'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
@@ -34,10 +35,11 @@ const PRIORITY_LABEL = {
 type HabitSelectorPopoverProps = {
   opened: boolean
   onClose: () => void
-  target?: HTMLElement | null
+  target?: HTMLButtonElement | null
 }
 
 export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorPopoverProps) {
+  const location = useLocation()
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
   const { habits } = routeApi.useLoaderData()
@@ -51,6 +53,7 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
     funnel(
       (value: string) => {
         navigate({
+          to: location.pathname,
           search: (prev) => ({ ...prev, habitSelectorQuery: value }),
         })
       },
@@ -97,13 +100,16 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
         withArrow
         arrowSize={12}
         closeOnClickOutside={false}
+        closeOnEscape={false}
         transitionProps={{ transition: 'pop', duration: 200 }}
         clickOutsideEvents={[]}
         withinPortal={false}
+        trapFocus={false}
+        returnFocus={false}
       >
         {target && (
           <Popover.Target>
-            <div
+            <Box
               style={{
                 position: 'fixed',
                 left: target.getBoundingClientRect().left,
@@ -119,6 +125,9 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
           p={0}
           style={{ border: '1px solid var(--mantine-color-gray-3)' }}
           onMouseDown={(e) => {
+            e.stopPropagation()
+          }}
+          onClick={(e) => {
             e.stopPropagation()
           }}
         >
@@ -154,6 +163,10 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
                 value={searchValue}
                 onChange={handleSearchChange}
                 size="xs"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                onFocus={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
               />
               <Select
                 label="優先度で絞り込み"
@@ -161,6 +174,7 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
                 value={search.habitSelectorFilter || 'all'}
                 onChange={(value) =>
                   navigate({
+                    to: location.pathname,
                     search: (prev) => ({
                       ...prev,
                       habitSelectorFilter: value as SearchParams['habitSelectorFilter'],
@@ -175,6 +189,9 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
                 ]}
                 size="xs"
                 clearable={false}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                onFocus={(e) => e.stopPropagation()}
               />
             </Stack>
 
