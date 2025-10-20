@@ -3,16 +3,22 @@
   padding: 12px;
   min-height: 100px;
   outline: none;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Display-only styles (for RichTextDisplay component) */
 .ProseMirror[contenteditable="false"] {
   padding: 0;
   min-height: auto;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ProseMirror[contenteditable="false"] p {
   margin: 0.1em 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ProseMirror[contenteditable="false"] ul,
@@ -23,6 +29,8 @@
 
 .ProseMirror[contenteditable="false"] li {
   margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Hide only the trailing break itself in read-only mode, not the content */
@@ -46,6 +54,8 @@
 .ProseMirror p {
   margin: 0;
   line-height: 1.46668;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ProseMirror p:first-child {
@@ -60,6 +70,8 @@
 .ProseMirror ol {
   padding-left: 1.5rem;
   margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ProseMirror ul {
@@ -104,10 +116,14 @@
   margin: 0;
   display: list-item;
   line-height: 1.46668;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ProseMirror li > p {
   margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Code and Code Block Styles */
