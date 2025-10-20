@@ -82,15 +82,21 @@ export function HabitSelectorPopover({ opened, onClose, target }: HabitSelectorP
   const filterValue = search.habitSelectorFilter || 'all'
 
   const filteredByPriority = filteredHabits.filter((habit) => {
-    if (filterValue === 'all') {
-      return true
-    }
+    switch (filterValue) {
+      case 'all':
+        return true
 
-    if (filterValue === 'null') {
-      return habit.priority === null
-    }
+      case 'null':
+        return habit.priority === null
 
-    return habit.priority === filterValue
+      case 'high':
+      case 'middle':
+      case 'low':
+        return habit.priority === filterValue
+
+      default:
+        return true
+    }
   })
 
   return (
