@@ -8,7 +8,15 @@ import {
   Text,
   useComputedColorScheme,
 } from '@mantine/core'
-import { IconCalendarEvent, IconCheck, IconEdit, IconPlus, IconX } from '@tabler/icons-react'
+import {
+  IconCalendarEvent,
+  IconCircleCheck,
+  IconClipboard,
+  IconEdit,
+  IconPlayerSkipForward,
+  IconPlus,
+  IconX,
+} from '@tabler/icons-react'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { RichTextDisplay } from '~/components/ui/rich-text-editor/rich-text-display'
@@ -134,9 +142,11 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                 }
                 leftSection={
                   selectedDateRecord.status === 'completed' ? (
-                    <IconCheck size={14} />
+                    <IconCircleCheck size={14} />
+                  ) : selectedDateRecord.status === 'skipped' ? (
+                    <IconPlayerSkipForward size={14} />
                   ) : (
-                    <IconX size={14} />
+                    <IconClipboard size={14} />
                   )
                 }
               >

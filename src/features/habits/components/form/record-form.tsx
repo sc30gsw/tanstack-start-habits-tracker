@@ -103,13 +103,27 @@ export function RecordForm({
 
   const statusOptions = useMemo(() => {
     if (isFutureDate) {
-      return [{ value: 'active', label: '予定中' }]
+      return [
+        {
+          value: 'active',
+          label: '予定中',
+        },
+      ]
     }
 
     return [
-      { value: 'active', label: '予定中' },
-      { value: 'completed', label: '完了' },
-      { value: 'skipped', label: 'スキップ' },
+      {
+        value: 'active',
+        label: '予定中',
+      },
+      {
+        value: 'completed',
+        label: '完了',
+      },
+      {
+        value: 'skipped',
+        label: 'スキップ',
+      },
     ]
   }, [isFutureDate])
 
@@ -293,13 +307,25 @@ export function RecordForm({
           description={isFutureDate ? '未来の日付は予定中のみ選択可能です' : undefined}
           leftSection={
             form.values.status === 'completed' ? (
-              <IconCircleCheck size={16} />
+              <IconCircleCheck size={16} color="var(--mantine-color-green-6)" />
             ) : form.values.status === 'skipped' ? (
-              <IconPlayerSkipForward size={16} />
+              <IconPlayerSkipForward size={16} color="var(--mantine-color-orange-6)" />
             ) : (
-              <IconClipboard size={16} />
+              <IconClipboard size={16} color="var(--mantine-color-blue-6)" />
             )
           }
+          renderOption={({ option }) => (
+            <Group gap="xs">
+              {option.value === 'completed' ? (
+                <IconCircleCheck size={16} color="var(--mantine-color-green-6)" />
+              ) : option.value === 'skipped' ? (
+                <IconPlayerSkipForward size={16} color="var(--mantine-color-orange-6)" />
+              ) : (
+                <IconClipboard size={16} color="var(--mantine-color-blue-6)" />
+              )}
+              <Text>{option.label}</Text>
+            </Group>
+          )}
         />
         <Group gap="md">
           <NumberInput
