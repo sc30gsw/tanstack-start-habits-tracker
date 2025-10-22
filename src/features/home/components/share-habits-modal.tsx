@@ -34,6 +34,9 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
 
   const { shareData: shareDataResponse } = routeApi.useLoaderData()
 
+  const today = dayjs().format('YYYY-MM-DD')
+  const selectedDate = searchParams.selectedDate ?? today
+
   const initialHabitSelection = (shareDataResponse.data || []).map((habit) => ({
     ...habit,
     selected: true,
@@ -78,7 +81,6 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
     )
   }
 
-  const today = dayjs().format('YYYY-MM-DD')
   const shareData = shareDataResponse.data
 
   const selectedHabits = habitSelection.filter((h) => h.selected)
@@ -257,7 +259,7 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
         <Stack gap="lg">
           <Group justify="space-between" align="center">
             <Text size="lg" c={titleColor} fw={600}>
-              {dayjs(today).format('YYYY年MM月DD日')}の完了した習慣
+              {dayjs(selectedDate).format('YYYY年MM月DD日')}の完了した習慣
             </Text>
             {shareData.length > 0 && (
               <Text size="md" c="blue.6" fw={600}>
