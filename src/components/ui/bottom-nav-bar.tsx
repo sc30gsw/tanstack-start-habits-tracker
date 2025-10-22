@@ -1,15 +1,17 @@
 import { ActionIcon, Text } from '@mantine/core'
-import { IconChecklist, IconClock, IconHome, IconList, IconListDetails } from '@tabler/icons-react'
+import { IconClock, IconHome, IconList, IconListDetails } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import LiquidGlass from 'liquid-glass-react'
 import { useRef, useState } from 'react'
 import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { authClient } from '~/lib/auth-client'
+import type { FileRouteTypes } from '~/routeTree.gen'
 
 export function BottomNavBar() {
   const routeApi = getRouteApi('__root__')
   const navigate = routeApi.useNavigate()
   const location = useLocation()
+  const search = routeApi.useSearch()
   const [opened, setOpened] = useState(false)
   const targetRef = useRef<HTMLButtonElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -20,195 +22,191 @@ export function BottomNavBar() {
     return null
   }
 
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: FileRouteTypes['fullPaths'] | 'details' | 'record') => {
+    switch (path) {
+      case 'details': {
+        return location.pathname.startsWith('/habits/')
+      }
+
+      case 'record': {
+        return search?.stopwatchOpen === true
+      }
+
+      default: {
+        return location.pathname === path
+      }
+    }
+  }
+
+  const inactiveColor = 'light-dark(rgba(60, 60, 67, 0.65), rgba(235, 235, 245, 0.65))'
 
   return (
     <div
       ref={containerRef}
-      className="fixed right-0 bottom-0 left-0 z-50 flex items-center justify-center"
+      className="fixed right-0 bottom-0 left-80 z-50 flex items-center justify-center"
       style={{
         padding: '8px 16px max(env(safe-area-inset-bottom), 8px)',
       }}
     >
-      <div className="flex w-full max-w-[600px] items-center justify-around gap-3">
-        {/* ホーム */}
+      <div className="flex w-full items-center justify-center">
         <LiquidGlass
-          displacementScale={20}
-          blurAmount={0.2}
+          displacementScale={25}
+          blurAmount={0.3}
           saturation={100}
-          elasticity={0.15}
-          cornerRadius={16}
+          elasticity={0.2}
+          cornerRadius={50}
           mode="standard"
-          padding="10px 12px"
+          padding="12px 20px"
           mouseContainer={containerRef}
+          style={{
+            backgroundColor: 'light-dark(rgba(255, 255, 255, 0.85), rgba(28, 28, 30, 0.85))',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          }}
         >
-          <div
-            style={{
-              minWidth: '52px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <ActionIcon component={Link} to="/" variant="transparent" size="sm">
-              <IconHome
-                size={20}
-                stroke={1.5}
-                style={{ color: isActive('/') ? 'var(--mantine-color-blue-6)' : 'inherit' }}
-              />
-            </ActionIcon>
-            <Text size="10px" fw={isActive('/') ? 600 : 400}>
-              ホーム
-            </Text>
-          </div>
-        </LiquidGlass>
-
-        {/* 習慣一覧 */}
-        <LiquidGlass
-          displacementScale={20}
-          blurAmount={0.2}
-          saturation={100}
-          elasticity={0.15}
-          cornerRadius={16}
-          mode="standard"
-          padding="10px 12px"
-          mouseContainer={containerRef}
-        >
-          <div
-            style={{
-              minWidth: '52px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <ActionIcon
-              component={Link}
-              to="/habits"
-              search={{ habitFilter: 'all', habitSort: 'all' } as any}
-              variant="transparent"
-              size="sm"
-            >
-              <IconList
-                size={20}
-                stroke={1.5}
-                style={{ color: isActive('/habits') ? 'var(--mantine-color-blue-6)' : 'inherit' }}
-              />
-            </ActionIcon>
-            <Text size="10px" fw={isActive('/habits') ? 600 : 400}>
-              習慣
-            </Text>
-          </div>
-        </LiquidGlass>
-
-        {/* 習慣を記録 */}
-        <LiquidGlass
-          displacementScale={20}
-          blurAmount={0.2}
-          saturation={100}
-          elasticity={0.15}
-          cornerRadius={16}
-          mode="standard"
-          padding="10px 12px"
-          mouseContainer={containerRef}
-        >
-          <div
-            style={{
-              minWidth: '52px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <ActionIcon
-              variant="transparent"
-              size="sm"
-              onClick={() => {
-                navigate({
-                  to: location.pathname,
-                  search: (prev) => ({
-                    ...prev,
-                    stopwatchOpen: true,
-                  }),
-                })
+          <div className="flex items-center justify-center gap-6">
+            {/* ホーム */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                minWidth: '60px',
               }}
             >
-              <IconClock size={20} stroke={1.5} />
-            </ActionIcon>
-            <Text size="10px" fw={400}>
-              記録
-            </Text>
-          </div>
-        </LiquidGlass>
+              <ActionIcon component={Link} to="/" variant="transparent" size="lg">
+                <IconHome
+                  size={24}
+                  stroke={2}
+                  style={{
+                    color: isActive('/') ? 'var(--mantine-color-blue-6)' : inactiveColor,
+                  }}
+                />
+              </ActionIcon>
+              <Text
+                size="11px"
+                fw={isActive('/') ? 700 : 500}
+                style={{
+                  color: isActive('/') ? 'var(--mantine-color-blue-6)' : inactiveColor,
+                }}
+              >
+                ホーム
+              </Text>
+            </div>
 
-        {/* 習慣詳細 */}
-        <LiquidGlass
-          displacementScale={20}
-          blurAmount={0.2}
-          saturation={100}
-          elasticity={0.15}
-          cornerRadius={16}
-          mode="standard"
-          padding="10px 12px"
-          mouseContainer={containerRef}
-        >
-          <div
-            style={{
-              minWidth: '52px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <ActionIcon ref={targetRef} variant="transparent" size="sm" onClick={() => setOpened(true)}>
-              <IconListDetails size={20} stroke={1.5} />
-            </ActionIcon>
-            <Text size="10px" fw={400}>
-              詳細
-            </Text>
-          </div>
-        </LiquidGlass>
-
-        {/* すべて */}
-        <LiquidGlass
-          displacementScale={20}
-          blurAmount={0.2}
-          saturation={100}
-          elasticity={0.15}
-          cornerRadius={16}
-          mode="standard"
-          padding="10px 12px"
-          mouseContainer={containerRef}
-        >
-          <div
-            style={{
-              minWidth: '52px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            <ActionIcon
-              component={Link}
-              to="/habits"
-              search={{ habitFilter: 'all', habitSort: 'all' } as any}
-              variant="transparent"
-              size="sm"
+            {/* 習慣一覧 */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                minWidth: '60px',
+              }}
             >
-              <IconChecklist
-                size={20}
-                stroke={1.5}
-                style={{ color: isActive('/habits') ? 'var(--mantine-color-blue-6)' : 'inherit' }}
-              />
-            </ActionIcon>
-            <Text size="10px" fw={isActive('/habits') ? 600 : 400}>
-              すべて
-            </Text>
+              <ActionIcon
+                component={Link}
+                to="/habits"
+                search={{ habitFilter: 'all', habitSort: 'all' } as any}
+                variant="transparent"
+                size="lg"
+              >
+                <IconList
+                  size={24}
+                  stroke={2}
+                  style={{
+                    color: isActive('/habits') ? 'var(--mantine-color-blue-6)' : inactiveColor,
+                  }}
+                />
+              </ActionIcon>
+              <Text
+                size="11px"
+                fw={isActive('/habits') ? 700 : 500}
+                style={{
+                  color: isActive('/habits') ? 'var(--mantine-color-blue-6)' : inactiveColor,
+                }}
+              >
+                習慣
+              </Text>
+            </div>
+
+            {/* 習慣詳細 */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                minWidth: '60px',
+              }}
+            >
+              <ActionIcon
+                ref={targetRef}
+                variant="transparent"
+                size="lg"
+                onClick={() => setOpened(true)}
+              >
+                <IconListDetails
+                  size={24}
+                  stroke={2}
+                  style={{
+                    color: isActive('details') ? 'var(--mantine-color-blue-6)' : inactiveColor,
+                  }}
+                />
+              </ActionIcon>
+              <Text
+                size="11px"
+                fw={isActive('details') ? 700 : 500}
+                style={{
+                  color: isActive('details') ? 'var(--mantine-color-blue-6)' : inactiveColor,
+                }}
+              >
+                詳細
+              </Text>
+            </div>
+
+            {/* 習慣を記録 */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px',
+                minWidth: '60px',
+              }}
+            >
+              <ActionIcon
+                variant="transparent"
+                size="lg"
+                onClick={() => {
+                  navigate({
+                    to: location.pathname,
+                    search: (prev) => ({
+                      ...prev,
+                      stopwatchOpen: true,
+                    }),
+                  })
+                }}
+              >
+                <IconClock
+                  size={24}
+                  stroke={2}
+                  style={{
+                    color: isActive('record') ? 'var(--mantine-color-blue-6)' : inactiveColor,
+                  }}
+                />
+              </ActionIcon>
+              <Text
+                size="11px"
+                fw={isActive('record') ? 700 : 500}
+                style={{
+                  color: isActive('record') ? 'var(--mantine-color-blue-6)' : inactiveColor,
+                }}
+              >
+                記録
+              </Text>
+            </div>
           </div>
         </LiquidGlass>
       </div>
