@@ -45,10 +45,10 @@ export function ThemeForm() {
   const handleThemeChange = useCallback(
     (theme: ThemeFormValues['theme']) => {
       startThemeTransition(async () => {
-        let actualTheme: 'light' | 'dark' | 'auto' = theme
+        let actualTheme: ThemeFormValues['theme'] = theme
 
         if (theme === 'auto') {
-          const savedDisplay = localStorage.getItem('theme-display') as 'light' | 'dark' | null
+          const savedDisplay = localStorage.getItem('theme-display')
 
           if (savedDisplay === 'light' || savedDisplay === 'dark') {
             actualTheme = savedDisplay
@@ -57,21 +57,26 @@ export function ThemeForm() {
             localStorage.setItem('theme-display', systemTheme)
             actualTheme = systemTheme
           }
-        } else {
-          localStorage.setItem('theme-display', theme)
+
+          setColorScheme(actualTheme)
+
+          return
         }
+
+        localStorage.setItem('theme-display', theme)
 
         const origin = lastClickedRef.current
 
         if (!origin || !document.startViewTransition) {
-          setColorScheme(actualTheme)
+          setColorScheme(theme)
+
           return
         }
 
         try {
           await document.startViewTransition(() => {
             flushSync(() => {
-              setColorScheme(actualTheme)
+              setColorScheme(theme)
             })
           }).ready
 
@@ -98,7 +103,7 @@ export function ThemeForm() {
         }
       })
     },
-    [computedColorScheme, setColorScheme],
+    [computedColorScheme],
   )
 
   const handleSubmit = form.onSubmit(async (values) => {
