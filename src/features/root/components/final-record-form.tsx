@@ -82,11 +82,7 @@ export function FinishRecordForm({ elapsedSeconds, habitId }: FinishRecordFormPr
           data: {
             habitId,
             durationMinutes,
-            status: existingRecord
-              ? 'completed'
-              : durationMinutes === 0
-                ? 'skipped'
-                : 'completed',
+            status: existingRecord ? 'completed' : durationMinutes === 0 ? 'skipped' : 'completed',
             notes: values.notes !== undefined ? values.notes.trim() : undefined,
             date: today,
           },
