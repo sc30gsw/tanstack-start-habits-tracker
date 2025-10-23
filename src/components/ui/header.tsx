@@ -1,113 +1,20 @@
-import { AppShell, Avatar, Button, Group, Menu, Text, Tooltip } from '@mantine/core'
+import { AppShell, Avatar, Button, Group, Menu, Text } from '@mantine/core'
 import {
-  IconChecklist,
-  IconClock,
   IconCreditCard,
   IconHeadphones,
   IconHome,
-  IconList,
-  IconListDetails,
   IconLogin,
   IconLogout,
   IconRocket,
   IconSettings,
   IconUserPlus,
 } from '@tabler/icons-react'
-import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
-import { memo, Suspense, useRef, useState } from 'react'
+import { getRouteApi, Link } from '@tanstack/react-router'
+import { Suspense } from 'react'
 import { NotificationPopover } from '~/features/notifications/components/notification-popover'
-import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { StopwatchModal } from '~/features/root/components/stopwatch-modal'
 import { ThemeToggle } from '~/features/theme/components/theme-toggle'
 import { authClient } from '~/lib/auth-client'
-
-function HabitDetailsMenuItem({ onCloseMenu }: Record<'onCloseMenu', () => void>) {
-  const [opened, setOpened] = useState(false)
-  const targetRef = useRef<HTMLButtonElement>(null)
-
-  return (
-    <>
-      <Menu.Item
-        ref={targetRef}
-        leftSection={<IconListDetails size={14} style={{ color: 'var(--mantine-color-cyan-6)' }} />}
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          setOpened(true)
-        }}
-        closeMenuOnClick={false}
-      >
-        習慣詳細
-      </Menu.Item>
-      <HabitSelectorPopover
-        opened={opened}
-        onClose={() => setOpened(false)}
-        target={targetRef.current}
-        onNavigate={() => {
-          setOpened(false)
-          onCloseMenu()
-        }}
-      />
-    </>
-  )
-}
-
-const HabitsMenu = memo(function HabitsMenu({ variant }: { variant: 'desktop' | 'mobile' }) {
-  const routeApi = getRouteApi('__root__')
-  const navigate = routeApi.useNavigate()
-  const location = useLocation()
-
-  const [opened, setOpened] = useState(false)
-
-  return (
-    <Menu shadow="md" width={220} opened={opened} onChange={setOpened}>
-      <Menu.Target>
-        {variant === 'desktop' ? (
-          <Button variant="subtle" size="sm" leftSection={<IconChecklist size={16} />}>
-            習慣管理
-          </Button>
-        ) : (
-          <Tooltip label="習慣管理" withArrow>
-            <Button variant="light" size="xs" color="blue">
-              <IconChecklist size={16} />
-            </Button>
-          </Tooltip>
-        )}
-      </Menu.Target>
-      <Menu.Dropdown>
-        <Menu.Label c="dimmed">習慣機能</Menu.Label>
-        <Menu.Item
-          leftSection={<IconList size={14} style={{ color: 'var(--mantine-color-blue-6)' }} />}
-          component={Link}
-          to="/habits"
-          search={
-            {
-              habitFilter: 'all',
-              habitSort: 'all',
-            } as any
-          }
-        >
-          習慣一覧
-        </Menu.Item>
-        <HabitDetailsMenuItem onCloseMenu={() => setOpened(false)} />
-        <Menu.Item
-          leftSection={<IconClock size={14} style={{ color: 'var(--mantine-color-green-6)' }} />}
-          onClick={() => {
-            navigate({
-              to: location.pathname,
-              search: (prev) => ({
-                ...prev,
-                stopwatchOpen: true,
-              }),
-            })
-          }}
-        >
-          習慣を記録
-        </Menu.Item>
-      </Menu.Dropdown>
-    </Menu>
-  )
-})
 
 export function Header() {
   const routeApi = getRouteApi('__root__')
@@ -136,9 +43,6 @@ export function Header() {
                 >
                   ホーム
                 </Button>
-
-                <HabitsMenu variant="desktop" />
-
                 <Button
                   component={Link}
                   to="/focus"
@@ -242,9 +146,6 @@ export function Header() {
           <Group hiddenFrom="sm">
             {session && (
               <>
-                {/* モバイル用習慣メニュー */}
-                <HabitsMenu variant="mobile" />
-
                 <NotificationPopover />
                 <ThemeToggle />
                 <Menu shadow="md" width={200}>
