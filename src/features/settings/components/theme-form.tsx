@@ -7,9 +7,7 @@ import { useEffect, useTransition } from 'react'
 import { GET_USER_SETTINGS_CACHE_KEY } from '~/constants/cache-key'
 import { settingsDto } from '~/features/settings/server/settings-functions'
 
-type ThemeFormValues = {
-  theme: 'light' | 'dark' | 'auto'
-}
+type ThemeFormValues = Record<'theme', 'light' | 'dark' | 'auto'>
 
 export function ThemeForm() {
   const [isPending, startTransition] = useTransition()
@@ -27,7 +25,6 @@ export function ThemeForm() {
     },
   })
 
-  // リアルタイムでテーマを反映
   useEffect(() => {
     setColorScheme(form.values.theme)
   }, [form.values.theme, setColorScheme])
