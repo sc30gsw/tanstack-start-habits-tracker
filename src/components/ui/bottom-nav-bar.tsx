@@ -38,8 +38,7 @@ export function BottomNavBar() {
     }
   }
 
-  // 透明なガラス効果 - 背景色に依存
-  const inactiveColor = 'light-dark(rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.6))'
+  const inactiveColor = 'rgba(60, 60, 67, 0.6)'
 
   return (
     <div
@@ -51,28 +50,27 @@ export function BottomNavBar() {
     >
       <div className="flex w-full items-center justify-center">
         <LiquidGlass
-          displacementScale={25}
-          blurAmount={0.35}
-          saturation={100}
-          elasticity={0.2}
-          cornerRadius={50}
-          mode="standard"
+          displacementScale={64}
+          blurAmount={0.1}
+          saturation={130}
+          aberrationIntensity={2}
+          elasticity={0.35}
+          cornerRadius={100}
+          mode="prominent"
+          overLight={false}
           padding="12px 20px"
           mouseContainer={containerRef}
           style={{
-            backgroundColor: 'light-dark(rgba(255, 255, 255, 0.25), rgba(30, 30, 30, 0.3))',
-            backdropFilter: 'blur(50px) saturate(180%) brightness(1.1)',
-            WebkitBackdropFilter: 'blur(50px) saturate(180%) brightness(1.1)',
-            boxShadow:
-              'light-dark(0px 8px 32px rgba(0, 0, 0, 0.12), 0px 8px 32px rgba(0, 0, 0, 0.7))',
-            border:
-              'light-dark(1px solid rgba(255, 255, 255, 0.3), 1px solid rgba(255, 255, 255, 0.15))',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            boxShadow: '0px 8px 32px rgba(0, 0, 0, 0.12)',
+            border: '0.5px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '50px',
           }}
         >
           <div className="flex items-center justify-center gap-6">
             {/* ホーム */}
             <div className="flex min-w-15 flex-col items-center gap-1">
-              <ActionIcon component={Link} to="/" variant="transparent" size="lg">
+              <ActionIcon component={Link} to="/" variant="transparent" size="lg" radius="xl">
                 <IconHome
                   size={24}
                   stroke={2}
@@ -100,6 +98,7 @@ export function BottomNavBar() {
                 search={{ habitFilter: 'all', habitSort: 'all' } as any}
                 variant="transparent"
                 size="lg"
+                radius="xl"
               >
                 <IconList
                   size={24}
@@ -126,6 +125,7 @@ export function BottomNavBar() {
                 ref={targetRef}
                 variant="transparent"
                 size="lg"
+                radius="xl"
                 onClick={() => setOpened(true)}
               >
                 <IconListDetails
@@ -152,6 +152,7 @@ export function BottomNavBar() {
               <ActionIcon
                 variant="transparent"
                 size="lg"
+                radius="xl"
                 onClick={() => {
                   navigate({
                     to: location.pathname,
