@@ -10,6 +10,7 @@ import { ModalsProvider } from '@mantine/modals'
 import { Notifications } from '@mantine/notifications'
 import { ClientOnly } from '~/components/client-only'
 import { QueryProvider } from '~/components/providers/query-provider'
+import { BottomNavBar } from '~/components/ui/bottom-nav-bar'
 import { Header } from '~/components/ui/header'
 import { Loader } from '~/components/ui/loader'
 import { getCurrentUser, getCurrentUserPasskey } from '~/features/auth/server/server-functions'
@@ -95,11 +96,12 @@ export const Route = createRootRoute({
 
 function AuthenticatedLayout() {
   return (
-    <AppShell header={{ height: 60 }} padding="md">
+    <AppShell header={{ height: 60 }} footer={{ height: 90 }} padding="md">
       <Header />
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+      <BottomNavBar />
     </AppShell>
   )
 }
@@ -111,6 +113,7 @@ function UnauthenticatedLayout() {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+      <BottomNavBar />
     </AppShell>
   )
 }
