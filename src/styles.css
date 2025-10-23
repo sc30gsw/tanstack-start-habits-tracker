@@ -55,3 +55,10 @@ code {
     var(--mantine-color-blue-7)
   );
 }
+
+/* View Transition Styles for Theme Toggle */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
