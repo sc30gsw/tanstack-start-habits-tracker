@@ -25,7 +25,6 @@ import { DailyHabitList } from '~/features/home/components/daily-habit-list'
 import { HomeCalendarView } from '~/features/home/components/home-calendar-view'
 import { HomeHeatmapView } from '~/features/home/components/home-heatmap-view'
 import { ShareHabitsModal } from '~/features/home/components/share-habits-modal'
-import { shareDto } from '~/features/home/server/share-functions'
 import { CTASection } from '~/features/landing/components/cta-section'
 import { FeaturesSection } from '~/features/landing/components/features-section'
 import { HeroSection } from '~/features/landing/components/hero-section'
@@ -61,18 +60,13 @@ export const Route = createFileRoute('/')({
         isAuthenticated: false,
         habits: { success: false, data: [] },
         records: { success: false, data: [] },
-        shareData: { success: false, data: [], error: 'Something wen wrong' },
       }
     }
-
-    // If authenticated, load full dashboard data
-    const today = dayjs().format('YYYY-MM-DD')
-    const selectedDate = context.search.selectedDate ?? today
 
     // ヒートマップ(今日から1年分) + カレンダーグリッド(42日分)の範囲を取得
     const { dateFrom, dateTo } = getDataFetchDateRange(context.search.currentMonth)
 
-    const [habitsResult, recordsResult, shareDataResult] = await Promise.all([
+    const [habitsResult, recordsResult] = await Promise.all([
       habitDto.getHabits({
         data: {
           q: '',
@@ -86,14 +80,12 @@ export const Route = createFileRoute('/')({
           date_to: dateTo,
         },
       }),
-      shareDto.getCompletedHabitsForShare({ data: { date: selectedDate } }),
     ])
 
     return {
       isAuthenticated: true,
       habits: habitsResult,
       records: recordsResult,
-      shareData: shareDataResult,
     }
   },
 })

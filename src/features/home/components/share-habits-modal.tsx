@@ -14,13 +14,16 @@ import {
 import { useListState } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import { IconCheck, IconCopy, IconShare } from '@tabler/icons-react'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import type { InferSelectModel } from 'drizzle-orm'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { filter, join, map, pipe } from 'remeda'
 import { RichTextDisplay } from '~/components/ui/rich-text-editor/rich-text-display'
+import { GET_COMPLETED_HABITS_FOR_SHARE_CACHE_KEY } from '~/constants/cache-key'
 import type { habits } from '~/db/schema'
+import { shareDto } from '~/features/home/server/share-functions'
 import { htmlToShareText } from '~/utils/html-helpers'
 
 export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
@@ -32,12 +35,16 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
-  const { shareData: shareDataResponse } = routeApi.useLoaderData()
-
   const today = dayjs().format('YYYY-MM-DD')
   const selectedDate = searchParams.selectedDate ?? today
 
-  const initialHabitSelection = (shareDataResponse.data || []).map((habit) => ({
+  const { data: shareDataResponse, isLoading } = useQuery({
+    queryKey: [GET_COMPLETED_HABITS_FOR_SHARE_CACHE_KEY, selectedDate],
+    queryFn: () => shareDto.getCompletedHabitsForShare({ data: { date: selectedDate } }),
+    enabled: open ?? false,
+  })
+
+  const initialHabitSelection = (shareDataResponse?.data || []).map((habit) => ({
     ...habit,
     selected: true,
   }))
@@ -55,7 +62,18 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
     setControlsRefs(controlsRefs)
   }
 
-  if (shareDataResponse.error || !shareDataResponse.data) {
+  useEffect(() => {
+    if (shareDataResponse?.data) {
+      habitSelectionHandlers.setState(
+        shareDataResponse.data.map((habit) => ({
+          ...habit,
+          selected: true,
+        })),
+      )
+    }
+  }, [shareDataResponse?.data])
+
+  if (isLoading) {
     return (
       <Modal
         opened={open ?? false}
@@ -76,7 +94,33 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
         }
         size="lg"
       >
-        <Text c="red">データの取得中にエラーが発生しました: {shareDataResponse.error}</Text>
+        <Text c="dimmed">データを読み込んでいます...</Text>
+      </Modal>
+    )
+  }
+
+  if (shareDataResponse?.error || !shareDataResponse?.data) {
+    return (
+      <Modal
+        opened={open ?? false}
+        onClose={() => {
+          navigate({
+            search: (prev) => ({
+              ...prev,
+              open: false,
+            }),
+            hash: copyId,
+          })
+        }}
+        title={
+          <Text size="lg" fw={600} c={titleColor}>
+            <IconShare size={20} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+            習慣を共有
+          </Text>
+        }
+        size="lg"
+      >
+        <Text c="red">データの取得中にエラーが発生しました: {shareDataResponse?.error}</Text>
       </Modal>
     )
   }
@@ -244,6 +288,7 @@ export function ShareHabitsModal({ copyId }: Record<'copyId', string>) {
               ...prev,
               open: false,
             }),
+            hash: copyId,
           })
         }}
         title={

@@ -7,3 +7,5 @@ export const GET_UNREAD_NOTIFICATIONS_COUNT_CACHE_KEY = 'getUnreadNotificationsC
 
 export const GET_USER_SETTINGS_CACHE_KEY = 'getUserSettings'
 export const GET_USER_PROFILE_CACHE_KEY = 'getUserProfile'
+
+export const GET_COMPLETED_HABITS_FOR_SHARE_CACHE_KEY = 'getCompletedHabitsForShare'
