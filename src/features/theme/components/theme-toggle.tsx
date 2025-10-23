@@ -51,11 +51,9 @@ export function ThemeToggle() {
 
   const handleToggleTheme = () => {
     if (!isAutoMode) {
-      // DB設定がある場合は変更不可
       return
     }
 
-    // Auto modeの場合のみlight/darkをトグル
     const nextMode: DisplayMode = localDisplayMode === 'light' ? 'dark' : 'light'
 
     setLocalDisplayMode(nextMode)
