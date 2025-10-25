@@ -1,4 +1,13 @@
-import { ActionIcon, Badge, Group, Paper, Stack, Text, Tooltip } from '@mantine/core'
+import {
+  ActionIcon,
+  Badge,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  Tooltip,
+  useMantineColorScheme,
+} from '@mantine/core'
 import { IconCheck, IconExternalLink, IconTrash } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -86,6 +95,8 @@ export function NotificationItem({
   onNavigate,
 }: NotificationItemProps) {
   const isRead = notification.readAt !== null
+  const { colorScheme } = useMantineColorScheme()
+  const isDark = colorScheme === 'dark'
 
   const createdAtJST = dayjs.utc(notification.createdAt).tz('Asia/Tokyo')
 
@@ -95,15 +106,31 @@ export function NotificationItem({
       withBorder
       radius="md"
       style={{
-        backgroundColor: isRead ? undefined : 'var(--mantine-color-blue-0)',
-        borderColor: isRead ? 'var(--mantine-color-gray-3)' : 'var(--mantine-color-blue-3)',
+        backgroundColor: isRead
+          ? undefined
+          : isDark
+            ? 'var(--mantine-color-dark-6)'
+            : 'var(--mantine-color-blue-0)',
+        borderColor: isRead
+          ? isDark
+            ? 'var(--mantine-color-dark-4)'
+            : 'var(--mantine-color-gray-3)'
+          : isDark
+            ? 'var(--mantine-color-blue-8)'
+            : 'var(--mantine-color-blue-3)',
         transition: 'all 0.2s ease',
       }}
       styles={{
         root: {
           '&:hover': {
-            backgroundColor: isRead ? 'var(--mantine-color-gray-0)' : 'var(--mantine-color-blue-1)',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+            backgroundColor: isRead
+              ? isDark
+                ? 'var(--mantine-color-dark-5)'
+                : 'var(--mantine-color-gray-0)'
+              : isDark
+                ? 'var(--mantine-color-dark-5)'
+                : 'var(--mantine-color-blue-1)',
+            boxShadow: isDark ? '0 2px 4px rgba(0, 0, 0, 0.3)' : '0 2px 4px rgba(0, 0, 0, 0.05)',
           },
         },
       }}
@@ -175,7 +202,14 @@ export function NotificationItem({
           </Text>
           <Link
             to={getNotificationLink(notification)}
-            className="flex items-center gap-1 text-blue-600 text-xs hover:underline"
+            style={{
+              color: isDark ? 'var(--mantine-color-blue-4)' : 'var(--mantine-color-blue-6)',
+              fontSize: 'var(--mantine-font-size-xs)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+              textDecoration: 'none',
+            }}
             onClick={() => {
               if (!isRead) {
                 onMarkAsRead(notification.id)
@@ -184,6 +218,12 @@ export function NotificationItem({
               setTimeout(() => {
                 onNavigate?.()
               }, 500)
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.textDecoration = 'underline'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.textDecoration = 'none'
             }}
           >
             {getNotificationLinkText(notification.type)}

@@ -11,6 +11,7 @@ import {
   Stack,
   Text,
   TextInput,
+  useMantineColorScheme,
 } from '@mantine/core'
 import { IconListDetails, IconSearch, IconX } from '@tabler/icons-react'
 import { getRouteApi, useLocation } from '@tanstack/react-router'
@@ -50,6 +51,8 @@ export function HabitSelectorPopover({
   const navigate = routeApi.useNavigate()
   const { habits } = routeApi.useLoaderData()
   const search = routeApi.useSearch()
+  const { colorScheme } = useMantineColorScheme()
+  const isDark = colorScheme === 'dark'
 
   const habitsList = habits || []
 
@@ -140,7 +143,11 @@ export function HabitSelectorPopover({
         )}
         <Popover.Dropdown
           p={0}
-          style={{ border: '1px solid var(--mantine-color-gray-3)' }}
+          style={{
+            border: isDark
+              ? '1px solid var(--mantine-color-dark-4)'
+              : '1px solid var(--mantine-color-gray-3)',
+          }}
           onMouseDown={(e) => {
             e.stopPropagation()
           }}
@@ -154,12 +161,16 @@ export function HabitSelectorPopover({
               pb="xs"
               gap="xs"
               style={{
-                borderBottom: '1px solid var(--mantine-color-gray-2)',
-                backgroundColor: 'var(--mantine-color-gray-0)',
+                borderBottom: isDark
+                  ? '1px solid var(--mantine-color-dark-4)'
+                  : '1px solid var(--mantine-color-gray-2)',
+                backgroundColor: isDark
+                  ? 'var(--mantine-color-dark-6)'
+                  : 'var(--mantine-color-gray-0)',
               }}
             >
               <Group justify="space-between" align="center">
-                <Text size="sm" fw={600} c="dark">
+                <Text size="sm" fw={600}>
                   習慣詳細
                 </Text>
                 <ActionIcon
@@ -239,14 +250,20 @@ export function HabitSelectorPopover({
                       withBorder
                       radius="md"
                       style={{
-                        borderColor: 'var(--mantine-color-gray-3)',
+                        borderColor: isDark
+                          ? 'var(--mantine-color-dark-4)'
+                          : 'var(--mantine-color-gray-3)',
                         cursor: 'pointer',
                         transition: 'all 0.15s ease',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--mantine-color-gray-0)'
+                        e.currentTarget.style.backgroundColor = isDark
+                          ? 'var(--mantine-color-dark-5)'
+                          : 'var(--mantine-color-gray-0)'
                         e.currentTarget.style.transform = 'translateY(-1px)'
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+                        e.currentTarget.style.boxShadow = isDark
+                          ? '0 2px 8px rgba(0, 0, 0, 0.5)'
+                          : '0 2px 8px rgba(0, 0, 0, 0.1)'
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = 'transparent'
