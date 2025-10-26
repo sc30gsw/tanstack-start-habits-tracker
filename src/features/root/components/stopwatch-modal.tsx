@@ -85,6 +85,7 @@ export function StopwatchModal() {
     }
   }, [isOpen, isStateRestored, selectedHabitId, mode])
 
+  // Wake Lock管理: タイマー実行中のみ有効化
   useEffect(() => {
     if (isRunning && isOpen) {
       wakeLockManager.current.request()
@@ -92,10 +93,25 @@ export function StopwatchModal() {
       wakeLockManager.current.release()
     }
 
+    // コンポーネントアンマウント時に必ず解放
     return () => {
+      console.log('🧹 StopwatchModal cleanup: Wake Lock解放')
       wakeLockManager.current.release()
     }
   }, [isRunning, isOpen])
+
+  // ページ離脱時にWake Lockを確実に解放
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      console.log('🚪 ページ離脱: Wake Lock解放')
+      wakeLockManager.current.release()
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
+  }, [])
 
   useEffect(() => {
     if (isOpen && (isRunning || pausedElapsed > 0 || accumulatedTime > 0)) {

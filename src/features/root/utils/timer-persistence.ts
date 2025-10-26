@@ -82,6 +82,12 @@ export class WakeLockManager {
    * Wake Lockを要求
    */
   async request(): Promise<boolean> {
+    // 既にアクティブな場合はスキップ
+    if (this.isActive()) {
+      console.log('🔒 Wake Lock は既に取得済み')
+      return true
+    }
+
     if (!('wakeLock' in navigator)) {
       console.warn('Wake Lock API はこのブラウザではサポートされていません')
       return false
@@ -92,14 +98,11 @@ export class WakeLockManager {
 
       // Wake Lockが解除されたときのハンドラー
       this.wakeLock.addEventListener('release', () => {
-        if (import.meta.env.DEV) {
-          console.log('🔓 Wake Lock解除')
-        }
+        console.log('🔓 Wake Lock解除')
+        this.wakeLock = null
       })
 
-      if (import.meta.env.DEV) {
-        console.log('🔒 Wake Lock取得')
-      }
+      console.log('🔒 Wake Lock取得成功')
 
       return true
     } catch (error) {
@@ -112,13 +115,20 @@ export class WakeLockManager {
    * Wake Lockを解放
    */
   async release() {
-    if (this.wakeLock) {
+    if (this.wakeLock && !this.wakeLock.released) {
       try {
+        console.log('🔓 Wake Lock解放開始...')
         await this.wakeLock.release()
         this.wakeLock = null
+        console.log('✅ Wake Lock解放完了')
       } catch (error) {
-        console.error('Wake Lock解放に失敗:', error)
+        console.error('❌ Wake Lock解放に失敗:', error)
+        // エラーでも null にして次回の request を可能にする
+        this.wakeLock = null
       }
+    } else if (this.wakeLock) {
+      console.log('ℹ️ Wake Lock は既に解放済み')
+      this.wakeLock = null
     }
   }
 
