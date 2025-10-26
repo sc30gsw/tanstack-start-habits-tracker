@@ -7,11 +7,17 @@ const NOTIFICATION_DEBOUNCE_MS = 1000 // 1秒以内の重複を防ぐ
 
 /**
  * ブラウザ通知の権限をリクエストする
+ * 注意: macOSでは、ブラウザが閉じていても通知を表示するためにブラウザが自動起動します
+ * PCのスリープを妨げる可能性があるため、デフォルトでは無効化しています
  */
 export async function requestNotificationPermission() {
+  // ブラウザ通知は無効化（Mantine通知と音声通知のみ使用）
+  // 有効化したい場合は以下のコメントを外してください
+  /*
   if ('Notification' in window && Notification.permission === 'default') {
     await Notification.requestPermission()
   }
+  */
 }
 
 /**
@@ -66,10 +72,12 @@ function playNotificationSound() {
 
 /**
  * フェーズ完了通知を表示する
+ * @param enableBrowserNotification ブラウザ通知を有効にするか（デフォルト: false）
  */
 export function showPhaseCompleteNotification(
   currentPhase: PomodoroPhase,
   nextPhase: PomodoroPhase,
+  enableBrowserNotification = false,
 ) {
   const now = Date.now()
 
@@ -94,8 +102,13 @@ export function showPhaseCompleteNotification(
     autoClose: 5000,
   })
 
-  // ブラウザ通知
-  if ('Notification' in window && Notification.permission === 'granted') {
+  // ブラウザ通知（オプトイン）
+  // 注意: ブラウザが閉じている状態でも通知を表示するため、ブラウザが自動起動します
+  if (
+    enableBrowserNotification &&
+    'Notification' in window &&
+    Notification.permission === 'granted'
+  ) {
     const notification = new Notification(config.title, {
       body: config.message,
       icon: '/favicon.ico',
