@@ -22,7 +22,6 @@ export function useNotifications() {
   } = useSuspenseQuery({
     queryKey: [GET_NOTIFICATIONS_CACHE_KEY],
     queryFn: () => notificationDto.getNotifications(),
-    refetchInterval: 60000, // Poll every 60 seconds
     refetchOnWindowFocus: true,
   })
 
@@ -30,7 +29,6 @@ export function useNotifications() {
   const { data: unreadCount = 0 } = useSuspenseQuery({
     queryKey: [GET_NOTIFICATIONS_CACHE_KEY, GET_UNREAD_NOTIFICATIONS_COUNT_CACHE_KEY],
     queryFn: () => notificationDto.getUnreadNotificationsCount(),
-    refetchInterval: 60000, // Poll every 60 seconds
     refetchOnWindowFocus: true,
   })
 
