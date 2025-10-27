@@ -1,11 +1,11 @@
 import { ActionIcon, Text, useMantineColorScheme } from '@mantine/core'
 import { IconChecklist, IconClock, IconHome, IconListDetails } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
-import LiquidGlass from 'liquid-glass-react'
 import { useRef, useState } from 'react'
 import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { authClient } from '~/lib/auth-client'
 import type { FileRouteTypes } from '~/routeTree.gen'
+import { LiquidGlassNav } from './liquid-glass-nav'
 
 export function BottomNavBar() {
   const routeApi = getRouteApi('__root__')
@@ -47,22 +47,13 @@ export function BottomNavBar() {
   return (
     <div
       ref={containerRef}
-      className="fixed right-0 bottom-0 left-80 z-50 flex items-center justify-center"
+      className="fixed right-0 bottom-0 left-0 z-50 flex items-center justify-center"
       style={{
         padding: 'max(env(safe-area-inset-bottom), 8px)',
       }}
     >
-      <LiquidGlass
-        displacementScale={20}
-        blurAmount={0.2}
-        saturation={100}
-        elasticity={0.15}
-        cornerRadius={100}
-        mode="standard"
-        padding="0"
-        mouseContainer={containerRef}
-        overLight={!isDark}
-      >
+      {/* Liquid Glass Navigation */}
+      <LiquidGlassNav>
         <div className="flex h-full items-stretch px-5">
           {/* ホーム */}
           <div
@@ -181,7 +172,7 @@ export function BottomNavBar() {
             </Text>
           </div>
         </div>
-      </LiquidGlass>
+      </LiquidGlassNav>
 
       <HabitSelectorPopover
         opened={opened}

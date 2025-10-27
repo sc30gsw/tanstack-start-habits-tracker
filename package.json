@@ -52,7 +52,6 @@
     "dayjs": "^1.11.18",
     "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",
-    "liquid-glass-react": "^1.1.1",
     "lowlight": "^3.3.0",
     "nanoid": "^5.1.6",
     "react": "^19.0.0",
