@@ -1,7 +1,7 @@
 import { ActionIcon, Text, useMantineColorScheme } from '@mantine/core'
 import { IconChecklist, IconClock, IconHome, IconListDetails } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { LiquidGlass } from '~/components/ui/liquid-glass'
 import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { authClient } from '~/lib/auth-client'
@@ -14,17 +14,27 @@ export function BottomNavBar() {
   const search = routeApi.useSearch()
 
   const [opened, setOpened] = useState(false)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [indicatorStyle, setIndicatorStyle] = useState({
+    left: 0,
+    width: 0,
+    height: 0,
+    top: 0,
+    opacity: 0,
+  })
 
   const targetRef = useRef<HTMLButtonElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const navContainerRef = useRef<HTMLDivElement>(null)
+
+  // 各ナビゲーションアイテムのref
+  const homeRef = useRef<HTMLDivElement>(null)
+  const habitsRef = useRef<HTMLDivElement>(null)
+  const recordRef = useRef<HTMLDivElement>(null)
+  const detailsRef = useRef<HTMLDivElement>(null)
 
   const { colorScheme } = useMantineColorScheme()
-
   const { data: session } = authClient.useSession()
-
-  if (!session?.user) {
-    return null
-  }
 
   const isActive = (path: FileRouteTypes['fullPaths'] | 'details' | 'record') => {
     switch (path) {
@@ -44,6 +54,100 @@ export function BottomNavBar() {
 
   const isDark = colorScheme === 'dark'
 
+  // インジケーターの位置を更新
+  const updateIndicator = useCallback((item: string | null) => {
+    if (!navContainerRef.current) {
+      return
+    }
+
+    let targetRef: React.RefObject<HTMLDivElement | null> | null = null
+
+    switch (item) {
+      case 'home':
+        targetRef = homeRef
+        break
+
+      case 'habits':
+        targetRef = habitsRef
+        break
+
+      case 'record':
+        targetRef = recordRef
+        break
+
+      case 'details':
+        targetRef = detailsRef
+        break
+
+      default:
+        targetRef = null
+        break
+    }
+
+    if (!targetRef?.current) {
+      // アイテムがない場合はインジケーターを非表示
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }))
+      return
+    }
+
+    const container = navContainerRef.current.getBoundingClientRect()
+    const target = targetRef.current.getBoundingClientRect()
+
+    // インジケーターを大きく（パディング追加）
+    const padding = 8
+    const edgePadding = 16 // 両端の逆側のパディング
+    let left = target.left - container.left - padding
+    let width = target.width + padding * 2
+    const height = target.height + padding * 2
+    const top = -padding
+
+    // 左端（ホーム）の場合: 左端から右側の余白まで完全に埋める
+    if (item === 'home') {
+      left = 0
+      const targetRelativeLeft = target.left - container.left
+      // 左端(0)からターゲットの左位置 + ターゲットの幅 + 右側の余白
+      width = targetRelativeLeft + target.width + edgePadding
+    }
+    // 右端（詳細）の場合: 左側の余白から右端まで完全に埋める
+    else if (item === 'details') {
+      const containerWidth = container.width
+      const targetRelativeLeft = target.left - container.left
+
+      // 左側の余白を含めた開始位置
+      left = targetRelativeLeft - edgePadding
+      // 開始位置からコンテナの右端まで
+      width = containerWidth - left
+    }
+
+    setIndicatorStyle({
+      left,
+      width,
+      height,
+      top,
+      opacity: 1,
+    })
+  }, [])
+
+  // アクティブアイテムの追跡
+  useEffect(() => {
+    const activeItem =
+      hoveredItem ||
+      (isActive('/')
+        ? 'home'
+        : isActive('/habits')
+          ? 'habits'
+          : isActive('record')
+            ? 'record'
+            : isActive('details')
+              ? 'details'
+              : null)
+    updateIndicator(activeItem)
+  }, [hoveredItem, location.pathname, search, updateIndicator])
+
+  if (!session?.user) {
+    return null
+  }
+
   return (
     <div
       ref={containerRef}
@@ -54,12 +158,46 @@ export function BottomNavBar() {
     >
       {/* Liquid Glass Navigation */}
       <LiquidGlass padding="none">
-        <div className="flex h-full items-stretch px-5">
+        <div ref={navContainerRef} className="relative flex h-full items-stretch gap-2 px-5">
+          {/* Liquid Glass インジケーター */}
+          {indicatorStyle.opacity > 0 && (
+            <div
+              className="pointer-events-none absolute transition-all duration-500 ease-out"
+              style={{
+                left: `${indicatorStyle.left}px`,
+                top: `${indicatorStyle.top}px`,
+                width: `${indicatorStyle.width}px`,
+                height: `${indicatorStyle.height}px`,
+                opacity: indicatorStyle.opacity,
+                zIndex: 0,
+              }}
+            >
+              <div
+                className="h-full w-full"
+                style={{
+                  borderRadius: '20px',
+                  backdropFilter: 'blur(32px) saturate(200%)',
+                  WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)',
+                  border: `2px solid ${isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)'}`,
+                  boxShadow: `
+                    0px 12px 40px rgba(0, 0, 0, 0.25),
+                    inset 0 0 0 1px ${isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.7)'},
+                    0 0 20px ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'}
+                  `,
+                  filter: 'blur(0.5px)',
+                }}
+              />
+            </div>
+          )}
+
           {/* ホーム */}
           <div
-            className={`-ml-5 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-2 pr-7 pl-10 transition-colors duration-200 ${
-              isActive('/') ? (isDark ? 'bg-white/15' : 'bg-black/8') : 'bg-transparent'
-            }`}
+            ref={homeRef}
+            role="group"
+            onMouseEnter={() => setHoveredItem('home')}
+            onMouseLeave={() => setHoveredItem(null)}
+            className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon component={Link} to="/" variant="transparent" size="lg">
               <IconHome
@@ -79,9 +217,11 @@ export function BottomNavBar() {
 
           {/* 習慣一覧 */}
           <div
-            className={`flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-7 py-2 transition-colors duration-200 ${
-              isActive('/habits') ? (isDark ? 'bg-white/15' : 'bg-black/8') : 'bg-transparent'
-            }`}
+            ref={habitsRef}
+            role="group"
+            onMouseEnter={() => setHoveredItem('habits')}
+            onMouseLeave={() => setHoveredItem(null)}
+            className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon
               component={Link}
@@ -109,9 +249,11 @@ export function BottomNavBar() {
 
           {/* 記録 */}
           <div
-            className={`flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-7 py-2 transition-colors duration-200 ${
-              isActive('record') ? (isDark ? 'bg-white/15' : 'bg-black/8') : 'bg-transparent'
-            }`}
+            ref={recordRef}
+            role="group"
+            onMouseEnter={() => setHoveredItem('record')}
+            onMouseLeave={() => setHoveredItem(null)}
+            className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon
               variant="transparent"
@@ -145,9 +287,11 @@ export function BottomNavBar() {
 
           {/* 詳細 */}
           <div
-            className={`-mr-5 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-2 pr-12 pl-7 transition-colors duration-200 ${
-              isActive('details') ? (isDark ? 'bg-white/15' : 'bg-black/8') : 'bg-transparent'
-            }`}
+            ref={detailsRef}
+            role="group"
+            onMouseEnter={() => setHoveredItem('details')}
+            onMouseLeave={() => setHoveredItem(null)}
+            className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon
               ref={targetRef}

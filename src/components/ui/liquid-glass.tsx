@@ -275,7 +275,9 @@ export function LiquidGlass({
             filter: `url(#${filterId})`,
             backdropFilter: `blur(${blur}px) saturate(${saturation}%)`,
             WebkitBackdropFilter: `blur(${blur}px) saturate(${saturation}%)`,
-            backgroundColor: isDark ? `rgba(0, 0, 0, ${opacity})` : `rgba(255, 255, 255, ${opacity})`,
+            backgroundColor: isDark
+              ? `rgba(0, 0, 0, ${opacity})`
+              : `rgba(255, 255, 255, ${opacity})`,
           }}
         />
 
