@@ -130,14 +130,14 @@ export function BottomNavBar() {
 
   // アクティブアイテムの追跡
   useEffect(() => {
-    const activeItem =
-      hoveredItem ||
-      (isActive('/')
-        ? 'home'
-        : isActive('/habits')
-          ? 'habits'
-          : isActive('record')
-            ? 'record'
+    // 記録がアクティブの場合はホバーを無視
+    const activeItem = isActive('record')
+      ? 'record'
+      : hoveredItem ||
+        (isActive('/')
+          ? 'home'
+          : isActive('/habits')
+            ? 'habits'
             : isActive('details')
               ? 'details'
               : null)
@@ -195,8 +195,8 @@ export function BottomNavBar() {
           <div
             ref={homeRef}
             role="group"
-            onMouseEnter={() => setHoveredItem('home')}
-            onMouseLeave={() => setHoveredItem(null)}
+            onMouseEnter={() => !isActive('record') && setHoveredItem('home')}
+            onMouseLeave={() => !isActive('record') && setHoveredItem(null)}
             className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon component={Link} to="/" variant="transparent" size="lg">
@@ -219,8 +219,8 @@ export function BottomNavBar() {
           <div
             ref={habitsRef}
             role="group"
-            onMouseEnter={() => setHoveredItem('habits')}
-            onMouseLeave={() => setHoveredItem(null)}
+            onMouseEnter={() => !isActive('record') && setHoveredItem('habits')}
+            onMouseLeave={() => !isActive('record') && setHoveredItem(null)}
             className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon
@@ -289,8 +289,8 @@ export function BottomNavBar() {
           <div
             ref={detailsRef}
             role="group"
-            onMouseEnter={() => setHoveredItem('details')}
-            onMouseLeave={() => setHoveredItem(null)}
+            onMouseEnter={() => !isActive('record') && setHoveredItem('details')}
+            onMouseLeave={() => !isActive('record') && setHoveredItem(null)}
             className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon
