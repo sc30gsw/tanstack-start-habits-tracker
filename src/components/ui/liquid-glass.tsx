@@ -17,6 +17,10 @@ type LiquidGlassProps = {
   saturation?: number
   /** 不透明度 (0-1) - デフォルト: 0.3 (0で完全透明、1で完全不透明) */
   opacity?: number
+  /** ボーダーの太さ (px) - デフォルト: 2 */
+  borderWidth?: number
+  /** ボーダーの不透明度 (0-1) - デフォルト: 0.2 */
+  borderOpacity?: number
   /** エラスティック効果の有効化 */
   enableElastic?: boolean
   /** SVGフィルター効果の有効化 */
@@ -31,6 +35,8 @@ export function LiquidGlass({
   blur = 20,
   saturation = 150,
   opacity = 0.3,
+  borderWidth = 2,
+  borderOpacity = 0.2,
   enableElastic = true,
   enableFilter = true,
 }: LiquidGlassProps) {
@@ -249,7 +255,17 @@ export function LiquidGlass({
         style={{
           borderRadius,
           padding: paddingValue,
-          boxShadow: '0px 12px 40px rgba(0, 0, 0, 0.25)',
+          border: `${borderWidth}px solid ${
+            isDark ? `rgba(255, 255, 255, ${borderOpacity})` : `rgba(0, 0, 0, ${borderOpacity})`
+          }`,
+          boxShadow: `
+            0px 12px 40px rgba(0, 0, 0, 0.25),
+            inset 0 0 0 ${borderWidth}px ${
+              isDark
+                ? `rgba(255, 255, 255, ${borderOpacity * 0.5})`
+                : `rgba(255, 255, 255, ${borderOpacity * 0.8})`
+            }
+          `,
         }}
       >
         {/* バックドロップ（ワープ効果） */}
