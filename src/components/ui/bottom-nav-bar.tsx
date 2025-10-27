@@ -203,7 +203,7 @@ export function BottomNavBar() {
               <IconHome
                 size={24}
                 stroke={1.5}
-                className={isActive('/') ? 'text-blue-600' : isDark ? 'text-white' : 'text-black'}
+                className={isActive('/') ? 'text-[#228be6]' : isDark ? 'text-white' : 'text-black'}
               />
             </ActionIcon>
             <Text
@@ -234,7 +234,7 @@ export function BottomNavBar() {
                 size={24}
                 stroke={1.5}
                 className={
-                  isActive('/habits') ? 'text-blue-600' : isDark ? 'text-white' : 'text-black'
+                  isActive('/habits') ? 'text-[#228be6]' : isDark ? 'text-white' : 'text-black'
                 }
               />
             </ActionIcon>
@@ -272,7 +272,7 @@ export function BottomNavBar() {
                 size={24}
                 stroke={1.5}
                 className={
-                  isActive('record') ? 'text-blue-600' : isDark ? 'text-white' : 'text-black'
+                  isActive('record') ? 'text-[#228be6]' : isDark ? 'text-white' : 'text-black'
                 }
               />
             </ActionIcon>
@@ -303,7 +303,7 @@ export function BottomNavBar() {
                 size={24}
                 stroke={1.5}
                 className={
-                  isActive('details') ? 'text-blue-600' : isDark ? 'text-white' : 'text-black'
+                  isActive('details') ? 'text-[#228be6]' : isDark ? 'text-white' : 'text-black'
                 }
               />
             </ActionIcon>
