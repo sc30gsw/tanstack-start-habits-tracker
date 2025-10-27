@@ -2,10 +2,10 @@ import { ActionIcon, Text, useMantineColorScheme } from '@mantine/core'
 import { IconChecklist, IconClock, IconHome, IconListDetails } from '@tabler/icons-react'
 import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
+import { LiquidGlass } from '~/components/ui/liquid-glass'
 import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
 import { authClient } from '~/lib/auth-client'
 import type { FileRouteTypes } from '~/routeTree.gen'
-import { LiquidGlassNav } from './liquid-glass-nav'
 
 export function BottomNavBar() {
   const routeApi = getRouteApi('__root__')
@@ -53,7 +53,7 @@ export function BottomNavBar() {
       }}
     >
       {/* Liquid Glass Navigation */}
-      <LiquidGlassNav>
+      <LiquidGlass padding="none">
         <div className="flex h-full items-stretch px-5">
           {/* ホーム */}
           <div
@@ -172,7 +172,7 @@ export function BottomNavBar() {
             </Text>
           </div>
         </div>
-      </LiquidGlassNav>
+      </LiquidGlass>
 
       <HabitSelectorPopover
         opened={opened}

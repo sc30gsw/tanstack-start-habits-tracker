@@ -4,12 +4,27 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 const DISPLACEMENT_MAP =
   'data:image/jpeg;base64,/9j/4AAQSkZJRgABAgAAZABkAAD/2wCEAAQDAwMDAwQDAwQGBAMEBgcFBAQFBwgHBwcHBwgLCAkJCQkICwsMDAwMDAsNDQ4ODQ0SEhISEhQUFBQUFBQUFBQBBQUFCAgIEAsLEBQODg4UFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFP/CABEIAQABAAMBEQACEQEDEQH/xAAxAAEBAQEBAQAAAAAAAAAAAAADAgQIAQYBAQEBAQEBAQAAAAAAAAAAAAMCBAEACAf/2gAMAwEAAhADEAAAAPjPor6kOgOiKhKgKhKgOhKhOhKxKgKhOgKhKhKgKxOhKhOgKhKhKgKwKhKgKgKwG841nns9J/nn2KVCdCdCVAVCVCVAdCVCdiVAVidCVAVCVAdiVCVCdAVCVCVAVCVAVAViVZxsBrPPY6R/NvsY6E6ErEqAqE6ErAqE6E7E7ErA0ErArAqAqEuiVAXRLol0S6J0JUBWBUI0BXnG88djpH81+xjoToSoSoCoTsSoYQTsTQSsCsCsCsCoCsCqAugNCXgLol4T6JUJUBUBUBsBrPFH0j+a/Yx0J0JUJUJ2BUMIRoBoJQI4BXnJAK840BUA0BeAvCXiLxF4i4JUJUBUBXnjp9Ifmv2MdEdAVCViVCdiVjGEaAaAaASgaATQSZxvONZwsB7nHoD0S8JcI/EXiPxHoi6JUBUBXnGg6R/NfsU6IqEqGLKEKE0EaCSgaAKZxXOKZhvONZxrOPc4dEuiPBLwl4T4RcM+M/GXSKwOi6R/NfsU6I6I6GLOEKEaEKUIEaJqBoBLnFMw3nBMwXnGs4VnHucOiXBLxHwz4Z8KPGXSKwKi6R/NPsU6ErKKKbObKUObKEKFCBGgkuYVzgmULyhWYKzD3OPQHwlwS8R8M+HHDPxHRFYHRdI/mn2MdCVCdiylDlShBNBJBJc4pnFc4JlC84XmzXlC82Ogo=='
 
-interface LiquidGlassNavProps {
+type LiquidGlassProps = {
   children: React.ReactNode
   className?: string
+  /** ガラスの形状 - 'pill' (100px角丸) | 'rounded' (32px角丸) | 'card' (16px角丸) */
+  shape?: 'pill' | 'rounded' | 'card'
+  /** パディング設定 - 'none' | 'sm' | 'md' | 'lg' */
+  padding?: 'none' | 'sm' | 'md' | 'lg'
+  /** エラスティック効果の有効化 */
+  enableElastic?: boolean
+  /** SVGフィルター効果の有効化 */
+  enableFilter?: boolean
 }
 
-export function LiquidGlassNav({ children, className = '' }: LiquidGlassNavProps) {
+export function LiquidGlass({
+  children,
+  className = '',
+  shape = 'pill',
+  padding = 'md',
+  enableElastic = true,
+  enableFilter = true,
+}: LiquidGlassProps) {
   const filterId = useId()
   const containerRef = useRef<HTMLDivElement>(null)
   const glassRef = useRef<HTMLDivElement>(null)
@@ -84,131 +99,149 @@ export function LiquidGlassNav({ children, className = '' }: LiquidGlassNavProps
     }
   }, [mousePos, glassSize])
 
-  const elastic = calculateElastic()
-  const displacementScale = isDark ? 64 : 40 // 正確な値に調整
-  const blurAmount = 20 // ガラス越し効果のための強いblur
-  const saturation = 150 // より鮮やかな色彩
+  const elastic = enableElastic ? calculateElastic() : { x: 0, y: 0 }
+  const displacementScale = isDark ? 64 : 40
+  const blurAmount = 20
+  const saturation = 150
+
+  // 形状に応じたborderRadius
+  const borderRadius = {
+    pill: '100px',
+    rounded: '32px',
+    card: '16px',
+  }[shape]
+
+  // パディングに応じたpadding値
+  const paddingValue = {
+    none: '0',
+    sm: '4px 8px',
+    md: '8px 16px',
+    lg: '12px 24px',
+  }[padding]
 
   return (
     <div
       ref={containerRef}
       className={`relative ${className}`}
       style={{
-        transform: `translate(${elastic.x}px, ${elastic.y}px)`,
-        transition: 'transform 0.2s ease-out',
+        transform: enableElastic ? `translate(${elastic.x}px, ${elastic.y}px)` : 'none',
+        transition: enableElastic ? 'transform 0.2s ease-out' : 'none',
       }}
     >
       {/* SVGフィルター定義 */}
-      <svg
-        style={{
-          position: 'absolute',
-          width: glassSize.width,
-          height: glassSize.height,
-          pointerEvents: 'none',
-        }}
-        aria-hidden="true"
-      >
-        <defs>
-          <filter
-            id={filterId}
-            x="-35%"
-            y="-35%"
-            width="170%"
-            height="170%"
-            colorInterpolationFilters="sRGB"
-          >
-            {/* Displacementマップ */}
-            <feImage
-              href={DISPLACEMENT_MAP}
-              result="DISPLACEMENT_MAP"
-              preserveAspectRatio="xMidYMid slice"
-            />
+      {enableFilter && (
+        <svg
+          style={{
+            position: 'absolute',
+            width: glassSize.width,
+            height: glassSize.height,
+            pointerEvents: 'none',
+          }}
+          aria-hidden="true"
+        >
+          <defs>
+            <filter
+              id={filterId}
+              x="-35%"
+              y="-35%"
+              width="170%"
+              height="170%"
+              colorInterpolationFilters="sRGB"
+            >
+              {/* Displacementマップ */}
+              <feImage
+                href={DISPLACEMENT_MAP}
+                result="DISPLACEMENT_MAP"
+                preserveAspectRatio="xMidYMid slice"
+              />
 
-            {/* エッジマスク */}
-            <feColorMatrix
-              in="DISPLACEMENT_MAP"
-              type="matrix"
-              values="0.3 0.3 0.3 0 0
+              {/* エッジマスク */}
+              <feColorMatrix
+                in="DISPLACEMENT_MAP"
+                type="matrix"
+                values="0.3 0.3 0.3 0 0
                       0.3 0.3 0.3 0 0
                       0.3 0.3 0.3 0 0
                       0 0 0 1 0"
-              result="EDGE_INTENSITY"
-            />
+                result="EDGE_INTENSITY"
+              />
 
-            {/* RGB色収差効果 */}
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="DISPLACEMENT_MAP"
-              scale={displacementScale * -1}
-              xChannelSelector="R"
-              yChannelSelector="B"
-              result="RED_DISPLACED"
-            />
-            <feColorMatrix
-              in="RED_DISPLACED"
-              type="matrix"
-              values="1 0 0 0 0
+              {/* RGB色収差効果 */}
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="DISPLACEMENT_MAP"
+                scale={displacementScale * -1}
+                xChannelSelector="R"
+                yChannelSelector="B"
+                result="RED_DISPLACED"
+              />
+              <feColorMatrix
+                in="RED_DISPLACED"
+                type="matrix"
+                values="1 0 0 0 0
                       0 0 0 0 0
                       0 0 0 0 0
                       0 0 0 1 0"
-              result="RED_CHANNEL"
-            />
+                result="RED_CHANNEL"
+              />
 
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="DISPLACEMENT_MAP"
-              scale={displacementScale * -1 - 6.4}
-              xChannelSelector="R"
-              yChannelSelector="B"
-              result="GREEN_DISPLACED"
-            />
-            <feColorMatrix
-              in="GREEN_DISPLACED"
-              type="matrix"
-              values="0 0 0 0 0
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="DISPLACEMENT_MAP"
+                scale={displacementScale * -1 - 6.4}
+                xChannelSelector="R"
+                yChannelSelector="B"
+                result="GREEN_DISPLACED"
+              />
+              <feColorMatrix
+                in="GREEN_DISPLACED"
+                type="matrix"
+                values="0 0 0 0 0
                       0 1 0 0 0
                       0 0 0 0 0
                       0 0 0 1 0"
-              result="GREEN_CHANNEL"
-            />
+                result="GREEN_CHANNEL"
+              />
 
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="DISPLACEMENT_MAP"
-              scale={displacementScale * -1 - 12.8}
-              xChannelSelector="R"
-              yChannelSelector="B"
-              result="BLUE_DISPLACED"
-            />
-            <feColorMatrix
-              in="BLUE_DISPLACED"
-              type="matrix"
-              values="0 0 0 0 0
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="DISPLACEMENT_MAP"
+                scale={displacementScale * -1 - 12.8}
+                xChannelSelector="R"
+                yChannelSelector="B"
+                result="BLUE_DISPLACED"
+              />
+              <feColorMatrix
+                in="BLUE_DISPLACED"
+                type="matrix"
+                values="0 0 0 0 0
                       0 0 0 0 0
                       0 0 1 0 0
                       0 0 0 1 0"
-              result="BLUE_CHANNEL"
-            />
+                result="BLUE_CHANNEL"
+              />
 
-            {/* チャンネル合成 */}
-            <feBlend in="GREEN_CHANNEL" in2="BLUE_CHANNEL" mode="screen" result="GB_COMBINED" />
-            <feBlend in="RED_CHANNEL" in2="GB_COMBINED" mode="screen" result="RGB_COMBINED" />
+              {/* チャンネル合成 */}
+              <feBlend in="GREEN_CHANNEL" in2="BLUE_CHANNEL" mode="screen" result="GB_COMBINED" />
+              <feBlend in="RED_CHANNEL" in2="GB_COMBINED" mode="screen" result="RGB_COMBINED" />
 
-            {/* Gaussian Blur for smoother aberration */}
-            <feGaussianBlur in="RGB_COMBINED" stdDeviation="0.3" result="ABERRATED_BLURRED" />
+              {/* Gaussian Blur for smoother aberration */}
+              <feGaussianBlur in="RGB_COMBINED" stdDeviation="0.3" result="ABERRATED_BLURRED" />
 
-            {/* Composite with edge mask */}
-            <feComposite in="ABERRATED_BLURRED" in2="EDGE_INTENSITY" operator="in" />
-          </filter>
-        </defs>
-      </svg>
+              {/* Composite with edge mask */}
+              <feComposite in="ABERRATED_BLURRED" in2="EDGE_INTENSITY" operator="in" />
+            </filter>
+          </defs>
+        </svg>
+      )}
 
       {/* メインガラスコンテナ */}
       <div
         ref={glassRef}
         className="relative inline-flex overflow-hidden transition-all duration-200"
         style={{
-          borderRadius: '100px',
+          borderRadius,
+          padding: paddingValue,
           boxShadow: '0px 12px 40px rgba(0, 0, 0, 0.25)',
         }}
       >
