@@ -111,8 +111,9 @@ export function BottomNavBar() {
         width = right - left
       }
     }
-    // 右端（詳細）が含まれる場合: 左側の余白から右端まで完全に埋める
-    else if (items.includes('details')) {
+
+    // 右端（詳細）が含まれる場合: 右端まで完全に埋める
+    if (items.includes('details')) {
       const containerWidth = container.width
       const lastRelativeLeft = lastElement.left - container.left
 
@@ -120,8 +121,10 @@ export function BottomNavBar() {
       if (items.length === 1) {
         left = lastRelativeLeft - edgePadding
         width = containerWidth - left + padding
+      } else {
+        // 複数要素の場合: 右端を外側まで拡張
+        width = containerWidth - left + padding
       }
-      // 複数要素の場合は既に計算済み
     }
 
     setIndicatorStyle({
