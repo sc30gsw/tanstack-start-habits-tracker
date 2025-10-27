@@ -54,69 +54,74 @@ export function BottomNavBar() {
 
   const isDark = colorScheme === 'dark'
 
-  // インジケーターの位置を更新
-  const updateIndicator = useCallback((item: string | null) => {
-    if (!navContainerRef.current) {
+  // インジケーターの位置を更新（複数アイテム対応）
+  const updateIndicator = useCallback((items: string[]) => {
+    if (!navContainerRef.current || items.length === 0) {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }))
       return
     }
 
-    let targetRef: React.RefObject<HTMLDivElement | null> | null = null
-
-    switch (item) {
-      case 'home':
-        targetRef = homeRef
-        break
-
-      case 'habits':
-        targetRef = habitsRef
-        break
-
-      case 'record':
-        targetRef = recordRef
-        break
-
-      case 'details':
-        targetRef = detailsRef
-        break
-
-      default:
-        targetRef = null
-        break
+    const refs: React.RefObject<HTMLDivElement | null>[] = []
+    for (const item of items) {
+      switch (item) {
+        case 'home':
+          refs.push(homeRef)
+          break
+        case 'habits':
+          refs.push(habitsRef)
+          break
+        case 'record':
+          refs.push(recordRef)
+          break
+        case 'details':
+          refs.push(detailsRef)
+          break
+      }
     }
 
-    if (!targetRef?.current) {
-      // アイテムがない場合はインジケーターを非表示
+    const validRefs = refs.filter((ref) => ref.current)
+    if (validRefs.length === 0) {
       setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }))
       return
     }
 
     const container = navContainerRef.current.getBoundingClientRect()
-    const target = targetRef.current.getBoundingClientRect()
-
-    // インジケーターを大きく（パディング追加）
     const padding = 8
     const edgePadding = 16 // 両端の逆側のパディング
-    let left = target.left - container.left - padding
-    let width = target.width + padding * 2
-    const height = target.height + padding * 2
+
+    // 全ての要素の境界を取得
+    const firstElement = validRefs[0].current!.getBoundingClientRect()
+    const lastElement = validRefs[validRefs.length - 1].current!.getBoundingClientRect()
+
+    let left = firstElement.left - container.left - padding
+    const right = lastElement.right - container.left + padding
+    let width = right - left
+    const height = firstElement.height + padding * 2
     const top = -padding
 
-    // 左端（ホーム）の場合: 左端から右側の余白まで完全に埋める
-    if (item === 'home') {
+    // 左端（ホーム）が含まれる場合: 左端から右側の余白まで完全に埋める
+    if (items.includes('home')) {
       left = -padding // 左端を少し外側に
-      const targetRelativeLeft = target.left - container.left
-      // 左端(0)からターゲットの左位置 + ターゲットの幅 + 右側の余白
-      width = targetRelativeLeft + target.width + edgePadding + padding
+      const firstRelativeLeft = firstElement.left - container.left
+      // 単一要素の場合は右側の余白も追加
+      if (items.length === 1) {
+        width = firstRelativeLeft + firstElement.width + edgePadding + padding
+      } else {
+        // 複数要素の場合は最後の要素まで
+        width = right - left
+      }
     }
-    // 右端（詳細）の場合: 左側の余白から右端まで完全に埋める
-    else if (item === 'details') {
+    // 右端（詳細）が含まれる場合: 左側の余白から右端まで完全に埋める
+    else if (items.includes('details')) {
       const containerWidth = container.width
-      const targetRelativeLeft = target.left - container.left
+      const lastRelativeLeft = lastElement.left - container.left
 
-      // 左側の余白を含めた開始位置
-      left = targetRelativeLeft - edgePadding
-      // 開始位置からコンテナの右端まで（少し外側まで）
-      width = containerWidth - left + padding
+      // 単一要素の場合は左側の余白も追加
+      if (items.length === 1) {
+        left = lastRelativeLeft - edgePadding
+        width = containerWidth - left + padding
+      }
+      // 複数要素の場合は既に計算済み
     }
 
     setIndicatorStyle({
@@ -130,18 +135,20 @@ export function BottomNavBar() {
 
   // アクティブアイテムの追跡
   useEffect(() => {
-    // 記録がアクティブの場合はホバーを無視
-    const activeItem = isActive('record')
-      ? 'record'
-      : hoveredItem ||
-        (isActive('/')
-          ? 'home'
-          : isActive('/habits')
-            ? 'habits'
-            : isActive('details')
-              ? 'details'
-              : null)
-    updateIndicator(activeItem)
+    // ホバー時は単一アイテム
+    if (hoveredItem) {
+      updateIndicator([hoveredItem])
+      return
+    }
+
+    // アクティブなアイテムを収集
+    const activeItems: string[] = []
+    if (isActive('/')) activeItems.push('home')
+    if (isActive('/habits')) activeItems.push('habits')
+    if (isActive('record')) activeItems.push('record')
+    if (isActive('details')) activeItems.push('details')
+
+    updateIndicator(activeItems)
   }, [hoveredItem, location.pathname, search, updateIndicator])
 
   if (!session?.user) {
@@ -195,8 +202,8 @@ export function BottomNavBar() {
           <div
             ref={homeRef}
             role="group"
-            onMouseEnter={() => !isActive('record') && setHoveredItem('home')}
-            onMouseLeave={() => !isActive('record') && setHoveredItem(null)}
+            onMouseEnter={() => setHoveredItem('home')}
+            onMouseLeave={() => setHoveredItem(null)}
             className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon component={Link} to="/" variant="transparent" size="lg">
@@ -219,8 +226,8 @@ export function BottomNavBar() {
           <div
             ref={habitsRef}
             role="group"
-            onMouseEnter={() => !isActive('record') && setHoveredItem('habits')}
-            onMouseLeave={() => !isActive('record') && setHoveredItem(null)}
+            onMouseEnter={() => setHoveredItem('habits')}
+            onMouseLeave={() => setHoveredItem(null)}
             className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon
@@ -289,8 +296,8 @@ export function BottomNavBar() {
           <div
             ref={detailsRef}
             role="group"
-            onMouseEnter={() => !isActive('record') && setHoveredItem('details')}
-            onMouseLeave={() => !isActive('record') && setHoveredItem(null)}
+            onMouseEnter={() => setHoveredItem('details')}
+            onMouseLeave={() => setHoveredItem(null)}
             className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
           >
             <ActionIcon
