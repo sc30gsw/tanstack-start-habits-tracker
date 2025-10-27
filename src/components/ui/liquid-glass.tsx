@@ -11,6 +11,12 @@ type LiquidGlassProps = {
   shape?: 'pill' | 'rounded' | 'card'
   /** パディング設定 - 'none' | 'sm' | 'md' | 'lg' */
   padding?: 'none' | 'sm' | 'md' | 'lg'
+  /** Blur強度 (px) - デフォルト: 20 */
+  blur?: number
+  /** 彩度 (%) - デフォルト: 150 */
+  saturation?: number
+  /** 不透明度 (0-1) - デフォルト: 0.3 (0で完全透明、1で完全不透明) */
+  opacity?: number
   /** エラスティック効果の有効化 */
   enableElastic?: boolean
   /** SVGフィルター効果の有効化 */
@@ -22,6 +28,9 @@ export function LiquidGlass({
   className = '',
   shape = 'pill',
   padding = 'md',
+  blur = 20,
+  saturation = 150,
+  opacity = 0.3,
   enableElastic = true,
   enableFilter = true,
 }: LiquidGlassProps) {
@@ -101,8 +110,6 @@ export function LiquidGlass({
 
   const elastic = enableElastic ? calculateElastic() : { x: 0, y: 0 }
   const displacementScale = isDark ? 64 : 40
-  const blurAmount = 20
-  const saturation = 150
 
   // 形状に応じたborderRadius
   const borderRadius = {
@@ -250,21 +257,25 @@ export function LiquidGlass({
           className="absolute inset-0"
           style={{
             filter: `url(#${filterId})`,
-            backdropFilter: `blur(${blurAmount}px) saturate(${saturation}%)`,
-            WebkitBackdropFilter: `blur(${blurAmount}px) saturate(${saturation}%)`,
-            backgroundColor: isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: `blur(${blur}px) saturate(${saturation}%)`,
+            WebkitBackdropFilter: `blur(${blur}px) saturate(${saturation}%)`,
+            backgroundColor: isDark ? `rgba(0, 0, 0, ${opacity})` : `rgba(255, 255, 255, ${opacity})`,
           }}
         />
 
-        {/* 追加のフロストレイヤー（ガラスの質感） */}
-        <span
-          className="absolute inset-0"
-          style={{
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.1)',
-          }}
-        />
+        {/* 追加のフロストレイヤー（ガラスの質感） - opacity が 0.1 以上の場合のみ */}
+        {opacity >= 0.1 && (
+          <span
+            className="absolute inset-0"
+            style={{
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              backgroundColor: isDark
+                ? `rgba(255, 255, 255, ${opacity * 0.15})`
+                : `rgba(255, 255, 255, ${opacity * 0.3})`,
+            }}
+          />
+        )}
 
         {/* コンテンツレイヤー */}
         <div className="relative z-10">{children}</div>
