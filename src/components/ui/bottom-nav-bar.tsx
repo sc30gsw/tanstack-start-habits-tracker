@@ -103,10 +103,10 @@ export function BottomNavBar() {
 
     // 左端（ホーム）の場合: 左端から右側の余白まで完全に埋める
     if (item === 'home') {
-      left = 0
+      left = -padding // 左端を少し外側に
       const targetRelativeLeft = target.left - container.left
       // 左端(0)からターゲットの左位置 + ターゲットの幅 + 右側の余白
-      width = targetRelativeLeft + target.width + edgePadding
+      width = targetRelativeLeft + target.width + edgePadding + padding
     }
     // 右端（詳細）の場合: 左側の余白から右端まで完全に埋める
     else if (item === 'details') {
@@ -115,8 +115,8 @@ export function BottomNavBar() {
 
       // 左側の余白を含めた開始位置
       left = targetRelativeLeft - edgePadding
-      // 開始位置からコンテナの右端まで
-      width = containerWidth - left
+      // 開始位置からコンテナの右端まで（少し外側まで）
+      width = containerWidth - left + padding
     }
 
     setIndicatorStyle({
