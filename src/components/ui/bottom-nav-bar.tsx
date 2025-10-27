@@ -59,30 +59,26 @@ export function BottomNavBar() {
         elasticity={0.15}
         cornerRadius={100}
         mode="standard"
-        padding="12px 20px"
+        padding="0"
         mouseContainer={containerRef}
         overLight={!isDark}
       >
-        <div className="flex items-center gap-6">
+        <div className="flex h-full items-stretch px-5">
           {/* ホーム */}
           <div
-            style={{
-              minWidth: '52px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
+            className={`-ml-5 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-2 pr-7 pl-10 transition-colors duration-200 ${
+              isActive('/') ? (isDark ? 'bg-white/15' : 'bg-black/8') : 'bg-transparent'
+            }`}
           >
-            <ActionIcon component={Link} to="/" variant="transparent" size="sm">
+            <ActionIcon component={Link} to="/" variant="transparent" size="lg">
               <IconHome
-                size={20}
+                size={24}
                 stroke={1.5}
-                style={{ color: isActive('/') ? 'var(--mantine-color-blue-6)' : 'inherit' }}
+                className={isActive('/') ? 'text-blue-600' : isDark ? 'text-white' : 'text-black'}
               />
             </ActionIcon>
             <Text
-              size="10px"
+              size="11px"
               fw={isActive('/') ? 600 : 400}
               c={isActive('/') ? 'blue.6' : isDark ? 'white' : 'dark'}
             >
@@ -92,31 +88,27 @@ export function BottomNavBar() {
 
           {/* 習慣一覧 */}
           <div
-            style={{
-              minWidth: '52px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
+            className={`flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-7 py-2 transition-colors duration-200 ${
+              isActive('/habits') ? (isDark ? 'bg-white/15' : 'bg-black/8') : 'bg-transparent'
+            }`}
           >
             <ActionIcon
               component={Link}
               to="/habits"
               search={{ habitFilter: 'all', habitSort: 'all' } as any}
               variant="transparent"
-              size="sm"
+              size="lg"
             >
               <IconChecklist
-                size={20}
+                size={24}
                 stroke={1.5}
-                style={{
-                  color: isActive('/habits') ? 'var(--mantine-color-blue-6)' : 'inherit',
-                }}
+                className={
+                  isActive('/habits') ? 'text-blue-600' : isDark ? 'text-white' : 'text-black'
+                }
               />
             </ActionIcon>
             <Text
-              size="10px"
+              size="11px"
               fw={isActive('/habits') ? 600 : 400}
               c={isActive('/habits') ? 'blue.6' : isDark ? 'white' : 'dark'}
             >
@@ -126,17 +118,13 @@ export function BottomNavBar() {
 
           {/* 記録 */}
           <div
-            style={{
-              minWidth: '52px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
+            className={`flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-7 py-2 transition-colors duration-200 ${
+              isActive('record') ? (isDark ? 'bg-white/15' : 'bg-black/8') : 'bg-transparent'
+            }`}
           >
             <ActionIcon
               variant="transparent"
-              size="sm"
+              size="lg"
               onClick={() => {
                 navigate({
                   to: location.pathname,
@@ -148,15 +136,15 @@ export function BottomNavBar() {
               }}
             >
               <IconClock
-                size={20}
+                size={24}
                 stroke={1.5}
-                style={{
-                  color: isActive('record') ? 'var(--mantine-color-blue-6)' : 'inherit',
-                }}
+                className={
+                  isActive('record') ? 'text-blue-600' : isDark ? 'text-white' : 'text-black'
+                }
               />
             </ActionIcon>
             <Text
-              size="10px"
+              size="11px"
               fw={isActive('record') ? 600 : 400}
               c={isActive('record') ? 'blue.6' : isDark ? 'white' : 'dark'}
             >
@@ -166,30 +154,26 @@ export function BottomNavBar() {
 
           {/* 詳細 */}
           <div
-            style={{
-              minWidth: '52px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '4px',
-            }}
+            className={`-mr-5 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg py-2 pr-12 pl-7 transition-colors duration-200 ${
+              isActive('details') ? (isDark ? 'bg-white/15' : 'bg-black/8') : 'bg-transparent'
+            }`}
           >
             <ActionIcon
               ref={targetRef}
               variant="transparent"
-              size="sm"
+              size="lg"
               onClick={() => setOpened(true)}
             >
               <IconListDetails
-                size={20}
+                size={24}
                 stroke={1.5}
-                style={{
-                  color: isActive('details') ? 'var(--mantine-color-blue-6)' : 'inherit',
-                }}
+                className={
+                  isActive('details') ? 'text-blue-600' : isDark ? 'text-white' : 'text-black'
+                }
               />
             </ActionIcon>
             <Text
-              size="10px"
+              size="11px"
               fw={isActive('details') ? 600 : 400}
               c={isActive('details') ? 'blue.6' : isDark ? 'white' : 'dark'}
             >
