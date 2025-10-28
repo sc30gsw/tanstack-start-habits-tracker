@@ -45,7 +45,7 @@ export function ThemeForm() {
   const handleThemeChange = useCallback(
     (theme: ThemeFormValues['theme']) => {
       startThemeTransition(async () => {
-        let actualTheme: ThemeFormValues['theme'] = theme
+        let actualTheme = theme
 
         if (theme === 'auto') {
           const savedDisplay = localStorage.getItem('theme-display')
