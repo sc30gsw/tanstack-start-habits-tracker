@@ -108,6 +108,10 @@ export function RecordForm({
           value: 'active',
           label: '予定中',
         },
+        {
+          value: 'skipped',
+          label: 'スキップ',
+        },
       ]
     }
 
@@ -280,9 +284,9 @@ export function RecordForm({
         {isFutureDate && (
           <Alert color="blue" title="未来の日付" variant="light">
             <Text size="sm">
-              未来の日付には「予定中」ステータスのみ記録できます。
+              未来の日付には「完了」ステータスは記録できません。
               <br />
-              完了やスキップの記録は、その日が来てから行ってください。
+              完了の記録は、その日が来てから行ってください。
             </Text>
           </Alert>
         )}
@@ -304,7 +308,7 @@ export function RecordForm({
           data={statusOptions}
           disabled={isPending}
           error={form.errors.status}
-          description={isFutureDate ? '未来の日付は予定中のみ選択可能です' : undefined}
+          description={isFutureDate ? '未来の日付は予定中とスキップのみ選択可能です' : undefined}
           leftSection={
             form.values.status === 'completed' ? (
               <IconCircleCheck size={16} color="var(--mantine-color-green-6)" />
