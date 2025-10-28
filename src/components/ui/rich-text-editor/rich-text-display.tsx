@@ -1,6 +1,12 @@
 import { Box, useComputedColorScheme } from '@mantine/core'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import Color from '@tiptap/extension-color'
+import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
+import Subscript from '@tiptap/extension-subscript'
+import Superscript from '@tiptap/extension-superscript'
+import { TextStyle } from '@tiptap/extension-text-style'
+import Underline from '@tiptap/extension-underline'
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
@@ -23,6 +29,14 @@ export function RichTextDisplay({ html }: Record<'html', string>) {
         },
         codeBlock: false, // デフォルトのcodeBlockを無効化
       }),
+      TextStyle,
+      Color,
+      Underline,
+      Highlight.configure({
+        multicolor: true,
+      }),
+      Subscript,
+      Superscript,
       CodeBlockLowlight.configure({
         lowlight,
         HTMLAttributes: {
