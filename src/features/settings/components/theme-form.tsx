@@ -63,6 +63,12 @@ export function ThemeForm() {
           return
         }
 
+        if (computedColorScheme === theme) {
+          localStorage.setItem('theme-display', theme)
+
+          return
+        }
+
         localStorage.setItem('theme-display', theme)
 
         const origin = lastClickedRef.current
