@@ -33,7 +33,6 @@ import {
   IconUnderline,
 } from '@tabler/icons-react'
 import { textblockTypeInputRule } from '@tiptap/core'
-import CodeBlockShiki from 'tiptap-extension-code-block-shiki'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
@@ -46,6 +45,7 @@ import Underline from '@tiptap/extension-underline'
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEffect, useState } from 'react'
+import CodeBlockShiki from 'tiptap-extension-code-block-shiki'
 import { CodeBlockComponent } from '~/components/ui/rich-text-editor/code-block-component'
 import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
@@ -99,12 +99,32 @@ const LANGUAGE_OPTIONS = [
   { value: 'nginx', label: 'Nginx' },
 ] as const satisfies readonly Record<string, string>[]
 
-// Language to file extension mapping
-const LANGUAGE_TO_EXTENSION: Record<string, string> = {
+// Language abbreviation to full name mapping
+const LANGUAGE_NORMALIZATION = {
+  js: 'javascript',
+  ts: 'typescript',
+  py: 'python',
+  rb: 'ruby',
+  rs: 'rust',
+  kt: 'kotlin',
+  ex: 'elixir',
+  cs: 'csharp',
+  ps1: 'powershell',
+  yml: 'yaml',
+  gql: 'graphql',
+  md: 'markdown',
+} as const satisfies Record<string, string>
+
+// Language to file extension mapping (including common abbreviations)
+const LANGUAGE_TO_EXTENSION = {
+  // JavaScript/TypeScript
   javascript: '.js',
+  js: '.js',
   typescript: '.ts',
+  ts: '.ts',
   jsx: '.jsx',
   tsx: '.tsx',
+  // Web
   html: '.html',
   css: '.css',
   scss: '.scss',
@@ -112,23 +132,34 @@ const LANGUAGE_TO_EXTENSION: Record<string, string> = {
   less: '.less',
   vue: '.vue',
   svelte: '.svelte',
+  // Backend
   python: '.py',
+  py: '.py',
   java: '.java',
   go: '.go',
   rust: '.rs',
+  rs: '.rs',
   ruby: '.rb',
+  rb: '.rb',
   php: '.php',
   csharp: '.cs',
+  cs: '.cs',
   cpp: '.cpp',
+  'c++': '.cpp',
   c: '.c',
   kotlin: '.kt',
+  kt: '.kt',
   swift: '.swift',
   dart: '.dart',
   elixir: '.ex',
+  ex: '.ex',
+  // Shell
   bash: '.sh',
   sh: '.sh',
   zsh: '.zsh',
   powershell: '.ps1',
+  ps1: '.ps1',
+  // Data & Config
   json: '.json',
   yaml: '.yml',
   yml: '.yml',
@@ -136,14 +167,18 @@ const LANGUAGE_TO_EXTENSION: Record<string, string> = {
   xml: '.xml',
   ini: '.ini',
   graphql: '.graphql',
+  gql: '.graphql',
   sql: '.sql',
+  // Markup
   markdown: '.md',
   md: '.md',
+  // Other
   nginx: '.conf',
-}
+  dockerfile: '',
+} as const satisfies Record<string, string>
 
-const TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX = /^```([a-z]+)?(?::([^\s]+))?[\s\n]$/
-const CODEBLOCK_REGEX = /^```([a-z]+)?(?::([^\n]+))?\n([\s\S]*?)\n```$/m
+const TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX = /^```([a-z0-9]+)?(?::([^\s]+))?[\s\n]$/
+const CODEBLOCK_REGEX = /^```([a-z0-9]+)?(?::([^\n]+))?\n([\s\S]*?)\n```$/m
 
 type RichTextEditorProps = {
   content: string
@@ -268,12 +303,19 @@ export function RichTextEditor({
               find: TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX,
               type: this.type,
               getAttributes: (match) => {
-                const language = match[1] ? (match[1] === 'markdown' ? 'md' : match[1]) : null
+                const rawLanguage = match[1] || null
+                // Normalize language code (ts -> typescript, js -> javascript, etc.)
+                const language = rawLanguage
+                  ? LANGUAGE_NORMALIZATION[rawLanguage as keyof typeof LANGUAGE_NORMALIZATION] ||
+                    rawLanguage
+                  : null
                 let filename = match[2] || null
 
                 // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
-                if (filename && language && !filename.includes('.')) {
-                  const extension = LANGUAGE_TO_EXTENSION[language]
+                // 短縮形でも拡張子を検索できるようにrawLanguageを使用
+                if (filename && rawLanguage && !filename.includes('.')) {
+                  const extension =
+                    LANGUAGE_TO_EXTENSION[rawLanguage as keyof typeof LANGUAGE_TO_EXTENSION]
                   if (extension) {
                     filename = `${filename}${extension}`
                   }
@@ -337,13 +379,17 @@ export function RichTextEditor({
 
         if (codeBlockMatch && editor) {
           event.preventDefault()
-          const language = codeBlockMatch[1] ? (codeBlockMatch[1] === 'markdown' ? 'md' : codeBlockMatch[1]) : null
+          const language = codeBlockMatch[1]
+            ? codeBlockMatch[1] === 'markdown'
+              ? 'md'
+              : codeBlockMatch[1]
+            : null
           let filename = codeBlockMatch[2] || null
           const code = codeBlockMatch[3]
 
           // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
           if (filename && language && !filename.includes('.')) {
-            const extension = LANGUAGE_TO_EXTENSION[language]
+            const extension = LANGUAGE_TO_EXTENSION[language as keyof typeof LANGUAGE_TO_EXTENSION]
             if (extension) {
               filename = `${filename}${extension}`
             }
@@ -486,10 +532,14 @@ export function RichTextEditor({
               padding: '4px 8px',
               border: 'none',
               borderRadius: '4px',
-              cursor: !editor.can().chain().focus().undo().run() || disabled ? 'not-allowed' : 'pointer',
+              cursor:
+                !editor.can().chain().focus().undo().run() || disabled ? 'not-allowed' : 'pointer',
               backgroundColor: 'transparent',
               opacity: !editor.can().chain().focus().undo().run() || disabled ? 0.4 : 1,
-              color: !editor.can().chain().focus().undo().run() || disabled ? 'var(--mantine-color-gray-5)' : 'inherit',
+              color:
+                !editor.can().chain().focus().undo().run() || disabled
+                  ? 'var(--mantine-color-gray-5)'
+                  : 'inherit',
             }}
           >
             <IconArrowBackUp size={18} />
@@ -522,10 +572,14 @@ export function RichTextEditor({
               padding: '4px 8px',
               border: 'none',
               borderRadius: '4px',
-              cursor: !editor.can().chain().focus().redo().run() || disabled ? 'not-allowed' : 'pointer',
+              cursor:
+                !editor.can().chain().focus().redo().run() || disabled ? 'not-allowed' : 'pointer',
               backgroundColor: 'transparent',
               opacity: !editor.can().chain().focus().redo().run() || disabled ? 0.4 : 1,
-              color: !editor.can().chain().focus().redo().run() || disabled ? 'var(--mantine-color-gray-5)' : 'inherit',
+              color:
+                !editor.can().chain().focus().redo().run() || disabled
+                  ? 'var(--mantine-color-gray-5)'
+                  : 'inherit',
             }}
           >
             <IconArrowForwardUp size={18} />
@@ -921,7 +975,8 @@ export function RichTextEditor({
                   // Auto-fill filename extension if filename is empty
                   const currentFilename = editor.getAttributes('codeBlock').filename
                   if (!currentFilename && normalizedValue) {
-                    const extension = LANGUAGE_TO_EXTENSION[normalizedValue]
+                    const extension =
+                      LANGUAGE_TO_EXTENSION[normalizedValue as keyof typeof LANGUAGE_TO_EXTENSION]
                     if (extension) {
                       editor.commands.updateAttributes('codeBlock', {
                         filename: `example${extension}`,
