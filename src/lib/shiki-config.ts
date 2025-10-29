@@ -1,29 +1,47 @@
-import { createHighlighterCore } from 'shiki/core'
-import bash from 'shiki/langs/bash.mjs'
-import css from 'shiki/langs/css.mjs'
-import html from 'shiki/langs/html.mjs'
-import javascript from 'shiki/langs/javascript.mjs'
-import json from 'shiki/langs/json.mjs'
-import jsx from 'shiki/langs/jsx.mjs'
-import python from 'shiki/langs/python.mjs'
-import sql from 'shiki/langs/sql.mjs'
-import tsx from 'shiki/langs/tsx.mjs'
-import typescript from 'shiki/langs/typescript.mjs'
-import githubDark from 'shiki/themes/github-dark.mjs'
-import githubLight from 'shiki/themes/github-light.mjs'
-import getWasm from 'shiki/wasm'
+import type { HighlighterCore } from 'shiki'
 
-let highlighterInstance: Awaited<ReturnType<typeof createHighlighterCore>> | null = null
+let highlighterInstance: HighlighterCore | null = null
 
-export async function getHighlighter() {
+export async function getHighlighter(): Promise<HighlighterCore> {
   if (highlighterInstance) {
     return highlighterInstance
   }
 
+  const { createHighlighterCore, createOnigurumaEngine } = await import('shiki/core')
+
+  // 必要な言語のみを動的インポート
+  const [
+    javascript,
+    typescript,
+    jsx,
+    tsx,
+    json,
+    css,
+    html,
+    bash,
+    python,
+    sql,
+    githubDark,
+    githubLight,
+  ] = await Promise.all([
+    import('shiki/langs/javascript.mjs').then((m) => m.default),
+    import('shiki/langs/typescript.mjs').then((m) => m.default),
+    import('shiki/langs/jsx.mjs').then((m) => m.default),
+    import('shiki/langs/tsx.mjs').then((m) => m.default),
+    import('shiki/langs/json.mjs').then((m) => m.default),
+    import('shiki/langs/css.mjs').then((m) => m.default),
+    import('shiki/langs/html.mjs').then((m) => m.default),
+    import('shiki/langs/bash.mjs').then((m) => m.default),
+    import('shiki/langs/python.mjs').then((m) => m.default),
+    import('shiki/langs/sql.mjs').then((m) => m.default),
+    import('shiki/themes/github-dark.mjs').then((m) => m.default),
+    import('shiki/themes/github-light.mjs').then((m) => m.default),
+  ])
+
   highlighterInstance = await createHighlighterCore({
     themes: [githubDark, githubLight],
     langs: [javascript, typescript, jsx, tsx, json, css, html, bash, python, sql],
-    loadWasm: getWasm,
+    engine: createOnigurumaEngine(import('shiki/wasm')),
   })
 
   return highlighterInstance

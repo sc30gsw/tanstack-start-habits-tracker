@@ -9,9 +9,9 @@ import Underline from '@tiptap/extension-underline'
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEffect } from 'react'
-import CodeBlockShiki from 'tiptap-extension-code-block-shiki'
 import { CodeBlockComponent } from '~/components/ui/rich-text-editor/code-block-component'
 import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
+import { CodeBlockShikiExtension } from '~/components/ui/rich-text-editor/code-block-shiki-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
@@ -34,7 +34,7 @@ export function RichTextDisplay({ html }: Record<'html', string>) {
       }),
       Subscript,
       Superscript,
-      CodeBlockShiki.configure({
+      CodeBlockShikiExtension.configure({
         defaultTheme: computedColorScheme === 'dark' ? 'github-dark' : 'github-light',
         HTMLAttributes: {
           class: 'code-block',
