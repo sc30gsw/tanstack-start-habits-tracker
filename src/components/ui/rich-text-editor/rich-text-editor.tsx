@@ -33,7 +33,7 @@ import {
   IconUnderline,
 } from '@tabler/icons-react'
 import { textblockTypeInputRule } from '@tiptap/core'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import CodeBlockShiki from 'tiptap-extension-code-block-shiki'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
@@ -45,36 +45,102 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import Underline from '@tiptap/extension-underline'
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { common, createLowlight } from 'lowlight'
 import { useEffect, useState } from 'react'
 import { CodeBlockComponent } from '~/components/ui/rich-text-editor/code-block-component'
 import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
-const lowlight = createLowlight(common)
-
 const LANGUAGE_OPTIONS = [
   { value: 'null', label: '自動検出' },
+  // Web Development
   { value: 'javascript', label: 'JavaScript' },
   { value: 'typescript', label: 'TypeScript' },
+  { value: 'jsx', label: 'JSX' },
+  { value: 'tsx', label: 'TSX' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'scss', label: 'SCSS' },
+  { value: 'sass', label: 'Sass' },
+  { value: 'less', label: 'Less' },
+  { value: 'vue', label: 'Vue' },
+  { value: 'svelte', label: 'Svelte' },
+  // Backend Languages
   { value: 'python', label: 'Python' },
   { value: 'java', label: 'Java' },
-  { value: 'css', label: 'CSS' },
-  { value: 'html', label: 'HTML' },
-  { value: 'json', label: 'JSON' },
-  { value: 'bash', label: 'Bash' },
-  { value: 'sql', label: 'SQL' },
-  { value: 'md', label: 'Markdown' },
-  { value: 'yaml', label: 'YAML' },
-  { value: 'xml', label: 'XML' },
-  { value: 'cpp', label: 'C++' },
-  { value: 'csharp', label: 'C#' },
   { value: 'go', label: 'Go' },
   { value: 'rust', label: 'Rust' },
   { value: 'ruby', label: 'Ruby' },
   { value: 'php', label: 'PHP' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'c', label: 'C' },
+  { value: 'kotlin', label: 'Kotlin' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'dart', label: 'Dart' },
+  { value: 'elixir', label: 'Elixir' },
+  // Shell & Scripts
+  { value: 'bash', label: 'Bash' },
+  { value: 'sh', label: 'Shell' },
+  { value: 'zsh', label: 'Zsh' },
+  { value: 'powershell', label: 'PowerShell' },
+  // Data & Config
+  { value: 'json', label: 'JSON' },
+  { value: 'yaml', label: 'YAML' },
+  { value: 'toml', label: 'TOML' },
+  { value: 'xml', label: 'XML' },
+  { value: 'ini', label: 'INI' },
+  { value: 'graphql', label: 'GraphQL' },
+  { value: 'sql', label: 'SQL' },
+  // Markup & Documentation
+  { value: 'markdown', label: 'Markdown' },
+  // Container & Infrastructure
+  { value: 'dockerfile', label: 'Dockerfile' },
+  { value: 'nginx', label: 'Nginx' },
 ] as const satisfies readonly Record<string, string>[]
+
+// Language to file extension mapping
+const LANGUAGE_TO_EXTENSION: Record<string, string> = {
+  javascript: '.js',
+  typescript: '.ts',
+  jsx: '.jsx',
+  tsx: '.tsx',
+  html: '.html',
+  css: '.css',
+  scss: '.scss',
+  sass: '.sass',
+  less: '.less',
+  vue: '.vue',
+  svelte: '.svelte',
+  python: '.py',
+  java: '.java',
+  go: '.go',
+  rust: '.rs',
+  ruby: '.rb',
+  php: '.php',
+  csharp: '.cs',
+  cpp: '.cpp',
+  c: '.c',
+  kotlin: '.kt',
+  swift: '.swift',
+  dart: '.dart',
+  elixir: '.ex',
+  bash: '.sh',
+  sh: '.sh',
+  zsh: '.zsh',
+  powershell: '.ps1',
+  json: '.json',
+  yaml: '.yml',
+  yml: '.yml',
+  toml: '.toml',
+  xml: '.xml',
+  ini: '.ini',
+  graphql: '.graphql',
+  sql: '.sql',
+  markdown: '.md',
+  md: '.md',
+  nginx: '.conf',
+}
 
 const TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX = /^```([a-z]+)?(?::([^\s]+))?[\s\n]$/
 const CODEBLOCK_REGEX = /^```([a-z]+)?(?::([^\n]+))?\n([\s\S]*?)\n```$/m
@@ -186,8 +252,8 @@ export function RichTextEditor({
           }
         },
       }),
-      CodeBlockLowlight.configure({
-        lowlight,
+      CodeBlockShiki.configure({
+        defaultTheme: computedColorScheme === 'dark' ? 'github-dark' : 'github-light',
         HTMLAttributes: {
           class: 'code-block',
         },
@@ -201,10 +267,23 @@ export function RichTextEditor({
             textblockTypeInputRule({
               find: TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX,
               type: this.type,
-              getAttributes: (match) => ({
-                language: match[1] || null,
-                filename: match[2] || null,
-              }),
+              getAttributes: (match) => {
+                const language = match[1] ? (match[1] === 'markdown' ? 'md' : match[1]) : null
+                let filename = match[2] || null
+
+                // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
+                if (filename && language && !filename.includes('.')) {
+                  const extension = LANGUAGE_TO_EXTENSION[language]
+                  if (extension) {
+                    filename = `${filename}${extension}`
+                  }
+                }
+
+                return {
+                  language,
+                  filename,
+                }
+              },
             }),
           ]
         },
@@ -258,9 +337,17 @@ export function RichTextEditor({
 
         if (codeBlockMatch && editor) {
           event.preventDefault()
-          const language = codeBlockMatch[1] || null
-          const filename = codeBlockMatch[2] || null
+          const language = codeBlockMatch[1] ? (codeBlockMatch[1] === 'markdown' ? 'md' : codeBlockMatch[1]) : null
+          let filename = codeBlockMatch[2] || null
           const code = codeBlockMatch[3]
+
+          // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
+          if (filename && language && !filename.includes('.')) {
+            const extension = LANGUAGE_TO_EXTENSION[language]
+            if (extension) {
+              filename = `${filename}${extension}`
+            }
+          }
 
           editor
             .chain()
@@ -827,13 +914,29 @@ export function RichTextEditor({
                 if (value === 'null') {
                   editor.commands.updateAttributes('codeBlock', { language: null })
                 } else {
-                  editor.commands.updateAttributes('codeBlock', { language: value })
+                  // Normalize markdown to md
+                  const normalizedValue = value === 'markdown' ? 'md' : value
+                  editor.commands.updateAttributes('codeBlock', { language: normalizedValue })
+
+                  // Auto-fill filename extension if filename is empty
+                  const currentFilename = editor.getAttributes('codeBlock').filename
+                  if (!currentFilename && normalizedValue) {
+                    const extension = LANGUAGE_TO_EXTENSION[normalizedValue]
+                    if (extension) {
+                      editor.commands.updateAttributes('codeBlock', {
+                        filename: `example${extension}`,
+                      })
+                    }
+                  }
                 }
               }}
               size="xs"
-              w={140}
+              w={180}
               disabled={disabled}
               placeholder="言語"
+              searchable
+              nothingFoundMessage="言語が見つかりません"
+              maxDropdownHeight={300}
               styles={{
                 input: {
                   fontSize: '12px',
