@@ -43,7 +43,9 @@ export function CodeBlockComponent({ node }: NodeViewProps) {
         </ActionIcon>
       </Tooltip>
       <pre data-language={language || undefined} data-filename={filename || undefined}>
-        <NodeViewContent as="div" />
+        <code>
+          <NodeViewContent />
+        </code>
       </pre>
     </NodeViewWrapper>
   )

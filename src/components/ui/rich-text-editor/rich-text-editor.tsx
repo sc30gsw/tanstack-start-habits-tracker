@@ -33,7 +33,7 @@ import {
   IconUnderline,
 } from '@tabler/icons-react'
 import { textblockTypeInputRule } from '@tiptap/core'
-import CodeBlock from '@tiptap/extension-code-block'
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
@@ -45,11 +45,14 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import Underline from '@tiptap/extension-underline'
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { all, createLowlight } from 'lowlight'
 import { useEffect, useState } from 'react'
 import { CodeBlockComponent } from '~/components/ui/rich-text-editor/code-block-component'
 import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
+
+const lowlight = createLowlight(all)
 
 const LANGUAGE_OPTIONS = [
   { value: 'null', label: '自動検出' },
@@ -287,7 +290,8 @@ export function RichTextEditor({
           }
         },
       }),
-      CodeBlock.configure({
+      CodeBlockLowlight.configure({
+        lowlight,
         HTMLAttributes: {
           class: 'code-block',
         },

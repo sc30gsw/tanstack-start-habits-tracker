@@ -203,19 +203,371 @@
   font-size: 0.875em;
 }
 
-/* Code Block Syntax Highlighting with CSS */
-/* Light theme */
+/* Code Block Syntax Highlighting - VSCode Style */
+/* Light theme - VS Code Light+ */
 .ProseMirror pre {
-  background-color: var(--mantine-color-gray-0);
-  border: 1px solid var(--mantine-color-gray-3);
-  color: var(--mantine-color-gray-9);
+  background-color: #ffffff;
+  border: 1px solid #e1e4e8;
+  color: #24292e;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-size: 0.9em;
+  line-height: 1.6;
 }
 
-/* Dark mode */
+/* Dark mode - VS Code Dark+ */
 [data-mantine-color-scheme='dark'] .ProseMirror pre {
-  background-color: var(--mantine-color-dark-8);
-  border: 1px solid var(--mantine-color-dark-4);
-  color: var(--mantine-color-gray-1);
+  background-color: #1e1e1e;
+  border: 1px solid #3e3e42;
+  color: #d4d4d4;
+}
+
+/* Lowlight/Highlight.js classes - Light Theme */
+/* Keywords: const, let, var, function, class, if, else, return, etc. */
+.ProseMirror pre code .hljs-keyword,
+.ProseMirror pre code .hljs-selector-tag,
+.ProseMirror pre code .hljs-literal,
+.ProseMirror pre code .hljs-section,
+.ProseMirror pre code .hljs-link {
+  color: #0000ff;
+  font-weight: 600;
+}
+
+/* Strings */
+.ProseMirror pre code .hljs-string,
+.ProseMirror pre code .hljs-doctag {
+  color: #a31515;
+}
+
+/* Numbers */
+.ProseMirror pre code .hljs-number {
+  color: #098658;
+}
+
+/* Comments */
+.ProseMirror pre code .hljs-comment,
+.ProseMirror pre code .hljs-quote {
+  color: #008000;
+  font-style: italic;
+}
+
+/* Functions and method calls */
+.ProseMirror pre code .hljs-function,
+.ProseMirror pre code .hljs-title.function_,
+.ProseMirror pre code .hljs-title.function {
+  color: #795e26;
+}
+
+/* Types, Classes, and Built-ins */
+.ProseMirror pre code .hljs-title.class_,
+.ProseMirror pre code .hljs-title.class,
+.ProseMirror pre code .hljs-type,
+.ProseMirror pre code .hljs-built_in,
+.ProseMirror pre code .hljs-builtin-name {
+  color: #267f99;
+}
+
+/* Variables and Parameters */
+.ProseMirror pre code .hljs-variable,
+.ProseMirror pre code .hljs-params,
+.ProseMirror pre code .hljs-attr {
+  color: #001080;
+}
+
+/* Properties */
+.ProseMirror pre code .hljs-property,
+.ProseMirror pre code .hljs-attribute {
+  color: #001080;
+}
+
+/* Tags (HTML/JSX) */
+.ProseMirror pre code .hljs-tag {
+  color: #800000;
+}
+
+/* Tag names */
+.ProseMirror pre code .hljs-name {
+  color: #800000;
+}
+
+/* Attribute names */
+.ProseMirror pre code .hljs-attr {
+  color: #0451a5;
+}
+
+/* Regular expressions */
+.ProseMirror pre code .hljs-regexp {
+  color: #811f3f;
+}
+
+/* Symbols and operators */
+.ProseMirror pre code .hljs-symbol,
+.ProseMirror pre code .hljs-bullet {
+  color: #001080;
+}
+
+/* Meta (decorators, preprocessor) */
+.ProseMirror pre code .hljs-meta {
+  color: #808080;
+}
+
+/* Template strings and interpolation */
+.ProseMirror pre code .hljs-template-variable,
+.ProseMirror pre code .hljs-template-tag {
+  color: #a31515;
+}
+
+/* Lowlight/Highlight.js classes - Dark Theme */
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-keyword,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-selector-tag,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-literal,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-section,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-link {
+  color: #569cd6;
+  font-weight: 600;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-string,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-doctag {
+  color: #ce9178;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-number {
+  color: #b5cea8;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-comment,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-quote {
+  color: #6a9955;
+  font-style: italic;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-function,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-title.function_,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-title.function {
+  color: #dcdcaa;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-title.class_,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-title.class,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-type,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-built_in,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-builtin-name {
+  color: #4ec9b0;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-variable,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-params,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-attr {
+  color: #9cdcfe;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-property,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-attribute {
+  color: #9cdcfe;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-tag {
+  color: #569cd6;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-name {
+  color: #569cd6;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-attr {
+  color: #9cdcfe;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-regexp {
+  color: #d16969;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-symbol,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-bullet {
+  color: #4ec9b0;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-meta {
+  color: #808080;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-template-variable,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-template-tag {
+  color: #ce9178;
+}
+
+/* Additional common classes */
+.ProseMirror pre code .hljs-addition {
+  color: #22863a;
+  background-color: #f0fff4;
+}
+
+.ProseMirror pre code .hljs-deletion {
+  color: #b31d28;
+  background-color: #ffeef0;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-addition {
+  color: #85e89d;
+  background-color: rgba(34, 134, 58, 0.15);
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .hljs-deletion {
+  color: #f97583;
+  background-color: rgba(179, 29, 40, 0.15);
+}
+
+.ProseMirror pre code .hljs-emphasis {
+  font-style: italic;
+}
+
+.ProseMirror pre code .hljs-strong {
+  font-weight: 700;
+}
+
+/* Fallback/legacy class names that were in the original CSS */
+/* Keywords: const, let, var, function, class, etc. */
+.ProseMirror pre code .keyword {
+  color: #0000ff;
+  font-weight: 600;
+}
+
+/* Strings */
+.ProseMirror pre code .string {
+  color: #a31515;
+}
+
+/* Numbers */
+.ProseMirror pre code .number {
+  color: #098658;
+}
+
+/* Comments */
+.ProseMirror pre code .comment {
+  color: #008000;
+  font-style: italic;
+}
+
+/* Functions */
+.ProseMirror pre code .function {
+  color: #795e26;
+}
+
+/* Types and Classes */
+.ProseMirror pre code .class-name,
+.ProseMirror pre code .type {
+  color: #267f99;
+}
+
+/* Variables */
+.ProseMirror pre code .variable {
+  color: #001080;
+}
+
+/* Operators */
+.ProseMirror pre code .operator {
+  color: #000000;
+}
+
+/* Punctuation */
+.ProseMirror pre code .punctuation {
+  color: #000000;
+}
+
+/* Properties */
+.ProseMirror pre code .property {
+  color: #001080;
+}
+
+/* Tags (HTML) */
+.ProseMirror pre code .tag {
+  color: #800000;
+}
+
+/* Attributes */
+.ProseMirror pre code .attr-name {
+  color: #0451a5;
+}
+
+/* Boolean, null, undefined */
+.ProseMirror pre code .boolean,
+.ProseMirror pre code .null,
+.ProseMirror pre code .undefined {
+  color: #0000ff;
+  font-weight: 600;
+}
+
+/* Regex */
+.ProseMirror pre code .regex {
+  color: #811f3f;
+}
+
+/* Import/Export */
+.ProseMirror pre code .keyword.module {
+  color: #af00db;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .keyword {
+  color: #569cd6;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .string {
+  color: #ce9178;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .number {
+  color: #b5cea8;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .comment {
+  color: #6a9955;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .function {
+  color: #dcdcaa;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .class-name,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .type {
+  color: #4ec9b0;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .variable {
+  color: #9cdcfe;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .operator {
+  color: #d4d4d4;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .punctuation {
+  color: #d4d4d4;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .property {
+  color: #9cdcfe;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .tag {
+  color: #569cd6;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .attr-name {
+  color: #9cdcfe;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .boolean,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .null,
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .undefined {
+  color: #569cd6;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .regex {
+  color: #d16969;
+}
+
+[data-mantine-color-scheme='dark'] .ProseMirror pre code .keyword.module {
+  color: #c586c0;
 }
 
 .ProseMirror strong {
