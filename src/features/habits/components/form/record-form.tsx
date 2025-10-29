@@ -21,7 +21,7 @@ dayjs.extend(timezone)
 dayjs.locale('ja')
 dayjs.tz.setDefault('Asia/Tokyo')
 
-import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor-lazy'
+import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
 import { recordDto } from '~/features/habits/server/record-functions'
 import type { HabitTable, RecordEntity, RecordTable } from '~/features/habits/types/habit'
 import { createRecordSchema } from '~/features/habits/types/schemas/record-schemas'

@@ -118,6 +118,17 @@ const LANGUAGE_NORMALIZATION = {
   md: 'markdown',
 } as const satisfies Record<string, string>
 
+const LANGUAGE_DENORMALIZATION = Object.entries(LANGUAGE_NORMALIZATION).reduce(
+  (acc, [short, full]) => {
+    acc[short] = full
+    acc[full] = full
+
+    return acc
+  },
+
+  {} as Record<string, string>,
+)
+
 // Language to file extension mapping (including common abbreviations)
 const LANGUAGE_TO_EXTENSION = {
   // JavaScript/TypeScript
@@ -374,24 +385,18 @@ export function RichTextEditor({
     onUpdate: ({ editor }) => {
       const html = editor.getHTML()
       onChange(html)
-
-      // Update code block attributes when content changes
-      if (editor.isActive('codeBlock')) {
-        const attrs = editor.getAttributes('codeBlock')
-        setCodeBlockAttrs({
-          language: attrs.language || null,
-          filename: attrs.filename || null,
-        })
-      }
     },
     onSelectionUpdate: ({ editor }) => {
-      // Update code block attributes when selection changes
+      // Update code block attributes when selection changes (focus change)
       if (editor.isActive('codeBlock')) {
         const attrs = editor.getAttributes('codeBlock')
         setCodeBlockAttrs({
           language: attrs.language || null,
           filename: attrs.filename || null,
         })
+      } else {
+        // Reset when not in code block
+        setCodeBlockAttrs({ language: null, filename: null })
       }
     },
     editorProps: {
@@ -989,9 +994,13 @@ export function RichTextEditor({
           <>
             <Select
               data={LANGUAGE_OPTIONS}
-              value={codeBlockAttrs.language || 'null'}
+              value={
+                codeBlockAttrs.language
+                  ? LANGUAGE_DENORMALIZATION[codeBlockAttrs.language] || codeBlockAttrs.language
+                  : 'null'
+              }
               onChange={(value) => {
-                if (value === 'null') {
+                if (!value || value === 'null') {
                   editor.commands.updateAttributes('codeBlock', { language: null })
                 } else {
                   // Normalize markdown to md
@@ -1014,10 +1023,11 @@ export function RichTextEditor({
               size="xs"
               w={180}
               disabled={disabled}
-              placeholder="言語"
+              placeholder="言語を選択"
               searchable
               nothingFoundMessage="言語が見つかりません"
               maxDropdownHeight={300}
+              clearable
               styles={{
                 input: {
                   fontSize: '12px',
@@ -1025,7 +1035,6 @@ export function RichTextEditor({
                   minHeight: '28px',
                 },
               }}
-              allowDeselect={false}
             />
             <TextInput
               value={codeBlockAttrs.filename || ''}
