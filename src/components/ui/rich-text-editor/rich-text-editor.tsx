@@ -205,6 +205,10 @@ export function RichTextEditor({
   const [linkText, setLinkText] = useState('')
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
   const [selectedColor, setSelectedColor] = useState('#000000')
+  const [codeBlockAttrs, setCodeBlockAttrs] = useState<{
+    language: string | null
+    filename: string | null
+  }>({ language: null, filename: null })
 
   const editor = useEditor({
     extensions: [
@@ -370,6 +374,25 @@ export function RichTextEditor({
     onUpdate: ({ editor }) => {
       const html = editor.getHTML()
       onChange(html)
+
+      // Update code block attributes when content changes
+      if (editor.isActive('codeBlock')) {
+        const attrs = editor.getAttributes('codeBlock')
+        setCodeBlockAttrs({
+          language: attrs.language || null,
+          filename: attrs.filename || null,
+        })
+      }
+    },
+    onSelectionUpdate: ({ editor }) => {
+      // Update code block attributes when selection changes
+      if (editor.isActive('codeBlock')) {
+        const attrs = editor.getAttributes('codeBlock')
+        setCodeBlockAttrs({
+          language: attrs.language || null,
+          filename: attrs.filename || null,
+        })
+      }
     },
     editorProps: {
       attributes: {
@@ -966,7 +989,7 @@ export function RichTextEditor({
           <>
             <Select
               data={LANGUAGE_OPTIONS}
-              value={editor.getAttributes('codeBlock').language || 'null'}
+              value={codeBlockAttrs.language || 'null'}
               onChange={(value) => {
                 if (value === 'null') {
                   editor.commands.updateAttributes('codeBlock', { language: null })
@@ -1005,7 +1028,7 @@ export function RichTextEditor({
               allowDeselect={false}
             />
             <TextInput
-              value={editor.getAttributes('codeBlock').filename || ''}
+              value={codeBlockAttrs.filename || ''}
               onChange={(e) => {
                 editor.commands.updateAttributes('codeBlock', {
                   filename: e.currentTarget.value || null,
