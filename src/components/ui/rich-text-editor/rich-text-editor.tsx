@@ -1,65 +1,184 @@
 import {
   Box,
   Button,
+  ColorInput,
   Group,
+  Kbd,
   Modal,
+  Popover,
   Select,
   Stack,
+  Text,
   TextInput,
   Tooltip,
   useComputedColorScheme,
 } from '@mantine/core'
 import {
+  IconArrowBackUp,
+  IconArrowForwardUp,
   IconBold,
   IconCode,
   IconCodePlus,
+  IconColorPicker,
+  IconHighlight,
   IconItalic,
   IconLink,
   IconLinkOff,
   IconList,
   IconListNumbers,
+  IconSeparatorHorizontal,
   IconStrikethrough,
+  IconSubscript,
+  IconSuperscript,
+  IconUnderline,
 } from '@tabler/icons-react'
 import { textblockTypeInputRule } from '@tiptap/core'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import Color from '@tiptap/extension-color'
+import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
 import ListItem from '@tiptap/extension-list-item'
 import Placeholder from '@tiptap/extension-placeholder'
+import Subscript from '@tiptap/extension-subscript'
+import Superscript from '@tiptap/extension-superscript'
+import { TextStyle } from '@tiptap/extension-text-style'
+import Underline from '@tiptap/extension-underline'
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { common, createLowlight } from 'lowlight'
 import { useEffect, useState } from 'react'
+import CodeBlockShiki from 'tiptap-extension-code-block-shiki'
 import { CodeBlockComponent } from '~/components/ui/rich-text-editor/code-block-component'
 import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
-const lowlight = createLowlight(common)
-
 const LANGUAGE_OPTIONS = [
   { value: 'null', label: '自動検出' },
+  // Web Development
   { value: 'javascript', label: 'JavaScript' },
   { value: 'typescript', label: 'TypeScript' },
+  { value: 'jsx', label: 'JSX' },
+  { value: 'tsx', label: 'TSX' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'scss', label: 'SCSS' },
+  { value: 'sass', label: 'Sass' },
+  { value: 'less', label: 'Less' },
+  { value: 'vue', label: 'Vue' },
+  { value: 'svelte', label: 'Svelte' },
+  // Backend Languages
   { value: 'python', label: 'Python' },
   { value: 'java', label: 'Java' },
-  { value: 'css', label: 'CSS' },
-  { value: 'html', label: 'HTML' },
-  { value: 'json', label: 'JSON' },
-  { value: 'bash', label: 'Bash' },
-  { value: 'sql', label: 'SQL' },
-  { value: 'markdown', label: 'Markdown' },
-  { value: 'yaml', label: 'YAML' },
-  { value: 'xml', label: 'XML' },
-  { value: 'cpp', label: 'C++' },
-  { value: 'csharp', label: 'C#' },
   { value: 'go', label: 'Go' },
   { value: 'rust', label: 'Rust' },
   { value: 'ruby', label: 'Ruby' },
   { value: 'php', label: 'PHP' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'c', label: 'C' },
+  { value: 'kotlin', label: 'Kotlin' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'dart', label: 'Dart' },
+  { value: 'elixir', label: 'Elixir' },
+  // Shell & Scripts
+  { value: 'bash', label: 'Bash' },
+  { value: 'sh', label: 'Shell' },
+  { value: 'zsh', label: 'Zsh' },
+  { value: 'powershell', label: 'PowerShell' },
+  // Data & Config
+  { value: 'json', label: 'JSON' },
+  { value: 'yaml', label: 'YAML' },
+  { value: 'toml', label: 'TOML' },
+  { value: 'xml', label: 'XML' },
+  { value: 'ini', label: 'INI' },
+  { value: 'graphql', label: 'GraphQL' },
+  { value: 'sql', label: 'SQL' },
+  // Markup & Documentation
+  { value: 'markdown', label: 'Markdown' },
+  // Container & Infrastructure
+  { value: 'dockerfile', label: 'Dockerfile' },
+  { value: 'nginx', label: 'Nginx' },
 ] as const satisfies readonly Record<string, string>[]
 
-const TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX = /^```([a-z]+)?(?::([^\s]+))?[\s\n]$/
-const CODEBLOCK_REGEX = /^```([a-z]+)?(?::([^\n]+))?\n([\s\S]*?)\n```$/m
+// Language abbreviation to full name mapping
+const LANGUAGE_NORMALIZATION = {
+  js: 'javascript',
+  ts: 'typescript',
+  py: 'python',
+  rb: 'ruby',
+  rs: 'rust',
+  kt: 'kotlin',
+  ex: 'elixir',
+  cs: 'csharp',
+  ps1: 'powershell',
+  yml: 'yaml',
+  gql: 'graphql',
+  md: 'markdown',
+} as const satisfies Record<string, string>
+
+// Language to file extension mapping (including common abbreviations)
+const LANGUAGE_TO_EXTENSION = {
+  // JavaScript/TypeScript
+  javascript: '.js',
+  js: '.js',
+  typescript: '.ts',
+  ts: '.ts',
+  jsx: '.jsx',
+  tsx: '.tsx',
+  // Web
+  html: '.html',
+  css: '.css',
+  scss: '.scss',
+  sass: '.sass',
+  less: '.less',
+  vue: '.vue',
+  svelte: '.svelte',
+  // Backend
+  python: '.py',
+  py: '.py',
+  java: '.java',
+  go: '.go',
+  rust: '.rs',
+  rs: '.rs',
+  ruby: '.rb',
+  rb: '.rb',
+  php: '.php',
+  csharp: '.cs',
+  cs: '.cs',
+  cpp: '.cpp',
+  'c++': '.cpp',
+  c: '.c',
+  kotlin: '.kt',
+  kt: '.kt',
+  swift: '.swift',
+  dart: '.dart',
+  elixir: '.ex',
+  ex: '.ex',
+  // Shell
+  bash: '.sh',
+  sh: '.sh',
+  zsh: '.zsh',
+  powershell: '.ps1',
+  ps1: '.ps1',
+  // Data & Config
+  json: '.json',
+  yaml: '.yml',
+  yml: '.yml',
+  toml: '.toml',
+  xml: '.xml',
+  ini: '.ini',
+  graphql: '.graphql',
+  gql: '.graphql',
+  sql: '.sql',
+  // Markup
+  markdown: '.md',
+  md: '.md',
+  // Other
+  nginx: '.conf',
+  dockerfile: '',
+} as const satisfies Record<string, string>
+
+const TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX = /^```([a-z0-9]+)?(?::([^\s]+))?[\s\n]$/
+const CODEBLOCK_REGEX = /^```([a-z0-9]+)?(?::([^\n]+))?\n([\s\S]*?)\n```$/m
 
 type RichTextEditorProps = {
   content: string
@@ -81,6 +200,8 @@ export function RichTextEditor({
   const [linkModalOpen, setLinkModalOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
   const [linkText, setLinkText] = useState('')
+  const [colorPickerOpen, setColorPickerOpen] = useState(false)
+  const [selectedColor, setSelectedColor] = useState('#000000')
 
   const editor = useEditor({
     extensions: [
@@ -112,6 +233,14 @@ export function RichTextEditor({
           }
         },
       }),
+      TextStyle,
+      Color,
+      Underline,
+      Highlight.configure({
+        multicolor: true,
+      }),
+      Subscript,
+      Superscript,
       ListItem.extend({
         addKeyboardShortcuts() {
           return {
@@ -158,8 +287,8 @@ export function RichTextEditor({
           }
         },
       }),
-      CodeBlockLowlight.configure({
-        lowlight,
+      CodeBlockShiki.configure({
+        defaultTheme: computedColorScheme === 'dark' ? 'github-dark' : 'github-light',
         HTMLAttributes: {
           class: 'code-block',
         },
@@ -173,10 +302,30 @@ export function RichTextEditor({
             textblockTypeInputRule({
               find: TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX,
               type: this.type,
-              getAttributes: (match) => ({
-                language: match[1] || null,
-                filename: match[2] || null,
-              }),
+              getAttributes: (match) => {
+                const rawLanguage = match[1] || null
+                // Normalize language code (ts -> typescript, js -> javascript, etc.)
+                const language = rawLanguage
+                  ? LANGUAGE_NORMALIZATION[rawLanguage as keyof typeof LANGUAGE_NORMALIZATION] ||
+                    rawLanguage
+                  : null
+                let filename = match[2] || null
+
+                // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
+                // 短縮形でも拡張子を検索できるようにrawLanguageを使用
+                if (filename && rawLanguage && !filename.includes('.')) {
+                  const extension =
+                    LANGUAGE_TO_EXTENSION[rawLanguage as keyof typeof LANGUAGE_TO_EXTENSION]
+                  if (extension) {
+                    filename = `${filename}${extension}`
+                  }
+                }
+
+                return {
+                  language,
+                  filename,
+                }
+              },
             }),
           ]
         },
@@ -230,9 +379,21 @@ export function RichTextEditor({
 
         if (codeBlockMatch && editor) {
           event.preventDefault()
-          const language = codeBlockMatch[1] || null
-          const filename = codeBlockMatch[2] || null
+          const language = codeBlockMatch[1]
+            ? codeBlockMatch[1] === 'markdown'
+              ? 'md'
+              : codeBlockMatch[1]
+            : null
+          let filename = codeBlockMatch[2] || null
           const code = codeBlockMatch[3]
+
+          // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
+          if (filename && language && !filename.includes('.')) {
+            const extension = LANGUAGE_TO_EXTENSION[language as keyof typeof LANGUAGE_TO_EXTENSION]
+            if (extension) {
+              filename = `${filename}${extension}`
+            }
+          }
 
           editor
             .chain()
@@ -348,7 +509,110 @@ export function RichTextEditor({
           borderTopRightRadius: '4px',
         }}
       >
-        <Tooltip label="太字 (⌘B)">
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">元に戻す</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  Z
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().chain().focus().undo().run() || disabled}
+            style={{
+              padding: '4px 8px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor:
+                !editor.can().chain().focus().undo().run() || disabled ? 'not-allowed' : 'pointer',
+              backgroundColor: 'transparent',
+              opacity: !editor.can().chain().focus().undo().run() || disabled ? 0.4 : 1,
+              color:
+                !editor.can().chain().focus().undo().run() || disabled
+                  ? 'var(--mantine-color-gray-5)'
+                  : 'inherit',
+            }}
+          >
+            <IconArrowBackUp size={18} />
+          </button>
+        </Tooltip>
+
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">やり直す</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⇧
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  Z
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().chain().focus().redo().run() || disabled}
+            style={{
+              padding: '4px 8px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor:
+                !editor.can().chain().focus().redo().run() || disabled ? 'not-allowed' : 'pointer',
+              backgroundColor: 'transparent',
+              opacity: !editor.can().chain().focus().redo().run() || disabled ? 0.4 : 1,
+              color:
+                !editor.can().chain().focus().redo().run() || disabled
+                  ? 'var(--mantine-color-gray-5)'
+                  : 'inherit',
+            }}
+          >
+            <IconArrowForwardUp size={18} />
+          </button>
+        </Tooltip>
+
+        <Box
+          style={{
+            width: '1px',
+            height: '20px',
+            backgroundColor:
+              computedColorScheme === 'dark'
+                ? 'var(--mantine-color-dark-4)'
+                : 'var(--mantine-color-gray-3)',
+            margin: '0 4px',
+          }}
+        />
+
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">太字</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  B
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBold().run()}
@@ -370,7 +634,21 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="斜体 (⌘I)">
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">斜体</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  I
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -392,7 +670,24 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="取り消し線 (⌘⇧X)">
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">取り消し線</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⇧
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  X
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -414,7 +709,57 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="コード (⌘E)">
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">下線</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  U
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            disabled={!editor.can().chain().focus().toggleUnderline().run() || disabled}
+            className={editor.isActive('underline') ? 'is-active' : ''}
+            style={{
+              padding: '4px 8px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              backgroundColor: editor.isActive('underline')
+                ? 'var(--mantine-color-blue-5)'
+                : 'transparent',
+              color: editor.isActive('underline') ? 'white' : 'inherit',
+              opacity: disabled ? 0.5 : 1,
+            }}
+          >
+            <IconUnderline size={18} />
+          </button>
+        </Tooltip>
+
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">コード</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  E
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleCode().run()}
@@ -436,7 +781,24 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="コードブロック (⌘⌥C)">
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">コードブロック</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌥
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  C
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleCodeBlock().run()}
@@ -458,6 +820,144 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
+        <Box
+          style={{
+            width: '1px',
+            height: '20px',
+            backgroundColor:
+              computedColorScheme === 'dark'
+                ? 'var(--mantine-color-dark-4)'
+                : 'var(--mantine-color-gray-3)',
+            margin: '0 4px',
+          }}
+        />
+
+        <Popover opened={colorPickerOpen} onChange={setColorPickerOpen} position="bottom" withArrow>
+          <Popover.Target>
+            <Tooltip label="文字色">
+              <button
+                type="button"
+                onClick={() => setColorPickerOpen(!colorPickerOpen)}
+                disabled={disabled}
+                style={{
+                  padding: '4px 8px',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: disabled ? 'not-allowed' : 'pointer',
+                  backgroundColor: 'transparent',
+                  opacity: disabled ? 0.5 : 1,
+                }}
+              >
+                <IconColorPicker size={18} />
+              </button>
+            </Tooltip>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Stack gap="xs">
+              <ColorInput
+                value={selectedColor}
+                onChange={(color) => {
+                  setSelectedColor(color)
+                  editor.chain().focus().setColor(color).run()
+                }}
+                format="hex"
+                swatches={[
+                  '#000000',
+                  '#868e96',
+                  '#fa5252',
+                  '#e64980',
+                  '#be4bdb',
+                  '#7950f2',
+                  '#4c6ef5',
+                  '#228be6',
+                  '#15aabf',
+                  '#12b886',
+                  '#40c057',
+                  '#82c91e',
+                  '#fab005',
+                  '#fd7e14',
+                ]}
+              />
+              <Button
+                size="xs"
+                variant="light"
+                onClick={() => {
+                  editor.chain().focus().unsetColor().run()
+                  setColorPickerOpen(false)
+                }}
+              >
+                色をリセット
+              </Button>
+            </Stack>
+          </Popover.Dropdown>
+        </Popover>
+
+        <Tooltip label="ハイライト">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleHighlight().run()}
+            disabled={disabled}
+            className={editor.isActive('highlight') ? 'is-active' : ''}
+            style={{
+              padding: '4px 8px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              backgroundColor: editor.isActive('highlight')
+                ? 'var(--mantine-color-yellow-5)'
+                : 'transparent',
+              color: editor.isActive('highlight') ? 'white' : 'inherit',
+              opacity: disabled ? 0.5 : 1,
+            }}
+          >
+            <IconHighlight size={18} />
+          </button>
+        </Tooltip>
+
+        <Tooltip label="下付き文字">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleSubscript().run()}
+            disabled={disabled}
+            className={editor.isActive('subscript') ? 'is-active' : ''}
+            style={{
+              padding: '4px 8px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              backgroundColor: editor.isActive('subscript')
+                ? 'var(--mantine-color-blue-5)'
+                : 'transparent',
+              color: editor.isActive('subscript') ? 'white' : 'inherit',
+              opacity: disabled ? 0.5 : 1,
+            }}
+          >
+            <IconSubscript size={18} />
+          </button>
+        </Tooltip>
+
+        <Tooltip label="上付き文字">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleSuperscript().run()}
+            disabled={disabled}
+            className={editor.isActive('superscript') ? 'is-active' : ''}
+            style={{
+              padding: '4px 8px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              backgroundColor: editor.isActive('superscript')
+                ? 'var(--mantine-color-blue-5)'
+                : 'transparent',
+              color: editor.isActive('superscript') ? 'white' : 'inherit',
+              opacity: disabled ? 0.5 : 1,
+            }}
+          >
+            <IconSuperscript size={18} />
+          </button>
+        </Tooltip>
+
         {/* 言語選択とファイル名入力（コードブロックがアクティブな時のみ表示） */}
         {editor.isActive('codeBlock') && (
           <>
@@ -466,15 +966,32 @@ export function RichTextEditor({
               value={editor.getAttributes('codeBlock').language || 'null'}
               onChange={(value) => {
                 if (value === 'null') {
-                  editor.chain().focus().updateAttributes('codeBlock', { language: null }).run()
+                  editor.commands.updateAttributes('codeBlock', { language: null })
                 } else {
-                  editor.chain().focus().updateAttributes('codeBlock', { language: value }).run()
+                  // Normalize markdown to md
+                  const normalizedValue = value === 'markdown' ? 'md' : value
+                  editor.commands.updateAttributes('codeBlock', { language: normalizedValue })
+
+                  // Auto-fill filename extension if filename is empty
+                  const currentFilename = editor.getAttributes('codeBlock').filename
+                  if (!currentFilename && normalizedValue) {
+                    const extension =
+                      LANGUAGE_TO_EXTENSION[normalizedValue as keyof typeof LANGUAGE_TO_EXTENSION]
+                    if (extension) {
+                      editor.commands.updateAttributes('codeBlock', {
+                        filename: `example${extension}`,
+                      })
+                    }
+                  }
                 }
               }}
               size="xs"
-              w={140}
+              w={180}
               disabled={disabled}
               placeholder="言語"
+              searchable
+              nothingFoundMessage="言語が見つかりません"
+              maxDropdownHeight={300}
               styles={{
                 input: {
                   fontSize: '12px',
@@ -487,11 +1004,9 @@ export function RichTextEditor({
             <TextInput
               value={editor.getAttributes('codeBlock').filename || ''}
               onChange={(e) => {
-                editor
-                  .chain()
-                  .focus()
-                  .updateAttributes('codeBlock', { filename: e.currentTarget.value || null })
-                  .run()
+                editor.commands.updateAttributes('codeBlock', {
+                  filename: e.currentTarget.value || null,
+                })
               }}
               size="xs"
               w={180}
@@ -508,7 +1023,24 @@ export function RichTextEditor({
           </>
         )}
 
-        <Tooltip label="箇条書き (⌘⇧8)">
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">箇条書き</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⇧
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  8
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -530,7 +1062,24 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        <Tooltip label="番号付きリスト (⌘⇧7)">
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">番号付きリスト</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⇧
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  7
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
           <button
             type="button"
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -552,6 +1101,24 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
+        <Tooltip label="水平線">
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setHorizontalRule().run()}
+            disabled={disabled}
+            style={{
+              padding: '4px 8px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              backgroundColor: 'transparent',
+              opacity: disabled ? 0.5 : 1,
+            }}
+          >
+            <IconSeparatorHorizontal size={18} />
+          </button>
+        </Tooltip>
+
         <Box
           style={{
             width: '1px',
@@ -564,7 +1131,24 @@ export function RichTextEditor({
           }}
         />
 
-        <Tooltip label="リンク挿入 (⌘⇧U)">
+        <Tooltip
+          label={
+            <Stack gap={4} align="center">
+              <Text size="xs">リンク挿入</Text>
+              <Group gap={4}>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⌘
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  ⇧
+                </Kbd>
+                <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                  U
+                </Kbd>
+              </Group>
+            </Stack>
+          }
+        >
           <button
             type="button"
             onClick={handleOpenLinkModal}

@@ -1,16 +1,19 @@
 import { Box, useComputedColorScheme } from '@mantine/core'
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
+import CodeBlockShiki from 'tiptap-extension-code-block-shiki'
+import Color from '@tiptap/extension-color'
+import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
+import Subscript from '@tiptap/extension-subscript'
+import Superscript from '@tiptap/extension-superscript'
+import { TextStyle } from '@tiptap/extension-text-style'
+import Underline from '@tiptap/extension-underline'
 import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { common, createLowlight } from 'lowlight'
 import { useEffect } from 'react'
 import { CodeBlockComponent } from '~/components/ui/rich-text-editor/code-block-component'
 import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
-
-const lowlight = createLowlight(common)
 
 export function RichTextDisplay({ html }: Record<'html', string>) {
   const computedColorScheme = useComputedColorScheme('light')
@@ -23,8 +26,16 @@ export function RichTextDisplay({ html }: Record<'html', string>) {
         },
         codeBlock: false, // デフォルトのcodeBlockを無効化
       }),
-      CodeBlockLowlight.configure({
-        lowlight,
+      TextStyle,
+      Color,
+      Underline,
+      Highlight.configure({
+        multicolor: true,
+      }),
+      Subscript,
+      Superscript,
+      CodeBlockShiki.configure({
+        defaultTheme: computedColorScheme === 'dark' ? 'github-dark' : 'github-light',
         HTMLAttributes: {
           class: 'code-block',
         },
