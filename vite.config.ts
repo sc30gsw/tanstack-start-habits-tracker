@@ -18,4 +18,13 @@ export default defineConfig({
       projects: ['./tsconfig.json'],
     }),
   ],
+  resolve: {
+    alias: {
+      'shiki/langs': 'shiki/langs/javascript.mjs',
+      'shiki/themes': 'shiki/themes/github-dark.mjs',
+    },
+  },
+  optimizeDeps: {
+    exclude: ['shiki'],
+  },
 })
