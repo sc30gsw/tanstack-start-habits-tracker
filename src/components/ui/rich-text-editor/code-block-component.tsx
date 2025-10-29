@@ -1,43 +1,18 @@
-import { ActionIcon, Tooltip, useComputedColorScheme } from '@mantine/core'
+import { ActionIcon, Tooltip } from '@mantine/core'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
 import type { NodeViewProps } from '@tiptap/react'
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
-import { useEffect, useState } from 'react'
-import { getHighlighter, SUPPORTED_LANGUAGES } from '~/lib/shiki-config'
+import { useState } from 'react'
 
 export function CodeBlockComponent({ node }: NodeViewProps) {
   const [copied, setCopied] = useState(false)
-  const [highlightedCode, setHighlightedCode] = useState<string>('')
-  const computedColorScheme = useComputedColorScheme('light')
 
   const language = node.attrs.language
   const filename = node.attrs.filename
-  const code = node.textContent
-
-  useEffect(() => {
-    const highlightCode = async () => {
-      try {
-        const highlighter = await getHighlighter()
-        const lang = SUPPORTED_LANGUAGES.includes(language as any) ? language : 'javascript'
-        const theme = computedColorScheme === 'dark' ? 'github-dark' : 'github-light'
-
-        const html = highlighter.codeToHtml(code, {
-          lang,
-          theme,
-        })
-
-        setHighlightedCode(html)
-      } catch (err) {
-        console.error('Failed to highlight code:', err)
-      }
-    }
-
-    if (code) {
-      highlightCode()
-    }
-  }, [code, language, computedColorScheme])
 
   const handleCopy = async () => {
+    const code = node.textContent
+
     try {
       await navigator.clipboard.writeText(code)
       setCopied(true)
@@ -67,13 +42,9 @@ export function CodeBlockComponent({ node }: NodeViewProps) {
           {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
         </ActionIcon>
       </Tooltip>
-      {highlightedCode ? (
-        <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
-      ) : (
-        <pre data-language={language || undefined} data-filename={filename || undefined}>
-          <NodeViewContent as="div" />
-        </pre>
-      )}
+      <pre data-language={language || undefined} data-filename={filename || undefined}>
+        <NodeViewContent as="div" />
+      </pre>
     </NodeViewWrapper>
   )
 }

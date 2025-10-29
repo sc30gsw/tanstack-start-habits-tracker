@@ -33,6 +33,7 @@ import {
   IconUnderline,
 } from '@tabler/icons-react'
 import { textblockTypeInputRule } from '@tiptap/core'
+import CodeBlock from '@tiptap/extension-code-block'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Link from '@tiptap/extension-link'
@@ -47,7 +48,6 @@ import StarterKit from '@tiptap/starter-kit'
 import { useEffect, useState } from 'react'
 import { CodeBlockComponent } from '~/components/ui/rich-text-editor/code-block-component'
 import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
-import { CodeBlockShikiExtension } from '~/components/ui/rich-text-editor/code-block-shiki-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
@@ -287,8 +287,7 @@ export function RichTextEditor({
           }
         },
       }),
-      CodeBlockShikiExtension.configure({
-        defaultTheme: computedColorScheme === 'dark' ? 'github-dark' : 'github-light',
+      CodeBlock.configure({
         HTMLAttributes: {
           class: 'code-block',
         },

@@ -203,26 +203,19 @@
   font-size: 0.875em;
 }
 
-/* Shiki Syntax Highlighting Theme Support */
-/* Default light theme */
-.ProseMirror .shiki,
-.ProseMirror .shiki span {
-  color: var(--shiki-light) !important;
-  background-color: var(--shiki-light-bg) !important;
+/* Code Block Syntax Highlighting with CSS */
+/* Light theme */
+.ProseMirror pre {
+  background-color: var(--mantine-color-gray-0);
+  border: 1px solid var(--mantine-color-gray-3);
+  color: var(--mantine-color-gray-9);
 }
 
-/* Dark mode theme */
-[data-mantine-color-scheme='dark'] .ProseMirror .shiki,
-[data-mantine-color-scheme='dark'] .ProseMirror .shiki span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
-}
-
-/* Shiki code block styling */
-.ProseMirror .shiki {
-  padding: 0;
-  margin: 0;
-  background: transparent !important;
+/* Dark mode */
+[data-mantine-color-scheme='dark'] .ProseMirror pre {
+  background-color: var(--mantine-color-dark-8);
+  border: 1px solid var(--mantine-color-dark-4);
+  color: var(--mantine-color-gray-1);
 }
 
 .ProseMirror strong {
