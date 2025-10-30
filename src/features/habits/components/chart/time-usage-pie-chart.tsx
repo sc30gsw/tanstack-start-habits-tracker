@@ -320,7 +320,7 @@ export function TimeUsagePieChart({
                   {item.name}
                 </Badge>
                 <Text size="sm" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
-                  {formatDuration(item.value)} • {percentage}%
+                  {formatDuration(item.value)}/ {percentage}%
                 </Text>
               </Group>
             )
