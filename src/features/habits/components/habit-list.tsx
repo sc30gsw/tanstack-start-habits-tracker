@@ -7,7 +7,7 @@ export function HabitList() {
   const routeApi = getRouteApi('/habits/')
   const searchParams = routeApi.useSearch()
 
-  const habitsData = routeApi.useLoaderData()
+  const { habits: habitsData } = routeApi.useLoaderData()
   const habits = habitsData.data ?? []
 
   if (habits.length === 0) {

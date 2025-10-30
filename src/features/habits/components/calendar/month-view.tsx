@@ -1,6 +1,6 @@
 import { ActionIcon, Group, Stack, Text } from '@mantine/core'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
-import { getRouteApi } from '@tanstack/react-router'
+import type { NavigateOptions } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
@@ -8,7 +8,7 @@ import { chunk } from 'remeda'
 import { CalendarDateCell } from '~/features/habits/components/calendar/calendar-date-cell'
 import { CalendarPresetsCombobox } from '~/features/habits/components/calendar/calendar-presets-combobox'
 import type { RecordEntity } from '~/features/habits/types/habit'
-import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
+import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 
 dayjs.extend(utc)
@@ -40,22 +40,32 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
   return chunk(dates, 7)
 }
 
-export function MonthView({ recordMap }: Record<'recordMap', Record<string, RecordEntity>>) {
-  const apiRoute = getRouteApi('/habits/$habitId')
-  const searchParams = apiRoute.useSearch()
-  const selectedDate = getValidatedDate(searchParams?.selectedDate)
-  const currentMonthString = searchParams?.currentMonth || dayjs(selectedDate).format('YYYY-MM')
-  const currentMonth = dayjs.tz(currentMonthString, 'Asia/Tokyo').isValid()
-    ? dayjs.tz(currentMonthString, 'Asia/Tokyo').startOf('month')
+type MonthViewProps = {
+  recordMap: Record<string, RecordEntity>
+  selectedDate: SearchParams['selectedDate']
+  currentMonth: SearchParams['currentMonth']
+  navigate: (options: NavigateOptions) => void
+}
+
+export function MonthView({
+  recordMap,
+  selectedDate,
+  currentMonth: currentMonthString,
+  navigate,
+}: MonthViewProps) {
+  const currentMonth = dayjs
+    .tz(currentMonthString || dayjs(selectedDate).format('YYYY-MM'), 'Asia/Tokyo')
+    .isValid()
+    ? dayjs
+        .tz(currentMonthString || dayjs(selectedDate).format('YYYY-MM'), 'Asia/Tokyo')
+        .startOf('month')
     : dayjs(selectedDate).startOf('month')
   const monthDates = generateMonthDates(currentMonth)
   const weeks = createWeekGroups(monthDates)
 
-  const navigate = apiRoute.useNavigate()
-
   return (
     <Stack gap={16}>
-      <CalendarPresetsCombobox />
+      <CalendarPresetsCombobox selectedDate={selectedDate} navigate={navigate} />
 
       <Group justify="space-between" mb={4}>
         <ActionIcon
@@ -118,6 +128,8 @@ export function MonthView({ recordMap }: Record<'recordMap', Record<string, Reco
                 record={recordMap[currentDate.format('YYYY-MM-DD')]}
                 isCurrentMonth={currentDate.month() === currentMonth.month()}
                 variant="month"
+                selectedDate={selectedDate}
+                navigate={navigate}
               />
             ))}
           </Group>

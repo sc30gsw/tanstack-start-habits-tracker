@@ -15,11 +15,12 @@ import {
   IconCheck,
   IconClock,
 } from '@tabler/icons-react'
-import { getRouteApi } from '@tanstack/react-router'
+import type { NavigateOptions } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { filter, map, pipe } from 'remeda'
+import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { getDateColor, getDatePresets } from '~/features/habits/utils/calendar-utils'
 
 dayjs.extend(utc)
@@ -35,11 +36,13 @@ const groupIcons = {
   year: <IconClock {...iconProps} />,
 } as const satisfies Record<string, React.ReactNode>
 
-export function CalendarPresetsCombobox() {
-  const apiRoute = getRouteApi('/habits/$habitId')
-  const searchParams = apiRoute.useSearch()
+type CalendarPresetsComboboxProps = {
+  selectedDate: SearchParams['selectedDate']
+  navigate: (options: NavigateOptions) => void
+}
 
-  const navigate = apiRoute.useNavigate()
+export function CalendarPresetsCombobox({ selectedDate, navigate }: CalendarPresetsComboboxProps) {
+  const selectedDateString = selectedDate || dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
 
   const allPresets = Array.from(getDatePresets())
 
@@ -94,10 +97,8 @@ export function CalendarPresetsCombobox() {
   )
 
   const getSelectedIcon = () => {
-    const selectedValue = searchParams?.preset || dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
-
     for (const preset of allPresets) {
-      if (preset.items.some((item) => item.value === selectedValue)) {
+      if (preset.items.some((item) => item.value === selectedDateString)) {
         return groupIcons[preset.group]
       }
     }
@@ -128,11 +129,9 @@ export function CalendarPresetsCombobox() {
     onDropdownClose: () => combobox.resetSelectedOption(),
   })
 
-  const selectedValue = searchParams?.preset || dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
-
   const getSelectedLabel = () => {
     for (const group of selectData) {
-      const found = group.items.find((item) => item.value === selectedValue)
+      const found = group.items.find((item) => item.value === selectedDateString)
 
       if (found) {
         const extraData = itemDataMap.get(found.value)
@@ -174,7 +173,7 @@ export function CalendarPresetsCombobox() {
         >
           {group.items.map((item) => {
             const extraData = itemDataMap.get(item.value)
-            const isSelected = item.value === selectedValue
+            const isSelected = item.value === selectedDateString
 
             return (
               <Combobox.Option key={item.value} value={item.value}>
