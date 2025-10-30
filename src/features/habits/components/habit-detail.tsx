@@ -30,7 +30,12 @@ export function HabitDetail() {
 
   const pieChartData = useMemo(() => {
     if (!records.data || !habits.data || !habit.data) {
-      return { data: [], totalDuration: 0, period: 'month' as const, dateRange: { from: '', to: '' } }
+      return {
+        data: [],
+        totalDuration: 0,
+        period: 'month' as const,
+        dateRange: { from: '', to: '' },
+      }
     }
 
     const aggregated = aggregateTimeByHabit(

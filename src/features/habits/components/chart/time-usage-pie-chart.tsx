@@ -1,10 +1,14 @@
 import { PieChart } from '@mantine/charts'
-import { Badge, Card, Group, Paper, SimpleGrid, Stack, Text } from '@mantine/core'
-import { IconChartPie, IconClock, IconTrophy } from '@tabler/icons-react'
+import { Badge, Card, Divider, Group, Paper, SimpleGrid, Stack, Text } from '@mantine/core'
+import { IconChartPie, IconClock, IconPercentage, IconTrophy } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import type { PieChartDataItem } from '~/features/habits/utils/pie-chart-utils'
 import { formatDuration } from '~/features/habits/utils/time-utils'
+
+const HOURS_PER_DAY = 24
+const MINUTES_PER_HOUR = 60
+const MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR // 1440分
 
 type TimeUsagePieChartProps = {
   data: PieChartDataItem[]
@@ -20,6 +24,32 @@ export function TimeUsagePieChart({
   period = 'month',
   dateRange,
 }: TimeUsagePieChartProps) {
+  const getTotalPeriodMinutes = () => {
+    if (!dateRange) {
+      return MINUTES_PER_DAY
+    }
+
+    const fromDate = dayjs(dateRange.from)
+    const toDate = dayjs(dateRange.to)
+
+    switch (period) {
+      case 'day':
+        return MINUTES_PER_DAY
+
+      case 'week': {
+        const days = toDate.diff(fromDate, 'day') + 1
+        return days * MINUTES_PER_DAY
+      }
+
+      default: {
+        const days = toDate.diff(fromDate, 'day') + 1
+        return days * MINUTES_PER_DAY
+      }
+    }
+  }
+
+  const totalPeriodMinutes = getTotalPeriodMinutes()
+
   const getPeriodLabel = () => {
     if (!dateRange) {
       return '時間配分'
@@ -41,17 +71,19 @@ export function TimeUsagePieChart({
   }
 
   const getDescription = () => {
-    if (!dateRange) return '選択期間内の各習慣の実行時間と割合を表示しています。'
+    if (!dateRange) {
+      return '記録した習慣の実行時間の配分を表示しています。'
+    }
 
     switch (period) {
       case 'day':
-        return '1日の各習慣の実行時間と、全体に対する割合を表示しています。'
+        return 'この日に記録した習慣の時間配分です。各習慣が記録時間全体の何%を占めるかを示しています。'
 
       case 'week':
-        return '1週間の各習慣の合計実行時間と、全体に対する割合を表示しています。'
+        return 'この週に記録した習慣の時間配分です。各習慣が記録時間全体の何%を占めるかを示しています。'
 
       default:
-        return '1ヶ月間の各習慣の合計実行時間と、全体に対する割合を表示しています。'
+        return 'この月に記録した習慣の時間配分です。各習慣が記録時間全体の何%を占めるかを示しています。'
     }
   }
 
@@ -67,6 +99,22 @@ export function TimeUsagePieChart({
 
   const averageDuration = totalDuration > 0 ? Math.round(totalDuration / data.length) : 0
   const maxDuration = data.length > 0 ? Math.max(...data.map((d) => d.value)) : 0
+
+  const habitPercentage = ((totalDuration / totalPeriodMinutes) * 100).toFixed(1)
+
+  const getDailyAverage = () => {
+    if (!dateRange) {
+      return totalDuration
+    }
+
+    const fromDate = dayjs(dateRange.from)
+    const toDate = dayjs(dateRange.to)
+    const days = toDate.diff(fromDate, 'day') + 1
+
+    return Math.round(totalDuration / days)
+  }
+
+  const dailyAverage = getDailyAverage()
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
@@ -104,7 +152,7 @@ export function TimeUsagePieChart({
                 return null
               }
 
-              const percentage = ((segmentValue / totalDuration) * 100).toFixed(1)
+              const percentageOfHabits = ((segmentValue / totalDuration) * 100).toFixed(1)
 
               return (
                 <Paper px="md" py="sm" withBorder shadow="md" radius="md">
@@ -126,7 +174,7 @@ export function TimeUsagePieChart({
                       時間: {formatDuration(segmentValue)}
                     </Text>
                     <Text size="sm" c="dimmed">
-                      割合: {percentage}%
+                      割合: {percentageOfHabits}%
                     </Text>
                   </Stack>
                 </Paper>
@@ -138,23 +186,69 @@ export function TimeUsagePieChart({
           labelsType="percent"
         />
 
-        <SimpleGrid cols={3} spacing="md">
-          <Stack gap={4}>
-            <Group gap={4}>
-              <IconClock size={14} style={{ opacity: 0.6 }} />
-              <Text size="xs" c="dimmed">
-                総実行時間
+        <Divider />
+
+        <Stack gap="xs">
+          <Text size="xs" fw={600} c="dimmed">
+            期間全体の統計
+          </Text>
+          <SimpleGrid cols={period === 'day' ? 2 : 3} spacing="md">
+            <Stack gap={4}>
+              <Group gap={4}>
+                <IconClock size={14} style={{ opacity: 0.6 }} />
+                <Text size="xs" c="dimmed">
+                  総実行時間
+                </Text>
+              </Group>
+              <Text size="sm" fw={600}>
+                {formatDuration(totalDuration)}
               </Text>
-            </Group>
-            <Text size="sm" fw={600}>
-              {formatDuration(totalDuration)}
-            </Text>
-          </Stack>
+              <Text size="xs" c="dimmed">
+                {period === 'day' ? '24時間中' : `全${Math.floor(totalPeriodMinutes / 60)}時間中`}{' '}
+                {habitPercentage}%
+              </Text>
+            </Stack>
+            {period !== 'day' && (
+              <Stack gap={4}>
+                <Group gap={4}>
+                  <IconClock size={14} style={{ opacity: 0.6 }} />
+                  <Text size="xs" c="dimmed">
+                    1日あたり平均
+                  </Text>
+                </Group>
+                <Text size="sm" fw={600}>
+                  {formatDuration(dailyAverage)}
+                </Text>
+                <Text size="xs" c="dimmed">
+                  24時間中 {((dailyAverage / (24 * 60)) * 100).toFixed(1)}%
+                </Text>
+              </Stack>
+            )}
+            <Stack gap={4}>
+              <Group gap={4}>
+                <IconPercentage size={14} style={{ opacity: 0.6 }} />
+                <Text size="xs" c="dimmed">
+                  記録カバー率
+                </Text>
+              </Group>
+              <Text size="sm" fw={600}>
+                {habitPercentage}%
+              </Text>
+              <Text size="xs" c="dimmed">
+                {period === 'day' ? '1日' : period === 'week' ? '1週間' : '1ヶ月'}のうち
+              </Text>
+            </Stack>
+          </SimpleGrid>
+        </Stack>
+
+        <Divider />
+
+        <SimpleGrid cols={2} spacing="md">
           <Stack gap={4}>
             <Group gap={4}>
-              <IconClock size={14} style={{ opacity: 0.6 }} />
+              <IconChartPie size={14} style={{ opacity: 0.6 }} />
               <Text size="xs" c="dimmed">
-                習慣あたり平均
+                1習慣あたりの平均実行時間
               </Text>
             </Group>
             <Text size="sm" fw={600}>
@@ -174,7 +268,9 @@ export function TimeUsagePieChart({
           </Stack>
         </SimpleGrid>
 
-        <Stack gap="xs" mt={8}>
+        <Divider />
+
+        <Stack gap="xs">
           <Group gap={4}>
             <IconChartPie size={14} style={{ opacity: 0.6 }} />
             <Text size="xs" c="dimmed" fw={600}>
