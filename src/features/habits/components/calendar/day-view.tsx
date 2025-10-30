@@ -1,4 +1,6 @@
-import { Badge, Card, Group, Stack, Text } from '@mantine/core'
+import { ActionIcon, Badge, Card, Group, Stack, Text, Tooltip } from '@mantine/core'
+import { IconExternalLink } from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
@@ -31,9 +33,15 @@ type DayViewProps = {
   selectedDateRecords: RecordEntity[]
   selectedDate: SearchParams['selectedDate']
   habits: HabitEntity[]
+  showHabitLink?: boolean
 }
 
-export function DayView({ selectedDateRecords, selectedDate, habits }: DayViewProps) {
+export function DayView({
+  selectedDateRecords,
+  selectedDate,
+  habits,
+  showHabitLink = false,
+}: DayViewProps) {
   const formattedDate = selectedDate ? dayjs(selectedDate).format('YYYY/MM/DD (ddd)') : '日付未選択'
 
   const habitMap = new Map(habits.map((habit) => [habit.id, habit]))
@@ -106,8 +114,25 @@ export function DayView({ selectedDateRecords, selectedDate, habits }: DayViewPr
                           {habit?.name}
                         </Text>
                       </Group>
-                      {getStatusBadge(record.status)}
+                      {showHabitLink ? (
+                        <Link
+                          to="/habits/$habitId"
+                          params={{ habitId: habit?.id || '' }}
+                          style={{ textDecoration: 'none' }}
+                        >
+                          <Tooltip label="詳細を見る" position="left">
+                            <ActionIcon variant="subtle" color="blue" size="sm">
+                              <IconExternalLink size={16} />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Link>
+                      ) : (
+                        getStatusBadge(record.status)
+                      )}
                     </Group>
+                    {showHabitLink && (
+                      <Group justify="flex-start">{getStatusBadge(record.status)}</Group>
+                    )}
                     <Text size="sm" c="dimmed">
                       実行時間: {formatDuration(record.duration_minutes || 0)}
                     </Text>

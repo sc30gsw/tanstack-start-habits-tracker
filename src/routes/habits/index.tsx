@@ -240,6 +240,7 @@ function HabitsPage() {
               selectedDateRecords={selectedDateRecords}
               selectedDate={searchParams.selectedDate}
               habits={habitsData.data || []}
+              showHabitLink={true}
             />
           </div>
         </div>
