@@ -1,11 +1,11 @@
 import { Card, type CSSProperties, Text, Tooltip } from '@mantine/core'
-import { getRouteApi } from '@tanstack/react-router'
+import type { NavigateOptions } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { RecordEntity } from '~/features/habits/types/habit'
-import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
+import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
@@ -13,29 +13,23 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
-// カレンダーセルの色定数
 const CELL_COLORS = {
-  // 完了状態の色
   completed: {
     normal: 'var(--mantine-color-green-6)',
     selected: 'var(--mantine-color-green-7)',
   },
-  // 未完了状態の色
   incomplete: {
     normal: 'var(--mantine-color-yellow-5)',
     selected: 'var(--mantine-color-yellow-6)',
   },
-  // スキップ状態の色
   skipped: {
     normal: 'var(--mantine-color-gray-5)',
     selected: 'var(--mantine-color-gray-6)',
   },
-  // 記録なし状態の色
   noRecord: {
-    normal: 'transparent', // getDateColorで決定
+    normal: 'transparent',
     selected: 'var(--mantine-color-blue-6)',
   },
-  // ボーダー色
   border: {
     normal: 'transparent',
     selected: 'var(--mantine-color-blue-6)',
@@ -43,7 +37,6 @@ const CELL_COLORS = {
   },
 } as const satisfies Record<string, Record<string, CSSProperties['color']>>
 
-// セルスタイルの型定義
 type CellStyleState = {
   hasRecord: boolean
   isCompleted: boolean
@@ -52,11 +45,9 @@ type CellStyleState = {
   dateType: ReturnType<typeof getDateType>
 }
 
-// 背景色とボーダー色を決定する純粋関数
 function getCellBackgroundStyle(state: CellStyleState) {
   const { hasRecord, isCompleted, isSkipped, isSelected, dateType } = state
 
-  // 記録がある場合
   if (hasRecord) {
     let colorSet:
       | typeof CELL_COLORS.incomplete
@@ -79,7 +70,6 @@ function getCellBackgroundStyle(state: CellStyleState) {
     }
   }
 
-  // 記録がない場合
   if (isSelected) {
     return {
       backgroundColor: CELL_COLORS.noRecord.selected,
@@ -87,35 +77,30 @@ function getCellBackgroundStyle(state: CellStyleState) {
     }
   }
 
-  // デフォルト（記録なし・非選択）
   return {
     backgroundColor: getDateColor(dateType, false, hasRecord),
     borderColor: CELL_COLORS.border.normal,
   }
 }
 
-// カレンダー日付セルコンポーネントのProps型定義
 type CalendarDateCellProps = {
   date: dayjs.Dayjs
   record?: RecordEntity | null
   isCurrentMonth?: boolean
   variant: 'month' | 'week'
+  selectedDate: SearchParams['selectedDate']
+  navigate: (options: NavigateOptions) => void
 }
 
-// 共通の日付セルコンポーネント
 export function CalendarDateCell({
   date,
   record,
   isCurrentMonth = true,
   variant,
+  selectedDate,
+  navigate,
 }: CalendarDateCellProps) {
-  const apiRoute = getRouteApi('/habits/$habitId')
-  const searchParams = apiRoute.useSearch()
-  const selectedDate = getValidatedDate(searchParams?.selectedDate)
-
-  const navigate = apiRoute.useNavigate()
-
-  const isSelected = !!(selectedDate && date.isSame(selectedDate, 'day'))
+  const isSelected = !!(selectedDate && dayjs(selectedDate).isSame(date, 'day'))
   const dateType = getDateType(date)
   const hasRecord = !!record
 

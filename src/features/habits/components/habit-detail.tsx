@@ -3,9 +3,11 @@ import { useMediaQuery } from '@mantine/hooks'
 import { IconChartBar, IconDashboard } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
+import { useMemo } from 'react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { CalendarView } from '~/features/habits/components/calendar/calendar-view'
 import { DateDetail } from '~/features/habits/components/calendar/date-detail'
+import { TimeUsagePieChart } from '~/features/habits/components/chart/time-usage-pie-chart'
 import { TrendsChart } from '~/features/habits/components/chart/trends-chart'
 import { HabitInfoCard } from '~/features/habits/components/habit-info-card'
 import { HabitLevelCard } from '~/features/habits/components/habit-level-card'
@@ -14,15 +16,44 @@ import type { RecordEntity } from '~/features/habits/types/habit'
 import type { HabitColor } from '~/features/habits/types/schemas/habit-schemas'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
+import { aggregateTimeByHabit, sortForDetailPage } from '~/features/habits/utils/pie-chart-utils'
 
 export function HabitDetail() {
   const apiRoute = getRouteApi('/habits/$habitId')
-  const { habit, records } = apiRoute.useLoaderData()
+  const { habit, records, habits } = apiRoute.useLoaderData()
 
   const searchParams = apiRoute.useSearch()
   const selectedDate = getValidatedDate(searchParams?.selectedDate)
+  const calendarView = searchParams?.calendarView || 'month'
   const detailTab = searchParams?.detailTab || 'dashboard'
   const navigate = apiRoute.useNavigate()
+
+  const pieChartData = useMemo(() => {
+    if (!records.data || !habits.data || !habit.data) {
+      return {
+        data: [],
+        totalDuration: 0,
+        period: 'month' as const,
+        dateRange: { from: '', to: '' },
+      }
+    }
+
+    const aggregated = aggregateTimeByHabit(
+      records.data,
+      habits.data,
+      calendarView,
+      searchParams?.selectedDate,
+    )
+
+    const sorted = sortForDetailPage(aggregated.data, habit.data.id)
+
+    return {
+      data: sorted,
+      totalDuration: aggregated.totalDuration,
+      period: aggregated.period,
+      dateRange: aggregated.dateRange,
+    }
+  }, [records.data, habits.data, habit.data, calendarView, searchParams?.selectedDate])
 
   const recordMap = records.data?.reduce<Record<string, RecordEntity>>((acc, r) => {
     acc[r.date] = r
@@ -50,7 +81,14 @@ export function HabitDetail() {
   const leftPanelContent = (
     <Stack gap="md">
       {recordMap && (
-        <CalendarView selectedDateRecord={selectedDateRecord || null} recordMap={recordMap} />
+        <CalendarView
+          recordMap={recordMap}
+          calendarView={calendarView}
+          selectedDate={searchParams?.selectedDate}
+          currentMonth={searchParams?.currentMonth}
+          navigate={navigate}
+          habits={habits.data || []}
+        />
       )}
       <DateDetail selectedDateRecord={selectedDateRecord || null} habitId={habit.data?.id ?? ''} />
     </Stack>
@@ -78,6 +116,12 @@ export function HabitDetail() {
           {records.data && (
             <>
               <TrendsChart records={records.data} habitColor={habit.data?.color as HabitColor} />
+              <TimeUsagePieChart
+                data={pieChartData.data}
+                totalDuration={pieChartData.totalDuration}
+                period={pieChartData.period}
+                dateRange={pieChartData.dateRange}
+              />
               <HeatmapSection records={records.data} habitColor={habit.data?.color as HabitColor} />
             </>
           )}
