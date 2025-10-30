@@ -195,18 +195,18 @@ export function TimeUsagePieChart({
         )}
 
         <Stack gap="xs">
-          <Text size="xs" fw={600} c="dimmed">
+          <Text size="xs" fw={700} c="dimmed">
             期間全体の統計
           </Text>
           <SimpleGrid cols={period === 'day' ? 2 : 3} spacing="md">
             <Stack gap={4}>
               <Group gap={4}>
-                <IconClock size={14} style={{ opacity: 0.6 }} />
-                <Text size="xs" c="dimmed">
+                <IconClock size={16} color="var(--mantine-color-blue-6)" />
+                <Text size="xs" c="dimmed" fw={500}>
                   総実行時間
                 </Text>
               </Group>
-              <Text size="sm" fw={600}>
+              <Text size="sm" fw={700}>
                 {formatDuration(totalDuration)}
               </Text>
               <Text size="xs" c="dimmed">
@@ -217,12 +217,12 @@ export function TimeUsagePieChart({
             {period !== 'day' && (
               <Stack gap={4}>
                 <Group gap={4}>
-                  <IconClock size={14} style={{ opacity: 0.6 }} />
-                  <Text size="xs" c="dimmed">
+                  <IconClock size={16} color="var(--mantine-color-blue-6)" />
+                  <Text size="xs" c="dimmed" fw={500}>
                     1日あたり平均
                   </Text>
                 </Group>
-                <Text size="sm" fw={600}>
+                <Text size="sm" fw={700}>
                   {formatDuration(dailyAverage)}
                 </Text>
                 <Text size="xs" c="dimmed">
@@ -232,12 +232,12 @@ export function TimeUsagePieChart({
             )}
             <Stack gap={4}>
               <Group gap={4}>
-                <IconPercentage size={14} style={{ opacity: 0.6 }} />
-                <Text size="xs" c="dimmed">
+                <IconPercentage size={16} color="var(--mantine-color-green-6)" />
+                <Text size="xs" c="dimmed" fw={500}>
                   記録カバー率
                 </Text>
               </Group>
-              <Text size="sm" fw={600}>
+              <Text size="sm" fw={700}>
                 {habitPercentage}%
               </Text>
               <Text size="xs" c="dimmed">
@@ -246,6 +246,60 @@ export function TimeUsagePieChart({
             </Stack>
           </SimpleGrid>
         </Stack>
+
+        <Divider />
+
+        <SimpleGrid cols={2} spacing="md">
+          <Stack gap={4}>
+            <Group gap={4}>
+              <IconChartPie size={16} color="var(--mantine-color-violet-6)" />
+              <Text size="xs" c="dimmed" fw={500}>
+                習慣あたり平均
+              </Text>
+            </Group>
+            <Text size="sm" fw={700}>
+              {formatDuration(averageDuration)}
+            </Text>
+          </Stack>
+          <Stack gap={4}>
+            <Group gap={4}>
+              <IconTrophy size={16} color="var(--mantine-color-orange-6)" />
+              <Text size="xs" c="dimmed" fw={500}>
+                習慣の最長時間
+              </Text>
+            </Group>
+            <Text size="sm" fw={700}>
+              {formatDuration(maxDuration)}
+            </Text>
+          </Stack>
+        </SimpleGrid>
+
+        {!hideChart && (
+          <>
+            <Divider />
+            <Stack gap="xs">
+              <Text size="xs" fw={700} c="dimmed">
+                習慣一覧
+              </Text>
+              <Group gap="xs">
+                {data.map((item) => {
+                  const colorName = item.color.split('.')[0]
+                  return (
+                    <Badge
+                      key={item.habitId}
+                      color={colorName}
+                      variant="filled"
+                      size="sm"
+                      radius="sm"
+                    >
+                      {item.name}
+                    </Badge>
+                  )
+                })}
+              </Group>
+            </Stack>
+          </>
+        )}
 
         <Divider />
 
@@ -280,7 +334,7 @@ export function TimeUsagePieChart({
           <Group gap={4}>
             <IconChartPie size={14} style={{ opacity: 0.6 }} />
             <Text size="xs" c="dimmed" fw={600}>
-              凡例
+              {hideChart ? '内訳' : '凡例'}
             </Text>
           </Group>
           {data.map((item) => {
