@@ -27,6 +27,16 @@ import type { HabitTable, RecordEntity, RecordTable } from '~/features/habits/ty
 import { createRecordSchema } from '~/features/habits/types/schemas/record-schemas'
 import { hoursToMinutes, minutesToHours } from '~/features/habits/utils/time-utils'
 
+function isEmptyContent(html?: string | null) {
+  if (!html) {
+    return true
+  }
+
+  const text = html.replace(/<[^>]*>/g, '').trim()
+
+  return text.length === 0
+}
+
 type RecordFormProps = {
   habitId: HabitTable['id']
   date: RecordTable['date']
@@ -62,7 +72,6 @@ export function RecordForm({
       notes: existingRecord?.notes ?? '',
     },
     validate: (values) => {
-      // durationMinutes が '' のときは 0 として扱う
       const parsed = createRecordSchema
         .pick({ status: true, durationMinutes: true, habitId: true, date: true, notes: true })
         .safeParse({
@@ -132,7 +141,7 @@ export function RecordForm({
   }, [isFutureDate])
 
   useEffect(() => {
-    if (isFutureDate && form.values.status !== 'active') {
+    if (isFutureDate && form.values.status === 'completed') {
       form.setFieldValue('status', 'active')
     }
   }, [isFutureDate, form])
@@ -144,7 +153,7 @@ export function RecordForm({
   const handleSubmit = (values: FormValues) => {
     const durationMinutes = typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
 
-    if (values.status === 'skipped' && !values.notes?.trim()) {
+    if (values.status === 'skipped' && isEmptyContent(values.notes)) {
       modals.openConfirmModal({
         title: 'スキップの理由を記録しませんか？',
         children: (
