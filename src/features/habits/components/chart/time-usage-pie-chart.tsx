@@ -248,7 +248,7 @@ export function TimeUsagePieChart({
             <Group gap={4}>
               <IconChartPie size={14} style={{ opacity: 0.6 }} />
               <Text size="xs" c="dimmed">
-                1習慣あたりの平均実行時間
+                習慣あたりの平均実行時間
               </Text>
             </Group>
             <Text size="sm" fw={600}>
