@@ -30,7 +30,7 @@ export function HabitDetail() {
 
   const pieChartData = useMemo(() => {
     if (!records.data || !habits.data || !habit.data) {
-      return { data: [], totalDuration: 0 }
+      return { data: [], totalDuration: 0, period: 'month' as const, dateRange: { from: '', to: '' } }
     }
 
     const aggregated = aggregateTimeByHabit(
@@ -45,6 +45,8 @@ export function HabitDetail() {
     return {
       data: sorted,
       totalDuration: aggregated.totalDuration,
+      period: aggregated.period,
+      dateRange: aggregated.dateRange,
     }
   }, [records.data, habits.data, habit.data, calendarView, searchParams?.selectedDate])
 
@@ -112,6 +114,8 @@ export function HabitDetail() {
               <TimeUsagePieChart
                 data={pieChartData.data}
                 totalDuration={pieChartData.totalDuration}
+                period={pieChartData.period}
+                dateRange={pieChartData.dateRange}
               />
               <HeatmapSection records={records.data} habitColor={habit.data?.color as HabitColor} />
             </>

@@ -144,6 +144,8 @@ function HabitsPage() {
     return {
       data: sorted,
       totalDuration: aggregated.totalDuration,
+      period: aggregated.period,
+      dateRange: aggregated.dateRange,
     }
   }, [recordsData.data, habitsData.data, searchParams.calendarView, searchParams.selectedDate])
 
@@ -253,7 +255,12 @@ function HabitsPage() {
           時間配分
         </Text>
       </Group>
-      <TimeUsagePieChart data={pieChartData.data} totalDuration={pieChartData.totalDuration} />
+      <TimeUsagePieChart
+        data={pieChartData.data}
+        totalDuration={pieChartData.totalDuration}
+        period={pieChartData.period}
+        dateRange={pieChartData.dateRange}
+      />
     </Stack>
   )
 
