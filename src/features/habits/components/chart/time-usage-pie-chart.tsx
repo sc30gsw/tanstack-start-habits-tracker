@@ -16,6 +16,7 @@ type TimeUsagePieChartProps = {
   period?: SearchParams['calendarView']
   dateRange?: { from: string; to: string }
   onSegmentClick?: (habitId: string) => void
+  hideChart?: boolean
 }
 
 export function TimeUsagePieChart({
@@ -23,6 +24,7 @@ export function TimeUsagePieChart({
   totalDuration,
   period = 'month',
   dateRange,
+  hideChart = false,
 }: TimeUsagePieChartProps) {
   const getTotalPeriodMinutes = () => {
     if (!dateRange) {
@@ -131,62 +133,66 @@ export function TimeUsagePieChart({
           </Text>
         </Stack>
 
-        <PieChart
-          h={300}
-          data={data}
-          withTooltip
-          tooltipDataSource="segment"
-          valueFormatter={(value) => formatDuration(value)}
-          tooltipProps={{
-            content: ({ payload }) => {
-              if (!payload || payload.length === 0) {
-                return null
-              }
+        {!hideChart && (
+          <>
+            <PieChart
+              h={300}
+              data={data}
+              withTooltip
+              tooltipDataSource="segment"
+              valueFormatter={(value) => formatDuration(value)}
+              tooltipProps={{
+                content: ({ payload }) => {
+                  if (!payload || payload.length === 0) {
+                    return null
+                  }
 
-              const segmentData = payload[0]
-              const segmentName = segmentData.name
-              const segmentValue = segmentData.value as number
+                  const segmentData = payload[0]
+                  const segmentName = segmentData.name
+                  const segmentValue = segmentData.value as number
 
-              const item = data.find((d) => d.name === segmentName)
-              if (!item) {
-                return null
-              }
+                  const item = data.find((d) => d.name === segmentName)
+                  if (!item) {
+                    return null
+                  }
 
-              const percentageOfHabits = ((segmentValue / totalDuration) * 100).toFixed(1)
+                  const percentageOfHabits = ((segmentValue / totalDuration) * 100).toFixed(1)
 
-              return (
-                <Paper px="md" py="sm" withBorder shadow="md" radius="md">
-                  <Stack gap={4}>
-                    <Group gap="xs" align="center">
-                      <div
-                        style={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: '50%',
-                          backgroundColor: `var(--mantine-color-${item.color ? item.color.replace('.', '-') : 'gray'})`,
-                        }}
-                      />
-                      <Text size="sm" fw={500}>
-                        {segmentName}
-                      </Text>
-                    </Group>
-                    <Text size="sm" c="dimmed">
-                      時間: {formatDuration(segmentValue)}
-                    </Text>
-                    <Text size="sm" c="dimmed">
-                      割合: {percentageOfHabits}%
-                    </Text>
-                  </Stack>
-                </Paper>
-              )
-            },
-          }}
-          labelsPosition="outside"
-          withLabels={true}
-          labelsType="percent"
-        />
+                  return (
+                    <Paper px="md" py="sm" withBorder shadow="md" radius="md">
+                      <Stack gap={4}>
+                        <Group gap="xs" align="center">
+                          <div
+                            style={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: '50%',
+                              backgroundColor: `var(--mantine-color-${item.color ? item.color.replace('.', '-') : 'gray'})`,
+                            }}
+                          />
+                          <Text size="sm" fw={500}>
+                            {segmentName}
+                          </Text>
+                        </Group>
+                        <Text size="sm" c="dimmed">
+                          時間: {formatDuration(segmentValue)}
+                        </Text>
+                        <Text size="sm" c="dimmed">
+                          割合: {percentageOfHabits}%
+                        </Text>
+                      </Stack>
+                    </Paper>
+                  )
+                },
+              }}
+              labelsPosition="outside"
+              withLabels={true}
+              labelsType="percent"
+            />
 
-        <Divider />
+            <Divider />
+          </>
+        )}
 
         <Stack gap="xs">
           <Text size="xs" fw={600} c="dimmed">

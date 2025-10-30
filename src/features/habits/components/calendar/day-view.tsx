@@ -1,6 +1,4 @@
-import { Badge, Card, Group, Stack, Text, Tooltip } from '@mantine/core'
-import { IconExternalLink } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
+import { Badge, Card, Group, Stack, Text } from '@mantine/core'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
@@ -93,8 +91,8 @@ export function DayView({ selectedDateRecords, selectedDate, habits }: DayViewPr
 
               return (
                 <Card key={record.id} withBorder padding="sm" radius="sm">
-                  <Group justify="space-between" align="flex-start">
-                    <Stack gap="xs" style={{ flex: 1 }}>
+                  <Stack gap="xs">
+                    <Group justify="space-between" align="flex-start">
                       <Group gap="xs" align="center">
                         <div
                           style={{
@@ -108,31 +106,12 @@ export function DayView({ selectedDateRecords, selectedDate, habits }: DayViewPr
                           {habit?.name}
                         </Text>
                       </Group>
-                      <Group gap="xs" align="center">
-                        {getStatusBadge(record.status)}
-                        <Text size="sm" c="dimmed">
-                          実行時間: {formatDuration(record.duration_minutes || 0)}
-                        </Text>
-                      </Group>
-                    </Stack>
-                    <Tooltip label="詳細を表示" position="top" withArrow>
-                      <Link
-                        to="/habits/$habitId"
-                        params={{ habitId: habit?.id || '' }}
-                        search={{ selectedDate: dayjs(selectedDate).format('YYYY-MM-DD') }}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'var(--mantine-color-gray-6)',
-                          textDecoration: 'none',
-                          flexShrink: 0,
-                        }}
-                      >
-                        <IconExternalLink size={16} />
-                      </Link>
-                    </Tooltip>
-                  </Group>
+                      {getStatusBadge(record.status)}
+                    </Group>
+                    <Text size="sm" c="dimmed">
+                      実行時間: {formatDuration(record.duration_minutes || 0)}
+                    </Text>
+                  </Stack>
                 </Card>
               )
             })}

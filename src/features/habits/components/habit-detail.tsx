@@ -115,13 +115,14 @@ export function HabitDetail() {
         <Stack gap="lg">
           {records.data && (
             <>
-              <TrendsChart records={records.data} habitColor={habit.data?.color as HabitColor} />
               <TimeUsagePieChart
                 data={pieChartData.data}
                 totalDuration={pieChartData.totalDuration}
                 period={pieChartData.period}
                 dateRange={pieChartData.dateRange}
+                hideChart={true}
               />
+              <TrendsChart records={records.data} habitColor={habit.data?.color as HabitColor} />
               <HeatmapSection records={records.data} habitColor={habit.data?.color as HabitColor} />
             </>
           )}
