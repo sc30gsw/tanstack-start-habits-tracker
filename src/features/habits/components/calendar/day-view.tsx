@@ -83,20 +83,11 @@ export function DayView({ selectedDateRecords, selectedDate, habits }: DayViewPr
         ) : (
           <Stack gap="sm">
             {recordsWithHabits.map(({ record, habit }) => {
-              // データベースには "blue" のような形式で保存されているので、".6" を追加
               const habitColorRaw = habit?.color || 'gray'
               const habitColor = habitColorRaw.includes('.') ? habitColorRaw : `${habitColorRaw}.6`
               const color =
                 COLOR_MAP[habitColor as keyof typeof COLOR_MAP] ||
                 `var(--mantine-color-${habitColor.replace('.', '-')})`
-              console.log(
-                'Habit color raw:',
-                habitColorRaw,
-                'Habit color:',
-                habitColor,
-                'Resolved color:',
-                color,
-              )
 
               return (
                 <Card key={record.id} withBorder padding="sm" radius="sm">
