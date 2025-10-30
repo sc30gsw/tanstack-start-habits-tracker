@@ -291,9 +291,9 @@ function HabitsPage() {
         </PanelGroup>
       ) : (
         <Grid gutter="lg">
+          <Grid.Col span={12}>{habitListContent}</Grid.Col>
           <Grid.Col span={12}>{calendarContent}</Grid.Col>
           <Grid.Col span={12}>{pieChartContent}</Grid.Col>
-          <Grid.Col span={12}>{habitListContent}</Grid.Col>
         </Grid>
       )}
     </Container>
