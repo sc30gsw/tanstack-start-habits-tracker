@@ -25,6 +25,7 @@ import { WeekView } from '~/features/habits/components/calendar/week-view'
 import { TimeUsagePieChart } from '~/features/habits/components/chart/time-usage-pie-chart'
 import { HabitCreateForm } from '~/features/habits/components/form/habit-create-form'
 import { HabitList } from '~/features/habits/components/habit-list'
+import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
 import type { RecordEntity } from '~/features/habits/types/habit'
@@ -181,7 +182,7 @@ function HabitsPage() {
   )
 
   const calendarContent = (
-    <Card withBorder padding="lg" radius="md" shadow="sm">
+    <Card withBorder padding="lg" radius="md" shadow="sm" id={CALENDAR_VIEW_HASH_TARGET}>
       <Stack gap="sm">
         <Group justify="space-between" align="center">
           <Group gap="xs" align="center">
@@ -218,7 +219,11 @@ function HabitsPage() {
               recordMap={recordMap}
               selectedDate={searchParams.selectedDate}
               currentMonth={searchParams.currentMonth}
-              navigate={navigate}
+              navigate={(options) =>
+                isDesktop
+                  ? navigate(options)
+                  : navigate({ ...options, hash: CALENDAR_VIEW_HASH_TARGET })
+              }
             />
           </div>
 
@@ -229,7 +234,11 @@ function HabitsPage() {
               weekDates={weekDates}
               recordMap={recordMap}
               selectedDate={searchParams.selectedDate}
-              navigate={navigate}
+              navigate={(options) =>
+                isDesktop
+                  ? navigate(options)
+                  : navigate({ ...options, hash: CALENDAR_VIEW_HASH_TARGET })
+              }
             />
           </div>
 
@@ -241,6 +250,11 @@ function HabitsPage() {
               selectedDate={searchParams.selectedDate}
               habits={habitsData.data || []}
               showHabitLink={true}
+              navigate={(options) =>
+                isDesktop
+                  ? navigate(options)
+                  : navigate({ ...options, hash: CALENDAR_VIEW_HASH_TARGET })
+              }
             />
           </div>
         </div>

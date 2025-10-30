@@ -41,8 +41,12 @@ export function CalendarView({
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
   const selectedDateRecords = useMemo(() => {
-    if (!selectedDate) return []
+    if (!selectedDate) {
+      return []
+    }
+
     const targetDate = dayjs(selectedDate)
+
     return Object.values(recordMap).filter((record) => dayjs(record.date).isSame(targetDate, 'day'))
   }, [selectedDate, recordMap])
 
@@ -105,6 +109,7 @@ export function CalendarView({
               selectedDateRecords={selectedDateRecords}
               selectedDate={selectedDate}
               habits={habits}
+              navigate={navigate}
             />
           </div>
         </div>

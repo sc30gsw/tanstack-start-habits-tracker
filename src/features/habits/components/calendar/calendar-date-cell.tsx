@@ -104,7 +104,6 @@ export function CalendarDateCell({
   const dateType = getDateType(date)
   const hasRecord = !!record
 
-  // 背景色とボーダーの設定
   const borderWidth: CSSProperties['borderWidth'] = '2px'
   const { backgroundColor, borderColor } = getCellBackgroundStyle({
     hasRecord,
@@ -116,7 +115,6 @@ export function CalendarDateCell({
 
   const textColor = getDateTextColor(dateType, isSelected, hasRecord)
 
-  // 月表示用のコンテンツ
   if (variant === 'month') {
     return (
       <Tooltip
@@ -156,7 +154,6 @@ export function CalendarDateCell({
     )
   }
 
-  // 週表示用のコンテンツ
   return (
     <Card
       withBorder
@@ -176,6 +173,7 @@ export function CalendarDateCell({
             ...prev,
             selectedDate: date.format('YYYY-MM-DD'),
           }),
+          hash: CALENDAR_VIEW_HASH_TARGET,
         })
       }
     >
@@ -183,7 +181,7 @@ export function CalendarDateCell({
         size="xs"
         c={
           isSelected || hasRecord
-            ? 'white' // 選択時や記録がある時は白文字で視認性を確保
+            ? 'white'
             : dateType === 'sunday'
               ? 'red.7'
               : dateType === 'saturday'

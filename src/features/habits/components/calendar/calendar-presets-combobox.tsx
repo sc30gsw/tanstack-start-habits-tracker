@@ -20,6 +20,7 @@ import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { filter, map, pipe } from 'remeda'
+import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { getDateColor, getDatePresets } from '~/features/habits/utils/calendar-utils'
 
@@ -114,6 +115,7 @@ export function CalendarPresetsCombobox({ selectedDate, navigate }: CalendarPres
           currentMonth: dayjs(value).format('YYYY-MM'),
           preset: value,
         }),
+        hash: CALENDAR_VIEW_HASH_TARGET,
       })
     } else {
       navigate({
@@ -121,6 +123,7 @@ export function CalendarPresetsCombobox({ selectedDate, navigate }: CalendarPres
           ...prev,
           preset: undefined,
         }),
+        hash: CALENDAR_VIEW_HASH_TARGET,
       })
     }
   }

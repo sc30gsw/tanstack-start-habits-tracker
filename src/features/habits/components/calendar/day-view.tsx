@@ -1,9 +1,11 @@
 import { ActionIcon, Badge, Card, Group, Stack, Text, Tooltip } from '@mantine/core'
-import { IconExternalLink } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
+import { IconChevronLeft, IconChevronRight, IconExternalLink } from '@tabler/icons-react'
+import { Link, type NavigateOptions } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+import { CalendarPresetsCombobox } from '~/features/habits/components/calendar/calendar-presets-combobox'
+import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { formatDuration } from '~/features/habits/utils/time-utils'
@@ -34,6 +36,7 @@ type DayViewProps = {
   selectedDate: SearchParams['selectedDate']
   habits: HabitEntity[]
   showHabitLink?: boolean
+  navigate: (options: NavigateOptions) => void
 }
 
 export function DayView({
@@ -41,8 +44,36 @@ export function DayView({
   selectedDate,
   habits,
   showHabitLink = false,
+  navigate,
 }: DayViewProps) {
-  const formattedDate = selectedDate ? dayjs(selectedDate).format('YYYY/MM/DD (ddd)') : '日付未選択'
+  const currentDate = dayjs(selectedDate)
+  const formattedDate = selectedDate ? currentDate.format('YYYY/MM/DD (ddd)') : '日付未選択'
+
+  const handlePrevDay = () => {
+    const newDate = currentDate.subtract(1, 'day')
+
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        selectedDate: newDate.format('YYYY-MM-DD'),
+        preset: undefined,
+      }),
+      hash: CALENDAR_VIEW_HASH_TARGET,
+    })
+  }
+
+  const handleNextDay = () => {
+    const newDate = currentDate.add(1, 'day')
+
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        selectedDate: newDate.format('YYYY-MM-DD'),
+        preset: undefined,
+      }),
+      hash: CALENDAR_VIEW_HASH_TARGET,
+    })
+  }
 
   const habitMap = new Map(habits.map((habit) => [habit.id, habit]))
 
@@ -78,71 +109,83 @@ export function DayView({
   }
 
   return (
-    <Card withBorder padding="lg" radius="md" shadow="sm">
-      <Stack gap="md">
-        <Text size="lg" fw={600}>
-          {formattedDate}
-        </Text>
+    <Stack gap={16}>
+      <CalendarPresetsCombobox selectedDate={selectedDate} navigate={navigate} />
 
-        {recordsWithHabits.length === 0 ? (
-          <Text size="sm" c="dimmed" ta="center" py="md">
-            この日の記録はありません
-          </Text>
-        ) : (
-          <Stack gap="sm">
-            {recordsWithHabits.map(({ record, habit }) => {
-              const habitColorRaw = habit?.color || 'gray'
-              const habitColor = habitColorRaw.includes('.') ? habitColorRaw : `${habitColorRaw}.6`
-              const color =
-                COLOR_MAP[habitColor as keyof typeof COLOR_MAP] ||
-                `var(--mantine-color-${habitColor.replace('.', '-')})`
+      <Group justify="space-between" mb={4}>
+        <ActionIcon variant="subtle" aria-label="前日" onClick={handlePrevDay}>
+          <IconChevronLeft size={16} />
+        </ActionIcon>
+        <Text fw={500}>{formattedDate}</Text>
+        <ActionIcon variant="subtle" aria-label="翌日" onClick={handleNextDay}>
+          <IconChevronRight size={16} />
+        </ActionIcon>
+      </Group>
 
-              return (
-                <Card key={record.id} withBorder padding="sm" radius="sm">
-                  <Stack gap="xs">
-                    <Group justify="space-between" align="flex-start">
-                      <Group gap="xs" align="center">
-                        <div
-                          style={{
-                            width: 12,
-                            height: 12,
-                            borderRadius: '50%',
-                            backgroundColor: color,
-                          }}
-                        />
-                        <Text size="sm" fw={500}>
-                          {habit?.name}
-                        </Text>
+      <Card withBorder padding="lg" radius="md" shadow="sm">
+        <Stack gap="md">
+          {recordsWithHabits.length === 0 ? (
+            <Text size="sm" c="dimmed" ta="center" py="md">
+              この日の記録はありません
+            </Text>
+          ) : (
+            <Stack gap="sm">
+              {recordsWithHabits.map(({ record, habit }) => {
+                const habitColorRaw = habit?.color || 'gray'
+                const habitColor = habitColorRaw.includes('.')
+                  ? habitColorRaw
+                  : `${habitColorRaw}.6`
+                const color =
+                  COLOR_MAP[habitColor as keyof typeof COLOR_MAP] ||
+                  `var(--mantine-color-${habitColor.replace('.', '-')})`
+
+                return (
+                  <Card key={record.id} withBorder padding="sm" radius="sm">
+                    <Stack gap="xs">
+                      <Group justify="space-between" align="flex-start">
+                        <Group gap="xs" align="center">
+                          <div
+                            style={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: '50%',
+                              backgroundColor: color,
+                            }}
+                          />
+                          <Text size="sm" fw={500}>
+                            {habit?.name}
+                          </Text>
+                        </Group>
+                        {showHabitLink ? (
+                          <Link
+                            to="/habits/$habitId"
+                            params={{ habitId: habit?.id || '' }}
+                            style={{ textDecoration: 'none' }}
+                          >
+                            <Tooltip label="詳細を見る" position="left">
+                              <ActionIcon variant="subtle" color="blue" size="sm">
+                                <IconExternalLink size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+                          </Link>
+                        ) : (
+                          getStatusBadge(record.status)
+                        )}
                       </Group>
-                      {showHabitLink ? (
-                        <Link
-                          to="/habits/$habitId"
-                          params={{ habitId: habit?.id || '' }}
-                          style={{ textDecoration: 'none' }}
-                        >
-                          <Tooltip label="詳細を見る" position="left">
-                            <ActionIcon variant="subtle" color="blue" size="sm">
-                              <IconExternalLink size={16} />
-                            </ActionIcon>
-                          </Tooltip>
-                        </Link>
-                      ) : (
-                        getStatusBadge(record.status)
+                      {showHabitLink && (
+                        <Group justify="flex-start">{getStatusBadge(record.status)}</Group>
                       )}
-                    </Group>
-                    {showHabitLink && (
-                      <Group justify="flex-start">{getStatusBadge(record.status)}</Group>
-                    )}
-                    <Text size="sm" c="dimmed">
-                      実行時間: {formatDuration(record.duration_minutes || 0)}
-                    </Text>
-                  </Stack>
-                </Card>
-              )
-            })}
-          </Stack>
-        )}
-      </Stack>
-    </Card>
+                      <Text size="sm" c="dimmed">
+                        実行時間: {formatDuration(record.duration_minutes || 0)}
+                      </Text>
+                    </Stack>
+                  </Card>
+                )
+              })}
+            </Stack>
+          )}
+        </Stack>
+      </Card>
+    </Stack>
   )
 }
