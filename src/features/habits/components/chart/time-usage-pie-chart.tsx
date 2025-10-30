@@ -274,33 +274,6 @@ export function TimeUsagePieChart({
           </Stack>
         </SimpleGrid>
 
-        {!hideChart && (
-          <>
-            <Divider />
-            <Stack gap="xs">
-              <Text size="xs" fw={700} c="dimmed">
-                習慣一覧
-              </Text>
-              <Group gap="xs">
-                {data.map((item) => {
-                  const colorName = item.color.split('.')[0]
-                  return (
-                    <Badge
-                      key={item.habitId}
-                      color={colorName}
-                      variant="filled"
-                      size="sm"
-                      radius="sm"
-                    >
-                      {item.name}
-                    </Badge>
-                  )
-                })}
-              </Group>
-            </Stack>
-          </>
-        )}
-
         <Divider />
 
         <SimpleGrid cols={2} spacing="md">
