@@ -21,8 +21,8 @@ const CELL_COLORS = {
     selected: 'var(--mantine-color-green-7)',
   },
   recoveryCompleted: {
-    normal: 'var(--mantine-color-cyan-6)',
-    selected: 'var(--mantine-color-cyan-7)',
+    normal: 'var(--mantine-color-orange-6)',
+    selected: 'var(--mantine-color-orange-7)',
   },
   incomplete: {
     normal: 'var(--mantine-color-yellow-5)',
@@ -142,7 +142,7 @@ export function CalendarDateCell({
         label={
           record ? (
             <Stack gap={4}>
-              <Text size="sm" fw={500}>
+              <Text size="sm" fw={700}>
                 {isRecoveryCompleted
                   ? 'リカバリー完了'
                   : record.status === 'completed'
@@ -151,11 +151,18 @@ export function CalendarDateCell({
                       ? 'スキップ'
                       : '予定中'}
               </Text>
-              <Text size="xs" c="dimmed">
+              <Text
+                size="xs"
+                c="dimmed"
+                style={{
+                  visibility: record.status === 'skipped' ? 'hidden' : 'visible',
+                  height: record.status === 'skipped' ? '0' : '1em',
+                }}
+              >
                 {formatDuration(record.duration_minutes || 0)}
               </Text>
               {isRecoveryCompleted && recoveryDate && (
-                <Text size="xs" c="cyan.4">
+                <Text size="xs" c="red.6" fw={700}>
                   {recoveryDate.format('M月D日')}に実施済み
                 </Text>
               )}
