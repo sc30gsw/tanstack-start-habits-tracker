@@ -33,6 +33,7 @@ import {
   useRecordForm,
 } from '~/features/habits/hooks/use-record-form'
 import type { HabitTable, RecordEntity, RecordTable } from '~/features/habits/types/habit'
+import { getDateType } from '~/features/habits/utils/calendar-utils'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -189,6 +190,32 @@ export function RecordForm({
               clearable
               disabled={isPending}
               error={form.errors.recoveryDate}
+              getDayProps={(calendarDate) => {
+                const dayjsDate = dayjs(calendarDate)
+                const dateType = getDateType(dayjsDate)
+
+                switch (dateType) {
+                  case 'sunday':
+                  case 'holiday':
+                    return {
+                      style: {
+                        color: 'var(--mantine-color-red-7)',
+                        fontWeight: 500,
+                      },
+                    }
+
+                  case 'saturday':
+                    return {
+                      style: {
+                        color: 'var(--mantine-color-blue-7)',
+                        fontWeight: 500,
+                      },
+                    }
+
+                  default:
+                    return {}
+                }
+              }}
             />
           </Stack>
         )}
