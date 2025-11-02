@@ -47,8 +47,8 @@ export const createRecordSchema = z
       .transform((val) => val?.trim() || undefined),
     recoveryDate: z
       .string()
-      .regex(DATE_REGEX, '振替日はYYYY-MM-DD形式で入力してください')
-      .refine(isValidDate, '有効な振替日を入力してください')
+      .regex(DATE_REGEX, 'リカバリー日はYYYY-MM-DD形式で入力してください')
+      .refine(isValidDate, '有効なリカバリー日を入力してください')
       .optional()
       .nullable()
       .transform((val) => val?.trim() || null),
@@ -91,7 +91,7 @@ export const createRecordSchema = z
       return true
     },
     {
-      message: '振替日はスキップステータスの時のみ設定できます',
+      message: 'リカバリー日はスキップステータスの時のみ設定できます',
       path: ['recoveryDate'],
     },
   )
@@ -104,7 +104,7 @@ export const createRecordSchema = z
       return true
     },
     {
-      message: '振替日は元の日付より未来の日付を指定してください',
+      message: 'リカバリー日は元の日付より未来の日付を指定してください',
       path: ['recoveryDate'],
     },
   )
@@ -121,7 +121,7 @@ export const createRecordSchema = z
       return true
     },
     {
-      message: '振替日は元の日付から30日以内で指定してください',
+      message: 'リカバリー日は元の日付から30日以内で指定してください',
       path: ['recoveryDate'],
     },
   )
@@ -147,8 +147,8 @@ export const updateRecordSchema = z
       .transform((val) => val?.trim() || undefined),
     recoveryDate: z
       .string()
-      .regex(DATE_REGEX, '振替日はYYYY-MM-DD形式で入力してください')
-      .refine(isValidDate, '有効な振替日を入力してください')
+      .regex(DATE_REGEX, 'リカバリー日はYYYY-MM-DD形式で入力してください')
+      .refine(isValidDate, '有効なリカバリー日を入力してください')
       .optional()
       .nullable()
       .transform((val) => val?.trim() || null),
@@ -195,7 +195,7 @@ export const updateRecordSchema = z
       return true
     },
     {
-      message: '振替日はスキップステータスの時のみ設定できます',
+      message: 'リカバリー日はスキップステータスの時のみ設定できます',
       path: ['recoveryDate'],
     },
   )
@@ -208,7 +208,7 @@ export const updateRecordSchema = z
       return true
     },
     {
-      message: '振替日は元の日付より未来の日付を指定してください',
+      message: 'リカバリー日は元の日付より未来の日付を指定してください',
       path: ['recoveryDate'],
     },
   )
@@ -225,7 +225,7 @@ export const updateRecordSchema = z
       return true
     },
     {
-      message: '振替日は元の日付から30日以内で指定してください',
+      message: 'リカバリー日は元の日付から30日以内で指定してください',
       path: ['recoveryDate'],
     },
   )

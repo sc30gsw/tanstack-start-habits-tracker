@@ -161,6 +161,15 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                   {formatDuration(selectedDateRecord.duration_minutes || 0)}
                 </Badge>
               )}
+              {selectedDateRecord.recoveryDate && (
+                <Badge
+                  variant="outline"
+                  color="orange"
+                  leftSection={<IconCalendarEvent size={14} />}
+                >
+                  リカバリー日: {dayjs(selectedDateRecord.recoveryDate).format('MM/DD')}
+                </Badge>
+              )}
             </Group>
             {hasNotes(selectedDateRecord.notes) && (
               <Stack gap="xs">

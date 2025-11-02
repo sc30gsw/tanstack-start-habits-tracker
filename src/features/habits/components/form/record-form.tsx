@@ -355,39 +355,47 @@ export function RecordForm({
             </Group>
           )}
         />
-        <Group gap="md">
-          <NumberInput
-            label="実行時間（時間）"
-            placeholder="0"
-            min={0}
-            max={24}
-            step={0.25}
-            decimalScale={2}
-            key={form.key('durationHours')}
-            value={form.values.durationHours}
-            onChange={handleHoursChange}
-            error={!!form.errors.durationMinutes}
-            disabled={isPending}
-            style={{ flex: 1 }}
-          />
-          <NumberInput
-            label="実行時間（分）"
-            placeholder="0"
-            min={0}
-            max={1440}
-            key={form.key('durationMinutes')}
-            value={form.values.durationMinutes ?? 0}
-            onChange={handleMinutesChange}
-            error={!!form.errors.durationMinutes}
-            disabled={isPending}
-            style={{ flex: 1 }}
-          />
-        </Group>
+        {form.values.status !== 'skipped' && (
+          <Group gap="md">
+            <NumberInput
+              label="実行時間（時間）"
+              placeholder="0"
+              min={0}
+              max={24}
+              step={0.25}
+              decimalScale={2}
+              key={form.key('durationHours')}
+              value={form.values.durationHours}
+              onChange={handleHoursChange}
+              error={!!form.errors.durationMinutes}
+              disabled={isPending}
+              style={{ flex: 1 }}
+            />
+            <NumberInput
+              label="実行時間（分）"
+              placeholder="0"
+              min={0}
+              max={1440}
+              key={form.key('durationMinutes')}
+              value={form.values.durationMinutes ?? 0}
+              onChange={handleMinutesChange}
+              error={!!form.errors.durationMinutes}
+              disabled={isPending}
+              style={{ flex: 1 }}
+            />
+          </Group>
+        )}
         {form.values.status === 'skipped' && (
           <DateInput
-            label="振替予定日（オプション）"
-            description="この習慣を振替実行する予定日を設定できます（30日以内）。振替日に完了すればストリークを維持できます。"
-            placeholder="振替日を選択"
+            label="リカバリー予定日"
+            description={
+              <Text c="dimmed">
+                この習慣をリカバリー実行する予定日を設定できます（30日以内）。
+                <br />
+                リカバリー日に完了すればストリークを維持できます。
+              </Text>
+            }
+            placeholder="リカバリー日を選択"
             key={form.key('recoveryDate')}
             value={form.values.recoveryDate ? new Date(form.values.recoveryDate) : null}
             onChange={(value) => {
