@@ -83,10 +83,16 @@ export function RecordForm({
             </Text>
           </Alert>
         )}
-        {(form.errors.status || form.errors.durationMinutes || form.errors.notes) && (
+        {(form.errors.status ||
+          form.errors.durationMinutes ||
+          form.errors.notes ||
+          form.errors.recoveryDate) && (
           <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
             <Text c="red">
-              {form.errors.status || form.errors.durationMinutes || form.errors.notes}
+              {form.errors.status ||
+                form.errors.durationMinutes ||
+                form.errors.notes ||
+                form.errors.recoveryDate}
             </Text>
           </Alert>
         )}
