@@ -45,6 +45,13 @@ export const createRecordSchema = z
       .string()
       .optional()
       .transform((val) => val?.trim() || undefined),
+    recoveryDate: z
+      .string()
+      .regex(DATE_REGEX, 'リカバリー日はYYYY-MM-DD形式で入力してください')
+      .refine(isValidDate, '有効なリカバリー日を入力してください')
+      .optional()
+      .nullable()
+      .transform((val) => val?.trim() || null),
   })
   .refine(
     (data) => {
@@ -75,6 +82,49 @@ export const createRecordSchema = z
       path: ['status'],
     },
   )
+  .refine(
+    (data) => {
+      if (data.recoveryDate && data.status !== 'skipped') {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー日はスキップステータスの時のみ設定できます',
+      path: ['recoveryDate'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.recoveryDate && data.recoveryDate <= data.date) {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー日は元の日付より未来の日付を指定してください',
+      path: ['recoveryDate'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.recoveryDate) {
+        const maxDate = dayjs(data.date).add(30, 'day').format('YYYY-MM-DD')
+
+        if (data.recoveryDate > maxDate) {
+          return false
+        }
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー日は元の日付から30日以内で指定してください',
+      path: ['recoveryDate'],
+    },
+  )
 
 export const updateRecordSchema = z
   .object({
@@ -95,6 +145,13 @@ export const updateRecordSchema = z
       .string()
       .optional()
       .transform((val) => val?.trim() || undefined),
+    recoveryDate: z
+      .string()
+      .regex(DATE_REGEX, 'リカバリー日はYYYY-MM-DD形式で入力してください')
+      .refine(isValidDate, '有効なリカバリー日を入力してください')
+      .optional()
+      .nullable()
+      .transform((val) => val?.trim() || null),
   })
   .refine(
     (data) => {
@@ -127,6 +184,49 @@ export const updateRecordSchema = z
     {
       message: '未来の日付には「完了」ステータスは記録できません',
       path: ['status'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.recoveryDate && data.status !== 'skipped') {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー日はスキップステータスの時のみ設定できます',
+      path: ['recoveryDate'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.recoveryDate && data.date && data.recoveryDate <= data.date) {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー日は元の日付より未来の日付を指定してください',
+      path: ['recoveryDate'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.recoveryDate && data.date) {
+        const maxDate = dayjs(data.date).add(30, 'day').format('YYYY-MM-DD')
+
+        if (data.recoveryDate > maxDate) {
+          return false
+        }
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー日は元の日付から30日以内で指定してください',
+      path: ['recoveryDate'],
     },
   )
 

@@ -90,7 +90,11 @@ export function HabitDetail() {
           habits={habits.data || []}
         />
       )}
-      <DateDetail selectedDateRecord={selectedDateRecord || null} habitId={habit.data?.id ?? ''} />
+      <DateDetail
+        selectedDateRecord={selectedDateRecord || null}
+        habitId={habit.data?.id ?? ''}
+        allRecords={records.data || []}
+      />
     </Stack>
   )
   const rightPanelContent = (

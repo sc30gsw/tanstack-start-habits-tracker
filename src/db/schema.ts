@@ -1,7 +1,6 @@
 import { relations, sql } from 'drizzle-orm'
 import { index, integer, real, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core'
 
-// Habits table for habit definitions
 export const habits = sqliteTable(
   'habits',
   {
@@ -22,7 +21,6 @@ export const habits = sqliteTable(
   (habit) => [index('habits_userId').on(habit.userId)],
 )
 
-// Records table for daily habit execution tracking
 export const records = sqliteTable(
   'records',
   {
@@ -30,21 +28,18 @@ export const records = sqliteTable(
     habitId: text('habit_id')
       .notNull()
       .references(() => habits.id, { onDelete: 'cascade' }),
-    date: text().notNull(), // ISO date string (YYYY-MM-DD)
+    date: text().notNull(),
     status: text().$type<'active' | 'completed' | 'skipped'>().notNull().default('active'),
     duration_minutes: integer().default(0),
     notes: text(),
+    recoveryDate: text('recovery_date'),
     createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
   },
-  (table) => [
-    // Unique constraint to prevent duplicate records for the same habit on the same date
-    unique().on(table.habitId, table.date),
-    index('records_userId').on(table.userId),
-  ],
+  (table) => [unique().on(table.habitId, table.date), index('records_userId').on(table.userId)],
 )
 
 export const users = sqliteTable('users', {
@@ -58,7 +53,7 @@ export const users = sqliteTable('users', {
     .notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .$onUpdate(() => new Date())
     .notNull(),
 })
 
@@ -70,7 +65,7 @@ export const sessions = sqliteTable('sessions', {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
-    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .$onUpdate(() => new Date())
     .notNull(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
@@ -101,7 +96,7 @@ export const accounts = sqliteTable('accounts', {
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
-    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .$onUpdate(() => new Date())
     .notNull(),
 })
 
@@ -115,7 +110,7 @@ export const verifications = sqliteTable('verifications', {
     .notNull(),
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .$onUpdate(() => new Date())
     .notNull(),
 })
 
@@ -135,12 +130,9 @@ export const passkeys = sqliteTable('passkeys', {
   aaguid: text('aaguid'),
 })
 
-// Settings table for user preferences
 export const settings = sqliteTable('settings', {
   id: text().primaryKey(),
-  theme: text().default('auto'), // 'light' | 'dark' | 'auto'
-
-  // Notification settings
+  theme: text().default('auto'),
   notificationsEnabled: integer('notifications_enabled', { mode: 'boolean' }).default(false),
   customReminderEnabled: integer('custom_reminder_enabled', { mode: 'boolean' }).default(false),
   dailyReminderTime: text('daily_reminder_time').default('09:00'), // HH:mm format
@@ -159,14 +151,11 @@ export const settings = sqliteTable('settings', {
     .references(() => users.id, { onDelete: 'cascade' }),
 })
 
-// Notifications table for in-app reminders
 export const notifications = sqliteTable('notifications', {
   id: text().primaryKey(),
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-
-  // Notification content
   title: text().notNull(),
   message: text().notNull(),
   type: text()
@@ -179,15 +168,9 @@ export const notifications = sqliteTable('notifications', {
       | 'achievement'
     >()
     .default('reminder'),
-
-  // Related habit and record
   habitId: text('habit_id').references(() => habits.id, { onDelete: 'cascade' }),
   recordId: text('record_id').references(() => records.id, { onDelete: 'cascade' }),
-
-  // Notification state
   isRead: integer('is_read', { mode: 'boolean' }).default(false),
-
-  // Timestamps
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   readAt: text('read_at'),
 })
@@ -207,7 +190,6 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }))
 
-// Habit Levels table for tracking habit progression
 export const habitLevels = sqliteTable(
   'habit_levels',
   {
@@ -216,21 +198,13 @@ export const habitLevels = sqliteTable(
       .notNull()
       .unique() // 1 habit = 1 level record
       .references(() => habits.id, { onDelete: 'cascade' }),
-
-    // Continuation level stats
     uniqueCompletionDays: integer('unique_completion_days').default(0).notNull(),
     completionLevel: integer('completion_level').default(1).notNull(),
-
-    // Total hours level stats
     totalHoursDecimal: real('total_hours_decimal').default(0.0).notNull(),
     hoursLevel: integer('hours_level').default(1).notNull(),
-
-    // Streak stats
     currentStreak: integer('current_streak').default(0).notNull(),
     longestStreak: integer('longest_streak').default(0).notNull(),
     lastActivityDate: text('last_activity_date'),
-
-    // Metadata
     createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
     userId: text('user_id')

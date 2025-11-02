@@ -50,6 +50,59 @@ code {
   );
 }
 
+/* TipTap Preview Styles */
+.tiptap-preview {
+  line-height: 1.6;
+}
+
+.tiptap-preview p {
+  margin: 0.5em 0;
+}
+
+.tiptap-preview ul,
+.tiptap-preview ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.tiptap-preview li {
+  margin: 0.25em 0;
+}
+
+.tiptap-preview strong {
+  font-weight: 600;
+}
+
+.tiptap-preview em {
+  font-style: italic;
+}
+
+.tiptap-preview code {
+  background-color: light-dark(
+    var(--mantine-color-gray-1),
+    var(--mantine-color-dark-6)
+  );
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.tiptap-preview pre {
+  background-color: light-dark(
+    var(--mantine-color-gray-1),
+    var(--mantine-color-dark-7)
+  );
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+
+.tiptap-preview pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
 .habit-detail-resize-handle:hover,
 .habits-list-resize-handle:hover {
   background-color: light-dark(

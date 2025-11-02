@@ -24,7 +24,9 @@ export function TimePeriodControls({
   onDateChange,
   onPeriodChange,
 }: TimePeriodControlsProps) {
-  const dateValue = selectedDate ? dayjs.tz(selectedDate, 'Asia/Tokyo').toDate() : dayjs().tz('Asia/Tokyo').toDate()
+  const dateValue = selectedDate
+    ? dayjs.tz(selectedDate, 'Asia/Tokyo').toDate()
+    : dayjs().tz('Asia/Tokyo').toDate()
 
   return (
     <Stack gap="md">

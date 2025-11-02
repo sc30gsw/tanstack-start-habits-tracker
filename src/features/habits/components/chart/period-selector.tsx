@@ -8,7 +8,10 @@ type PeriodSelectorProps = {
 
 export function PeriodSelector({ value, onChange }: PeriodSelectorProps) {
   return (
-    <Radio.Group value={value || 'month'} onChange={(val) => onChange(val as SearchParams['calendarView'])}>
+    <Radio.Group
+      value={value || 'month'}
+      onChange={(val) => onChange(val as SearchParams['calendarView'])}
+    >
       <Group gap="sm">
         <Radio value="day" label="日" />
         <Radio value="week" label="週" />

@@ -79,6 +79,7 @@ const createRecord = createServerFn({ method: 'POST' })
           status: data.status,
           duration_minutes: data.durationMinutes,
           notes: data.notes,
+          recoveryDate: data.recoveryDate,
           createdAt: now,
           updatedAt: now,
           userId,
@@ -150,6 +151,10 @@ const updateRecord = createServerFn({ method: 'POST' })
 
       if (data.notes !== undefined) {
         updateData.notes = data.notes
+      }
+
+      if (data.recoveryDate !== undefined) {
+        updateData.recoveryDate = data.recoveryDate
       }
 
       const [updatedRecord] = await db

@@ -1,41 +1,43 @@
-import { Alert, Button, Group, Kbd, NumberInput, Select, Stack, Text, Tooltip } from '@mantine/core'
-import { useForm } from '@mantine/form'
-import { modals } from '@mantine/modals'
-import { notifications } from '@mantine/notifications'
+import {
+  Alert,
+  Button,
+  Card,
+  Drawer,
+  Group,
+  Kbd,
+  NumberInput,
+  Select,
+  Stack,
+  Text,
+  Tooltip,
+} from '@mantine/core'
+import { DateInput } from '@mantine/dates'
+import { useMediaQuery } from '@mantine/hooks'
 import {
   IconAlertTriangle,
   IconCircleCheck,
   IconClipboard,
   IconDeviceFloppy,
+  IconEdit,
+  IconMaximize,
   IconPlayerSkipForward,
 } from '@tabler/icons-react'
-import { useRouter } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import { useEffect, useMemo, useState, useTransition } from 'react'
 import 'dayjs/locale/ja'
+import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
+import {
+  type FormValues,
+  isEmptyContent,
+  useRecordForm,
+} from '~/features/habits/hooks/use-record-form'
+import type { HabitTable, RecordEntity, RecordTable } from '~/features/habits/types/habit'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.locale('ja')
 dayjs.tz.setDefault('Asia/Tokyo')
-
-import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
-import { recordDto } from '~/features/habits/server/record-functions'
-import type { HabitTable, RecordEntity, RecordTable } from '~/features/habits/types/habit'
-import { createRecordSchema } from '~/features/habits/types/schemas/record-schemas'
-import { hoursToMinutes, minutesToHours } from '~/features/habits/utils/time-utils'
-
-function isEmptyContent(html?: string | null) {
-  if (!html) {
-    return true
-  }
-
-  const text = html.replace(/<[^>]*>/g, '').trim()
-
-  return text.length === 0
-}
 
 type RecordFormProps = {
   habitId: HabitTable['id']
@@ -45,11 +47,6 @@ type RecordFormProps = {
   existingRecord?: RecordEntity
 }
 
-type FormValues = Pick<RecordTable, 'status' | 'notes'> & {
-  durationMinutes: RecordTable['duration_minutes']
-  durationHours: number | ''
-}
-
 export function RecordForm({
   habitId,
   date,
@@ -57,235 +54,22 @@ export function RecordForm({
   onCancel,
   existingRecord,
 }: RecordFormProps) {
-  const [isPending, startTransition] = useTransition()
-  const router = useRouter()
+  const isDesktop = useMediaQuery('(min-width: 768px)')
 
-  const [editorContent, setEditorContent] = useState(existingRecord?.notes ?? '')
-
-  const form = useForm<FormValues>({
-    initialValues: {
-      status: existingRecord?.status ?? 'active',
-      durationMinutes: existingRecord?.duration_minutes ?? 0,
-      durationHours: existingRecord?.duration_minutes
-        ? minutesToHours(existingRecord.duration_minutes)
-        : 0,
-      notes: existingRecord?.notes ?? '',
-    },
-    validate: (values) => {
-      const parsed = createRecordSchema
-        .pick({ status: true, durationMinutes: true, habitId: true, date: true, notes: true })
-        .safeParse({
-          habitId: habitId,
-          date,
-          status: values.status,
-          durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
-          notes: values.notes,
-        })
-
-      if (parsed.success) {
-        return {}
-      }
-
-      const fieldErrors: Record<string, string> = {}
-
-      for (const issue of parsed.error.issues) {
-        const path = issue.path[0]
-        if (typeof path === 'string' && !fieldErrors[path]) {
-          fieldErrors[path] = issue.message
-        }
-      }
-
-      return fieldErrors
-    },
-    transformValues: (values) => ({
-      status: values.status,
-      durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
-      durationHours: typeof values.durationHours === 'number' ? values.durationHours : 0,
-      notes: values.notes,
-    }),
-  })
-
-  const isFutureDate = useMemo(() => {
-    const todayJST = dayjs().tz('Asia/Tokyo').format('YYYY-MM-DD')
-    return date > todayJST
-  }, [date])
-
-  const statusOptions = useMemo(() => {
-    if (isFutureDate) {
-      return [
-        {
-          value: 'active',
-          label: '予定中',
-        },
-        {
-          value: 'skipped',
-          label: 'スキップ',
-        },
-      ]
-    }
-
-    return [
-      {
-        value: 'active',
-        label: '予定中',
-      },
-      {
-        value: 'completed',
-        label: '完了',
-      },
-      {
-        value: 'skipped',
-        label: 'スキップ',
-      },
-    ]
-  }, [isFutureDate])
-
-  useEffect(() => {
-    if (isFutureDate && form.values.status === 'completed') {
-      form.setFieldValue('status', 'active')
-    }
-  }, [isFutureDate, form])
-
-  useEffect(() => {
-    form.setFieldValue('notes', editorContent)
-  }, [editorContent])
-
-  const handleSubmit = (values: FormValues) => {
-    const durationMinutes = typeof values.durationMinutes === 'number' ? values.durationMinutes : 0
-
-    if (values.status === 'skipped' && isEmptyContent(values.notes)) {
-      modals.openConfirmModal({
-        title: 'スキップの理由を記録しませんか？',
-        children: (
-          <Text size="sm">
-            なぜスキップしたのか、どうすれば改善できるかを記録することで、
-            <br />
-            今後の習慣継続に役立ちます。
-          </Text>
-        ),
-        labels: {
-          confirm: '理由を記入する',
-          cancel: existingRecord ? 'このまま更新' : 'このまま保存',
-        },
-        confirmProps: { color: 'blue' },
-        onConfirm: () => {
-          setTimeout(() => {
-            const editor = document.querySelector('.tiptap.ProseMirror') as HTMLElement
-            if (editor) {
-              editor.focus()
-              editor.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            }
-          }, 100)
-        },
-        onCancel: () => {
-          executeSubmit(values, durationMinutes)
-        },
-      })
-      return
-    }
-
-    executeSubmit(values, durationMinutes)
-  }
-
-  const executeSubmit = (values: FormValues, durationMinutes: number) => {
-    const validationResult = createRecordSchema.safeParse({
-      habitId,
-      date,
-      status: values.status,
-      durationMinutes,
-      notes: values.notes,
-    })
-
-    if (!validationResult.success) {
-      const fieldErrors: Record<string, string> = {}
-
-      for (const issue of validationResult.error.issues) {
-        const path = issue.path[0]
-
-        if (typeof path === 'string' && !fieldErrors[path]) {
-          fieldErrors[path] = issue.message
-        }
-      }
-
-      form.setErrors(fieldErrors)
-
-      return
-    }
-
-    startTransition(async () => {
-      form.clearErrors()
-
-      try {
-        const result = existingRecord
-          ? await recordDto.updateRecord({
-              data: {
-                id: existingRecord.id,
-                status: values.status,
-                durationMinutes,
-                notes: values.notes ?? '',
-              },
-            })
-          : await recordDto.createRecord({
-              data: {
-                habitId,
-                date,
-                status: values.status,
-                durationMinutes,
-                notes: values.notes ?? '',
-              },
-            })
-
-        if (result.success) {
-          router.invalidate()
-          onSuccess()
-          form.reset()
-
-          notifications.show({
-            title: '成功',
-            message: existingRecord ? '記録が更新されました' : '記録が作成されました',
-            color: 'green',
-          })
-        } else {
-          notifications.show({
-            title: 'エラー',
-            message: result.error || `記録の${existingRecord ? '更新' : '作成'}に失敗しました`,
-            color: 'red',
-          })
-          form.setErrors({ durationMinutes: result.error || '記録の保存に失敗しました' })
-        }
-      } catch (_err) {
-        notifications.show({
-          title: 'エラー',
-          message: '予期しないエラーが発生しました',
-          color: 'red',
-        })
-
-        form.setErrors({ durationMinutes: '予期しないエラーが発生しました' })
-      }
-    })
-  }
-
-  const handleMinutesChange = (value: string | number) => {
-    const minutes = typeof value === 'string' ? 0 : (value ?? 0)
-    form.setFieldValue('durationMinutes', minutes)
-
-    if (typeof minutes === 'number') {
-      form.setFieldValue('durationHours', minutesToHours(minutes))
-    } else {
-      form.setFieldValue('durationHours', 0)
-    }
-  }
-
-  const handleHoursChange = (value: string | number) => {
-    const hours = typeof value === 'string' ? 0 : (value ?? 0)
-    form.setFieldValue('durationHours', hours)
-
-    if (typeof hours === 'number') {
-      form.setFieldValue('durationMinutes', hoursToMinutes(hours))
-    } else {
-      form.setFieldValue('durationMinutes', 0)
-    }
-  }
+  const {
+    form,
+    isPending,
+    statusOptions,
+    isFutureDate,
+    editorContent,
+    setEditorContent,
+    isEditorModalOpen,
+    setIsEditorModalOpen,
+    handleSubmit,
+    handleHoursChange,
+    handleMinutesChange,
+    notesConfig,
+  } = useRecordForm(habitId, date, onSuccess, existingRecord)
 
   return (
     <form onSubmit={form.onSubmit((values: FormValues) => handleSubmit(values))} noValidate>
@@ -340,52 +124,139 @@ export function RecordForm({
             </Group>
           )}
         />
-        <Group gap="md">
-          <NumberInput
-            label="実行時間（時間）"
-            placeholder="0"
-            min={0}
-            max={24}
-            step={0.25}
-            decimalScale={2}
-            key={form.key('durationHours')}
-            value={form.values.durationHours}
-            onChange={handleHoursChange}
-            error={!!form.errors.durationMinutes}
-            disabled={isPending}
-            style={{ flex: 1 }}
-          />
-          <NumberInput
-            label="実行時間（分）"
-            placeholder="0"
-            min={0}
-            max={1440}
-            key={form.key('durationMinutes')}
-            value={form.values.durationMinutes ?? 0}
-            onChange={handleMinutesChange}
-            error={!!form.errors.durationMinutes}
-            disabled={isPending}
-            style={{ flex: 1 }}
-          />
-        </Group>
+        {form.values.status !== 'skipped' && (
+          <Group gap="md">
+            <NumberInput
+              label="実行時間（時間）"
+              placeholder="0"
+              min={0}
+              max={24}
+              step={0.25}
+              decimalScale={2}
+              key={form.key('durationHours')}
+              value={form.values.durationHours}
+              onChange={handleHoursChange}
+              error={!!form.errors.durationMinutes}
+              disabled={isPending}
+              style={{ flex: 1 }}
+            />
+            <NumberInput
+              label="実行時間（分）"
+              placeholder="0"
+              min={0}
+              max={1440}
+              key={form.key('durationMinutes')}
+              value={form.values.durationMinutes ?? 0}
+              onChange={handleMinutesChange}
+              error={!!form.errors.durationMinutes}
+              disabled={isPending}
+              style={{ flex: 1 }}
+            />
+          </Group>
+        )}
+        {form.values.status === 'skipped' && (
+          <Stack gap="md" mt="xs">
+            <DateInput
+              label="リカバリー予定日"
+              description={
+                <Text size="sm" c="dimmed" style={{ lineHeight: 1.6, marginBottom: 8 }}>
+                  スキップした習慣を後日実行する予定日を設定できます。
+                  <br />
+                  （スキップした日から
+                  <Text component="span" fw={700} c="blue.6">
+                    30日以内
+                  </Text>
+                  まで選択可能）
+                  <br />
+                  リカバリー日に完了すれば、習慣継続の記録として反映されます。
+                </Text>
+              }
+              placeholder="リカバリー日を選択"
+              key={form.key('recoveryDate')}
+              value={form.values.recoveryDate ? new Date(form.values.recoveryDate) : null}
+              onChange={(value) => {
+                form.setFieldValue('recoveryDate', value ? dayjs(value).format('YYYY-MM-DD') : null)
+              }}
+              minDate={dayjs(date).add(1, 'day').toDate()}
+              maxDate={dayjs(date).add(30, 'day').toDate()}
+              valueFormat="YYYY-MM-DD"
+              clearable
+              disabled={isPending}
+              error={form.errors.recoveryDate}
+            />
+          </Stack>
+        )}
         <Stack gap="xs">
-          <Text size="sm" fw={500}>
-            実施内容・振り返り
-          </Text>
-          <RichTextEditor
-            content={editorContent}
-            onChange={setEditorContent}
-            placeholder="例：
-・ランニング 30分（5km）
-・ストレッチ 10分
+          <Group justify="space-between" align="center">
+            <Text size="sm" fw={500}>
+              {notesConfig.label}
+            </Text>
+          </Group>
 
-できなかった部分：
-・筋トレは時間がなくてスキップ
-・明日は朝の時間を使って取り組む"
-            disabled={isPending}
-            onSubmit={() => form.onSubmit((values: FormValues) => handleSubmit(values))()}
-          />
+          {editorContent && !isEmptyContent(editorContent) ? (
+            <Card withBorder padding="md" radius="md">
+              <Stack gap="sm">
+                <div
+                  className="tiptap-preview"
+                  dangerouslySetInnerHTML={{ __html: editorContent }}
+                  style={{
+                    minHeight: '80px',
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                  }}
+                />
+                <Button
+                  variant="light"
+                  size="sm"
+                  leftSection={<IconEdit size={16} />}
+                  onClick={() => setIsEditorModalOpen(true)}
+                >
+                  編集する
+                </Button>
+              </Stack>
+            </Card>
+          ) : (
+            /* 内容が空の場合は入力ボタンのみ表示 */
+            <Button
+              variant="outline"
+              size="md"
+              leftSection={<IconMaximize size={16} />}
+              onClick={() => setIsEditorModalOpen(true)}
+              fullWidth
+            >
+              {notesConfig.label}を記入する
+            </Button>
+          )}
         </Stack>
+
+        <Drawer
+          opened={isEditorModalOpen}
+          onClose={() => setIsEditorModalOpen(false)}
+          title={notesConfig.label}
+          position={isDesktop ? 'right' : 'top'}
+          size={isDesktop ? 'xl' : 'lg'}
+        >
+          <Stack gap="md" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <RichTextEditor
+                content={editorContent}
+                onChange={setEditorContent}
+                placeholder={notesConfig.placeholder}
+                disabled={isPending}
+                onSubmit={() => {
+                  setIsEditorModalOpen(false)
+                }}
+                minHeight="calc(100vh - 600px)"
+              />
+            </div>
+            <Group justify="flex-end" style={{ flexShrink: 0 }}>
+              <Button variant="outline" onClick={() => setIsEditorModalOpen(false)}>
+                閉じる
+              </Button>
+            </Group>
+          </Stack>
+        </Drawer>
+
         <Group gap="sm" align="center">
           <Tooltip
             label={

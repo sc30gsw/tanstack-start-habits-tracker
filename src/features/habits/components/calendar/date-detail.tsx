@@ -25,6 +25,7 @@ import { RecordDeleteButton } from '~/features/habits/components/record-delete-b
 import { RECORD_FORM_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { HabitTable, RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
+import { isRecordRecovered } from '~/features/habits/utils/recovery-utils'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
 const HTML_TAG_REGEX = /<[^>]*>/g
@@ -32,9 +33,10 @@ const HTML_TAG_REGEX = /<[^>]*>/g
 type DateDetailProps = {
   selectedDateRecord: RecordEntity | null
   habitId: HabitTable['id']
+  allRecords: RecordEntity[]
 }
 
-export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
+export function DateDetail({ selectedDateRecord, habitId, allRecords }: DateDetailProps) {
   const apiRoute = getRouteApi('/habits/$habitId')
   const searchParams = apiRoute.useSearch()
   const selectedDate = getValidatedDate(searchParams?.selectedDate)
@@ -161,6 +163,21 @@ export function DateDetail({ selectedDateRecord, habitId }: DateDetailProps) {
                   {formatDuration(selectedDateRecord.duration_minutes || 0)}
                 </Badge>
               )}
+              {selectedDateRecord.recoveryDate && (
+                <Badge
+                  variant="outline"
+                  color="orange"
+                  leftSection={<IconCalendarEvent size={14} />}
+                >
+                  リカバリー日: {dayjs(selectedDateRecord.recoveryDate).format('MM/DD')}
+                </Badge>
+              )}
+              {selectedDateRecord.recoveryDate &&
+                isRecordRecovered(selectedDateRecord, allRecords) && (
+                  <Badge variant="filled" color="green" leftSection={<IconCircleCheck size={14} />}>
+                    リカバリー完了
+                  </Badge>
+                )}
             </Group>
             {hasNotes(selectedDateRecord.notes) && (
               <Stack gap="xs">
