@@ -200,6 +200,7 @@ type RichTextEditorProps = {
   placeholder?: string
   disabled?: boolean
   onSubmit?: () => void
+  minHeight?: string | number
 }
 
 export function RichTextEditor({
@@ -208,6 +209,7 @@ export function RichTextEditor({
   placeholder = '今日の感想や具体的に何をやったかを記録...',
   disabled = false,
   onSubmit,
+  minHeight = '120px',
 }: RichTextEditorProps) {
   const computedColorScheme = useComputedColorScheme('light')
 
@@ -1240,7 +1242,7 @@ export function RichTextEditor({
             computedColorScheme === 'dark'
               ? 'var(--mantine-color-dark-6)'
               : 'var(--mantine-color-white)',
-          minHeight: '120px',
+          minHeight: minHeight,
           maxHeight: '300px',
           overflowY: 'auto',
         }}

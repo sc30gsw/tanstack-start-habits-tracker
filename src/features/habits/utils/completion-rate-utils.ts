@@ -4,15 +4,13 @@ import utc from 'dayjs/plugin/utc'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import type { RecordEntity } from '~/features/habits/types/habit'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
+import { getRecoveredDatesSet } from '~/features/habits/utils/recovery-utils'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(weekOfYear)
 dayjs.tz.setDefault('Asia/Tokyo')
 
-/**
- * カレンダービューと選択日に基づいて対象期間を計算する
- */
 export function getTargetDateRange(
   selectedDate: Date,
   calendarView: SearchParams['calendarView'],
@@ -23,7 +21,6 @@ export function getTargetDateRange(
 
   switch (calendarView) {
     case 'day': {
-      // 日表示：その日のみ
       return {
         startDate: selected.format('YYYY-MM-DD'),
         endDate: selected.format('YYYY-MM-DD'),
@@ -32,11 +29,9 @@ export function getTargetDateRange(
     }
 
     case 'week': {
-      // 週表示：選択日の週
       const weekStart = selected.startOf('week')
       let weekEnd = selected.endOf('week')
 
-      // 最新週の場合は今日まで
       if (selected.isSame(today, 'week')) {
         weekEnd = today
       }
@@ -49,8 +44,8 @@ export function getTargetDateRange(
     }
 
     case 'month': {
-      // 月表示：currentMonthが指定されている場合はそれを使用、そうでなければ選択日の月
       let targetMonth = selected
+
       if (currentMonth) {
         targetMonth = dayjs.tz(currentMonth, 'Asia/Tokyo')
       }
@@ -58,7 +53,6 @@ export function getTargetDateRange(
       const monthStart = targetMonth.startOf('month')
       let monthEnd = targetMonth.endOf('month')
 
-      // 最新月の場合は今日まで
       if (targetMonth.isSame(today, 'month')) {
         monthEnd = today
       }
@@ -71,7 +65,6 @@ export function getTargetDateRange(
     }
 
     default: {
-      // デフォルトは月表示と同じ
       const defaultMonthStart = selected.startOf('month')
       let defaultMonthEnd = selected.endOf('month')
 
@@ -88,11 +81,8 @@ export function getTargetDateRange(
   }
 }
 
-/**
- * 対象期間内の記録をフィルタリングする
- */
 export function filterRecordsByDateRange(
-  records: Pick<RecordEntity, 'date' | 'status'>[],
+  records: Pick<RecordEntity, 'date' | 'status' | 'recoveryDate'>[],
   startDate: string,
   endDate: string,
 ) {
@@ -108,11 +98,8 @@ export function filterRecordsByDateRange(
   })
 }
 
-/**
- * 期間内の達成率を計算する
- */
 export function calculateCompletionRate(
-  records: Pick<RecordEntity, 'date' | 'status'>[],
+  records: Pick<RecordEntity, 'date' | 'status' | 'recoveryDate'>[],
   selectedDate: Date,
   calendarView: SearchParams['calendarView'],
   currentMonth?: SearchParams['currentMonth'],
@@ -123,12 +110,14 @@ export function calculateCompletionRate(
     currentMonth,
   )
   const targetRecords = filterRecordsByDateRange(records, startDate, endDate)
-
-  // 完了した記録の数を計算
   const completedRecords = targetRecords.filter((record) => record.status === 'completed')
-  const completedDays = completedRecords.length
 
-  // 達成率を計算（記録がない日は未達成として扱う）
+  const recoveredDates = getRecoveredDatesSet(records as RecordEntity[])
+  const recoveredInRange = targetRecords.filter(
+    (r) => r.status === 'skipped' && recoveredDates.has(r.date),
+  )
+
+  const completedDays = completedRecords.length + recoveredInRange.length
   const completionRate = totalDays > 0 ? completedDays / totalDays : 0
 
   return {
@@ -138,25 +127,15 @@ export function calculateCompletionRate(
   } as const satisfies Record<string, number>
 }
 
-/**
- * カレンダーグリッド(42日分)の日付範囲を計算する
- * 日曜始まり・土曜終わりのカレンダーで、前月末〜翌月初めを含む
- */
 export function getCalendarGridDateRange(currentMonth?: SearchParams['currentMonth']) {
   const today = dayjs().tz('Asia/Tokyo')
-  const targetMonth = currentMonth ? dayjs.tz(currentMonth, 'Asia/Tokyo') : today
 
-  // 月の最初の日
+  const targetMonth = currentMonth ? dayjs.tz(currentMonth, 'Asia/Tokyo') : today
   const firstDayOfMonth = targetMonth.startOf('month')
 
-  // 月の最初の日の曜日（0=日曜, 1=月曜, ..., 6=土曜）
   const firstDayWeekday = firstDayOfMonth.day()
 
-  // カレンダーグリッドの開始日（日曜始まり）
-  // 日曜(0)の場合は0日前、月曜(1)の場合は1日前、...、土曜(6)の場合は6日前
   const gridStartDate = firstDayOfMonth.subtract(firstDayWeekday, 'day')
-
-  // カレンダーグリッドの終了日（開始日+41日 = 42日分）
   const gridEndDate = gridStartDate.add(41, 'day')
 
   return {
@@ -165,20 +144,13 @@ export function getCalendarGridDateRange(currentMonth?: SearchParams['currentMon
   } as const satisfies Record<string, string>
 }
 
-/**
- * データ取得用の日付範囲を計算する
- * ヒートマップ用の過去1年分 + カレンダーグリッド42日分を考慮
- */
 export function getDataFetchDateRange(currentMonth?: SearchParams['currentMonth']) {
   const today = dayjs().tz('Asia/Tokyo')
 
-  // ヒートマップのために過去1年分
   const oneYearAgo = today.subtract(1, 'year').format('YYYY-MM-DD')
 
-  // カレンダーグリッド42日分の範囲を取得
   const { startDate: calendarStart, endDate: calendarEnd } = getCalendarGridDateRange(currentMonth)
 
-  // より広い範囲を採用
   const finalStartDate = dayjs(calendarStart).isBefore(oneYearAgo) ? calendarStart : oneYearAgo
   const finalEndDate = dayjs(calendarEnd).isAfter(today) ? calendarEnd : today.format('YYYY-MM-DD')
 

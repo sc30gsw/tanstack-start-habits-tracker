@@ -386,28 +386,36 @@ export function RecordForm({
           </Group>
         )}
         {form.values.status === 'skipped' && (
-          <DateInput
-            label="リカバリー予定日"
-            description={
-              <Text c="dimmed">
-                この習慣をリカバリー実行する予定日を設定できます（30日以内）。
-                <br />
-                リカバリー日に完了すればストリークを維持できます。
-              </Text>
-            }
-            placeholder="リカバリー日を選択"
-            key={form.key('recoveryDate')}
-            value={form.values.recoveryDate ? new Date(form.values.recoveryDate) : null}
-            onChange={(value) => {
-              form.setFieldValue('recoveryDate', value ? dayjs(value).format('YYYY-MM-DD') : null)
-            }}
-            minDate={dayjs(date).add(1, 'day').toDate()}
-            maxDate={dayjs(date).add(30, 'day').toDate()}
-            valueFormat="YYYY-MM-DD"
-            clearable
-            disabled={isPending}
-            error={form.errors.recoveryDate}
-          />
+          <Stack gap="md" mt="xs">
+            <DateInput
+              label="リカバリー予定日"
+              description={
+                <Text size="sm" c="dimmed" style={{ lineHeight: 1.6, marginBottom: 8 }}>
+                  スキップした習慣を後日実行する予定日を設定できます。
+                  <br />
+                  （スキップした日から
+                  <Text component="span" fw={700} c="blue.6">
+                    30日以内
+                  </Text>
+                  まで選択可能）
+                  <br />
+                  リカバリー日に完了すれば、習慣継続の記録として反映されます。
+                </Text>
+              }
+              placeholder="リカバリー日を選択"
+              key={form.key('recoveryDate')}
+              value={form.values.recoveryDate ? new Date(form.values.recoveryDate) : null}
+              onChange={(value) => {
+                form.setFieldValue('recoveryDate', value ? dayjs(value).format('YYYY-MM-DD') : null)
+              }}
+              minDate={dayjs(date).add(1, 'day').toDate()}
+              maxDate={dayjs(date).add(30, 'day').toDate()}
+              valueFormat="YYYY-MM-DD"
+              clearable
+              disabled={isPending}
+              error={form.errors.recoveryDate}
+            />
+          </Stack>
         )}
         <Stack gap="xs">
           <Text size="sm" fw={500}>
@@ -425,6 +433,7 @@ export function RecordForm({
 ・明日は朝の時間を使って取り組む"
             disabled={isPending}
             onSubmit={() => form.onSubmit((values: FormValues) => handleSubmit(values))()}
+            minHeight="300px"
           />
         </Stack>
         <Group gap="sm" align="center">
