@@ -199,7 +199,6 @@ type RichTextEditorProps = {
   onChange: (html: string) => void
   placeholder?: string
   disabled?: boolean
-  onSubmit?: () => void
   minHeight?: string | number
 }
 
@@ -208,7 +207,6 @@ export function RichTextEditor({
   onChange,
   placeholder = '今日の感想や具体的に何をやったかを記録...',
   disabled = false,
-  onSubmit,
   minHeight = '120px',
 }: RichTextEditorProps) {
   const computedColorScheme = useComputedColorScheme('light')
@@ -239,19 +237,6 @@ export function RichTextEditor({
           keepAttributes: false,
         },
         listItem: false, // Disable default to use custom
-      }).extend({
-        addKeyboardShortcuts() {
-          return {
-            'Mod-Enter': () => {
-              if (onSubmit) {
-                onSubmit()
-                return true
-              }
-
-              return false
-            },
-          }
-        },
       }),
       TextStyle,
       Color,
@@ -271,14 +256,6 @@ export function RichTextEditor({
             'Shift-Tab': () => {
               // Outdent list item (lift nested list)
               return this.editor.commands.liftListItem('listItem')
-            },
-            'Mod-Enter': () => {
-              // Submit on Cmd+Enter (Mac) or Ctrl+Enter (Windows/Linux)
-              if (onSubmit) {
-                onSubmit()
-                return true
-              }
-              return false
             },
             Enter: () => {
               const { state } = this.editor
@@ -375,6 +352,21 @@ export function RichTextEditor({
               setLinkModalOpen(true)
 
               return true
+            },
+            // スペースキーでリンクを解除（スペース以降の文字のみ）
+            Space: () => {
+              if (this.editor.isActive('link')) {
+                const { $from } = this.editor.state.selection
+                const marks = $from.marks()
+                const hasLinkMark = marks.some((mark) => mark.type.name === 'link')
+
+                if (hasLinkMark) {
+                  // スペースを挿入し、そのスペース以降のみリンクを解除
+                  // これにより既存のリンクテキストはそのまま残る
+                  return this.editor.chain().insertContent(' ').unsetMark('link').run()
+                }
+              }
+              return false
             },
           }
         },
@@ -488,7 +480,8 @@ export function RichTextEditor({
     const selectedText = editor.state.doc.textBetween(from, to, '')
 
     setLinkUrl(previousUrl || '')
-    setLinkText(selectedText || '')
+    // 選択されたテキストの前後の空白を削除
+    setLinkText(selectedText.trim())
     setLinkModalOpen(true)
   }
 
@@ -498,19 +491,50 @@ export function RichTextEditor({
       return
     }
 
-    if (linkText) {
+    // リンクテキストの前後の空白を削除
+    const trimmedLinkText = linkText.trim()
+
+    if (trimmedLinkText) {
+      // 現在の選択範囲を削除してから、トリムしたテキストをリンクとして挿入
       editor
         .chain()
         .focus()
-        .extendMarkRange('link')
+        .deleteSelection()
         .insertContent({
           type: 'text',
-          text: linkText,
+          text: trimmedLinkText,
           marks: [{ type: 'link', attrs: { href: linkUrl } }],
         })
         .run()
     } else {
-      editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run()
+      // テキストが指定されていない場合は、選択範囲にリンクを設定
+      const { from, to } = editor.state.selection
+      const selectedText = editor.state.doc.textBetween(from, to, '').trim()
+
+      if (selectedText) {
+        // 選択範囲を削除してトリムしたテキストをリンクとして挿入
+        editor
+          .chain()
+          .focus()
+          .deleteSelection()
+          .insertContent({
+            type: 'text',
+            text: selectedText,
+            marks: [{ type: 'link', attrs: { href: linkUrl } }],
+          })
+          .run()
+      } else {
+        // 選択範囲がない場合はURLをそのままリンクとして挿入
+        editor
+          .chain()
+          .focus()
+          .insertContent({
+            type: 'text',
+            text: linkUrl,
+            marks: [{ type: 'link', attrs: { href: linkUrl } }],
+          })
+          .run()
+      }
     }
 
     setLinkModalOpen(false)
@@ -1170,7 +1194,7 @@ export function RichTextEditor({
         <Tooltip
           label={
             <Stack gap={4} align="center">
-              <Text size="xs">リンク挿入</Text>
+              <Text size="xs">{editor.isActive('link') ? 'リンク解除' : 'リンク挿入'}</Text>
               <Group gap={4}>
                 <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
                   ⌘
@@ -1207,7 +1231,24 @@ export function RichTextEditor({
         </Tooltip>
 
         {editor.isActive('link') && (
-          <Tooltip label="リンク解除">
+          <Tooltip
+            label={
+              <Stack gap={4} align="center">
+                <Text size="xs">リンク解除</Text>
+                <Group gap={4}>
+                  <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                    ⌘
+                  </Kbd>
+                  <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                    ⇧
+                  </Kbd>
+                  <Kbd size="xs" style={{ backgroundColor: '#1a1a1a', color: 'white' }}>
+                    U
+                  </Kbd>
+                </Group>
+              </Stack>
+            }
+          >
             <button
               type="button"
               onClick={handleUnsetLink}
