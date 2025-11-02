@@ -13,6 +13,7 @@ import {
 } from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { useMediaQuery } from '@mantine/hooks'
+import 'dayjs/locale/ja'
 import {
   IconAlertTriangle,
   IconCircleCheck,
@@ -25,7 +26,6 @@ import {
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import 'dayjs/locale/ja'
 import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
 import {
   type FormValues,
@@ -187,6 +187,9 @@ export function RecordForm({
               minDate={dayjs(date).add(1, 'day').toDate()}
               maxDate={dayjs(date).add(30, 'day').toDate()}
               valueFormat="YYYY-MM-DD"
+              firstDayOfWeek={0}
+              locale="ja"
+              monthLabelFormat="YYYY年 M月"
               clearable
               disabled={isPending}
               error={form.errors.recoveryDate}
