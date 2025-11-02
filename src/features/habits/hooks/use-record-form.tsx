@@ -155,13 +155,7 @@ export function useRecordForm(
         },
         confirmProps: { color: 'blue' },
         onConfirm: () => {
-          setTimeout(() => {
-            const editor = document.querySelector('.tiptap.ProseMirror') as HTMLElement
-            if (editor) {
-              editor.focus()
-              editor.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            }
-          }, 100)
+          setIsEditorModalOpen(true)
         },
         onCancel: () => {
           executeSubmit(values, durationMinutes)
