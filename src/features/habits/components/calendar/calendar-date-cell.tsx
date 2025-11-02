@@ -1,4 +1,5 @@
-import { Card, type CSSProperties, Text, Tooltip } from '@mantine/core'
+import { Card, type CSSProperties, Stack, Text, Tooltip } from '@mantine/core'
+import { IconArrowBackUp } from '@tabler/icons-react'
 import type { NavigateOptions } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
@@ -7,6 +8,7 @@ import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-targ
 import type { RecordEntity } from '~/features/habits/types/habit'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { getDateColor, getDateTextColor, getDateType } from '~/features/habits/utils/calendar-utils'
+import { isRecordRecovered } from '~/features/habits/utils/recovery-utils'
 import { formatDuration } from '~/features/habits/utils/time-utils'
 
 dayjs.extend(utc)
@@ -17,6 +19,10 @@ const CELL_COLORS = {
   completed: {
     normal: 'var(--mantine-color-green-6)',
     selected: 'var(--mantine-color-green-7)',
+  },
+  recoveryCompleted: {
+    normal: 'var(--mantine-color-orange-5)',
+    selected: 'var(--mantine-color-orange-6)',
   },
   incomplete: {
     normal: 'var(--mantine-color-yellow-5)',
@@ -41,20 +47,26 @@ type CellStyleState = {
   hasRecord: boolean
   isCompleted: boolean
   isSkipped: boolean
+  isRecoveryCompleted: boolean
   isSelected: boolean
   dateType: ReturnType<typeof getDateType>
 }
 
 function getCellBackgroundStyle(state: CellStyleState) {
-  const { hasRecord, isCompleted, isSkipped, isSelected, dateType } = state
+  const { hasRecord, isCompleted, isSkipped, isRecoveryCompleted, isSelected, dateType } = state
 
   if (hasRecord) {
     let colorSet:
       | typeof CELL_COLORS.incomplete
       | typeof CELL_COLORS.completed
+      | typeof CELL_COLORS.recoveryCompleted
       | typeof CELL_COLORS.skipped = CELL_COLORS.incomplete
 
     switch (true) {
+      case isRecoveryCompleted:
+        colorSet = CELL_COLORS.recoveryCompleted
+        break
+
       case isCompleted:
         colorSet = CELL_COLORS.completed
         break
@@ -86,6 +98,7 @@ function getCellBackgroundStyle(state: CellStyleState) {
 type CalendarDateCellProps = {
   date: dayjs.Dayjs
   record?: RecordEntity | null
+  allRecords: RecordEntity[]
   isCurrentMonth?: boolean
   variant: 'month' | 'week'
   selectedDate: SearchParams['selectedDate']
@@ -95,6 +108,7 @@ type CalendarDateCellProps = {
 export function CalendarDateCell({
   date,
   record,
+  allRecords,
   isCurrentMonth = true,
   variant,
   selectedDate,
@@ -104,11 +118,17 @@ export function CalendarDateCell({
   const dateType = getDateType(date)
   const hasRecord = !!record
 
+  const isRecoveryCompleted = !!(record && isRecordRecovered(record, allRecords))
+
+  const recoveryDate =
+    isRecoveryCompleted && record?.recoveryDate ? dayjs(record.recoveryDate) : null
+
   const borderWidth: CSSProperties['borderWidth'] = '2px'
   const { backgroundColor, borderColor } = getCellBackgroundStyle({
     hasRecord,
     isCompleted: record?.status === 'completed',
     isSkipped: record?.status === 'skipped',
+    isRecoveryCompleted,
     isSelected,
     dateType,
   })
@@ -120,9 +140,29 @@ export function CalendarDateCell({
       <Tooltip
         withinPortal
         label={
-          record
-            ? `${record.status === 'completed' ? '完了' : record.status === 'skipped' ? 'スキップ' : '予定中'} / ${formatDuration(record.duration_minutes || 0)}`
-            : '記録なし'
+          record ? (
+            <Stack gap={4}>
+              <Text size="sm" fw={500}>
+                {isRecoveryCompleted
+                  ? 'リカバリー完了'
+                  : record.status === 'completed'
+                    ? '完了'
+                    : record.status === 'skipped'
+                      ? 'スキップ'
+                      : '予定中'}
+              </Text>
+              <Text size="xs" c="dimmed">
+                {formatDuration(record.duration_minutes || 0)}
+              </Text>
+              {isRecoveryCompleted && recoveryDate && (
+                <Text size="xs" c="orange.4">
+                  {recoveryDate.format('M月D日')}に実施済み
+                </Text>
+              )}
+            </Stack>
+          ) : (
+            '記録なし'
+          )
         }
       >
         <Card
@@ -144,8 +184,21 @@ export function CalendarDateCell({
             minWidth: 34,
             border: `${borderWidth} solid ${borderColor}`,
             boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
+            position: 'relative',
           }}
         >
+          {isRecoveryCompleted && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 2,
+                right: 2,
+                opacity: 0.8,
+              }}
+            >
+              <IconArrowBackUp size={12} stroke={2} color="var(--mantine-color-orange-9)" />
+            </div>
+          )}
           <Text size="sm" fw={500}>
             {date.date()}
           </Text>

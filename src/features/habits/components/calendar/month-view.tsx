@@ -63,6 +63,8 @@ export function MonthView({
   const monthDates = generateMonthDates(currentMonth)
   const weeks = createWeekGroups(monthDates)
 
+  const allRecords = Object.values(recordMap)
+
   return (
     <Stack gap={16}>
       <CalendarPresetsCombobox selectedDate={selectedDate} navigate={navigate} />
@@ -126,6 +128,7 @@ export function MonthView({
                 key={currentDate.format('YYYY-MM-DD')}
                 date={currentDate}
                 record={recordMap[currentDate.format('YYYY-MM-DD')]}
+                allRecords={allRecords}
                 isCurrentMonth={currentDate.month() === currentMonth.month()}
                 variant="month"
                 selectedDate={selectedDate}

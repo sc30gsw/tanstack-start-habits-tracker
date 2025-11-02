@@ -31,6 +31,8 @@ export function WeekView({ weekDates, recordMap, selectedDate, navigate }: WeekV
       ? `${weekStart.format('YYYY/MM/DD')} - ${weekEnd.format('YYYY/MM/DD')}`
       : `${weekStart.format('YYYY/MM/DD')} - ${weekEnd.format('MM/DD')}`
 
+  const allRecords = Object.values(recordMap)
+
   const handlePrevWeek = () => {
     const newDate = currentDate.subtract(1, 'week')
 
@@ -77,6 +79,7 @@ export function WeekView({ weekDates, recordMap, selectedDate, navigate }: WeekV
             key={currentDate.format('YYYY-MM-DD')}
             date={currentDate}
             record={recordMap[currentDate.format('YYYY-MM-DD')]}
+            allRecords={allRecords}
             variant="week"
             selectedDate={selectedDate}
             navigate={navigate}
