@@ -21,8 +21,12 @@ const CELL_COLORS = {
     selected: 'var(--mantine-color-green-7)',
   },
   recoveryCompleted: {
-    normal: 'var(--mantine-color-orange-6)',
-    selected: 'var(--mantine-color-orange-7)',
+    normal: 'var(--mantine-color-cyan-6)',
+    selected: 'var(--mantine-color-cyan-7)',
+  },
+  recoveryScheduled: {
+    normal: 'var(--mantine-color-orange-5)',
+    selected: 'var(--mantine-color-orange-6)',
   },
   incomplete: {
     normal: 'var(--mantine-color-yellow-5)',
@@ -48,18 +52,28 @@ type CellStyleState = {
   isCompleted: boolean
   isSkipped: boolean
   isRecoveryCompleted: boolean
+  isRecoveryScheduled: boolean
   isSelected: boolean
   dateType: ReturnType<typeof getDateType>
 }
 
 function getCellBackgroundStyle(state: CellStyleState) {
-  const { hasRecord, isCompleted, isSkipped, isRecoveryCompleted, isSelected, dateType } = state
+  const {
+    hasRecord,
+    isCompleted,
+    isSkipped,
+    isRecoveryCompleted,
+    isRecoveryScheduled,
+    isSelected,
+    dateType,
+  } = state
 
   if (hasRecord) {
     let colorSet:
       | typeof CELL_COLORS.incomplete
       | typeof CELL_COLORS.completed
       | typeof CELL_COLORS.recoveryCompleted
+      | typeof CELL_COLORS.recoveryScheduled
       | typeof CELL_COLORS.skipped = CELL_COLORS.incomplete
 
     switch (true) {
@@ -69,6 +83,10 @@ function getCellBackgroundStyle(state: CellStyleState) {
 
       case isCompleted:
         colorSet = CELL_COLORS.completed
+        break
+
+      case isRecoveryScheduled:
+        colorSet = CELL_COLORS.recoveryScheduled
         break
 
       case isSkipped:
@@ -123,12 +141,22 @@ export function CalendarDateCell({
   const recoveryDate =
     isRecoveryCompleted && record?.recoveryDate ? dayjs(record.recoveryDate) : null
 
+  const recoverySourceRecord = allRecords.find(
+    (r) => r.status === 'skipped' && r.recoveryDate === date.format('YYYY-MM-DD'),
+  )
+  const isRecoveryScheduled = !!(
+    record?.status === 'active' &&
+    recoverySourceRecord &&
+    !isRecoveryCompleted
+  )
+
   const borderWidth: CSSProperties['borderWidth'] = '2px'
   const { backgroundColor, borderColor } = getCellBackgroundStyle({
     hasRecord,
     isCompleted: record?.status === 'completed',
     isSkipped: record?.status === 'skipped',
     isRecoveryCompleted,
+    isRecoveryScheduled,
     isSelected,
     dateType,
   })
@@ -141,22 +169,25 @@ export function CalendarDateCell({
         withinPortal
         label={
           record ? (
-            <Stack gap={4}>
+            <Stack gap={4} px="xs">
               <Text size="sm" fw={700}>
                 {isRecoveryCompleted
                   ? 'リカバリー完了'
-                  : record.status === 'completed'
-                    ? '完了'
-                    : record.status === 'skipped'
-                      ? 'スキップ'
-                      : '予定中'}
+                  : isRecoveryScheduled
+                    ? 'リカバリー予定'
+                    : record.status === 'completed'
+                      ? '完了'
+                      : record.status === 'skipped'
+                        ? 'スキップ'
+                        : '予定中'}
               </Text>
               <Text
                 size="xs"
                 c="dimmed"
                 style={{
-                  visibility: record.status === 'skipped' ? 'hidden' : 'visible',
-                  height: record.status === 'skipped' ? '0' : '1em',
+                  visibility:
+                    record.status === 'skipped' || isRecoveryScheduled ? 'hidden' : 'visible',
+                  height: record.status === 'skipped' || isRecoveryScheduled ? '0' : '1em',
                 }}
               >
                 {formatDuration(record.duration_minutes || 0)}
@@ -164,6 +195,11 @@ export function CalendarDateCell({
               {isRecoveryCompleted && recoveryDate && (
                 <Text size="xs" c="red.6" fw={700}>
                   {recoveryDate.format('M月D日')}に実施済み
+                </Text>
+              )}
+              {isRecoveryScheduled && recoverySourceRecord && (
+                <Text size="xs" c="orange.6" fw={700}>
+                  {dayjs(recoverySourceRecord.date).format('M月D日')}のリカバリー予定
                 </Text>
               )}
             </Stack>
