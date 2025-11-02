@@ -21,8 +21,8 @@ const CELL_COLORS = {
     selected: 'var(--mantine-color-green-7)',
   },
   recoveryCompleted: {
-    normal: 'var(--mantine-color-orange-5)',
-    selected: 'var(--mantine-color-orange-6)',
+    normal: 'var(--mantine-color-cyan-6)',
+    selected: 'var(--mantine-color-cyan-7)',
   },
   incomplete: {
     normal: 'var(--mantine-color-yellow-5)',
@@ -155,7 +155,7 @@ export function CalendarDateCell({
                 {formatDuration(record.duration_minutes || 0)}
               </Text>
               {isRecoveryCompleted && recoveryDate && (
-                <Text size="xs" c="orange.4">
+                <Text size="xs" c="cyan.4">
                   {recoveryDate.format('M月D日')}に実施済み
                 </Text>
               )}
