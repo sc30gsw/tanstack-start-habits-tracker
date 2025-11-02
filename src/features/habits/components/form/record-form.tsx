@@ -1,4 +1,5 @@
 import { Alert, Button, Group, Kbd, NumberInput, Select, Stack, Text, Tooltip } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
@@ -48,6 +49,7 @@ type RecordFormProps = {
 type FormValues = Pick<RecordTable, 'status' | 'notes'> & {
   durationMinutes: RecordTable['duration_minutes']
   durationHours: number | ''
+  recoveryDate: RecordTable['recoveryDate']
 }
 
 export function RecordForm({
@@ -70,16 +72,25 @@ export function RecordForm({
         ? minutesToHours(existingRecord.duration_minutes)
         : 0,
       notes: existingRecord?.notes ?? '',
+      recoveryDate: existingRecord?.recoveryDate ?? null,
     },
     validate: (values) => {
       const parsed = createRecordSchema
-        .pick({ status: true, durationMinutes: true, habitId: true, date: true, notes: true })
+        .pick({
+          status: true,
+          durationMinutes: true,
+          habitId: true,
+          date: true,
+          notes: true,
+          recoveryDate: true,
+        })
         .safeParse({
           habitId: habitId,
           date,
           status: values.status,
           durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
           notes: values.notes,
+          recoveryDate: values.recoveryDate,
         })
 
       if (parsed.success) {
@@ -102,6 +113,7 @@ export function RecordForm({
       durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
       durationHours: typeof values.durationHours === 'number' ? values.durationHours : 0,
       notes: values.notes,
+      recoveryDate: values.recoveryDate,
     }),
   })
 
@@ -194,6 +206,7 @@ export function RecordForm({
       status: values.status,
       durationMinutes,
       notes: values.notes,
+      recoveryDate: values.recoveryDate,
     })
 
     if (!validationResult.success) {
@@ -223,6 +236,7 @@ export function RecordForm({
                 status: values.status,
                 durationMinutes,
                 notes: values.notes ?? '',
+                recoveryDate: values.recoveryDate,
               },
             })
           : await recordDto.createRecord({
@@ -232,6 +246,7 @@ export function RecordForm({
                 status: values.status,
                 durationMinutes,
                 notes: values.notes ?? '',
+                recoveryDate: values.recoveryDate,
               },
             })
 
@@ -368,6 +383,24 @@ export function RecordForm({
             style={{ flex: 1 }}
           />
         </Group>
+        {form.values.status === 'skipped' && (
+          <DateInput
+            label="振替予定日（オプション）"
+            description="この習慣を振替実行する予定日を設定できます（30日以内）。振替日に完了すればストリークを維持できます。"
+            placeholder="振替日を選択"
+            key={form.key('recoveryDate')}
+            value={form.values.recoveryDate ? new Date(form.values.recoveryDate) : null}
+            onChange={(value) => {
+              form.setFieldValue('recoveryDate', value ? dayjs(value).format('YYYY-MM-DD') : null)
+            }}
+            minDate={dayjs(date).add(1, 'day').toDate()}
+            maxDate={dayjs(date).add(30, 'day').toDate()}
+            valueFormat="YYYY-MM-DD"
+            clearable
+            disabled={isPending}
+            error={form.errors.recoveryDate}
+          />
+        )}
         <Stack gap="xs">
           <Text size="sm" fw={500}>
             実施内容・振り返り
