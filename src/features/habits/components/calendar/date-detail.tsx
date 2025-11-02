@@ -23,12 +23,11 @@ import { RichTextDisplay } from '~/components/ui/rich-text-editor/rich-text-disp
 import { RecordForm } from '~/features/habits/components/form/record-form'
 import { RecordDeleteButton } from '~/features/habits/components/record-delete-button'
 import { RECORD_FORM_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
+import { isEmptyContent } from '~/features/habits/hooks/use-record-form'
 import type { HabitTable, RecordEntity } from '~/features/habits/types/habit'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { isRecordRecovered } from '~/features/habits/utils/recovery-utils'
 import { formatDuration } from '~/features/habits/utils/time-utils'
-
-const HTML_TAG_REGEX = /<[^>]*>/g
 
 type DateDetailProps = {
   selectedDateRecord: RecordEntity | null
@@ -49,13 +48,7 @@ export function DateDetail({ selectedDateRecord, habitId, allRecords }: DateDeta
   const textColor = 'gray.6'
 
   const hasNotes = (html?: string | null) => {
-    if (!html) {
-      return false
-    }
-
-    const textContent = html.replace(HTML_TAG_REGEX, '').trim()
-
-    return textContent.length > 0
+    return !isEmptyContent(html)
   }
 
   return (

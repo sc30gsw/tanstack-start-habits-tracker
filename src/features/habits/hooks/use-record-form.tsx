@@ -10,40 +10,39 @@ import type { HabitTable, RecordEntity, RecordTable } from '~/features/habits/ty
 import { createRecordSchema } from '~/features/habits/types/schemas/record-schemas'
 import { hoursToMinutes, minutesToHours } from '~/features/habits/utils/time-utils'
 
+const EMPTY_PATTERNS = [
+  /^<p><\/p>$/,
+  /^<p>\s*<\/p>$/,
+  /^<p><br><\/p>$/,
+  /^<p>\s*<br>\s*<\/p>$/,
+] as const satisfies readonly RegExp[]
+
+const STRUCTURAL_ELEMENTS_REGEX = /<(hr|img|ul|ol|pre|code|blockquote|h[1-6])/i
+const TAGS_REGEX = /<[^>]*>/g
+
 export function isEmptyContent(html?: string | null) {
   if (!html) {
     return true
   }
 
-  // Remove whitespace and newlines
   const trimmed = html.trim()
-  
-  // Check if it's literally empty
+
   if (trimmed.length === 0) {
     return true
   }
 
-  // Check for common "empty" patterns that Tiptap generates
-  const emptyPatterns = [
-    /^<p><\/p>$/,
-    /^<p>\s*<\/p>$/,
-    /^<p><br><\/p>$/,
-    /^<p>\s*<br>\s*<\/p>$/,
-  ]
-
-  if (emptyPatterns.some(pattern => pattern.test(trimmed))) {
+  if (EMPTY_PATTERNS.some((pattern) => pattern.test(trimmed))) {
     return true
   }
 
-  // Check if there's any meaningful content
-  // This includes text, images, hr, lists (even empty ones), code blocks, etc.
-  const hasStructuralElements = /<(hr|img|ul|ol|pre|code|blockquote|h[1-6])/i.test(trimmed)
+  const hasStructuralElements = STRUCTURAL_ELEMENTS_REGEX.test(trimmed)
+
   if (hasStructuralElements) {
     return false
   }
 
-  // For other cases, check if there's any text content
-  const text = html.replace(/<[^>]*>/g, '').trim()
+  const text = html.replace(TAGS_REGEX, '').trim()
+
   return text.length === 0
 }
 
