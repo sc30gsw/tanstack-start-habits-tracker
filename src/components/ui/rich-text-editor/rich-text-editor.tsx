@@ -200,6 +200,7 @@ type RichTextEditorProps = {
   placeholder?: string
   disabled?: boolean
   minHeight?: string | number
+  onSubmit?: () => void
 }
 
 export function RichTextEditor({
@@ -208,6 +209,7 @@ export function RichTextEditor({
   placeholder = '今日の感想や具体的に何をやったかを記録...',
   disabled = false,
   minHeight = '120px',
+  onSubmit,
 }: RichTextEditorProps) {
   const computedColorScheme = useComputedColorScheme('light')
 
@@ -237,6 +239,18 @@ export function RichTextEditor({
           keepAttributes: false,
         },
         listItem: false, // Disable default to use custom
+      }).extend({
+        addKeyboardShortcuts() {
+          return {
+            'Mod-Enter': () => {
+              if (onSubmit) {
+                onSubmit()
+                return true
+              }
+              return false
+            },
+          }
+        },
       }),
       TextStyle,
       Color,
