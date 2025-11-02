@@ -26,6 +26,7 @@ import {
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
+import { useEffect } from 'react'
 import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
 import {
   type FormValues,
@@ -72,7 +73,25 @@ export function RecordForm({
     handleHoursChange,
     handleMinutesChange,
     notesConfig,
+    triggerSubmit,
   } = useRecordForm(habitId, date, onSuccess, existingRecord)
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        if (isEditorModalOpen) {
+          return
+        }
+
+        e.preventDefault()
+        triggerSubmit()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isEditorModalOpen, triggerSubmit])
 
   return (
     <form onSubmit={form.onSubmit((values: FormValues) => handleSubmit(values))} noValidate>
@@ -287,9 +306,6 @@ export function RecordForm({
                 onChange={setEditorContent}
                 placeholder={notesConfig.placeholder}
                 disabled={isPending}
-                onSubmit={() => {
-                  setIsEditorModalOpen(false)
-                }}
                 minHeight="calc(100vh - 600px)"
               />
             </div>

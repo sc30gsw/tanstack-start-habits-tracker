@@ -346,6 +346,12 @@ export function useRecordForm(
 
   const notesConfig = getNotesConfig()
 
+  const triggerSubmit = () => {
+    const values = form.values
+
+    handleSubmit(values)
+  }
+
   return {
     form,
     isPending,
@@ -361,5 +367,6 @@ export function useRecordForm(
     handleMinutesChange,
     handleHoursChange,
     notesConfig,
+    triggerSubmit,
   } as const
 }
