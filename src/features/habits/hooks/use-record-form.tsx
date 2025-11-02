@@ -15,8 +15,35 @@ export function isEmptyContent(html?: string | null) {
     return true
   }
 
-  const text = html.replace(/<[^>]*>/g, '').trim()
+  // Remove whitespace and newlines
+  const trimmed = html.trim()
+  
+  // Check if it's literally empty
+  if (trimmed.length === 0) {
+    return true
+  }
 
+  // Check for common "empty" patterns that Tiptap generates
+  const emptyPatterns = [
+    /^<p><\/p>$/,
+    /^<p>\s*<\/p>$/,
+    /^<p><br><\/p>$/,
+    /^<p>\s*<br>\s*<\/p>$/,
+  ]
+
+  if (emptyPatterns.some(pattern => pattern.test(trimmed))) {
+    return true
+  }
+
+  // Check if there's any meaningful content
+  // This includes text, images, hr, lists (even empty ones), code blocks, etc.
+  const hasStructuralElements = /<(hr|img|ul|ol|pre|code|blockquote|h[1-6])/i.test(trimmed)
+  if (hasStructuralElements) {
+    return false
+  }
+
+  // For other cases, check if there's any text content
+  const text = html.replace(/<[^>]*>/g, '').trim()
   return text.length === 0
 }
 
@@ -37,6 +64,7 @@ export function useRecordForm(
 
   const [editorContent, setEditorContent] = useState(existingRecord?.notes ?? '')
   const [isEditorModalOpen, setIsEditorModalOpen] = useState(false)
+  const [editorKey, setEditorKey] = useState(crypto.randomUUID())
 
   const form = useForm<FormValues>({
     initialValues: {
@@ -328,6 +356,8 @@ export function useRecordForm(
     setEditorContent,
     isEditorModalOpen,
     setIsEditorModalOpen,
+    editorKey,
+    setEditorKey,
     handleSubmit,
     handleMinutesChange,
     handleHoursChange,

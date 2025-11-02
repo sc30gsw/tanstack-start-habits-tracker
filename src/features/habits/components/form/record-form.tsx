@@ -66,6 +66,8 @@ export function RecordForm({
     setEditorContent,
     isEditorModalOpen,
     setIsEditorModalOpen,
+    editorKey,
+    setEditorKey,
     handleSubmit,
     handleHoursChange,
     handleMinutesChange,
@@ -245,19 +247,24 @@ export function RecordForm({
                   variant="light"
                   size="sm"
                   leftSection={<IconEdit size={16} />}
-                  onClick={() => setIsEditorModalOpen(true)}
+                  onClick={() => {
+                    setEditorKey(crypto.randomUUID())
+                    setIsEditorModalOpen(true)
+                  }}
                 >
                   編集する
                 </Button>
               </Stack>
             </Card>
           ) : (
-            /* 内容が空の場合は入力ボタンのみ表示 */
             <Button
               variant="outline"
               size="md"
               leftSection={<IconMaximize size={16} />}
-              onClick={() => setIsEditorModalOpen(true)}
+              onClick={() => {
+                setEditorKey(crypto.randomUUID())
+                setIsEditorModalOpen(true)
+              }}
               fullWidth
             >
               {notesConfig.label}を記入する
@@ -275,6 +282,7 @@ export function RecordForm({
           <Stack gap="md" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <RichTextEditor
+                key={editorKey}
                 content={editorContent}
                 onChange={setEditorContent}
                 placeholder={notesConfig.placeholder}

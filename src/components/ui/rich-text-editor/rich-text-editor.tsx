@@ -331,11 +331,10 @@ export function RichTextEditor({
                   : null
                 let filename = match[2] || null
 
-                // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
-                // 短縮形でも拡張子を検索できるようにrawLanguageを使用
                 if (filename && rawLanguage && !filename.includes('.')) {
                   const extension =
                     LANGUAGE_TO_EXTENSION[rawLanguage as keyof typeof LANGUAGE_TO_EXTENSION]
+
                   if (extension) {
                     filename = `${filename}${extension}`
                   }
