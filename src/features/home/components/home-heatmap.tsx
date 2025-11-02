@@ -47,6 +47,7 @@ export function HomeHeatmap({ records }: Record<'records', RecordEntity[]>) {
           status: 'completed' as const, // completedのみなので固定
           duration_minutes: metric === 'duration' ? duration : completed,
           notes: null,
+          recoveryDate: null,
           created_at: new Date(),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
