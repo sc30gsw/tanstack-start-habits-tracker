@@ -86,6 +86,38 @@ const createRecord = createServerFn({ method: 'POST' })
         })
         .returning()
 
+      if (data.status === 'skipped' && data.recoveryDate) {
+        const existingRecoveryRecord = await db.query.records.findFirst({
+          where: and(eq(records.habitId, data.habitId), eq(records.date, data.recoveryDate)),
+        })
+
+        if (!existingRecoveryRecord) {
+          const recoveryRecordId = nanoid()
+
+          await db.insert(records).values({
+            id: recoveryRecordId,
+            habitId: data.habitId,
+            date: data.recoveryDate,
+            status: 'active',
+            duration_minutes: 0,
+            notes: null,
+            recoveryDate: null,
+            createdAt: now,
+            updatedAt: now,
+            userId,
+          })
+        } else if (existingRecoveryRecord.status === 'skipped') {
+          await db
+            .update(records)
+            .set({
+              status: 'active',
+              updatedAt: now,
+            })
+            .where(eq(records.id, existingRecoveryRecord.id))
+        }
+        // ! 予定中または完了の場合は何もしない
+      }
+
       await updateHabitLevel(data.habitId)
 
       const recordEntity = {
@@ -163,6 +195,60 @@ const updateRecord = createServerFn({ method: 'POST' })
         .where(eq(records.id, data.id))
         .returning()
 
+      if (existingRecord.status === 'skipped' && existingRecord.recoveryDate) {
+        const oldRecoveryRecord = await db.query.records.findFirst({
+          where: and(
+            eq(records.habitId, existingRecord.habitId),
+            eq(records.date, existingRecord.recoveryDate),
+            eq(records.userId, userId),
+          ),
+        })
+
+        if (oldRecoveryRecord && oldRecoveryRecord.status === 'active') {
+          await db
+            .delete(records)
+            .where(and(eq(records.id, oldRecoveryRecord.id), eq(records.userId, userId)))
+        }
+      }
+
+      if (updatedRecord.status === 'skipped' && updatedRecord.recoveryDate) {
+        const existingRecoveryRecord = await db.query.records.findFirst({
+          where: and(
+            eq(records.habitId, existingRecord.habitId),
+            eq(records.date, updatedRecord.recoveryDate),
+            eq(records.userId, userId),
+          ),
+        })
+
+        if (!existingRecoveryRecord) {
+          const recoveryRecordId = nanoid()
+          const now = dayjs().tz('Asia/Tokyo').toISOString()
+
+          await db.insert(records).values({
+            id: recoveryRecordId,
+            habitId: existingRecord.habitId,
+            date: updatedRecord.recoveryDate,
+            status: 'active',
+            duration_minutes: 0,
+            notes: null,
+            recoveryDate: null,
+            createdAt: now,
+            updatedAt: now,
+            userId,
+          })
+        } else if (existingRecoveryRecord.status === 'skipped') {
+          const now = dayjs().tz('Asia/Tokyo').toISOString()
+          await db
+            .update(records)
+            .set({
+              status: 'active',
+              updatedAt: now,
+            })
+            .where(eq(records.id, existingRecoveryRecord.id))
+        }
+        //! 予定中または完了の場合は何もしない
+      }
+
       await updateHabitLevel(existingRecord.habitId)
 
       const recordEntity = {
@@ -217,6 +303,23 @@ const deleteRecord = createServerFn({ method: 'POST' })
       }
 
       const habitId = existingRecord.habitId
+
+      if (existingRecord.status === 'skipped' && existingRecord.recoveryDate) {
+        const recoveryRecord = await db.query.records.findFirst({
+          where: and(
+            eq(records.habitId, habitId),
+            eq(records.date, existingRecord.recoveryDate),
+            eq(records.userId, userId),
+          ),
+        })
+
+        if (recoveryRecord && recoveryRecord.status === 'active') {
+          await db
+            .delete(records)
+            .where(and(eq(records.id, recoveryRecord.id), eq(records.userId, userId)))
+        }
+        // ! 完了またはスキップの場合は削除しない
+      }
 
       await db.delete(records).where(and(eq(records.id, data.id), eq(records.userId, userId)))
 
