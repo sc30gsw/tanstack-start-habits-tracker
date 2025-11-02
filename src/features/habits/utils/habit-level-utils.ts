@@ -8,17 +8,12 @@ import {
   STREAK_THRESHOLDS,
 } from '~/features/habits/constants/level-thresholds'
 import { COMPLETION_TITLES, HOURS_TITLES } from '~/features/habits/constants/level-titles'
-import type { HabitLevelInfo, HabitLevelTable } from '~/features/habits/types/habit'
+import type { HabitLevelInfo, HabitLevelTable, RecordTable } from '~/features/habits/types/habit'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 
-type RecordStatus = 'active' | 'completed' | 'skipped'
+type RecordData = Pick<RecordTable, 'date' | 'status' | 'recoveryDate'>
 
-type RecordWithDate = {
-  date: string
-  status: RecordStatus
-}
-
-type RecordWithDuration = RecordWithDate & Record<'duration_minutes', number | null>
+type RecordWithDuration = RecordData & Record<'duration_minutes', number | null>
 
 function calculateLevelByTiers(
   value: number,
@@ -405,8 +400,19 @@ export function getLevelTitle(level: number, type: 'completion' | 'hours') {
 
 export function calculateHabitStats(records: Array<RecordWithDuration>) {
   const completedRecords = records.filter((r) => r.status === 'completed')
+  const completedDates = new Set(completedRecords.map((r) => r.date))
 
-  const uniqueDays = new Set(completedRecords.map((r) => r.date)).size
+  const skippedWithRecovery = records.filter(
+    (r) => r.status === 'skipped' && r.recoveryDate !== null && r.recoveryDate !== undefined,
+  )
+
+  const recoveredDates = skippedWithRecovery
+    .filter((skip) => completedDates.has(skip.recoveryDate!))
+    .map((skip) => skip.date)
+
+  const allValidDates = [...completedRecords.map((r) => r.date), ...recoveredDates]
+
+  const uniqueDays = new Set(allValidDates).size
 
   const totalMinutes = completedRecords.reduce(
     (sum, r) => sum + (r.duration_minutes ?? STREAK_CONSTANTS.MIN_VALUE),
@@ -414,9 +420,9 @@ export function calculateHabitStats(records: Array<RecordWithDuration>) {
   )
   const totalHours = totalMinutes / STREAK_CONSTANTS.MINUTES_TO_HOURS_DIVISOR
 
-  const { currentStreak, longestStreak } = calculateStreak(completedRecords.map((r) => r.date))
+  const { currentStreak, longestStreak } = calculateStreak(allValidDates)
 
-  const dates = completedRecords.map((r) => r.date).sort()
+  const dates = allValidDates.sort()
   const lastDate = dates[dates.length - STREAK_CONSTANTS.LAST_INDEX_OFFSET] ?? null
 
   return {
@@ -432,7 +438,7 @@ export function calculateHabitStats(records: Array<RecordWithDuration>) {
 
 export function calculateLevelInfo(
   levelData: HabitLevelTable,
-  records: Array<RecordWithDate>,
+  records: Array<RecordData>,
   selectedDate?: SearchParams['selectedDate'],
 ) {
   const completionTitle = getLevelTitle(levelData.completionLevel, 'completion')
@@ -441,9 +447,19 @@ export function calculateLevelInfo(
   const nextCompletionDays = calculateNextLevelRequirement(levelData.completionLevel, 'completion')
   const nextHoursRequirement = calculateNextLevelRequirement(levelData.hoursLevel, 'hours')
 
-  const completedDates = records.filter((r) => r.status === 'completed').map((r) => r.date)
+  const completedRecords = records.filter((r) => r.status === 'completed')
+  const completedDates = new Set(completedRecords.map((r) => r.date))
 
-  const streakDetails = calculateStreak(completedDates)
+  const skippedWithRecovery = records.filter(
+    (r) => r.status === 'skipped' && r.recoveryDate !== null && r.recoveryDate !== undefined,
+  )
+  const recoveredDates = skippedWithRecovery
+    .filter((skip) => completedDates.has(skip.recoveryDate!))
+    .map((skip) => skip.date)
+
+  const allValidDates = [...completedRecords.map((r) => r.date), ...recoveredDates]
+
+  const streakDetails = calculateStreak(allValidDates)
   const motivationMessage = generateMotivationMessage(
     streakDetails.currentStreak,
     streakDetails.previousStreak,
@@ -451,9 +467,9 @@ export function calculateLevelInfo(
   )
 
   const yesterday = dayjs().subtract(STREAK_CONSTANTS.YESTERDAY_OFFSET, 'day').format('YYYY-MM-DD')
-  const yesterdayStreak = calculateStreakAtDate(completedDates, yesterday)
+  const yesterdayStreak = calculateStreakAtDate(allValidDates, yesterday)
   const selectedDateStreak = selectedDate
-    ? calculateStreakAtDate(completedDates, selectedDate)
+    ? calculateStreakAtDate(allValidDates, selectedDate)
     : null
 
   return {
