@@ -243,7 +243,7 @@ export function EditorToolbar({
         <ToolbarButton
           icon={<IconLinkOff size={18} />}
           label="リンク解除"
-          shortcuts={['⌘', '⇧', 'U']}
+          shortcuts={['⌘', '⇧', 'K']}
           onClick={onUnsetLink}
           disabled={disabled}
         />

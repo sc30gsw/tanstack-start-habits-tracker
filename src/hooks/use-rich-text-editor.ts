@@ -187,6 +187,13 @@ export function useRichTextEditor({
 
                 return true
               },
+              'Mod-Shift-k': () => {
+                if (this.editor.isActive('link')) {
+                  return this.editor.chain().focus().unsetLink().run()
+                }
+
+                return false
+              },
               Space: () => {
                 if (this.editor.isActive('link')) {
                   const { $from } = this.editor.state.selection
