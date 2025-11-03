@@ -210,6 +210,17 @@ export function useRichTextEditor({
       onUpdate: ({ editor }) => {
         const html = editor.getHTML()
         onChange(html)
+
+        if (editor.isActive('codeBlock')) {
+          const attrs = editor.getAttributes('codeBlock')
+
+          setCodeBlockAttrs({
+            language: attrs.language || null,
+            filename: attrs.filename || null,
+          })
+        } else {
+          setCodeBlockAttrs({ language: null, filename: null })
+        }
       },
       onSelectionUpdate: ({ editor }) => {
         if (editor.isActive('codeBlock')) {

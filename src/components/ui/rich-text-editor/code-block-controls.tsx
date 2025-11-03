@@ -1,10 +1,6 @@
 import { Select, TextInput } from '@mantine/core'
 import type { Editor } from '@tiptap/react'
-import {
-  LANGUAGE_DENORMALIZATION,
-  LANGUAGE_OPTIONS,
-  LANGUAGE_TO_EXTENSION,
-} from '~/constants/rich-text-editor'
+import { LANGUAGE_DENORMALIZATION, LANGUAGE_OPTIONS } from '~/constants/rich-text-editor'
 
 type CodeBlockControlsProps = {
   editor: Editor
@@ -35,17 +31,6 @@ export function CodeBlockControls({ editor, disabled, codeBlockAttrs }: CodeBloc
           } else {
             const normalizedValue = value === 'markdown' ? 'md' : value
             editor.commands.updateAttributes('codeBlock', { language: normalizedValue })
-
-            const currentFilename = editor.getAttributes('codeBlock').filename
-            if (!currentFilename && normalizedValue) {
-              const extension =
-                LANGUAGE_TO_EXTENSION[normalizedValue as keyof typeof LANGUAGE_TO_EXTENSION]
-              if (extension) {
-                editor.commands.updateAttributes('codeBlock', {
-                  filename: `example${extension}`,
-                })
-              }
-            }
           }
         }}
         size="xs"
@@ -53,8 +38,6 @@ export function CodeBlockControls({ editor, disabled, codeBlockAttrs }: CodeBloc
         disabled={disabled}
         placeholder="言語を選択"
         searchable
-        nothingFoundMessage="言語が見つかりません"
-        maxDropdownHeight={300}
         clearable
         styles={{
           input: {
