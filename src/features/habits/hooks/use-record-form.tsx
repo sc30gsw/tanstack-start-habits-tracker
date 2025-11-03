@@ -17,7 +17,8 @@ const EMPTY_PATTERNS = [
   /^<p>\s*<br>\s*<\/p>$/,
 ] as const satisfies readonly RegExp[]
 
-const STRUCTURAL_ELEMENTS_REGEX = /<(hr|img|ul|ol|pre|code|blockquote|h[1-6])/i
+const STRUCTURAL_ELEMENTS_REGEX = /<(hr|img|ul|ol|pre|code|blockquote|h[1-6]|div)/i
+const LINK_PREVIEW_REGEX = /data-type="link-preview"/i
 const TAGS_REGEX = /<[^>]*>/g
 
 export function isEmptyContent(html?: string | null) {
@@ -33,6 +34,12 @@ export function isEmptyContent(html?: string | null) {
 
   if (EMPTY_PATTERNS.some((pattern) => pattern.test(trimmed))) {
     return true
+  }
+
+  const hasLinkPreview = LINK_PREVIEW_REGEX.test(trimmed)
+
+  if (hasLinkPreview) {
+    return false
   }
 
   const hasStructuralElements = STRUCTURAL_ELEMENTS_REGEX.test(trimmed)

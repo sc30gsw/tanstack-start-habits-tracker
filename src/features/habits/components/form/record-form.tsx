@@ -28,6 +28,7 @@ import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { useEffect } from 'react'
 import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
+import { RichTextPreview } from '~/components/ui/rich-text-editor/rich-text-preview'
 import {
   type FormValues,
   isEmptyContent,
@@ -75,6 +76,7 @@ export function RecordForm({
     notesConfig,
     triggerSubmit,
   } = useRecordForm(habitId, date, onSuccess, existingRecord)
+  console.log('🚀 ~ RecordForm ~ editorContent:', editorContent)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -253,15 +255,7 @@ export function RecordForm({
           {editorContent && !isEmptyContent(editorContent) ? (
             <Card withBorder padding="md" radius="md">
               <Stack gap="sm">
-                <div
-                  className="tiptap-preview"
-                  dangerouslySetInnerHTML={{ __html: editorContent }}
-                  style={{
-                    minHeight: '80px',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
-                  }}
-                />
+                <RichTextPreview html={editorContent} minHeight="80px" maxHeight="200px" />
                 <Button
                   variant="light"
                   size="sm"

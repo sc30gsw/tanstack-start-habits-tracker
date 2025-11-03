@@ -386,6 +386,33 @@ code {
   border-top-color: var(--mantine-color-dark-4);
 }
 
+.tiptap-preview div[data-type='link-preview'] {
+  display: block;
+  text-decoration: none;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 500px;
+  margin: 8px 0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background-color: var(--mantine-color-white);
+}
+
+.tiptap-preview div[data-type='link-preview']:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-mantine-color-scheme='dark'] .tiptap-preview div[data-type='link-preview'] {
+  border: 1px solid var(--mantine-color-dark-4);
+  background-color: var(--mantine-color-dark-6);
+}
+
+[data-mantine-color-scheme='dark'] .tiptap-preview div[data-type='link-preview']:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 .habit-detail-resize-handle:hover,
 .habits-list-resize-handle:hover {
   background-color: light-dark(
