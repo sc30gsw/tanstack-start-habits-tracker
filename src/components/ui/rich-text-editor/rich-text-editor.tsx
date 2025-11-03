@@ -225,245 +225,249 @@ export function RichTextEditor({
     filename: string | null
   }>({ language: null, filename: null })
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
-        },
-        codeBlock: false,
-        bulletList: {
-          keepMarks: true,
-          keepAttributes: false,
-        },
-        orderedList: {
-          keepMarks: true,
-          keepAttributes: false,
-        },
-        listItem: false, // Disable default to use custom
-      }).extend({
-        addKeyboardShortcuts() {
-          return {
-            'Mod-Enter': () => {
-              if (onSubmit) {
-                onSubmit()
-                return true
-              }
-              return false
-            },
-          }
-        },
-      }),
-      TextStyle,
-      Color,
-      Underline,
-      Highlight.configure({
-        multicolor: true,
-      }),
-      Subscript,
-      Superscript,
-      ListItem.extend({
-        addKeyboardShortcuts() {
-          return {
-            Tab: () => {
-              // Indent list item (create nested list)
-              return this.editor.commands.sinkListItem('listItem')
-            },
-            'Shift-Tab': () => {
-              // Outdent list item (lift nested list)
-              return this.editor.commands.liftListItem('listItem')
-            },
-            Enter: () => {
-              const { state } = this.editor
-              const { $from } = state.selection
-
-              // Check if we're in a list item
-              const listItemDepth = $from.depth - 1
-              if (listItemDepth < 0 || $from.node(listItemDepth).type.name !== 'listItem') {
+  const editor = useEditor(
+    {
+      extensions: [
+        StarterKit.configure({
+          heading: {
+            levels: [1, 2, 3],
+          },
+          codeBlock: false,
+          bulletList: {
+            keepMarks: true,
+            keepAttributes: false,
+          },
+          orderedList: {
+            keepMarks: true,
+            keepAttributes: false,
+          },
+          listItem: false, // Disable default to use custom
+        }).extend({
+          addKeyboardShortcuts() {
+            return {
+              'Mod-Enter': () => {
+                if (onSubmit) {
+                  onSubmit()
+                  return true
+                }
                 return false
-              }
-
-              // Get the current list item node
-              const currentListItem = $from.node(listItemDepth)
-
-              // Check if the list item is empty (only contains empty paragraph)
-              const isEmpty = currentListItem.textContent.length === 0
-
-              if (isEmpty) {
-                // Exit the list (Slack-like behavior)
+              },
+            }
+          },
+        }),
+        TextStyle,
+        Color,
+        Underline,
+        Highlight.configure({
+          multicolor: true,
+        }),
+        Subscript,
+        Superscript,
+        ListItem.extend({
+          addKeyboardShortcuts() {
+            return {
+              Tab: () => {
+                // Indent list item (create nested list)
+                return this.editor.commands.sinkListItem('listItem')
+              },
+              'Shift-Tab': () => {
+                // Outdent list item (lift nested list)
                 return this.editor.commands.liftListItem('listItem')
-              }
+              },
+              Enter: () => {
+                const { state } = this.editor
+                const { $from } = state.selection
 
-              // Create new list item (default behavior)
-              return this.editor.commands.splitListItem('listItem')
-            },
-          }
-        },
-      }),
-      CodeBlockLowlight.configure({
-        lowlight,
-        HTMLAttributes: {
-          class: 'code-block',
-        },
-        languageClassPrefix: 'language-',
-      }).extend({
-        addNodeView() {
-          return ReactNodeViewRenderer(CodeBlockComponent)
-        },
-        addInputRules() {
-          return [
-            textblockTypeInputRule({
-              find: TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX,
-              type: this.type,
-              getAttributes: (match) => {
-                const rawLanguage = match[1] || null
-                // Normalize language code (ts -> typescript, js -> javascript, etc.)
-                const language = rawLanguage
-                  ? LANGUAGE_NORMALIZATION[rawLanguage as keyof typeof LANGUAGE_NORMALIZATION] ||
-                    rawLanguage
-                  : null
-                let filename = match[2] || null
+                // Check if we're in a list item
+                const listItemDepth = $from.depth - 1
+                if (listItemDepth < 0 || $from.node(listItemDepth).type.name !== 'listItem') {
+                  return false
+                }
 
-                if (filename && rawLanguage && !filename.includes('.')) {
-                  const extension =
-                    LANGUAGE_TO_EXTENSION[rawLanguage as keyof typeof LANGUAGE_TO_EXTENSION]
+                // Get the current list item node
+                const currentListItem = $from.node(listItemDepth)
 
-                  if (extension) {
-                    filename = `${filename}${extension}`
+                // Check if the list item is empty (only contains empty paragraph)
+                const isEmpty = currentListItem.textContent.length === 0
+
+                if (isEmpty) {
+                  // Exit the list (Slack-like behavior)
+                  return this.editor.commands.liftListItem('listItem')
+                }
+
+                // Create new list item (default behavior)
+                return this.editor.commands.splitListItem('listItem')
+              },
+            }
+          },
+        }),
+        CodeBlockLowlight.configure({
+          lowlight,
+          HTMLAttributes: {
+            class: 'code-block',
+          },
+          languageClassPrefix: 'language-',
+        }).extend({
+          addNodeView() {
+            return ReactNodeViewRenderer(CodeBlockComponent)
+          },
+          addInputRules() {
+            return [
+              textblockTypeInputRule({
+                find: TEXTBLOCK_TYPE_INPUT_RULES_FIND_REGEX,
+                type: this.type,
+                getAttributes: (match) => {
+                  const rawLanguage = match[1] || null
+                  // Normalize language code (ts -> typescript, js -> javascript, etc.)
+                  const language = rawLanguage
+                    ? LANGUAGE_NORMALIZATION[rawLanguage as keyof typeof LANGUAGE_NORMALIZATION] ||
+                      rawLanguage
+                    : null
+                  let filename = match[2] || null
+
+                  if (filename && rawLanguage && !filename.includes('.')) {
+                    const extension =
+                      LANGUAGE_TO_EXTENSION[rawLanguage as keyof typeof LANGUAGE_TO_EXTENSION]
+
+                    if (extension) {
+                      filename = `${filename}${extension}`
+                    }
+                  }
+
+                  return {
+                    language,
+                    filename,
+                  }
+                },
+              }),
+            ]
+          },
+        }),
+        CodeBlockLanguageExtension,
+        Placeholder.configure({
+          placeholder,
+        }),
+        Link.configure({
+          openOnClick: false,
+          autolink: true,
+          linkOnPaste: true,
+          HTMLAttributes: {
+            class: 'rich-text-link',
+            rel: 'noopener noreferrer',
+            target: '_blank',
+          },
+        }).extend({
+          addKeyboardShortcuts() {
+            return {
+              'Mod-Shift-u': () => {
+                const previousUrl = this.editor.getAttributes('link').href
+                const { from, to } = this.editor.state.selection
+                const selectedText = this.editor.state.doc.textBetween(from, to, '')
+
+                setLinkUrl(previousUrl || '')
+                setLinkText(selectedText || '')
+                setLinkModalOpen(true)
+
+                return true
+              },
+              // スペースキーでリンクを解除（スペース以降の文字のみ）
+              Space: () => {
+                if (this.editor.isActive('link')) {
+                  const { $from } = this.editor.state.selection
+                  const marks = $from.marks()
+                  const hasLinkMark = marks.some((mark) => mark.type.name === 'link')
+
+                  if (hasLinkMark) {
+                    // スペースを挿入し、そのスペース以降のみリンクを解除
+                    // これにより既存のリンクテキストはそのまま残る
+                    return this.editor.chain().insertContent(' ').unsetMark('link').run()
                   }
                 }
-
-                return {
-                  language,
-                  filename,
-                }
+                return false
               },
-            }),
-          ]
-        },
-      }),
-      CodeBlockLanguageExtension,
-      Placeholder.configure({
-        placeholder,
-      }),
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-        linkOnPaste: true,
-        HTMLAttributes: {
-          class: 'rich-text-link',
-          rel: 'noopener noreferrer',
-          target: '_blank',
-        },
-      }).extend({
-        addKeyboardShortcuts() {
-          return {
-            'Mod-Shift-u': () => {
-              const previousUrl = this.editor.getAttributes('link').href
-              const { from, to } = this.editor.state.selection
-              const selectedText = this.editor.state.doc.textBetween(from, to, '')
-
-              setLinkUrl(previousUrl || '')
-              setLinkText(selectedText || '')
-              setLinkModalOpen(true)
-
-              return true
-            },
-            // スペースキーでリンクを解除（スペース以降の文字のみ）
-            Space: () => {
-              if (this.editor.isActive('link')) {
-                const { $from } = this.editor.state.selection
-                const marks = $from.marks()
-                const hasLinkMark = marks.some((mark) => mark.type.name === 'link')
-
-                if (hasLinkMark) {
-                  // スペースを挿入し、そのスペース以降のみリンクを解除
-                  // これにより既存のリンクテキストはそのまま残る
-                  return this.editor.chain().insertContent(' ').unsetMark('link').run()
-                }
-              }
-              return false
-            },
-          }
-        },
-      }),
-      LinkPreview,
-    ],
-    content,
-    editable: !disabled,
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML()
-      onChange(html)
-    },
-    onSelectionUpdate: ({ editor }) => {
-      // Update code block attributes when selection changes (focus change)
-      if (editor.isActive('codeBlock')) {
-        const attrs = editor.getAttributes('codeBlock')
-        setCodeBlockAttrs({
-          language: attrs.language || null,
-          filename: attrs.filename || null,
-        })
-      } else {
-        // Reset when not in code block
-        setCodeBlockAttrs({ language: null, filename: null })
-      }
-    },
-    editorProps: {
-      attributes: {
-        class: `prose prose-sm ${computedColorScheme === 'dark' ? 'prose-invert' : ''} max-w-none focus:outline-none`,
-      },
-      handlePaste: (view, event) => {
-        const text = event.clipboardData?.getData('text/plain')
-
-        const codeBlockMatch = text?.match(CODEBLOCK_REGEX)
-
-        if (codeBlockMatch && editor) {
-          event.preventDefault()
-          const language = codeBlockMatch[1]
-            ? codeBlockMatch[1] === 'markdown'
-              ? 'md'
-              : codeBlockMatch[1]
-            : null
-          let filename = codeBlockMatch[2] || null
-          const code = codeBlockMatch[3]
-
-          // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
-          if (filename && language && !filename.includes('.')) {
-            const extension = LANGUAGE_TO_EXTENSION[language as keyof typeof LANGUAGE_TO_EXTENSION]
-            if (extension) {
-              filename = `${filename}${extension}`
             }
-          }
-
-          editor
-            .chain()
-            .focus()
-            .insertContent({
-              type: 'codeBlock',
-              attrs: { language, filename },
-              content: code ? [{ type: 'text', text: code }] : undefined,
-            })
-            .run()
-
-          return true
+          },
+        }),
+        LinkPreview,
+      ],
+      content,
+      editable: !disabled,
+      onUpdate: ({ editor }) => {
+        const html = editor.getHTML()
+        onChange(html)
+      },
+      onSelectionUpdate: ({ editor }) => {
+        // Update code block attributes when selection changes (focus change)
+        if (editor.isActive('codeBlock')) {
+          const attrs = editor.getAttributes('codeBlock')
+          setCodeBlockAttrs({
+            language: attrs.language || null,
+            filename: attrs.filename || null,
+          })
+        } else {
+          // Reset when not in code block
+          setCodeBlockAttrs({ language: null, filename: null })
         }
+      },
+      editorProps: {
+        attributes: {
+          class: `prose prose-sm ${computedColorScheme === 'dark' ? 'prose-invert' : ''} max-w-none focus:outline-none`,
+        },
+        handlePaste: (view, event) => {
+          const text = event.clipboardData?.getData('text/plain')
 
-        if (text && isValidUrl(text)) {
-          const { state } = view
-          const { selection } = state
-          const { $from } = selection
+          const codeBlockMatch = text?.match(CODEBLOCK_REGEX)
 
-          if ($from.parent.textContent === '') {
+          if (codeBlockMatch && editor) {
             event.preventDefault()
-            editor?.commands.setLinkPreview({ url: text })
+            const language = codeBlockMatch[1]
+              ? codeBlockMatch[1] === 'markdown'
+                ? 'md'
+                : codeBlockMatch[1]
+              : null
+            let filename = codeBlockMatch[2] || null
+            const code = codeBlockMatch[3]
+
+            // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
+            if (filename && language && !filename.includes('.')) {
+              const extension =
+                LANGUAGE_TO_EXTENSION[language as keyof typeof LANGUAGE_TO_EXTENSION]
+              if (extension) {
+                filename = `${filename}${extension}`
+              }
+            }
+
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'codeBlock',
+                attrs: { language, filename },
+                content: code ? [{ type: 'text', text: code }] : undefined,
+              })
+              .run()
 
             return true
           }
-        }
-        return false
+
+          if (text && isValidUrl(text)) {
+            const { state } = view
+            const { selection } = state
+            const { $from } = selection
+
+            if ($from.parent.textContent === '') {
+              event.preventDefault()
+              editor?.commands.setLinkPreview({ url: text })
+
+              return true
+            }
+          }
+          return false
+        },
       },
     },
-  }, [editorKey]) // editorKeyが変わったら新しいエディターインスタンスを作成
+    [editorKey],
+  ) // editorKeyが変わったら新しいエディターインスタンスを作成
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
