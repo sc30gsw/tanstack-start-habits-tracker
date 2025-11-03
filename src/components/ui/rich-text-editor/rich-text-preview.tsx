@@ -11,6 +11,7 @@ import Underline from '@tiptap/extension-underline'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { common, createLowlight } from 'lowlight'
+import { useEffect } from 'react'
 import { CodeBlockLanguageExtension } from '~/components/ui/rich-text-editor/code-block-language-extension'
 import { LinkPreview } from '~/components/ui/rich-text-editor/link-preview-node'
 
@@ -81,6 +82,12 @@ export function RichTextPreview({
       },
     },
   })
+
+  useEffect(() => {
+    if (editor && html !== editor.getHTML()) {
+      editor.commands.setContent(html)
+    }
+  }, [editor, html])
 
   return (
     <Box
