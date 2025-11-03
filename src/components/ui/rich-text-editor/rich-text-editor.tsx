@@ -56,7 +56,6 @@ const lowlight = createLowlight(common)
 
 const LANGUAGE_OPTIONS = [
   { value: 'null', label: '自動検出' },
-  // Web Development
   { value: 'javascript', label: 'JavaScript' },
   { value: 'typescript', label: 'TypeScript' },
   { value: 'jsx', label: 'JSX' },
@@ -68,7 +67,6 @@ const LANGUAGE_OPTIONS = [
   { value: 'less', label: 'Less' },
   { value: 'vue', label: 'Vue' },
   { value: 'svelte', label: 'Svelte' },
-  // Backend Languages
   { value: 'python', label: 'Python' },
   { value: 'java', label: 'Java' },
   { value: 'go', label: 'Go' },
@@ -82,12 +80,10 @@ const LANGUAGE_OPTIONS = [
   { value: 'swift', label: 'Swift' },
   { value: 'dart', label: 'Dart' },
   { value: 'elixir', label: 'Elixir' },
-  // Shell & Scripts
   { value: 'bash', label: 'Bash' },
   { value: 'sh', label: 'Shell' },
   { value: 'zsh', label: 'Zsh' },
   { value: 'powershell', label: 'PowerShell' },
-  // Data & Config
   { value: 'json', label: 'JSON' },
   { value: 'yaml', label: 'YAML' },
   { value: 'toml', label: 'TOML' },
@@ -95,14 +91,11 @@ const LANGUAGE_OPTIONS = [
   { value: 'ini', label: 'INI' },
   { value: 'graphql', label: 'GraphQL' },
   { value: 'sql', label: 'SQL' },
-  // Markup & Documentation
   { value: 'markdown', label: 'Markdown' },
-  // Container & Infrastructure
   { value: 'dockerfile', label: 'Dockerfile' },
   { value: 'nginx', label: 'Nginx' },
 ] as const satisfies readonly Record<string, string>[]
 
-// Language abbreviation to full name mapping
 const LANGUAGE_NORMALIZATION = {
   js: 'javascript',
   ts: 'typescript',
@@ -129,16 +122,13 @@ const LANGUAGE_DENORMALIZATION = Object.entries(LANGUAGE_NORMALIZATION).reduce(
   {} as Record<string, string>,
 )
 
-// Language to file extension mapping (including common abbreviations)
 const LANGUAGE_TO_EXTENSION = {
-  // JavaScript/TypeScript
   javascript: '.js',
   js: '.js',
   typescript: '.ts',
   ts: '.ts',
   jsx: '.jsx',
   tsx: '.tsx',
-  // Web
   html: '.html',
   css: '.css',
   scss: '.scss',
@@ -146,7 +136,6 @@ const LANGUAGE_TO_EXTENSION = {
   less: '.less',
   vue: '.vue',
   svelte: '.svelte',
-  // Backend
   python: '.py',
   py: '.py',
   java: '.java',
@@ -167,13 +156,11 @@ const LANGUAGE_TO_EXTENSION = {
   dart: '.dart',
   elixir: '.ex',
   ex: '.ex',
-  // Shell
   bash: '.sh',
   sh: '.sh',
   zsh: '.zsh',
   powershell: '.ps1',
   ps1: '.ps1',
-  // Data & Config
   json: '.json',
   yaml: '.yml',
   yml: '.yml',
@@ -183,10 +170,8 @@ const LANGUAGE_TO_EXTENSION = {
   graphql: '.graphql',
   gql: '.graphql',
   sql: '.sql',
-  // Markup
   markdown: '.md',
   md: '.md',
-  // Other
   nginx: '.conf',
   dockerfile: '',
 } as const satisfies Record<string, string>
@@ -241,15 +226,17 @@ export function RichTextEditor({
             keepMarks: true,
             keepAttributes: false,
           },
-          listItem: false, // Disable default to use custom
+          listItem: false,
         }).extend({
           addKeyboardShortcuts() {
             return {
               'Mod-Enter': () => {
                 if (onSubmit) {
                   onSubmit()
+
                   return true
                 }
+
                 return false
               },
             }
@@ -267,35 +254,28 @@ export function RichTextEditor({
           addKeyboardShortcuts() {
             return {
               Tab: () => {
-                // Indent list item (create nested list)
                 return this.editor.commands.sinkListItem('listItem')
               },
               'Shift-Tab': () => {
-                // Outdent list item (lift nested list)
                 return this.editor.commands.liftListItem('listItem')
               },
               Enter: () => {
                 const { state } = this.editor
                 const { $from } = state.selection
 
-                // Check if we're in a list item
                 const listItemDepth = $from.depth - 1
+
                 if (listItemDepth < 0 || $from.node(listItemDepth).type.name !== 'listItem') {
                   return false
                 }
 
-                // Get the current list item node
                 const currentListItem = $from.node(listItemDepth)
-
-                // Check if the list item is empty (only contains empty paragraph)
                 const isEmpty = currentListItem.textContent.length === 0
 
                 if (isEmpty) {
-                  // Exit the list (Slack-like behavior)
                   return this.editor.commands.liftListItem('listItem')
                 }
 
-                // Create new list item (default behavior)
                 return this.editor.commands.splitListItem('listItem')
               },
             }
@@ -318,7 +298,6 @@ export function RichTextEditor({
                 type: this.type,
                 getAttributes: (match) => {
                   const rawLanguage = match[1] || null
-                  // Normalize language code (ts -> typescript, js -> javascript, etc.)
                   const language = rawLanguage
                     ? LANGUAGE_NORMALIZATION[rawLanguage as keyof typeof LANGUAGE_NORMALIZATION] ||
                       rawLanguage
@@ -370,7 +349,6 @@ export function RichTextEditor({
 
                 return true
               },
-              // スペースキーでリンクを解除（スペース以降の文字のみ）
               Space: () => {
                 if (this.editor.isActive('link')) {
                   const { $from } = this.editor.state.selection
@@ -378,8 +356,6 @@ export function RichTextEditor({
                   const hasLinkMark = marks.some((mark) => mark.type.name === 'link')
 
                   if (hasLinkMark) {
-                    // スペースを挿入し、そのスペース以降のみリンクを解除
-                    // これにより既存のリンクテキストはそのまま残る
                     return this.editor.chain().insertContent(' ').unsetMark('link').run()
                   }
                 }
@@ -392,20 +368,20 @@ export function RichTextEditor({
       ],
       content,
       editable: !disabled,
+      autofocus: 'end',
       onUpdate: ({ editor }) => {
         const html = editor.getHTML()
         onChange(html)
       },
       onSelectionUpdate: ({ editor }) => {
-        // Update code block attributes when selection changes (focus change)
         if (editor.isActive('codeBlock')) {
           const attrs = editor.getAttributes('codeBlock')
+
           setCodeBlockAttrs({
             language: attrs.language || null,
             filename: attrs.filename || null,
           })
         } else {
-          // Reset when not in code block
           setCodeBlockAttrs({ language: null, filename: null })
         }
       },
@@ -428,10 +404,10 @@ export function RichTextEditor({
             let filename = codeBlockMatch[2] || null
             const code = codeBlockMatch[3]
 
-            // ファイル名が指定されていて、拡張子が含まれていない場合は自動追加
             if (filename && language && !filename.includes('.')) {
               const extension =
                 LANGUAGE_TO_EXTENSION[language as keyof typeof LANGUAGE_TO_EXTENSION]
+
               if (extension) {
                 filename = `${filename}${extension}`
               }
@@ -467,7 +443,7 @@ export function RichTextEditor({
       },
     },
     [editorKey],
-  ) // editorKeyが変わったら新しいエディターインスタンスを作成
+  )
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
@@ -485,9 +461,10 @@ export function RichTextEditor({
     return null
   }
 
-  const isValidUrl = (text: string): boolean => {
+  const isValidUrl = (text: string) => {
     try {
       const url = new URL(text)
+
       return url.protocol === 'http:' || url.protocol === 'https:'
     } catch {
       return false
@@ -500,7 +477,6 @@ export function RichTextEditor({
     const selectedText = editor.state.doc.textBetween(from, to, '')
 
     setLinkUrl(previousUrl || '')
-    // 選択されたテキストの前後の空白を削除
     setLinkText(selectedText.trim())
     setLinkModalOpen(true)
   }
@@ -508,14 +484,13 @@ export function RichTextEditor({
   const handleSetLink = () => {
     if (!linkUrl) {
       setLinkModalOpen(false)
+
       return
     }
 
-    // リンクテキストの前後の空白を削除
     const trimmedLinkText = linkText.trim()
 
     if (trimmedLinkText) {
-      // 現在の選択範囲を削除してから、トリムしたテキストをリンクとして挿入
       editor
         .chain()
         .focus()
@@ -527,12 +502,10 @@ export function RichTextEditor({
         })
         .run()
     } else {
-      // テキストが指定されていない場合は、選択範囲にリンクを設定
       const { from, to } = editor.state.selection
       const selectedText = editor.state.doc.textBetween(from, to, '').trim()
 
       if (selectedText) {
-        // 選択範囲を削除してトリムしたテキストをリンクとして挿入
         editor
           .chain()
           .focus()
@@ -544,7 +517,6 @@ export function RichTextEditor({
           })
           .run()
       } else {
-        // 選択範囲がない場合はURLをそのままリンクとして挿入
         editor
           .chain()
           .focus()
@@ -568,7 +540,6 @@ export function RichTextEditor({
 
   return (
     <Box>
-      {/* Toolbar */}
       <Group
         gap="xs"
         p="xs"
@@ -1034,7 +1005,6 @@ export function RichTextEditor({
           </button>
         </Tooltip>
 
-        {/* 言語選択とファイル名入力（コードブロックがアクティブな時のみ表示） */}
         {editor.isActive('codeBlock') && (
           <>
             <Select
@@ -1288,7 +1258,6 @@ export function RichTextEditor({
         )}
       </Group>
 
-      {/* Editor Content */}
       <Box
         style={{
           border:
