@@ -1,8 +1,5 @@
 import { Extension } from '@tiptap/core'
 
-/**
- * コードブロックの言語とファイル名をdata属性として設定するエクステンション
- */
 export const CodeBlockLanguageExtension = Extension.create({
   name: 'codeBlockLanguage',
 
