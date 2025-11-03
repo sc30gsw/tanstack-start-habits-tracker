@@ -201,6 +201,7 @@ type RichTextEditorProps = {
   disabled?: boolean
   minHeight?: string | number
   onSubmit?: () => void
+  editorKey?: string
 }
 
 export function RichTextEditor({
@@ -210,6 +211,7 @@ export function RichTextEditor({
   disabled = false,
   minHeight = '120px',
   onSubmit,
+  editorKey,
 }: RichTextEditorProps) {
   const computedColorScheme = useComputedColorScheme('light')
 
@@ -461,7 +463,7 @@ export function RichTextEditor({
         return false
       },
     },
-  })
+  }, [editorKey]) // editorKeyが変わったら新しいエディターインスタンスを作成
 
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {

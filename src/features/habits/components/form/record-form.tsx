@@ -302,6 +302,7 @@ export function RecordForm({
             <div style={{ flex: 1, overflow: 'hidden' }}>
               <RichTextEditor
                 key={editorKey}
+                editorKey={editorKey}
                 content={editorContent}
                 onChange={setEditorContent}
                 placeholder={notesConfig.placeholder}
