@@ -129,6 +129,19 @@ export const createRecordSchema = z
       path: ['recoveryDate'],
     },
   )
+  .refine(
+    (data) => {
+      if (data.recoverySuccess === true && data.status !== 'completed') {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー成功にするには、ステータスを「完了」にしてください',
+      path: ['recoverySuccess'],
+    },
+  )
 
 export const updateRecordSchema = z
   .object({
@@ -235,6 +248,19 @@ export const updateRecordSchema = z
     {
       message: 'リカバリー日は元の日付から30日以内で指定してください',
       path: ['recoveryDate'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.recoverySuccess === true && data.status !== 'completed') {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー成功にするには、ステータスを「完了」にしてください',
+      path: ['recoverySuccess'],
     },
   )
 

@@ -78,6 +78,7 @@ export function RecordForm({
     notesConfig,
     triggerSubmit,
   } = useRecordForm(habitId, date, onSuccess, existingRecord)
+  console.log('🚀 ~ RecordForm ~ existingRecord:', existingRecord)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -111,13 +112,15 @@ export function RecordForm({
         {(form.errors.status ||
           form.errors.durationMinutes ||
           form.errors.notes ||
-          form.errors.recoveryDate) && (
+          form.errors.recoveryDate ||
+          form.errors.recoverySuccess) && (
           <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
             <Text c="red">
               {form.errors.status ||
                 form.errors.durationMinutes ||
                 form.errors.notes ||
-                form.errors.recoveryDate}
+                form.errors.recoveryDate ||
+                form.errors.recoverySuccess}
             </Text>
           </Alert>
         )}
