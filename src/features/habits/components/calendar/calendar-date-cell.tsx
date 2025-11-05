@@ -289,44 +289,104 @@ export function CalendarDateCell({
   }
 
   return (
-    <Card
-      withBorder
-      padding="xs"
-      style={{
-        flex: 1,
-        textAlign: 'center',
-        cursor: 'pointer',
-        backgroundColor,
-        color: textColor,
-        border: `${borderWidth} solid ${borderColor}`,
-        boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
-      }}
-      onClick={() =>
-        navigate({
-          search: (prev) => ({
-            ...prev,
-            selectedDate: date.format('YYYY-MM-DD'),
-            showRecordForm: false,
-          }),
-          hash: CALENDAR_VIEW_HASH_TARGET,
-        })
+    <Tooltip
+      withinPortal
+      label={
+        record ? (
+          <Stack gap={4} px="xs">
+            <Text size="sm" fw={700}>
+              {isRecoveryCompleted
+                ? 'リカバリー完了'
+                : isRecoveryFailed
+                  ? 'リカバリー失敗'
+                  : isRecoveryScheduled
+                    ? 'リカバリー予定'
+                    : record.status === 'completed'
+                      ? '完了'
+                      : record.status === 'skipped'
+                        ? 'スキップ'
+                        : '予定中'}
+            </Text>
+            <Text
+              size="xs"
+              c="dimmed"
+              style={{
+                visibility:
+                  record.status === 'skipped' ||
+                  isRecoveryScheduled ||
+                  isRecoveryFailed
+                    ? 'hidden'
+                    : 'visible',
+                height:
+                  record.status === 'skipped' ||
+                  isRecoveryScheduled ||
+                  isRecoveryFailed
+                    ? '0'
+                    : '1em',
+              }}
+            >
+              {formatDuration(record.duration_minutes || 0)}
+            </Text>
+            {isRecoveryCompleted && recoveryDate && (
+              <Text size="xs" c="cyan.6" fw={700}>
+                {recoveryDate.format('M月D日')}に実施済み
+              </Text>
+            )}
+            {isRecoveryFailed && (
+              <Text size="xs" c="red.6" fw={700}>
+                リカバリー失敗として記録
+              </Text>
+            )}
+            {isRecoveryScheduled && recoverySourceRecord && (
+              <Text size="xs" c="orange.6" fw={700}>
+                {dayjs(recoverySourceRecord.date).format('M月D日')}のリカバリー予定
+              </Text>
+            )}
+          </Stack>
+        ) : (
+          '記録なし'
+        )
       }
     >
-      <Text
-        size="xs"
-        c={
-          isSelected || hasRecord
-            ? 'white'
-            : dateType === 'sunday'
-              ? 'red.7'
-              : dateType === 'saturday'
-                ? 'blue.7'
-                : 'dimmed'
+      <Card
+        withBorder
+        padding="xs"
+        style={{
+          flex: 1,
+          textAlign: 'center',
+          cursor: 'pointer',
+          backgroundColor,
+          color: textColor,
+          border: `${borderWidth} solid ${borderColor}`,
+          boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
+        }}
+        onClick={() =>
+          navigate({
+            search: (prev) => ({
+              ...prev,
+              selectedDate: date.format('YYYY-MM-DD'),
+              showRecordForm: false,
+            }),
+            hash: CALENDAR_VIEW_HASH_TARGET,
+          })
         }
       >
-        {date.format('dd')}
-      </Text>
-      <Text fw={500}>{date.date()}</Text>
-    </Card>
+        <Text
+          size="xs"
+          c={
+            isSelected || hasRecord
+              ? 'white'
+              : dateType === 'sunday'
+                ? 'red.7'
+                : dateType === 'saturday'
+                  ? 'blue.7'
+                  : 'dimmed'
+          }
+        >
+          {date.format('dd')}
+        </Text>
+        <Text fw={500}>{date.date()}</Text>
+      </Card>
+    </Tooltip>
   )
 }
