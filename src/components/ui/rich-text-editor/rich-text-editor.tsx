@@ -2,9 +2,9 @@ import { Box, useComputedColorScheme } from '@mantine/core'
 import { EditorContent } from '@tiptap/react'
 import { useEffect, useState } from 'react'
 import { EditorToolbar } from '~/components/ui/rich-text-editor/editor-toolbar'
+import { LinkModal } from '~/components/ui/rich-text-editor/link-modal'
 import { useLinkActions } from '~/hooks/use-link-actions'
 import { useRichTextEditor } from '~/hooks/use-rich-text-editor'
-import { LinkModal } from '~/components/ui/rich-text-editor/link-modal'
 import '~/components/ui/rich-text-editor/rich-text-editor.css'
 
 type RichTextEditorProps = {

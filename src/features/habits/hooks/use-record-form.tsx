@@ -57,6 +57,7 @@ export type FormValues = Pick<RecordTable, 'status' | 'notes'> & {
   durationMinutes: RecordTable['duration_minutes']
   durationHours: number | ''
   recoveryDate: RecordTable['recoveryDate']
+  recoverySuccess: RecordTable['recoverySuccess']
 }
 
 export function useRecordForm(
@@ -81,6 +82,7 @@ export function useRecordForm(
         : 0,
       notes: existingRecord?.notes ?? '',
       recoveryDate: existingRecord?.recoveryDate ?? null,
+      recoverySuccess: existingRecord?.recoverySuccess ?? null,
     },
     validate: (values) => {
       const parsed = createRecordSchema
@@ -91,6 +93,7 @@ export function useRecordForm(
           date: true,
           notes: true,
           recoveryDate: true,
+          recoverySuccess: true,
         })
         .safeParse({
           habitId,
@@ -99,6 +102,7 @@ export function useRecordForm(
           durationMinutes: typeof values.durationMinutes === 'number' ? values.durationMinutes : 0,
           notes: values.notes,
           recoveryDate: values.recoveryDate,
+          recoverySuccess: values.recoverySuccess,
         })
 
       if (parsed.success) {
@@ -122,6 +126,7 @@ export function useRecordForm(
       durationHours: typeof values.durationHours === 'number' ? values.durationHours : 0,
       notes: values.notes,
       recoveryDate: values.recoveryDate,
+      recoverySuccess: values.recoverySuccess,
     }),
   })
 
@@ -209,6 +214,7 @@ export function useRecordForm(
       durationMinutes,
       notes: values.notes,
       recoveryDate: values.recoveryDate,
+      recoverySuccess: values.recoverySuccess,
     })
 
     if (!validationResult.success) {
@@ -239,6 +245,7 @@ export function useRecordForm(
                 durationMinutes,
                 notes: values.notes ?? '',
                 recoveryDate: values.recoveryDate,
+                recoverySuccess: values.recoverySuccess,
               },
             })
           : await recordDto.createRecord({
@@ -249,6 +256,7 @@ export function useRecordForm(
                 durationMinutes,
                 notes: values.notes ?? '',
                 recoveryDate: values.recoveryDate,
+                recoverySuccess: values.recoverySuccess,
               },
             })
 
