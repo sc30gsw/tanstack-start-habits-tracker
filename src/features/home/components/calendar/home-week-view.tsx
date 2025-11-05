@@ -1,4 +1,5 @@
-import { ActionIcon, Group, Stack, Text } from '@mantine/core'
+import { ActionIcon, Center, Group, Stack, Text } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -7,7 +8,6 @@ import utc from 'dayjs/plugin/utc'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 import { HomeCalendarDateCell } from '~/features/home/components/calendar/home-calendar-date-cell'
-import { HomeCalendarPresetsCombobox } from '~/features/home/components/calendar/home-calendar-presets-combobox'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -55,7 +55,26 @@ export function HomeWeekView() {
 
   return (
     <Stack gap={4}>
-      <HomeCalendarPresetsCombobox />
+      <Center>
+        <DateInput
+          size="sm"
+          value={currentDate.toDate()}
+          onChange={(date) => {
+            if (date) {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  selectedDate: dayjs(date).format('YYYY-MM-DD'),
+                  preset: undefined,
+                }),
+              })
+            }
+          }}
+          valueFormat="YYYY年MM月DD日"
+          placeholder="日付を選択"
+          popoverProps={{ position: 'bottom', withinPortal: true }}
+        />
+      </Center>
 
       <Group justify="space-between" mb={4}>
         <ActionIcon variant="subtle" aria-label="前週" onClick={handlePrevWeek}>

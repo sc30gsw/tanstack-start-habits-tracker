@@ -1,11 +1,11 @@
-import { ActionIcon, Box, Card, Flex, Group, Stack, Text } from '@mantine/core'
+import { ActionIcon, Box, Card, Center, Flex, Group, Stack, Text } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
-import { HomeCalendarPresetsCombobox } from '~/features/home/components/calendar/home-calendar-presets-combobox'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -51,7 +51,26 @@ export function HomeDayView() {
 
   return (
     <Stack gap={8}>
-      <HomeCalendarPresetsCombobox />
+      <Center>
+        <DateInput
+          size="sm"
+          value={currentDate.toDate()}
+          onChange={(date) => {
+            if (date) {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  selectedDate: dayjs(date).format('YYYY-MM-DD'),
+                  preset: undefined,
+                }),
+              })
+            }
+          }}
+          valueFormat="YYYY年MM月DD日"
+          placeholder="日付を選択"
+          popoverProps={{ position: 'bottom', withinPortal: true }}
+        />
+      </Center>
 
       <Group justify="space-between" mb={4}>
         <ActionIcon variant="subtle" aria-label="前日" onClick={handlePrevDay}>

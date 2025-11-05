@@ -50,7 +50,9 @@ export function HabitsListMonthView({
   currentMonth: currentMonthString,
   navigate,
 }: HabitsListMonthViewProps) {
-  const currentMonth = dayjs.tz(currentMonthString || dayjs().format('YYYY-MM'), 'Asia/Tokyo').isValid()
+  const currentMonth = dayjs
+    .tz(currentMonthString || dayjs().format('YYYY-MM'), 'Asia/Tokyo')
+    .isValid()
     ? dayjs.tz(currentMonthString || dayjs().format('YYYY-MM'), 'Asia/Tokyo').startOf('month')
     : dayjs().tz('Asia/Tokyo').startOf('month')
   const monthDates = generateMonthDates(currentMonth)

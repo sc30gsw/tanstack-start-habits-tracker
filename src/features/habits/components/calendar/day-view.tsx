@@ -1,10 +1,10 @@
-import { ActionIcon, Badge, Card, Group, Stack, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Badge, Card, Center, Group, Stack, Text, Tooltip } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { IconChevronLeft, IconChevronRight, IconExternalLink } from '@tabler/icons-react'
 import { Link, type NavigateOptions, useLocation } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import { CalendarPresetsCombobox } from '~/features/habits/components/calendar/calendar-presets-combobox'
 import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
@@ -117,7 +117,26 @@ export function DayView({
 
   return (
     <Stack gap={16}>
-      <CalendarPresetsCombobox selectedDate={selectedDate} navigate={navigate} />
+      <Center>
+        <DateInput
+          size="sm"
+          value={currentDate.toDate()}
+          onChange={(date) => {
+            if (date) {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  selectedDate: dayjs(date).format('YYYY-MM-DD'),
+                  preset: undefined,
+                }),
+              })
+            }
+          }}
+          valueFormat="YYYY年MM月DD日"
+          placeholder="日付を選択"
+          popoverProps={{ position: 'bottom', withinPortal: true }}
+        />
+      </Center>
 
       <Group justify="space-between" mb={4}>
         <ActionIcon variant="subtle" aria-label="前日" onClick={handlePrevDay}>

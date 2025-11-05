@@ -1,4 +1,5 @@
-import { ActionIcon, Group, Stack, Text } from '@mantine/core'
+import { ActionIcon, Center, Group, Stack, Text } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -8,7 +9,6 @@ import { chunk } from 'remeda'
 import { getValidatedDate } from '~/features/habits/types/schemas/search-params'
 import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 import { HomeCalendarDateCell } from '~/features/home/components/calendar/home-calendar-date-cell'
-import { HomeCalendarPresetsCombobox } from '~/features/home/components/calendar/home-calendar-presets-combobox'
 import { CALENDAR_ID } from '~/features/home/components/home-calendar-view'
 
 dayjs.extend(utc)
@@ -55,7 +55,28 @@ export function HomeMonthView() {
 
   return (
     <Stack gap={16}>
-      <HomeCalendarPresetsCombobox />
+      <Center>
+        <DateInput
+          size="sm"
+          value={currentMonth.toDate()}
+          onChange={(date) => {
+            if (date) {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  currentMonth: dayjs(date).format('YYYY-MM'),
+                  preset: undefined,
+                }),
+                hash: CALENDAR_ID,
+              })
+            }
+          }}
+          valueFormat="YYYY年MM月DD日"
+          placeholder="日付を選択"
+          maxLevel="year"
+          popoverProps={{ position: 'bottom', withinPortal: true }}
+        />
+      </Center>
 
       <Group justify="space-between" mb={4}>
         <ActionIcon

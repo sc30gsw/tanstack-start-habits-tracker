@@ -261,15 +261,15 @@ function HabitsPage() {
   const currentMonth = searchParams.currentMonth
     ? dayjs.tz(searchParams.currentMonth, 'Asia/Tokyo')
     : dayjs().tz('Asia/Tokyo')
-  
+
   const startOfWeek = currentMonth.startOf('week')
   const weekDates = Array.from({ length: 7 }).map((_, i) => startOfWeek.add(i, 'day'))
-  
+
   const selectedDateRecords = useMemo(() => {
     // 月次ビューの最初の日のレコードを表示
     return (
-      recordsData.data?.filter((record) => 
-        dayjs(record.date).isSame(currentMonth.startOf('month'), 'day')
+      recordsData.data?.filter((record) =>
+        dayjs(record.date).isSame(currentMonth.startOf('month'), 'day'),
       ) || []
     )
   }, [currentMonth, recordsData.data])
@@ -306,12 +306,7 @@ function HabitsPage() {
       maxDailyDuration: aggregated.maxDailyDuration,
       maxDailyDate: aggregated.maxDailyDate,
     }
-  }, [
-    recordsData.data,
-    habitsData.data,
-    searchParams.calendarView,
-    searchParams.currentMonth,
-  ])
+  }, [recordsData.data, habitsData.data, searchParams.calendarView, searchParams.currentMonth])
 
   if (!isList) {
     return <Outlet />
