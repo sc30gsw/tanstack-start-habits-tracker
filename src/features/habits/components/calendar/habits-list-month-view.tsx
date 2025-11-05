@@ -41,19 +41,21 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
 
 type HabitsListMonthViewProps = {
   records: RecordEntity[]
+  selectedDate: SearchParams['selectedDate']
   currentMonth: SearchParams['currentMonth']
   navigate: (options: NavigateOptions) => void
 }
 
 export function HabitsListMonthView({
   records,
+  selectedDate,
   currentMonth: currentMonthString,
   navigate,
 }: HabitsListMonthViewProps) {
   const currentMonth = dayjs
-    .tz(currentMonthString || dayjs().format('YYYY-MM'), 'Asia/Tokyo')
+    .tz(currentMonthString || dayjs(selectedDate).format('YYYY-MM'), 'Asia/Tokyo')
     .isValid()
-    ? dayjs.tz(currentMonthString || dayjs().format('YYYY-MM'), 'Asia/Tokyo').startOf('month')
+    ? dayjs.tz(currentMonthString || dayjs(selectedDate).format('YYYY-MM'), 'Asia/Tokyo').startOf('month')
     : dayjs().tz('Asia/Tokyo').startOf('month')
   const monthDates = generateMonthDates(currentMonth)
   const weeks = createWeekGroups(monthDates)
@@ -65,10 +67,12 @@ export function HabitsListMonthView({
           variant="subtle"
           aria-label="前月"
           onClick={() => {
+            const newMonth = currentMonth.subtract(1, 'month')
             navigate({
               search: (prev) => ({
                 ...prev,
-                currentMonth: currentMonth.subtract(1, 'month').format('YYYY-MM'),
+                selectedDate: newMonth.startOf('month').format('YYYY-MM-DD'),
+                currentMonth: newMonth.format('YYYY-MM'),
               }),
             })
           }}
@@ -80,10 +84,12 @@ export function HabitsListMonthView({
           variant="subtle"
           aria-label="翌月"
           onClick={() => {
+            const newMonth = currentMonth.add(1, 'month')
             navigate({
               search: (prev) => ({
                 ...prev,
-                currentMonth: currentMonth.add(1, 'month').format('YYYY-MM'),
+                selectedDate: newMonth.startOf('month').format('YYYY-MM-DD'),
+                currentMonth: newMonth.format('YYYY-MM'),
                 preset: undefined,
               }),
             })
@@ -120,7 +126,7 @@ export function HabitsListMonthView({
                 records={records}
                 isCurrentMonth={currentDate.month() === currentMonth.month()}
                 variant="month"
-                selectedDate={undefined}
+                selectedDate={selectedDate}
                 navigate={navigate}
               />
             ))}

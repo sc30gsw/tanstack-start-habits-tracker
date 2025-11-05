@@ -52,6 +52,7 @@ export const Route = createFileRoute('/habits/')({
       habitFilter: true,
       showRecordForm: true,
       calendarView: true,
+      selectedDate: true,
       currentMonth: true,
       q: true,
     })
@@ -64,6 +65,7 @@ export const Route = createFileRoute('/habits/')({
     }),
   loaderDeps: ({ search }) => ({
     calendarView: search.calendarView || 'month',
+    selectedDate: search.selectedDate,
     currentMonth: search.currentMonth,
     q: search.q,
     habitSort: search.habitSort,
@@ -78,7 +80,7 @@ export const Route = createFileRoute('/habits/')({
       },
     })
 
-    const dataRange = getCalendarDataRange(deps.calendarView, deps.currentMonth, undefined)
+    const dataRange = getCalendarDataRange(deps.calendarView, deps.currentMonth, deps.selectedDate)
 
     const recordsResult = await recordDto.getRecords({
       data: {
@@ -260,24 +262,23 @@ function HabitsPage() {
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
-  const currentMonth = searchParams.currentMonth
-    ? dayjs.tz(searchParams.currentMonth, 'Asia/Tokyo')
-    : dayjs().tz('Asia/Tokyo')
+  // DateInputの値を決定（selectedDateが最優先、なければcurrentMonth、なければ今日）
+  const selectedDate = searchParams.selectedDate
+    ? dayjs.tz(searchParams.selectedDate, 'Asia/Tokyo')
+    : searchParams.currentMonth
+      ? dayjs.tz(searchParams.currentMonth, 'Asia/Tokyo').startOf('month')
+      : dayjs().tz('Asia/Tokyo')
 
-  // DateInputで使用する現在の日付値（優先順位: currentMonth）
-  const dateInputValue = currentMonth.toDate()
+  const dateInputValue = selectedDate.toDate()
 
-  const startOfWeek = currentMonth.startOf('week')
+  const startOfWeek = selectedDate.startOf('week')
   const weekDates = Array.from({ length: 7 }).map((_, i) => startOfWeek.add(i, 'day'))
 
   const selectedDateRecords = useMemo(() => {
-    // 月次ビューの最初の日のレコードを表示
     return (
-      recordsData.data?.filter((record) =>
-        dayjs(record.date).isSame(currentMonth.startOf('month'), 'day'),
-      ) || []
+      recordsData.data?.filter((record) => dayjs(record.date).isSame(selectedDate, 'day')) || []
     )
-  }, [currentMonth, recordsData.data])
+  }, [selectedDate, recordsData.data])
 
   const pieChartData = useMemo(() => {
     if (!habitsData.data || !recordsData.data) {
@@ -295,7 +296,7 @@ function HabitsPage() {
       recordsData.data,
       habitsData.data,
       searchParams.calendarView,
-      undefined,
+      searchParams.selectedDate,
       searchParams.currentMonth,
     )
 
@@ -311,7 +312,7 @@ function HabitsPage() {
       maxDailyDuration: aggregated.maxDailyDuration,
       maxDailyDate: aggregated.maxDailyDate,
     }
-  }, [recordsData.data, habitsData.data, searchParams.calendarView, searchParams.currentMonth])
+  }, [recordsData.data, habitsData.data, searchParams.calendarView, searchParams.selectedDate, searchParams.currentMonth])
 
   if (!isList) {
     return <Outlet />
@@ -360,11 +361,13 @@ function HabitsPage() {
               value={dateInputValue}
               onChange={(date) => {
                 if (date) {
+                  const newDate = dayjs(date)
                   navigate({
                     to: '.',
                     search: (prev) => ({
                       ...prev,
-                      currentMonth: dayjs(date).format('YYYY-MM'),
+                      selectedDate: newDate.format('YYYY-MM-DD'),
+                      currentMonth: newDate.format('YYYY-MM'),
                     }),
                   })
                 }
@@ -405,6 +408,7 @@ function HabitsPage() {
           >
             <HabitsListMonthView
               records={recordsData.data || []}
+              selectedDate={searchParams.selectedDate}
               currentMonth={searchParams.currentMonth}
               navigate={(options) =>
                 isDesktop
@@ -420,6 +424,7 @@ function HabitsPage() {
             <HabitsListWeekView
               weekDates={weekDates}
               records={recordsData.data || []}
+              selectedDate={searchParams.selectedDate}
               navigate={(options) =>
                 isDesktop
                   ? navigate(options)
@@ -433,7 +438,7 @@ function HabitsPage() {
           >
             <DayView
               selectedDateRecords={selectedDateRecords}
-              selectedDate={currentMonth.startOf('month').format('YYYY-MM-DD')}
+              selectedDate={searchParams.selectedDate}
               habits={habitsData.data || []}
               showHabitLink={true}
               navigate={(options) =>

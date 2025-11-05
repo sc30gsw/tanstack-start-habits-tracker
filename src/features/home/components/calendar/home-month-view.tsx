@@ -54,30 +54,6 @@ export function HomeMonthView() {
 
   return (
     <Stack gap={16}>
-      <Center>
-        <DateInput
-          size="sm"
-          value={currentMonth.toDate()}
-          onChange={(date) => {
-            if (date) {
-              navigate({
-                search: (prev) => ({
-                  ...prev,
-                  selectedDate: dayjs(date).format('YYYY-MM-DD'),
-                  currentMonth: dayjs(date).format('YYYY-MM'),
-                  preset: undefined,
-                }),
-                hash: CALENDAR_ID,
-              })
-            }
-          }}
-          valueFormat="YYYY年MM月DD日"
-          placeholder="日付を選択"
-          maxLevel="year"
-          popoverProps={{ position: 'bottom', withinPortal: true }}
-        />
-      </Center>
-
       <Group justify="space-between" mb={4}>
         <ActionIcon
           variant="subtle"
@@ -87,6 +63,7 @@ export function HomeMonthView() {
               search: (prev) => ({
                 ...prev,
                 currentMonth: currentMonth.subtract(1, 'month').format('YYYY-MM'),
+                selectedDate: currentMonth.subtract(1, 'month').format('YYYY-MM-DD'),
                 preset: undefined,
               }),
               hash: CALENDAR_ID,
@@ -104,6 +81,7 @@ export function HomeMonthView() {
               search: (prev) => ({
                 ...prev,
                 currentMonth: currentMonth.add(1, 'month').format('YYYY-MM'),
+                selectedDate: currentMonth.add(1, 'month').format('YYYY-MM-DD'),
                 preset: undefined,
               }),
               hash: CALENDAR_ID,

@@ -7,6 +7,7 @@ import utc from 'dayjs/plugin/utc'
 import { HabitsListCalendarDateCell } from '~/features/habits/components/calendar/habits-list-calendar-date-cell'
 import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { RecordEntity } from '~/features/habits/types/habit'
+import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 
 dayjs.extend(utc)
@@ -16,34 +17,37 @@ dayjs.tz.setDefault('Asia/Tokyo')
 type HabitsListWeekViewProps = {
   weekDates: dayjs.Dayjs[]
   records: RecordEntity[]
+  selectedDate: SearchParams['selectedDate']
   navigate: (options: NavigateOptions) => void
 }
 
-export function HabitsListWeekView({ weekDates, records, navigate }: HabitsListWeekViewProps) {
+export function HabitsListWeekView({ weekDates, records, selectedDate, navigate }: HabitsListWeekViewProps) {
   const currentDate = weekDates[0] || dayjs()
   const startOfWeek = currentDate.startOf('week')
   const endOfWeek = currentDate.endOf('week')
   const weekRange = `${startOfWeek.format('YYYY/MM/DD')} - ${endOfWeek.format('MM/DD')}`
 
   const handlePrevWeek = () => {
-    const newMonth = currentDate.subtract(1, 'week')
+    const newDate = currentDate.subtract(1, 'week')
 
     navigate({
       search: (prev) => ({
         ...prev,
-        currentMonth: newMonth.format('YYYY-MM'),
+        selectedDate: newDate.format('YYYY-MM-DD'),
+        currentMonth: newDate.format('YYYY-MM'),
       }),
       hash: CALENDAR_VIEW_HASH_TARGET,
     })
   }
 
   const handleNextWeek = () => {
-    const newMonth = currentDate.add(1, 'week')
+    const newDate = currentDate.add(1, 'week')
 
     navigate({
       search: (prev) => ({
         ...prev,
-        currentMonth: newMonth.format('YYYY-MM'),
+        selectedDate: newDate.format('YYYY-MM-DD'),
+        currentMonth: newDate.format('YYYY-MM'),
       }),
       hash: CALENDAR_VIEW_HASH_TARGET,
     })
@@ -86,7 +90,7 @@ export function HabitsListWeekView({ weekDates, records, navigate }: HabitsListW
             records={records}
             variant="week"
             showWeekday={false}
-            selectedDate={undefined}
+            selectedDate={selectedDate}
             navigate={navigate}
           />
         ))}
