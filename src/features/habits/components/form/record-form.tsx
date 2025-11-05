@@ -78,7 +78,6 @@ export function RecordForm({
     notesConfig,
     triggerSubmit,
   } = useRecordForm(habitId, date, onSuccess, existingRecord)
-  console.log('🚀 ~ RecordForm ~ existingRecord:', existingRecord)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
