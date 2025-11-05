@@ -17,6 +17,7 @@ import type { SearchParams } from '~/features/habits/types/schemas/search-params
 import { HomeDayView } from '~/features/home/components/calendar/home-day-view'
 import { HomeMonthView } from '~/features/home/components/calendar/home-month-view'
 import { HomeWeekView } from '~/features/home/components/calendar/home-week-view'
+import { getDayPropsForJapaneseCalendar } from '~/utils/date-input-styles'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -73,6 +74,7 @@ export function HomeCalendarView() {
               valueFormat="YYYY年MM月DD日"
               placeholder="日付を選択"
               popoverProps={{ position: 'bottom', withinPortal: true }}
+              getDayProps={getDayPropsForJapaneseCalendar}
             />
           </Center>
           <SegmentedControl

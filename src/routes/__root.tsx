@@ -6,6 +6,7 @@ import '@mantine/notifications/styles.css'
 import '@mantine/dates/styles.css'
 
 import { AppShell, ColorSchemeScript, MantineProvider } from '@mantine/core'
+import { DatesProvider } from '@mantine/dates'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications } from '@mantine/notifications'
 import { ClientOnly } from '~/components/client-only'
@@ -136,10 +137,18 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <QueryProvider>
           <MantineProvider theme={theme}>
-            <ModalsProvider>
-              <Notifications />
-              {children}
-            </ModalsProvider>
+            <DatesProvider
+              settings={{
+                locale: 'ja',
+                firstDayOfWeek: 0, // 日曜日を週の開始日に設定
+                weekendDays: [0, 6], // 日曜日と土曜日を週末に設定
+              }}
+            >
+              <ModalsProvider>
+                <Notifications />
+                {children}
+              </ModalsProvider>
+            </DatesProvider>
           </MantineProvider>
         </QueryProvider>
         {/* {(import.meta.env.DEV || process.env.NODE_ENV === 'development') && (

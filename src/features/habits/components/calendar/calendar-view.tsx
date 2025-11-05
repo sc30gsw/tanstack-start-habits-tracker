@@ -20,6 +20,7 @@ import { WeekView } from '~/features/habits/components/calendar/week-view'
 import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { HabitEntity, RecordEntity } from '~/features/habits/types/habit'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
+import { getDayPropsForJapaneseCalendar } from '~/utils/date-input-styles'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -97,6 +98,7 @@ export function CalendarView({
               valueFormat="YYYY年MM月DD日"
               placeholder="日付を選択"
               popoverProps={{ position: 'bottom', withinPortal: true }}
+              getDayProps={getDayPropsForJapaneseCalendar}
             />
           </Center>
           <SegmentedControl

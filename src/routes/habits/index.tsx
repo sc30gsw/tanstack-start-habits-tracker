@@ -39,6 +39,7 @@ import {
   sortForListPage,
 } from '~/features/habits/utils/pie-chart-utils'
 import { HabitOrganizer } from '~/features/home/components/habit-organizer'
+import { getDayPropsForJapaneseCalendar } from '~/utils/date-input-styles'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -381,6 +382,7 @@ function HabitsPage() {
               valueFormat="YYYY年MM月DD日"
               placeholder="日付を選択"
               popoverProps={{ position: 'bottom', withinPortal: true }}
+              getDayProps={getDayPropsForJapaneseCalendar}
             />
           </Center>
           <SegmentedControl
