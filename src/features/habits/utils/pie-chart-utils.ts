@@ -116,7 +116,6 @@ export function getCalendarDataRange(
   }
 }
 
-// 統計情報用の期間を取得（実際の月/週/日）
 export function getPeriodDateRange(
   calendarView: SearchParams['calendarView'] = 'month',
   currentMonth?: SearchParams['currentMonth'],
@@ -158,8 +157,7 @@ export function aggregateTimeByHabit(
   selectedDate?: string,
   currentMonth?: string,
 ) {
-  // カレンダー表示範囲のデータを取得（統計もカレンダー表示範囲に合わせる）
-  const dateRange = getCalendarDataRange(calendarView, currentMonth, selectedDate)
+  const dateRange = getPeriodDateRange(calendarView, currentMonth, selectedDate)
 
   const filteredRecords = records.filter(
     (record) =>
