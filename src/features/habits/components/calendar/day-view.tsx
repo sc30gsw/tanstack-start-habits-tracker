@@ -57,6 +57,7 @@ export function DayView({
         ...prev,
         selectedDate: newDate.format('YYYY-MM-DD'),
         preset: undefined,
+        showRecordForm: false,
       }),
       hash: CALENDAR_VIEW_HASH_TARGET,
     })
@@ -70,6 +71,7 @@ export function DayView({
         ...prev,
         selectedDate: newDate.format('YYYY-MM-DD'),
         preset: undefined,
+        showRecordForm: false,
       }),
       hash: CALENDAR_VIEW_HASH_TARGET,
     })

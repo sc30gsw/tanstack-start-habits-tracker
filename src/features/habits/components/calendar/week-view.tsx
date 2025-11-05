@@ -41,6 +41,7 @@ export function WeekView({ weekDates, recordMap, selectedDate, navigate }: WeekV
         ...prev,
         selectedDate: newDate.format('YYYY-MM-DD'),
         preset: undefined,
+        showRecordForm: false,
       }),
       hash: CALENDAR_VIEW_HASH_TARGET,
     })
@@ -54,6 +55,7 @@ export function WeekView({ weekDates, recordMap, selectedDate, navigate }: WeekV
         ...prev,
         selectedDate: newDate.format('YYYY-MM-DD'),
         preset: undefined,
+        showRecordForm: false,
       }),
       hash: CALENDAR_VIEW_HASH_TARGET,
     })

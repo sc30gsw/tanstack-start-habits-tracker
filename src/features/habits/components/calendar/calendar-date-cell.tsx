@@ -246,7 +246,11 @@ export function CalendarDateCell({
           onClick={() =>
             navigate({
               hash: CALENDAR_VIEW_HASH_TARGET,
-              search: (prev) => ({ ...prev, selectedDate: date.format('YYYY-MM-DD') }),
+              search: (prev) => ({
+                ...prev,
+                selectedDate: date.format('YYYY-MM-DD'),
+                showRecordForm: false,
+              }),
             })
           }
           padding="xs"
@@ -302,6 +306,7 @@ export function CalendarDateCell({
           search: (prev) => ({
             ...prev,
             selectedDate: date.format('YYYY-MM-DD'),
+            showRecordForm: false,
           }),
           hash: CALENDAR_VIEW_HASH_TARGET,
         })
