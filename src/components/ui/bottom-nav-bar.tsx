@@ -1,6 +1,6 @@
-import { ActionIcon, Text, useMantineColorScheme } from '@mantine/core'
+import { Text, useMantineColorScheme } from '@mantine/core'
 import { IconChecklist, IconClock, IconHome, IconListDetails } from '@tabler/icons-react'
-import { getRouteApi, Link, useLocation } from '@tanstack/react-router'
+import { getRouteApi, useLocation } from '@tanstack/react-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LiquidGlass } from '~/components/ui/liquid-glass'
 import { HabitSelectorPopover } from '~/features/root/components/habit-selector-popover'
@@ -27,10 +27,10 @@ export function BottomNavBar() {
   const containerRef = useRef<HTMLDivElement>(null)
   const navContainerRef = useRef<HTMLDivElement>(null)
 
-  const homeRef = useRef<HTMLDivElement>(null)
-  const habitsRef = useRef<HTMLDivElement>(null)
-  const recordRef = useRef<HTMLDivElement>(null)
-  const detailsRef = useRef<HTMLDivElement>(null)
+  const homeRef = useRef<HTMLButtonElement>(null)
+  const habitsRef = useRef<HTMLButtonElement>(null)
+  const recordRef = useRef<HTMLButtonElement>(null)
+  const detailsRef = useRef<HTMLButtonElement>(null)
 
   const { colorScheme } = useMantineColorScheme()
   const { data: session } = authClient.useSession()
@@ -60,7 +60,7 @@ export function BottomNavBar() {
       return
     }
 
-    const refs: React.RefObject<HTMLDivElement | null>[] = []
+    const refs: React.RefObject<HTMLButtonElement | null>[] = []
     for (const item of items) {
       switch (item) {
         case 'home':
@@ -184,7 +184,7 @@ export function BottomNavBar() {
       {/* Liquid Glass Navigation */}
       <div className="pointer-events-auto">
         <LiquidGlass padding="none">
-          <div ref={navContainerRef} className="relative flex h-full items-stretch gap-2 px-5">
+          <div ref={navContainerRef} className="relative flex h-full items-stretch gap-2 px-4">
             {/* Liquid Glass インジケーター */}
             {indicatorStyle.opacity > 0 && (
               <div
@@ -218,128 +218,150 @@ export function BottomNavBar() {
             )}
 
             {/* ホーム */}
-            <div
+            <button
+              type="button"
               ref={homeRef}
-              role="group"
               onMouseEnter={() => setHoveredItem('home')}
               onMouseLeave={() => setHoveredItem(null)}
-              className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
+              onClick={() => navigate({ to: '/' })}
+              className="relative z-10 flex min-w-20 flex-1 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-0 bg-transparent px-4 py-2 transition-colors duration-200"
             >
-              <ActionIcon component={Link} to="/" variant="transparent" size="lg">
-                <IconHome
-                  size={24}
-                  stroke={1.5}
-                  className={
-                    isActive('/') ? 'text-[#228be6]' : isDark ? 'text-white' : 'text-black'
-                  }
-                />
-              </ActionIcon>
+              <IconHome
+                size={24}
+                stroke={1.5}
+                className={
+                  isActive('/') || hoveredItem === 'home'
+                    ? 'text-[#228be6]'
+                    : isDark
+                      ? 'text-white'
+                      : 'text-black'
+                }
+              />
               <Text
                 size="11px"
                 fw={isActive('/') ? 600 : 400}
-                c={isActive('/') ? 'blue.6' : isDark ? 'white' : 'dark'}
+                c={isActive('/') || hoveredItem === 'home' ? 'blue.6' : isDark ? 'white' : 'dark'}
               >
                 ホーム
               </Text>
-            </div>
+            </button>
 
-            <div
+            {/* 習慣一覧 */}
+            <button
+              type="button"
               ref={habitsRef}
-              role="group"
               onMouseEnter={() => setHoveredItem('habits')}
               onMouseLeave={() => setHoveredItem(null)}
-              className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
+              onClick={() =>
+                navigate({ to: '/habits', search: { habitFilter: 'all', habitSort: 'all' } as any })
+              }
+              className="relative z-10 flex min-w-20 flex-1 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-0 bg-transparent px-4 py-2 transition-colors duration-200"
             >
-              <ActionIcon
-                component={Link}
-                to="/habits"
-                search={{ habitFilter: 'all', habitSort: 'all' } as any}
-                variant="transparent"
-                size="lg"
-              >
-                <IconChecklist
-                  size={24}
-                  stroke={1.5}
-                  className={
-                    isActive('/habits') ? 'text-[#228be6]' : isDark ? 'text-white' : 'text-black'
-                  }
-                />
-              </ActionIcon>
+              <IconChecklist
+                size={24}
+                stroke={1.5}
+                className={
+                  isActive('/habits') || hoveredItem === 'habits'
+                    ? 'text-[#228be6]'
+                    : isDark
+                      ? 'text-white'
+                      : 'text-black'
+                }
+              />
               <Text
                 size="11px"
                 fw={isActive('/habits') ? 600 : 400}
-                c={isActive('/habits') ? 'blue.6' : isDark ? 'white' : 'dark'}
+                c={
+                  isActive('/habits') || hoveredItem === 'habits'
+                    ? 'blue.6'
+                    : isDark
+                      ? 'white'
+                      : 'dark'
+                }
               >
                 習慣
               </Text>
-            </div>
+            </button>
 
-            <div
+            {/* 記録 */}
+            <button
+              type="button"
               ref={recordRef}
-              role="group"
               onMouseEnter={() => setHoveredItem('record')}
               onMouseLeave={() => setHoveredItem(null)}
-              className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
+              onClick={() => {
+                navigate({
+                  to: location.pathname,
+                  search: (prev) => ({
+                    ...prev,
+                    stopwatchOpen: true,
+                  }),
+                })
+              }}
+              className="relative z-10 flex min-w-20 flex-1 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-0 bg-transparent px-4 py-2 transition-colors duration-200"
             >
-              <ActionIcon
-                variant="transparent"
-                size="lg"
-                onClick={() => {
-                  navigate({
-                    to: location.pathname,
-                    search: (prev) => ({
-                      ...prev,
-                      stopwatchOpen: true,
-                    }),
-                  })
-                }}
-              >
-                <IconClock
-                  size={24}
-                  stroke={1.5}
-                  className={
-                    isActive('record') ? 'text-[#228be6]' : isDark ? 'text-white' : 'text-black'
-                  }
-                />
-              </ActionIcon>
+              <IconClock
+                size={24}
+                stroke={1.5}
+                className={
+                  isActive('record') || hoveredItem === 'record'
+                    ? 'text-[#228be6]'
+                    : isDark
+                      ? 'text-white'
+                      : 'text-black'
+                }
+              />
               <Text
                 size="11px"
                 fw={isActive('record') ? 600 : 400}
-                c={isActive('record') ? 'blue.6' : isDark ? 'white' : 'dark'}
+                c={
+                  isActive('record') || hoveredItem === 'record'
+                    ? 'blue.6'
+                    : isDark
+                      ? 'white'
+                      : 'dark'
+                }
               >
                 記録
               </Text>
-            </div>
+            </button>
 
-            <div
+            {/* 詳細 */}
+            <button
+              type="button"
               ref={detailsRef}
-              role="group"
               onMouseEnter={() => setHoveredItem('details')}
               onMouseLeave={() => setHoveredItem(null)}
-              className="relative z-10 flex min-w-16 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg px-4 py-2 transition-colors duration-200"
+              onClick={() => setOpened(true)}
+              className="relative z-10 flex min-w-20 flex-1 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-0 bg-transparent px-4 py-2 transition-colors duration-200"
             >
-              <ActionIcon
-                ref={targetRef}
-                variant="transparent"
-                size="lg"
-                onClick={() => setOpened(true)}
-              >
+              <div ref={targetRef}>
                 <IconListDetails
                   size={24}
                   stroke={1.5}
                   className={
-                    isActive('details') ? 'text-[#228be6]' : isDark ? 'text-white' : 'text-black'
+                    isActive('details') || hoveredItem === 'details'
+                      ? 'text-[#228be6]'
+                      : isDark
+                        ? 'text-white'
+                        : 'text-black'
                   }
                 />
-              </ActionIcon>
+              </div>
               <Text
                 size="11px"
                 fw={isActive('details') ? 600 : 400}
-                c={isActive('details') ? 'blue.6' : isDark ? 'white' : 'dark'}
+                c={
+                  isActive('details') || hoveredItem === 'details'
+                    ? 'blue.6'
+                    : isDark
+                      ? 'white'
+                      : 'dark'
+                }
               >
                 詳細
               </Text>
-            </div>
+            </button>
           </div>
         </LiquidGlass>
       </div>
