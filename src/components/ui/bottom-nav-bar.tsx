@@ -35,21 +35,24 @@ export function BottomNavBar() {
   const { colorScheme } = useMantineColorScheme()
   const { data: session } = authClient.useSession()
 
-  const isActive = (path: FileRouteTypes['fullPaths'] | 'details' | 'record') => {
-    switch (path) {
-      case 'details': {
-        return location.pathname.startsWith('/habits/')
-      }
+  const isActive = useCallback(
+    (path: FileRouteTypes['fullPaths'] | 'details' | 'record') => {
+      switch (path) {
+        case 'details': {
+          return location.pathname.startsWith('/habits/')
+        }
 
-      case 'record': {
-        return search?.stopwatchOpen === true
-      }
+        case 'record': {
+          return search?.stopwatchOpen === true
+        }
 
-      default: {
-        return location.pathname === path
+        default: {
+          return location.pathname === path
+        }
       }
-    }
-  }
+    },
+    [location.pathname, search?.stopwatchOpen],
+  )
 
   const isDark = colorScheme === 'dark'
 
@@ -143,31 +146,26 @@ export function BottomNavBar() {
       return
     }
 
-    const activeItems: string[] = []
+    const activeItems: Parameters<typeof isActive>[0][] = []
 
-    switch (location.pathname) {
-      case '/':
-        activeItems.push('home')
-        break
+    const checks = [
+      { condition: isActive('/'), item: 'home' },
+      { condition: isActive('/habits'), item: 'habits' },
+      { condition: isActive('record'), item: 'record' },
+      { condition: isActive('details'), item: 'details' },
+    ] as const satisfies ReadonlyArray<{
+      condition: boolean
+      item: Parameters<typeof isActive>[0] | 'habits' | 'home'
+    }>
 
-      case '/habits':
-        activeItems.push('habits')
-        break
-
-      case '/record':
-        activeItems.push('record')
-        break
-
-      case '/details':
-        activeItems.push('details')
-        break
-
-      default:
-        break
+    for (const { condition, item } of checks) {
+      if (condition) {
+        activeItems.push(item as (typeof activeItems)[number])
+      }
     }
 
     updateIndicator(activeItems)
-  }, [hoveredItem, location.pathname, search, updateIndicator])
+  }, [hoveredItem, location.pathname, search, updateIndicator, isActive])
 
   if (!session?.user) {
     return null
