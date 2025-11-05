@@ -377,6 +377,11 @@ function HabitsPage() {
             ]}
           />
         </Group>
+        <Group>
+          <Text size="xs" c="dimmed" ta="center">
+            ※ カレンダーには完了済みの習慣のみ表示されます
+          </Text>
+        </Group>
 
         <div className="relative">
           <div
