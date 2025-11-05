@@ -30,7 +30,7 @@ import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-targ
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
-import { getValidatedDate, searchSchema } from '~/features/habits/types/schemas/search-params'
+import { searchSchema } from '~/features/habits/types/schemas/search-params'
 import {
   aggregateTimeByHabit,
   getCalendarDataRange,
@@ -50,7 +50,6 @@ export const Route = createFileRoute('/habits/')({
       habitFilter: true,
       showRecordForm: true,
       calendarView: true,
-      selectedDate: true,
       currentMonth: true,
       q: true,
     })
@@ -64,7 +63,6 @@ export const Route = createFileRoute('/habits/')({
   loaderDeps: ({ search }) => ({
     calendarView: search.calendarView || 'month',
     currentMonth: search.currentMonth,
-    selectedDate: search.selectedDate,
     q: search.q,
     habitSort: search.habitSort,
     habitFilter: search.habitFilter,
@@ -78,7 +76,7 @@ export const Route = createFileRoute('/habits/')({
       },
     })
 
-    const dataRange = getCalendarDataRange(deps.calendarView, deps.currentMonth, deps.selectedDate)
+    const dataRange = getCalendarDataRange(deps.calendarView, deps.currentMonth, undefined)
 
     const recordsResult = await recordDto.getRecords({
       data: {
@@ -257,25 +255,24 @@ function HabitsPage() {
   const isList = last.routeId === '/habits/'
 
   const calendarView = searchParams.calendarView || 'month'
-  const selectedDate = getValidatedDate(searchParams?.selectedDate)
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
-  const selectedDateRecords = useMemo(() => {
-    if (!selectedDate) {
-      return []
-    }
-
-    return (
-      recordsData.data?.filter((record) => dayjs(record.date).isSame(dayjs(selectedDate), 'day')) ||
-      []
-    )
-  }, [selectedDate, recordsData.data])
-
-  const startOfWeek = selectedDate
-    ? dayjs(selectedDate).tz('Asia/Tokyo').startOf('week')
-    : dayjs().tz('Asia/Tokyo').startOf('week')
+  const currentMonth = searchParams.currentMonth
+    ? dayjs.tz(searchParams.currentMonth, 'Asia/Tokyo')
+    : dayjs().tz('Asia/Tokyo')
+  
+  const startOfWeek = currentMonth.startOf('week')
   const weekDates = Array.from({ length: 7 }).map((_, i) => startOfWeek.add(i, 'day'))
+  
+  const selectedDateRecords = useMemo(() => {
+    // 月次ビューの最初の日のレコードを表示
+    return (
+      recordsData.data?.filter((record) => 
+        dayjs(record.date).isSame(currentMonth.startOf('month'), 'day')
+      ) || []
+    )
+  }, [currentMonth, recordsData.data])
 
   const pieChartData = useMemo(() => {
     if (!habitsData.data || !recordsData.data) {
@@ -293,7 +290,7 @@ function HabitsPage() {
       recordsData.data,
       habitsData.data,
       searchParams.calendarView,
-      searchParams.selectedDate,
+      undefined,
       searchParams.currentMonth,
     )
 
@@ -313,7 +310,6 @@ function HabitsPage() {
     recordsData.data,
     habitsData.data,
     searchParams.calendarView,
-    searchParams.selectedDate,
     searchParams.currentMonth,
   ])
 
@@ -358,6 +354,27 @@ function HabitsPage() {
               カレンダー
             </Text>
           </Group>
+          {searchParams.currentMonth && (
+            <DateInput
+              size="sm"
+              value={dayjs.tz(searchParams.currentMonth, 'Asia/Tokyo').toDate()}
+              onChange={(date) => {
+                if (date) {
+                  navigate({
+                    to: '.',
+                    search: (prev) => ({
+                      ...prev,
+                      currentMonth: dayjs(date).format('YYYY-MM'),
+                    }),
+                  })
+                }
+              }}
+              valueFormat="YYYY年MM月DD日"
+              placeholder="日付を選択"
+              maxLevel="year"
+              popoverProps={{ position: 'bottom', withinPortal: true }}
+            />
+          )}
           <SegmentedControl
             size="xs"
             value={calendarView}
@@ -389,7 +406,6 @@ function HabitsPage() {
           >
             <HabitsListMonthView
               records={recordsData.data || []}
-              selectedDate={searchParams.selectedDate}
               currentMonth={searchParams.currentMonth}
               navigate={(options) =>
                 isDesktop
@@ -405,7 +421,6 @@ function HabitsPage() {
             <HabitsListWeekView
               weekDates={weekDates}
               records={recordsData.data || []}
-              selectedDate={searchParams.selectedDate}
               navigate={(options) =>
                 isDesktop
                   ? navigate(options)
@@ -419,7 +434,7 @@ function HabitsPage() {
           >
             <DayView
               selectedDateRecords={selectedDateRecords}
-              selectedDate={searchParams.selectedDate}
+              selectedDate={currentMonth.startOf('month').format('YYYY-MM-DD')}
               habits={habitsData.data || []}
               showHabitLink={true}
               navigate={(options) =>

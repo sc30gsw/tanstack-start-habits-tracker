@@ -4,11 +4,9 @@ import type { NavigateOptions } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
-import { CalendarPresetsCombobox } from '~/features/habits/components/calendar/calendar-presets-combobox'
 import { HabitsListCalendarDateCell } from '~/features/habits/components/calendar/habits-list-calendar-date-cell'
 import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import type { RecordEntity } from '~/features/habits/types/habit'
-import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { WEEK_DAYS } from '~/features/habits/utils/calendar-utils'
 
 dayjs.extend(utc)
@@ -18,42 +16,34 @@ dayjs.tz.setDefault('Asia/Tokyo')
 type HabitsListWeekViewProps = {
   weekDates: dayjs.Dayjs[]
   records: RecordEntity[]
-  selectedDate: SearchParams['selectedDate']
   navigate: (options: NavigateOptions) => void
 }
 
-export function HabitsListWeekView({
-  weekDates,
-  records,
-  selectedDate,
-  navigate,
-}: HabitsListWeekViewProps) {
-  const currentDate = selectedDate ? dayjs(selectedDate) : dayjs()
+export function HabitsListWeekView({ weekDates, records, navigate }: HabitsListWeekViewProps) {
+  const currentDate = weekDates[0] || dayjs()
   const startOfWeek = currentDate.startOf('week')
   const endOfWeek = currentDate.endOf('week')
   const weekRange = `${startOfWeek.format('YYYY/MM/DD')} - ${endOfWeek.format('MM/DD')}`
 
   const handlePrevWeek = () => {
-    const newDate = currentDate.subtract(1, 'week')
+    const newMonth = currentDate.subtract(1, 'week')
 
     navigate({
       search: (prev) => ({
         ...prev,
-        selectedDate: newDate.format('YYYY-MM-DD'),
-        preset: undefined,
+        currentMonth: newMonth.format('YYYY-MM'),
       }),
       hash: CALENDAR_VIEW_HASH_TARGET,
     })
   }
 
   const handleNextWeek = () => {
-    const newDate = currentDate.add(1, 'week')
+    const newMonth = currentDate.add(1, 'week')
 
     navigate({
       search: (prev) => ({
         ...prev,
-        selectedDate: newDate.format('YYYY-MM-DD'),
-        preset: undefined,
+        currentMonth: newMonth.format('YYYY-MM'),
       }),
       hash: CALENDAR_VIEW_HASH_TARGET,
     })
@@ -61,8 +51,6 @@ export function HabitsListWeekView({
 
   return (
     <Stack gap={16}>
-      <CalendarPresetsCombobox selectedDate={selectedDate} navigate={navigate} />
-
       <Text size="xs" c="dimmed" ta="center">
         ※ カレンダーには完了済みの習慣のみ表示されます
       </Text>
@@ -102,7 +90,7 @@ export function HabitsListWeekView({
             records={records}
             variant="week"
             showWeekday={false}
-            selectedDate={selectedDate}
+            selectedDate={undefined}
             navigate={navigate}
           />
         ))}

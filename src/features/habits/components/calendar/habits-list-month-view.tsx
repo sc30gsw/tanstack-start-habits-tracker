@@ -1,5 +1,4 @@
-import { ActionIcon, Center, Group, Stack, Text } from '@mantine/core'
-import { DateInput } from '@mantine/dates'
+import { ActionIcon, Group, Stack, Text } from '@mantine/core'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import type { NavigateOptions } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -42,49 +41,26 @@ function createWeekGroups(dates: readonly dayjs.Dayjs[]) {
 
 type HabitsListMonthViewProps = {
   records: RecordEntity[]
-  selectedDate: SearchParams['selectedDate']
   currentMonth: SearchParams['currentMonth']
   navigate: (options: NavigateOptions) => void
 }
 
 export function HabitsListMonthView({
   records,
-  selectedDate,
   currentMonth: currentMonthString,
   navigate,
 }: HabitsListMonthViewProps) {
-  const currentMonth = dayjs
-    .tz(currentMonthString || dayjs(selectedDate).format('YYYY-MM'), 'Asia/Tokyo')
-    .isValid()
-    ? dayjs
-        .tz(currentMonthString || dayjs(selectedDate).format('YYYY-MM'), 'Asia/Tokyo')
-        .startOf('month')
-    : dayjs(selectedDate).startOf('month')
+  const currentMonth = dayjs.tz(currentMonthString || dayjs().format('YYYY-MM'), 'Asia/Tokyo').isValid()
+    ? dayjs.tz(currentMonthString || dayjs().format('YYYY-MM'), 'Asia/Tokyo').startOf('month')
+    : dayjs().tz('Asia/Tokyo').startOf('month')
   const monthDates = generateMonthDates(currentMonth)
   const weeks = createWeekGroups(monthDates)
 
   return (
     <Stack gap={16}>
-      <Center>
-        <DateInput
-          size="sm"
-          value={currentMonth.toDate()}
-          onChange={(date) => {
-            if (date) {
-              navigate({
-                search: (prev) => ({
-                  ...prev,
-                  currentMonth: dayjs(date).format('YYYY-MM'),
-                }),
-              })
-            }
-          }}
-          valueFormat="YYYY年MM月DD日"
-          placeholder="日付を選択"
-          maxLevel="year"
-          popoverProps={{ position: 'bottom', withinPortal: true }}
-        />
-      </Center>
+      <Text size="xs" c="dimmed" ta="center">
+        ※ カレンダーには完了済みの習慣のみ表示されます
+      </Text>
 
       <Group justify="space-between" mb={4}>
         <ActionIcon
@@ -146,7 +122,7 @@ export function HabitsListMonthView({
                 records={records}
                 isCurrentMonth={currentDate.month() === currentMonth.month()}
                 variant="month"
-                selectedDate={selectedDate}
+                selectedDate={undefined}
                 navigate={navigate}
               />
             ))}
