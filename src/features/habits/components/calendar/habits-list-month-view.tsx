@@ -55,7 +55,9 @@ export function HabitsListMonthView({
   const currentMonth = dayjs
     .tz(currentMonthString || dayjs(selectedDate).format('YYYY-MM'), 'Asia/Tokyo')
     .isValid()
-    ? dayjs.tz(currentMonthString || dayjs(selectedDate).format('YYYY-MM'), 'Asia/Tokyo').startOf('month')
+    ? dayjs
+        .tz(currentMonthString || dayjs(selectedDate).format('YYYY-MM'), 'Asia/Tokyo')
+        .startOf('month')
     : dayjs().tz('Asia/Tokyo').startOf('month')
   const monthDates = generateMonthDates(currentMonth)
   const weeks = createWeekGroups(monthDates)

@@ -312,7 +312,13 @@ function HabitsPage() {
       maxDailyDuration: aggregated.maxDailyDuration,
       maxDailyDate: aggregated.maxDailyDate,
     }
-  }, [recordsData.data, habitsData.data, searchParams.calendarView, searchParams.selectedDate, searchParams.currentMonth])
+  }, [
+    recordsData.data,
+    habitsData.data,
+    searchParams.calendarView,
+    searchParams.selectedDate,
+    searchParams.currentMonth,
+  ])
 
   if (!isList) {
     return <Outlet />

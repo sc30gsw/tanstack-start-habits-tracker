@@ -21,7 +21,12 @@ type HabitsListWeekViewProps = {
   navigate: (options: NavigateOptions) => void
 }
 
-export function HabitsListWeekView({ weekDates, records, selectedDate, navigate }: HabitsListWeekViewProps) {
+export function HabitsListWeekView({
+  weekDates,
+  records,
+  selectedDate,
+  navigate,
+}: HabitsListWeekViewProps) {
   const currentDate = weekDates[0] || dayjs()
   const startOfWeek = currentDate.startOf('week')
   const endOfWeek = currentDate.endOf('week')

@@ -1,4 +1,12 @@
-import { Card, Center, Group, SegmentedControl, Stack, Text, useComputedColorScheme } from '@mantine/core'
+import {
+  Card,
+  Center,
+  Group,
+  SegmentedControl,
+  Stack,
+  Text,
+  useComputedColorScheme,
+} from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { IconCalendar } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
