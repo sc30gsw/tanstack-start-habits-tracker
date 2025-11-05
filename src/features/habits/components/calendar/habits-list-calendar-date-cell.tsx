@@ -84,9 +84,9 @@ export function HabitsListCalendarDateCell({
   const getTooltipContent = () => {
     // 完了した習慣のみを表示
     const completedDayRecords = records.filter(
-      (r) => r.date === dateString && r.status === 'completed'
+      (r) => r.date === dateString && r.status === 'completed',
     )
-    
+
     if (completedDayRecords.length === 0) {
       return '完了した習慣はありません'
     }
@@ -203,81 +203,81 @@ export function HabitsListCalendarDateCell({
           color: textColor,
           border: `${borderWidth} solid ${borderColor}`,
           boxShadow: isSelected ? '0 0 0 1px var(--mantine-color-blue-6)' : undefined,
-        minHeight: '80px',
-      }}
-      onClick={() => {
-        navigate({
-          search: (prev) => ({
-            ...prev,
-            selectedDate: date.format('YYYY-MM-DD'),
-          }),
-          hash: CALENDAR_VIEW_HASH_TARGET,
-        })
-      }}
-    >
-      <Stack gap={2} align="stretch">
-        {showWeekday && (
-          <Text
-            size="xs"
-            c={
-              isSelected
-                ? 'white'
-                : dateType === 'sunday'
-                  ? 'red.7'
-                  : dateType === 'saturday'
-                    ? 'blue.7'
-                    : 'dimmed'
-            }
-          >
-            {date.format('dd')}
-          </Text>
-        )}
-        <Text fw={500}>{date.date()}</Text>
-        {completedRecords.length > 0 && (
-          <Stack gap={1} mt={4}>
-            {completedRecords.slice(0, 3).map((record) => (
-              <Flex
-                key={record.id}
-                gap={4}
-                align="center"
-                style={{
-                  overflow: 'hidden',
-                }}
-              >
-                <Box
-                  w={3}
-                  h={14}
-                  style={{
-                    backgroundColor: `var(--mantine-color-${record.habit?.color ?? 'blue'}-6)`,
-                    borderRadius: '2px',
-                    flexShrink: 0,
-                  }}
-                />
-                <Text
-                  size="9px"
-                  ta="left"
-                  c={isSelected ? 'white' : undefined}
+          minHeight: '80px',
+        }}
+        onClick={() => {
+          navigate({
+            search: (prev) => ({
+              ...prev,
+              selectedDate: date.format('YYYY-MM-DD'),
+            }),
+            hash: CALENDAR_VIEW_HASH_TARGET,
+          })
+        }}
+      >
+        <Stack gap={2} align="stretch">
+          {showWeekday && (
+            <Text
+              size="xs"
+              c={
+                isSelected
+                  ? 'white'
+                  : dateType === 'sunday'
+                    ? 'red.7'
+                    : dateType === 'saturday'
+                      ? 'blue.7'
+                      : 'dimmed'
+              }
+            >
+              {date.format('dd')}
+            </Text>
+          )}
+          <Text fw={500}>{date.date()}</Text>
+          {completedRecords.length > 0 && (
+            <Stack gap={1} mt={4}>
+              {completedRecords.slice(0, 3).map((record) => (
+                <Flex
+                  key={record.id}
+                  gap={4}
+                  align="center"
                   style={{
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    flex: 1,
                   }}
-                  title={record.habit?.name}
                 >
-                  {record.habit?.name}
+                  <Box
+                    w={3}
+                    h={14}
+                    style={{
+                      backgroundColor: `var(--mantine-color-${record.habit?.color ?? 'blue'}-6)`,
+                      borderRadius: '2px',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Text
+                    size="9px"
+                    ta="left"
+                    c={isSelected ? 'white' : undefined}
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      flex: 1,
+                    }}
+                    title={record.habit?.name}
+                  >
+                    {record.habit?.name}
+                  </Text>
+                </Flex>
+              ))}
+              {completedRecords.length > 3 && (
+                <Text size="8px" c={isSelected ? 'white' : 'dimmed'} ta="center">
+                  +{completedRecords.length - 3}件
                 </Text>
-              </Flex>
-            ))}
-            {completedRecords.length > 3 && (
-              <Text size="8px" c={isSelected ? 'white' : 'dimmed'} ta="center">
-                +{completedRecords.length - 3}件
-              </Text>
-            )}
-          </Stack>
-        )}
-      </Stack>
-    </Card>
+              )}
+            </Stack>
+          )}
+        </Stack>
+      </Card>
     </Tooltip>
   )
 }

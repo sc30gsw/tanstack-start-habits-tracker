@@ -101,7 +101,9 @@ export function TimeUsagePieChart({
           </Text>
           {dateRange && (
             <Text size="xs" c="blue.6" fw={500}>
-              ※ 統計情報は{period === 'month' ? '月' : period === 'week' ? '週' : '日'}単位で集計されています（{dayjs(dateRange.from).format('M/D')}〜{dayjs(dateRange.to).format('M/D')}）
+              ※ 統計情報は{period === 'month' ? '月' : period === 'week' ? '週' : '日'}
+              単位で集計されています（{dayjs(dateRange.from).format('M/D')}〜
+              {dayjs(dateRange.to).format('M/D')}）
             </Text>
           )}
         </Stack>

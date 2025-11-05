@@ -64,6 +64,57 @@ function mapToPieChartColor(habitColor: string | null | undefined) {
   return 'gray'
 }
 
+// カレンダー表示用のデータ範囲を取得（グリッド全体をカバー）
+export function getCalendarDataRange(
+  calendarView: SearchParams['calendarView'] = 'month',
+  currentMonth?: SearchParams['currentMonth'],
+  selectedDate?: SearchParams['selectedDate'],
+) {
+  switch (calendarView) {
+    case 'month': {
+      // 月ビュー: 42マス分（前月末日〜翌月初日を含む）
+      const baseDate = currentMonth
+        ? dayjs.tz(currentMonth, 'Asia/Tokyo')
+        : selectedDate
+          ? dayjs.tz(selectedDate, 'Asia/Tokyo')
+          : dayjs().tz('Asia/Tokyo')
+
+      const monthStart = baseDate.startOf('month')
+      const leadingDays = monthStart.day() // 月初の曜日（0=日曜）
+
+      return {
+        from: monthStart.subtract(leadingDays, 'day').format('YYYY-MM-DD'),
+        to: monthStart.add(41 - leadingDays, 'day').format('YYYY-MM-DD'),
+      }
+    }
+
+    case 'week': {
+      // 週ビュー: 7日分（日曜〜土曜）
+      const baseDate = selectedDate
+        ? dayjs.tz(selectedDate, 'Asia/Tokyo')
+        : dayjs().tz('Asia/Tokyo')
+
+      return {
+        from: baseDate.startOf('week').format('YYYY-MM-DD'),
+        to: baseDate.endOf('week').format('YYYY-MM-DD'),
+      }
+    }
+
+    case 'day': {
+      // 日ビュー: 1日分
+      const baseDate = selectedDate
+        ? dayjs.tz(selectedDate, 'Asia/Tokyo')
+        : dayjs().tz('Asia/Tokyo')
+
+      return {
+        from: baseDate.format('YYYY-MM-DD'),
+        to: baseDate.format('YYYY-MM-DD'),
+      }
+    }
+  }
+}
+
+// 統計情報用の期間を取得（実際の月/週/日）
 export function getPeriodDateRange(
   calendarView: SearchParams['calendarView'] = 'month',
   selectedDate?: SearchParams['selectedDate'],
@@ -99,9 +150,10 @@ export function aggregateTimeByHabit(
   currentMonth?: string,
 ) {
   // monthの場合はcurrentMonthを優先、それ以外はselectedDateを使用
-  const dateForRange = calendarView === 'month' && currentMonth
-    ? dayjs(currentMonth).format('YYYY-MM-DD')
-    : selectedDate
+  const dateForRange =
+    calendarView === 'month' && currentMonth
+      ? dayjs(currentMonth).format('YYYY-MM-DD')
+      : selectedDate
 
   const dateRange = getPeriodDateRange(calendarView, dateForRange)
 

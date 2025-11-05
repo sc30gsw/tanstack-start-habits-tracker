@@ -11,6 +11,7 @@ import {
 } from '@mantine/core'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import dayjs from 'dayjs'
 import { eq } from 'drizzle-orm'
 import { db } from '~/db'
 import { habitLevels } from '~/db/schema'
@@ -24,12 +25,25 @@ import { calculateLevelInfo } from '~/features/habits/utils/habit-level-utils'
 export const Route = createFileRoute('/habits/$habitId')({
   component: HabitDetailPage,
   validateSearch: searchSchema,
-  beforeLoad: async ({ search }) => {
-    return { search }
+  loaderDeps: ({ search }) => {
+    // calendarViewに応じて適切なページネーションパラメータを使用
+    const pageParam =
+      search.calendarView === 'month'
+        ? search.currentMonth || dayjs().format('YYYY-MM')
+        : search.selectedDate || dayjs().format('YYYY-MM-DD')
+
+    return {
+      calendarView: search.calendarView,
+      pageParam,
+    }
   },
-  loader: async ({ params, context }) => {
+  loader: async ({ params, context, deps }) => {
     // ヒートマップ(今日から1年分) + カレンダーグリッド(42日分)の範囲を取得
-    const { dateFrom, dateTo } = getDataFetchDateRange(context.search.currentMonth)
+    // monthビューの場合はcurrentMonth、それ以外はselectedDateを基準にする
+    const dateForRange =
+      deps.calendarView === 'month' ? deps.pageParam : deps.pageParam
+
+    const { dateFrom, dateTo } = getDataFetchDateRange(dateForRange)
 
     const [habitResult, recordsResult, habitsResult, habitLevelData] = await Promise.all([
       habitDto.getHabitById({ data: { id: params.habitId } }),

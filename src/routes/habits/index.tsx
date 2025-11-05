@@ -32,7 +32,7 @@ import type { SearchParams } from '~/features/habits/types/schemas/search-params
 import { getValidatedDate, searchSchema } from '~/features/habits/types/schemas/search-params'
 import {
   aggregateTimeByHabit,
-  getPeriodDateRange,
+  getCalendarDataRange,
   sortForListPage,
 } from '~/features/habits/utils/pie-chart-utils'
 import { HabitOrganizer } from '~/features/home/components/habit-organizer'
@@ -60,27 +60,39 @@ export const Route = createFileRoute('/habits/')({
         .default(false)
         .catch(() => false),
     }),
-  loader: async ({ context }) => {
+  loaderDeps: ({ search }) => {
+    const pageParam =
+      search.calendarView === 'month'
+        ? search.currentMonth || dayjs().format('YYYY-MM')
+        : search.selectedDate || dayjs().format('YYYY-MM-DD')
+
+    return {
+      calendarView: search.calendarView,
+      pageParam,
+      q: search.q,
+      habitSort: search.habitSort,
+      habitFilter: search.habitFilter,
+    }
+  },
+  loader: async ({ deps }) => {
     const habitsResult = await habitDto.getHabits({
       data: {
-        q: context.search.q || '',
-        habitSort: context.search.habitSort || 'all',
-        habitFilter: context.search.habitFilter || 'all',
+        q: deps.q || '',
+        habitSort: deps.habitSort || 'all',
+        habitFilter: deps.habitFilter || 'all',
       },
     })
 
-    // calendarViewに応じた期間を取得
-    // monthの場合はcurrentMonthを使用、それ以外はselectedDateを使用
-    const dateForRange = context.search.calendarView === 'month' && context.search.currentMonth
-      ? dayjs(context.search.currentMonth).format('YYYY-MM-DD')
-      : context.search.selectedDate
-
-    const dateRange = getPeriodDateRange(context.search.calendarView, dateForRange)
+    const dataRange = getCalendarDataRange(
+      deps.calendarView,
+      deps.calendarView === 'month' ? deps.pageParam : undefined,
+      deps.calendarView !== 'month' ? deps.pageParam : undefined,
+    )
 
     const recordsResult = await recordDto.getRecords({
       data: {
-        date_from: dateRange.from,
-        date_to: dateRange.to,
+        date_from: dataRange.from,
+        date_to: dataRange.to,
       },
     })
 
@@ -146,7 +158,13 @@ function HabitsPage() {
       period: aggregated.period,
       dateRange: aggregated.dateRange,
     }
-  }, [recordsData.data, habitsData.data, searchParams.calendarView, searchParams.selectedDate, searchParams.currentMonth])
+  }, [
+    recordsData.data,
+    habitsData.data,
+    searchParams.calendarView,
+    searchParams.selectedDate,
+    searchParams.currentMonth,
+  ])
 
   if (!isList) {
     return <Outlet />
