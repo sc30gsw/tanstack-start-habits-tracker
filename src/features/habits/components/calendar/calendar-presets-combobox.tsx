@@ -114,6 +114,7 @@ export function CalendarPresetsCombobox({ selectedDate, navigate }: CalendarPres
           selectedDate: value,
           currentMonth: dayjs(value).format('YYYY-MM'),
           preset: value,
+          showRecordForm: false,
         }),
         hash: CALENDAR_VIEW_HASH_TARGET,
       })

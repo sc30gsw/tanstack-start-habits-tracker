@@ -52,6 +52,10 @@ export const createRecordSchema = z
       .optional()
       .nullable()
       .transform((val) => val?.trim() || null),
+    isRecoveryAttempt: z.boolean().default(false).optional(),
+    recoverySuccess: z.boolean().optional().nullable(),
+    originalSkippedRecordId: z.string().optional().nullable(),
+    recoveryAttemptedAt: z.string().optional().nullable(),
   })
   .refine(
     (data) => {
@@ -125,6 +129,19 @@ export const createRecordSchema = z
       path: ['recoveryDate'],
     },
   )
+  .refine(
+    (data) => {
+      if (data.recoverySuccess === true && data.status !== 'completed') {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー成功にするには、ステータスを「完了」にしてください',
+      path: ['recoverySuccess'],
+    },
+  )
 
 export const updateRecordSchema = z
   .object({
@@ -152,6 +169,10 @@ export const updateRecordSchema = z
       .optional()
       .nullable()
       .transform((val) => val?.trim() || null),
+    isRecoveryAttempt: z.boolean().optional(),
+    recoverySuccess: z.boolean().optional().nullable(),
+    originalSkippedRecordId: z.string().optional().nullable(),
+    recoveryAttemptedAt: z.string().optional().nullable(),
   })
   .refine(
     (data) => {
@@ -227,6 +248,19 @@ export const updateRecordSchema = z
     {
       message: 'リカバリー日は元の日付から30日以内で指定してください',
       path: ['recoveryDate'],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.recoverySuccess === true && data.status !== 'completed') {
+        return false
+      }
+
+      return true
+    },
+    {
+      message: 'リカバリー成功にするには、ステータスを「完了」にしてください',
+      path: ['recoverySuccess'],
     },
   )
 

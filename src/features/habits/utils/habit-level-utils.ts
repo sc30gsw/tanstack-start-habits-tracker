@@ -11,7 +11,10 @@ import { COMPLETION_TITLES, HOURS_TITLES } from '~/features/habits/constants/lev
 import type { HabitLevelInfo, HabitLevelTable, RecordTable } from '~/features/habits/types/habit'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 
-type RecordData = Pick<RecordTable, 'date' | 'status' | 'recoveryDate'>
+type RecordData = Pick<
+  RecordTable,
+  'date' | 'status' | 'recoveryDate' | 'isRecoveryAttempt' | 'recoverySuccess'
+>
 
 type RecordWithDuration = RecordData & Record<'duration_minutes', number | null>
 
@@ -204,7 +207,7 @@ export function calculateProgressPercent(current: number, next: number) {
   return Math.min(PROGRESS_BAR.MAX, Math.round((current / next) * PROGRESS_BAR.MAX))
 }
 
-function getUniqueSortedDates(dates: string[]) {
+function getUniqueSortedDates(dates: readonly string[]) {
   return [...new Set(dates)].sort()
 }
 
@@ -278,7 +281,7 @@ function calculateLongestStreak(uniqueDates: string[]) {
   return longest
 }
 
-export function calculateStreak(dates: string[]) {
+export function calculateStreak(dates: readonly string[]) {
   if (dates.length === STREAK_CONSTANTS.MIN_VALUE) {
     return {
       currentStreak: STREAK_CONSTANTS.MIN_VALUE,
@@ -332,6 +335,7 @@ function getInactiveStreakMessage(daysSinceLastActivity: number | null, previous
     if (previousStreak > STREAK_CONSTANTS.MIN_VALUE) {
       return `⚡ 昨日まで${previousStreak}日間継続していました。今日も実行してストリークを伸ばしましょう！`
     }
+
     return '💪 昨日実行しました。今日も続けてストリークを作りましょう！'
   }
 
@@ -339,6 +343,7 @@ function getInactiveStreakMessage(daysSinceLastActivity: number | null, previous
     if (previousStreak > STREAK_CONSTANTS.MIN_VALUE) {
       return `💪 ${daysSinceLastActivity}日前まで${previousStreak}日間継続していました。今日から再開しましょう！`
     }
+
     return `🌟 ${daysSinceLastActivity}日前に実行しました。今日から再開しましょう！`
   }
 
@@ -361,7 +366,7 @@ export function generateMotivationMessage(
   return getInactiveStreakMessage(daysSinceLastActivity, previousStreak)
 }
 
-export function calculateStreakAtDate(dates: string[], targetDate: string) {
+export function calculateStreakAtDate(dates: readonly string[], targetDate: string) {
   if (dates.length === STREAK_CONSTANTS.MIN_VALUE) {
     return STREAK_CONSTANTS.MIN_VALUE
   }
@@ -399,22 +404,22 @@ export function getLevelTitle(level: number, type: 'completion' | 'hours') {
 }
 
 export function calculateHabitStats(records: Array<RecordWithDuration>) {
-  const completedRecords = records.filter((r) => r.status === 'completed')
-  const completedDates = new Set(completedRecords.map((r) => r.date))
-
-  const skippedWithRecovery = records.filter(
-    (r) => r.status === 'skipped' && r.recoveryDate !== null && r.recoveryDate !== undefined,
+  const regularCompletedRecords = records.filter(
+    (r) => r.status === 'completed' && !r.isRecoveryAttempt,
   )
 
-  const recoveredDates = skippedWithRecovery
-    .filter((skip) => completedDates.has(skip.recoveryDate!))
-    .map((skip) => skip.date)
+  const successfulRecoveryAttempts = records.filter(
+    (r) => r.isRecoveryAttempt === true && r.recoverySuccess === true,
+  )
 
-  const allValidDates = [...completedRecords.map((r) => r.date), ...recoveredDates]
+  const allValidDates = [
+    ...regularCompletedRecords.map((r) => r.date),
+    ...successfulRecoveryAttempts.map((r) => r.date),
+  ] as const satisfies readonly string[]
 
   const uniqueDays = new Set(allValidDates).size
 
-  const totalMinutes = completedRecords.reduce(
+  const totalMinutes = [...regularCompletedRecords, ...successfulRecoveryAttempts].reduce(
     (sum, r) => sum + (r.duration_minutes ?? STREAK_CONSTANTS.MIN_VALUE),
     STREAK_CONSTANTS.MIN_VALUE as number,
   )
@@ -422,7 +427,7 @@ export function calculateHabitStats(records: Array<RecordWithDuration>) {
 
   const { currentStreak, longestStreak } = calculateStreak(allValidDates)
 
-  const dates = allValidDates.sort()
+  const dates = (allValidDates as string[]).sort()
   const lastDate = dates[dates.length - STREAK_CONSTANTS.LAST_INDEX_OFFSET] ?? null
 
   return {
@@ -447,17 +452,18 @@ export function calculateLevelInfo(
   const nextCompletionDays = calculateNextLevelRequirement(levelData.completionLevel, 'completion')
   const nextHoursRequirement = calculateNextLevelRequirement(levelData.hoursLevel, 'hours')
 
-  const completedRecords = records.filter((r) => r.status === 'completed')
-  const completedDates = new Set(completedRecords.map((r) => r.date))
-
-  const skippedWithRecovery = records.filter(
-    (r) => r.status === 'skipped' && r.recoveryDate !== null && r.recoveryDate !== undefined,
+  const regularCompletedRecords = records.filter(
+    (r) => r.status === 'completed' && !r.isRecoveryAttempt,
   )
-  const recoveredDates = skippedWithRecovery
-    .filter((skip) => completedDates.has(skip.recoveryDate!))
-    .map((skip) => skip.date)
 
-  const allValidDates = [...completedRecords.map((r) => r.date), ...recoveredDates]
+  const successfulRecoveryAttempts = records.filter(
+    (r) => r.isRecoveryAttempt === true && r.recoverySuccess === true,
+  )
+
+  const allValidDates = [
+    ...regularCompletedRecords.map((r) => r.date),
+    ...successfulRecoveryAttempts.map((r) => r.date),
+  ] as const satisfies readonly string[]
 
   const streakDetails = calculateStreak(allValidDates)
   const motivationMessage = generateMotivationMessage(

@@ -33,13 +33,22 @@ export const records = sqliteTable(
     duration_minutes: integer().default(0),
     notes: text(),
     recoveryDate: text('recovery_date'),
+    isRecoveryAttempt: integer('is_recovery_attempt', { mode: 'boolean' }).default(false).notNull(),
+    recoverySuccess: integer('recovery_success', { mode: 'boolean' }),
+    originalSkippedRecordId: text('original_skipped_record_id'),
+    recoveryAttemptedAt: text('recovery_attempted_at'),
     createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
   },
-  (table) => [unique().on(table.habitId, table.date), index('records_userId').on(table.userId)],
+  (table) => [
+    unique().on(table.habitId, table.date),
+    index('records_userId').on(table.userId),
+    index('records_recovery_attempt').on(table.habitId, table.isRecoveryAttempt),
+    index('records_habit_date').on(table.habitId, table.date),
+  ],
 )
 
 export const users = sqliteTable('users', {
@@ -135,7 +144,7 @@ export const settings = sqliteTable('settings', {
   theme: text().default('auto'),
   notificationsEnabled: integer('notifications_enabled', { mode: 'boolean' }).default(false),
   customReminderEnabled: integer('custom_reminder_enabled', { mode: 'boolean' }).default(false),
-  dailyReminderTime: text('daily_reminder_time').default('09:00'), // HH:mm format
+  dailyReminderTime: text('daily_reminder_time').default('09:00'),
   incompleteReminderEnabled: integer('incomplete_reminder_enabled', { mode: 'boolean' }).default(
     true,
   ),
@@ -196,7 +205,7 @@ export const habitLevels = sqliteTable(
     id: text().primaryKey(),
     habitId: text('habit_id')
       .notNull()
-      .unique() // 1 habit = 1 level record
+      .unique()
       .references(() => habits.id, { onDelete: 'cascade' }),
     uniqueCompletionDays: integer('unique_completion_days').default(0).notNull(),
     completionLevel: integer('completion_level').default(1).notNull(),
@@ -245,6 +254,10 @@ export const recordsRelations = relations(records, ({ one }) => ({
   user: one(users, {
     fields: [records.userId],
     references: [users.id],
+  }),
+  originalSkippedRecord: one(records, {
+    fields: [records.originalSkippedRecordId],
+    references: [records.id],
   }),
 }))
 

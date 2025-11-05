@@ -29,6 +29,8 @@ import utc from 'dayjs/plugin/utc'
 import { useEffect } from 'react'
 import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
 import { RichTextPreview } from '~/components/ui/rich-text-editor/rich-text-preview'
+import { RecoverySwitch } from '~/features/habits/components/form/recover-switch'
+import { RecoverySwitchWrapper } from '~/features/habits/components/form/recovery-switch-wrapper'
 import {
   type FormValues,
   isEmptyContent,
@@ -109,13 +111,15 @@ export function RecordForm({
         {(form.errors.status ||
           form.errors.durationMinutes ||
           form.errors.notes ||
-          form.errors.recoveryDate) && (
+          form.errors.recoveryDate ||
+          form.errors.recoverySuccess) && (
           <Alert color="red" title="エラー" icon={<IconAlertTriangle stroke={2} />}>
             <Text c="red">
               {form.errors.status ||
                 form.errors.durationMinutes ||
                 form.errors.notes ||
-                form.errors.recoveryDate}
+                form.errors.recoveryDate ||
+                form.errors.recoverySuccess}
             </Text>
           </Alert>
         )}
@@ -153,6 +157,15 @@ export function RecordForm({
             </Group>
           )}
         />
+        {existingRecord?.isRecoveryAttempt && (
+          <RecoverySwitchWrapper>
+            <RecoverySwitch
+              value={form.values.recoverySuccess}
+              onChange={(value) => form.setFieldValue('recoverySuccess', value)}
+              disabled={isPending}
+            />
+          </RecoverySwitchWrapper>
+        )}
         {form.values.status !== 'skipped' && (
           <Group gap="md">
             <NumberInput
