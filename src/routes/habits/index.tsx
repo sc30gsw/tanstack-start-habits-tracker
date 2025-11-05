@@ -61,20 +61,14 @@ export const Route = createFileRoute('/habits/')({
         .default(false)
         .catch(() => false),
     }),
-  loaderDeps: ({ search }) => {
-    const pageParam =
-      search.calendarView === 'month'
-        ? search.currentMonth || dayjs().format('YYYY-MM')
-        : search.selectedDate || dayjs().format('YYYY-MM-DD')
-
-    return {
-      calendarView: search.calendarView,
-      pageParam,
-      q: search.q,
-      habitSort: search.habitSort,
-      habitFilter: search.habitFilter,
-    }
-  },
+  loaderDeps: ({ search }) => ({
+    calendarView: search.calendarView || 'month',
+    currentMonth: search.currentMonth,
+    selectedDate: search.selectedDate,
+    q: search.q,
+    habitSort: search.habitSort,
+    habitFilter: search.habitFilter,
+  }),
   loader: async ({ deps }) => {
     const habitsResult = await habitDto.getHabits({
       data: {
@@ -84,11 +78,7 @@ export const Route = createFileRoute('/habits/')({
       },
     })
 
-    const dataRange = getCalendarDataRange(
-      deps.calendarView,
-      deps.calendarView === 'month' ? deps.pageParam : undefined,
-      deps.calendarView !== 'month' ? deps.pageParam : undefined,
-    )
+    const dataRange = getCalendarDataRange(deps.calendarView, deps.currentMonth, deps.selectedDate)
 
     const recordsResult = await recordDto.getRecords({
       data: {

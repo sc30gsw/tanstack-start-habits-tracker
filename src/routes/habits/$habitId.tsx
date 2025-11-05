@@ -30,21 +30,17 @@ import { calculateLevelInfo } from '~/features/habits/utils/habit-level-utils'
 export const Route = createFileRoute('/habits/$habitId')({
   component: HabitDetailPage,
   validateSearch: searchSchema,
-  loaderDeps: ({ search }) => {
-    const pageParam =
-      search.calendarView === 'month'
-        ? search.currentMonth || dayjs().format('YYYY-MM')
-        : search.selectedDate || dayjs().format('YYYY-MM-DD')
-
-    return {
-      calendarView: search.calendarView,
-      pageParam,
-    }
-  },
+  loaderDeps: ({ search }) => ({
+    calendarView: search.calendarView || 'month',
+    currentMonth: search.currentMonth,
+    selectedDate: search.selectedDate,
+  }),
   loader: async ({ params, context, deps }) => {
     // ヒートマップ(今日から1年分) + カレンダーグリッド(42日分)の範囲を取得
-    // monthビューの場合はcurrentMonth、それ以外はselectedDateを基準にする
-    const dateForRange = deps.calendarView === 'month' ? deps.pageParam : deps.pageParam
+    const dateForRange =
+      deps.calendarView === 'month'
+        ? deps.currentMonth || dayjs().format('YYYY-MM')
+        : deps.selectedDate || dayjs().format('YYYY-MM-DD')
 
     const { dateFrom, dateTo } = getDataFetchDateRange(dateForRange)
 
