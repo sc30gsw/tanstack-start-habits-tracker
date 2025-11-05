@@ -245,6 +245,7 @@ export function CalendarDateCell({
               search: (prev) => ({
                 ...prev,
                 selectedDate: date.format('YYYY-MM-DD'),
+                currentMonth: date.format('YYYY-MM'),
                 showRecordForm: false,
               }),
             })
@@ -357,6 +358,7 @@ export function CalendarDateCell({
             search: (prev) => ({
               ...prev,
               selectedDate: date.format('YYYY-MM-DD'),
+              currentMonth: date.format('YYYY-MM'),
               showRecordForm: false,
             }),
             hash: CALENDAR_VIEW_HASH_TARGET,

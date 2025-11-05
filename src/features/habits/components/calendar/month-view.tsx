@@ -71,10 +71,12 @@ export function MonthView({
           variant="subtle"
           aria-label="前月"
           onClick={() => {
+            const newMonth = currentMonth.subtract(1, 'month')
             navigate({
               search: (prev) => ({
                 ...prev,
-                currentMonth: currentMonth.subtract(1, 'month').format('YYYY-MM'),
+                selectedDate: newMonth.startOf('month').format('YYYY-MM-DD'),
+                currentMonth: newMonth.format('YYYY-MM'),
                 preset: undefined,
               }),
             })
@@ -87,10 +89,12 @@ export function MonthView({
           variant="subtle"
           aria-label="翌月"
           onClick={() => {
+            const newMonth = currentMonth.add(1, 'month')
             navigate({
               search: (prev) => ({
                 ...prev,
-                currentMonth: currentMonth.add(1, 'month').format('YYYY-MM'),
+                selectedDate: newMonth.startOf('month').format('YYYY-MM-DD'),
+                currentMonth: newMonth.format('YYYY-MM'),
                 preset: undefined,
               }),
             })

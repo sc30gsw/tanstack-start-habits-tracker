@@ -1,4 +1,13 @@
-import { Card, Group, SegmentedControl, Stack, Text, useComputedColorScheme } from '@mantine/core'
+import {
+  Card,
+  Center,
+  Group,
+  SegmentedControl,
+  Stack,
+  Text,
+  useComputedColorScheme,
+} from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { IconCalendar } from '@tabler/icons-react'
 import type { NavigateOptions } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -33,6 +42,15 @@ export function CalendarView({
   navigate,
   habits = [],
 }: CalendarViewProps) {
+  // DateInputの値を決定（selectedDateが最優先、なければcurrentMonth、なければ今日）
+  const dateValue = selectedDate
+    ? dayjs.tz(selectedDate, 'Asia/Tokyo')
+    : currentMonth
+      ? dayjs.tz(currentMonth, 'Asia/Tokyo').startOf('month')
+      : dayjs().tz('Asia/Tokyo')
+
+  const dateInputValue = dateValue.toDate()
+
   const startOfWeek = selectedDate
     ? dayjs(selectedDate).tz('Asia/Tokyo').startOf('week')
     : dayjs().tz('Asia/Tokyo').startOf('week')
@@ -60,6 +78,27 @@ export function CalendarView({
               カレンダー
             </Text>
           </Group>
+          <Center>
+            <DateInput
+              size="sm"
+              value={dateInputValue}
+              onChange={(date) => {
+                if (date) {
+                  const newDate = dayjs(date)
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      selectedDate: newDate.format('YYYY-MM-DD'),
+                      currentMonth: newDate.format('YYYY-MM'),
+                    }),
+                  })
+                }
+              }}
+              valueFormat="YYYY年MM月DD日"
+              placeholder="日付を選択"
+              popoverProps={{ position: 'bottom', withinPortal: true }}
+            />
+          </Center>
           <SegmentedControl
             size="xs"
             value={calendarView}

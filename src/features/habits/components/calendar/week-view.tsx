@@ -39,6 +39,7 @@ export function WeekView({ weekDates, recordMap, selectedDate, navigate }: WeekV
       search: (prev) => ({
         ...prev,
         selectedDate: newDate.format('YYYY-MM-DD'),
+        currentMonth: newDate.format('YYYY-MM'),
         preset: undefined,
         showRecordForm: false,
       }),
@@ -53,6 +54,7 @@ export function WeekView({ weekDates, recordMap, selectedDate, navigate }: WeekV
       search: (prev) => ({
         ...prev,
         selectedDate: newDate.format('YYYY-MM-DD'),
+        currentMonth: newDate.format('YYYY-MM'),
         preset: undefined,
         showRecordForm: false,
       }),
