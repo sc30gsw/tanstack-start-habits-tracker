@@ -1,14 +1,10 @@
 import { PieChart } from '@mantine/charts'
 import { Badge, Card, Divider, Group, Paper, SimpleGrid, Stack, Text } from '@mantine/core'
-import { IconChartPie, IconClock, IconPercentage, IconTrophy } from '@tabler/icons-react'
+import { IconChartPie, IconClock, IconTrophy } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import type { PieChartDataItem } from '~/features/habits/utils/pie-chart-utils'
 import { formatDuration } from '~/features/habits/utils/time-utils'
-
-const HOURS_PER_DAY = 24
-const MINUTES_PER_HOUR = 60
-const MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR // 1440分
 
 type TimeUsagePieChartProps = {
   data: PieChartDataItem[]
@@ -26,32 +22,6 @@ export function TimeUsagePieChart({
   dateRange,
   hideChart = false,
 }: TimeUsagePieChartProps) {
-  const getTotalPeriodMinutes = () => {
-    if (!dateRange) {
-      return MINUTES_PER_DAY
-    }
-
-    const fromDate = dayjs(dateRange.from)
-    const toDate = dayjs(dateRange.to)
-
-    switch (period) {
-      case 'day':
-        return MINUTES_PER_DAY
-
-      case 'week': {
-        const days = toDate.diff(fromDate, 'day') + 1
-        return days * MINUTES_PER_DAY
-      }
-
-      default: {
-        const days = toDate.diff(fromDate, 'day') + 1
-        return days * MINUTES_PER_DAY
-      }
-    }
-  }
-
-  const totalPeriodMinutes = getTotalPeriodMinutes()
-
   const getPeriodLabel = () => {
     if (!dateRange) {
       return '時間配分'
@@ -102,21 +72,19 @@ export function TimeUsagePieChart({
   const averageDuration = totalDuration > 0 ? Math.round(totalDuration / data.length) : 0
   const maxDuration = data.length > 0 ? Math.max(...data.map((d) => d.value)) : 0
 
-  const habitPercentage = ((totalDuration / totalPeriodMinutes) * 100).toFixed(1)
-
-  const getDailyAverage = () => {
+  const getPeriodDays = () => {
     if (!dateRange) {
-      return totalDuration
+      return 1
     }
 
     const fromDate = dayjs(dateRange.from)
     const toDate = dayjs(dateRange.to)
     const days = toDate.diff(fromDate, 'day') + 1
 
-    return Math.round(totalDuration / days)
+    return days
   }
 
-  const dailyAverage = getDailyAverage()
+  const periodDays = getPeriodDays()
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
@@ -131,6 +99,11 @@ export function TimeUsagePieChart({
           <Text size="xs" c="dimmed">
             {getDescription()}
           </Text>
+          {dateRange && (
+            <Text size="xs" c="blue.6" fw={500}>
+              ※ 統計情報は{period === 'month' ? '月' : period === 'week' ? '週' : '日'}単位で集計されています（{dayjs(dateRange.from).format('M/D')}〜{dayjs(dateRange.to).format('M/D')}）
+            </Text>
+          )}
         </Stack>
 
         {!hideChart && (
@@ -209,39 +182,38 @@ export function TimeUsagePieChart({
               <Text size="sm" fw={700}>
                 {formatDuration(totalDuration)}
               </Text>
-              <Text size="xs" c="dimmed">
-                {period === 'day' ? '24時間中' : `全${Math.floor(totalPeriodMinutes / 60)}時間中`}{' '}
-                {habitPercentage}%
+              <Text size="xs" c="green.6" fw={500}>
+                {totalDuration}分を習慣に投資
               </Text>
             </Stack>
             {period !== 'day' && (
               <Stack gap={4}>
                 <Group gap={4}>
-                  <IconClock size={16} color="var(--mantine-color-blue-6)" />
+                  <IconTrophy size={16} color="var(--mantine-color-green-6)" />
                   <Text size="xs" c="dimmed" fw={500}>
-                    1日あたり平均
+                    実行日数
                   </Text>
                 </Group>
                 <Text size="sm" fw={700}>
-                  {formatDuration(dailyAverage)}
+                  {periodDays}日間
                 </Text>
-                <Text size="xs" c="dimmed">
-                  24時間中 {((dailyAverage / (24 * 60)) * 100).toFixed(1)}%
+                <Text size="xs" c="green.6" fw={500}>
+                  継続して記録中！
                 </Text>
               </Stack>
             )}
             <Stack gap={4}>
               <Group gap={4}>
-                <IconPercentage size={16} color="var(--mantine-color-green-6)" />
+                <IconTrophy size={16} color="var(--mantine-color-orange-6)" />
                 <Text size="xs" c="dimmed" fw={500}>
-                  記録カバー率
+                  記録した習慣数
                 </Text>
               </Group>
               <Text size="sm" fw={700}>
-                {habitPercentage}%
+                {data.length}個
               </Text>
-              <Text size="xs" c="dimmed">
-                {period === 'day' ? '1日' : period === 'week' ? '1週間' : '1ヶ月'}のうち
+              <Text size="xs" c="green.6" fw={500}>
+                成長を継続中！
               </Text>
             </Stack>
           </SimpleGrid>

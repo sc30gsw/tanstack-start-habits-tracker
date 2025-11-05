@@ -20,15 +20,14 @@ import { useMemo } from 'react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { z } from 'zod/v4'
 import { DayView } from '~/features/habits/components/calendar/day-view'
-import { MonthView } from '~/features/habits/components/calendar/month-view'
-import { WeekView } from '~/features/habits/components/calendar/week-view'
+import { HabitsListMonthView } from '~/features/habits/components/calendar/habits-list-month-view'
+import { HabitsListWeekView } from '~/features/habits/components/calendar/habits-list-week-view'
 import { TimeUsagePieChart } from '~/features/habits/components/chart/time-usage-pie-chart'
 import { HabitCreateForm } from '~/features/habits/components/form/habit-create-form'
 import { HabitList } from '~/features/habits/components/habit-list'
 import { CALENDAR_VIEW_HASH_TARGET } from '~/features/habits/constants/hash-target-ids'
 import { habitDto } from '~/features/habits/server/habit-functions'
 import { recordDto } from '~/features/habits/server/record-functions'
-import type { RecordEntity } from '~/features/habits/types/habit'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
 import { getValidatedDate, searchSchema } from '~/features/habits/types/schemas/search-params'
 import {
@@ -51,6 +50,7 @@ export const Route = createFileRoute('/habits/')({
       showRecordForm: true,
       calendarView: true,
       selectedDate: true,
+      currentMonth: true,
       q: true,
     })
     .extend({
@@ -69,7 +69,13 @@ export const Route = createFileRoute('/habits/')({
       },
     })
 
-    const dateRange = getPeriodDateRange(context.search.calendarView, context.search.selectedDate)
+    // calendarViewに応じた期間を取得
+    // monthの場合はcurrentMonthを使用、それ以外はselectedDateを使用
+    const dateForRange = context.search.calendarView === 'month' && context.search.currentMonth
+      ? dayjs(context.search.currentMonth).format('YYYY-MM-DD')
+      : context.search.selectedDate
+
+    const dateRange = getPeriodDateRange(context.search.calendarView, dateForRange)
 
     const recordsResult = await recordDto.getRecords({
       data: {
@@ -100,15 +106,6 @@ function HabitsPage() {
   const computedColorScheme = useComputedColorScheme('light')
   const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
 
-  const recordMap = useMemo(() => {
-    return (
-      recordsData.data?.reduce<Record<string, RecordEntity>>((acc, r) => {
-        acc[r.date] = r
-        return acc
-      }, {}) || {}
-    )
-  }, [recordsData.data])
-
   const selectedDateRecords = useMemo(() => {
     if (!selectedDate) {
       return []
@@ -138,6 +135,7 @@ function HabitsPage() {
       habitsData.data,
       searchParams.calendarView,
       searchParams.selectedDate,
+      searchParams.currentMonth,
     )
 
     const sorted = sortForListPage(aggregated.data)
@@ -148,7 +146,7 @@ function HabitsPage() {
       period: aggregated.period,
       dateRange: aggregated.dateRange,
     }
-  }, [recordsData.data, habitsData.data, searchParams.calendarView, searchParams.selectedDate])
+  }, [recordsData.data, habitsData.data, searchParams.calendarView, searchParams.selectedDate, searchParams.currentMonth])
 
   if (!isList) {
     return <Outlet />
@@ -215,8 +213,8 @@ function HabitsPage() {
           <div
             className={`${calendarView === 'month' ? 'relative z-10' : 'invisible absolute inset-0 z-0'}`}
           >
-            <MonthView
-              recordMap={recordMap}
+            <HabitsListMonthView
+              records={recordsData.data || []}
               selectedDate={searchParams.selectedDate}
               currentMonth={searchParams.currentMonth}
               navigate={(options) =>
@@ -230,9 +228,9 @@ function HabitsPage() {
           <div
             className={`${calendarView === 'week' ? 'relative z-10' : 'invisible absolute inset-0 z-0'}`}
           >
-            <WeekView
+            <HabitsListWeekView
               weekDates={weekDates}
-              recordMap={recordMap}
+              records={recordsData.data || []}
               selectedDate={searchParams.selectedDate}
               navigate={(options) =>
                 isDesktop

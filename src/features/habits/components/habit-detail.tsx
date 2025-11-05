@@ -43,6 +43,7 @@ export function HabitDetail() {
       habits.data,
       calendarView,
       searchParams?.selectedDate,
+      searchParams?.currentMonth,
     )
 
     const sorted = sortForDetailPage(aggregated.data, habit.data.id)
@@ -53,7 +54,7 @@ export function HabitDetail() {
       period: aggregated.period,
       dateRange: aggregated.dateRange,
     }
-  }, [records.data, habits.data, habit.data, calendarView, searchParams?.selectedDate])
+  }, [records.data, habits.data, habit.data, calendarView, searchParams?.selectedDate, searchParams?.currentMonth])
 
   const recordMap = records.data?.reduce<Record<string, RecordEntity>>((acc, r) => {
     acc[r.date] = r

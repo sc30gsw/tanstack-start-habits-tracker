@@ -96,8 +96,14 @@ export function aggregateTimeByHabit(
   habits: HabitEntity[],
   calendarView: SearchParams['calendarView'] = 'month',
   selectedDate?: string,
+  currentMonth?: string,
 ) {
-  const dateRange = getPeriodDateRange(calendarView, selectedDate)
+  // monthの場合はcurrentMonthを優先、それ以外はselectedDateを使用
+  const dateForRange = calendarView === 'month' && currentMonth
+    ? dayjs(currentMonth).format('YYYY-MM-DD')
+    : selectedDate
+
+  const dateRange = getPeriodDateRange(calendarView, dateForRange)
 
   const filteredRecords = records.filter(
     (record) =>
