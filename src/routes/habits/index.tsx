@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  Center,
   Container,
   Grid,
   Group,
@@ -11,6 +12,7 @@ import {
   Title,
   useComputedColorScheme,
 } from '@mantine/core'
+import { DateInput } from '@mantine/dates'
 import { useMediaQuery } from '@mantine/hooks'
 import { IconCalendar, IconChartPie } from '@tabler/icons-react'
 import { createFileRoute, Outlet, useMatches, useNavigate } from '@tanstack/react-router'
@@ -262,6 +264,9 @@ function HabitsPage() {
     ? dayjs.tz(searchParams.currentMonth, 'Asia/Tokyo')
     : dayjs().tz('Asia/Tokyo')
 
+  // DateInputで使用する現在の日付値（優先順位: currentMonth）
+  const dateInputValue = currentMonth.toDate()
+
   const startOfWeek = currentMonth.startOf('week')
   const weekDates = Array.from({ length: 7 }).map((_, i) => startOfWeek.add(i, 'day'))
 
@@ -349,10 +354,10 @@ function HabitsPage() {
               カレンダー
             </Text>
           </Group>
-          {searchParams.currentMonth && (
+          <Center>
             <DateInput
               size="sm"
-              value={dayjs.tz(searchParams.currentMonth, 'Asia/Tokyo').toDate()}
+              value={dateInputValue}
               onChange={(date) => {
                 if (date) {
                   navigate({
@@ -366,10 +371,9 @@ function HabitsPage() {
               }}
               valueFormat="YYYY年MM月DD日"
               placeholder="日付を選択"
-              maxLevel="year"
               popoverProps={{ position: 'bottom', withinPortal: true }}
             />
-          )}
+          </Center>
           <SegmentedControl
             size="xs"
             value={calendarView}

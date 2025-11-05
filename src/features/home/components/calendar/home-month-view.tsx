@@ -1,5 +1,4 @@
-import { ActionIcon, Center, Group, Stack, Text } from '@mantine/core'
-import { DateInput } from '@mantine/dates'
+import { ActionIcon, Group, Stack, Text } from '@mantine/core'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { getRouteApi } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -64,6 +63,7 @@ export function HomeMonthView() {
               navigate({
                 search: (prev) => ({
                   ...prev,
+                  selectedDate: dayjs(date).format('YYYY-MM-DD'),
                   currentMonth: dayjs(date).format('YYYY-MM'),
                   preset: undefined,
                 }),

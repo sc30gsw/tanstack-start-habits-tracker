@@ -1,5 +1,4 @@
-import { ActionIcon, Badge, Card, Center, Group, Stack, Text, Tooltip } from '@mantine/core'
-import { DateInput } from '@mantine/dates'
+import { ActionIcon, Badge, Card, Group, Stack, Text, Tooltip } from '@mantine/core'
 import { IconChevronLeft, IconChevronRight, IconExternalLink } from '@tabler/icons-react'
 import { Link, type NavigateOptions, useLocation } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -117,27 +116,6 @@ export function DayView({
 
   return (
     <Stack gap={16}>
-      <Center>
-        <DateInput
-          size="sm"
-          value={currentDate.toDate()}
-          onChange={(date) => {
-            if (date) {
-              navigate({
-                search: (prev) => ({
-                  ...prev,
-                  selectedDate: dayjs(date).format('YYYY-MM-DD'),
-                  preset: undefined,
-                }),
-              })
-            }
-          }}
-          valueFormat="YYYY年MM月DD日"
-          placeholder="日付を選択"
-          popoverProps={{ position: 'bottom', withinPortal: true }}
-        />
-      </Center>
-
       <Group justify="space-between" mb={4}>
         <ActionIcon variant="subtle" aria-label="前日" onClick={handlePrevDay}>
           <IconChevronLeft size={16} />

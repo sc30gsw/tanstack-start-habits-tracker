@@ -51,10 +51,6 @@ export function HabitsListWeekView({ weekDates, records, navigate }: HabitsListW
 
   return (
     <Stack gap={16}>
-      <Text size="xs" c="dimmed" ta="center">
-        ※ カレンダーには完了済みの習慣のみ表示されます
-      </Text>
-
       <Group justify="space-between" mb={4}>
         <ActionIcon variant="subtle" aria-label="前週" onClick={handlePrevWeek}>
           <IconChevronLeft size={16} />
