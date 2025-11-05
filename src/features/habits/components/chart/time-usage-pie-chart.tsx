@@ -286,7 +286,7 @@ export function TimeUsagePieChart({
                     {formatDuration(dailyAverage)}
                   </Text>
                   <Text size="xs" c="dimmed">
-                    実行日{executionDays}日で割った値
+                    実行日{executionDays}日の平均
                   </Text>
                 </Stack>
               </Box>
@@ -349,6 +349,9 @@ export function TimeUsagePieChart({
                 </Group>
                 <Text size="sm" fw={700}>
                   {formatDuration(averageDuration)}
+                </Text>
+                <Text size="xs" c="dimmed">
+                  実行日{executionDays}日の平均
                 </Text>
               </Stack>
             </Box>
