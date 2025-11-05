@@ -1,15 +1,20 @@
 import {
   Alert,
+  Card,
   Container,
+  Grid,
   Group,
   Select,
+  Skeleton,
   Stack,
+  Tabs,
   Text,
   Title,
   Tooltip,
   useComputedColorScheme,
 } from '@mantine/core'
-import { IconAlertTriangle } from '@tabler/icons-react'
+import { useMediaQuery } from '@mantine/hooks'
+import { IconAlertTriangle, IconChartBar, IconDashboard } from '@tabler/icons-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
 import { eq } from 'drizzle-orm'
@@ -26,7 +31,6 @@ export const Route = createFileRoute('/habits/$habitId')({
   component: HabitDetailPage,
   validateSearch: searchSchema,
   loaderDeps: ({ search }) => {
-    // calendarViewに応じて適切なページネーションパラメータを使用
     const pageParam =
       search.calendarView === 'month'
         ? search.currentMonth || dayjs().format('YYYY-MM')
@@ -40,8 +44,7 @@ export const Route = createFileRoute('/habits/$habitId')({
   loader: async ({ params, context, deps }) => {
     // ヒートマップ(今日から1年分) + カレンダーグリッド(42日分)の範囲を取得
     // monthビューの場合はcurrentMonth、それ以外はselectedDateを基準にする
-    const dateForRange =
-      deps.calendarView === 'month' ? deps.pageParam : deps.pageParam
+    const dateForRange = deps.calendarView === 'month' ? deps.pageParam : deps.pageParam
 
     const { dateFrom, dateTo } = getDataFetchDateRange(dateForRange)
 
@@ -72,6 +75,187 @@ export const Route = createFileRoute('/habits/$habitId')({
         : null
 
     return { habit: habitResult, records: recordsResult, habits: habitsResult, levelInfo }
+  },
+  pendingComponent: () => {
+    const isDesktop = useMediaQuery('(min-width: 768px)')
+
+    const calendarSkeleton = (
+      <Card withBorder padding="md" radius="md" shadow="sm">
+        <Stack gap="sm">
+          {/* Calendar Header */}
+          <Group justify="space-between" align="center">
+            <Skeleton height={24} width={120} />
+            <Group gap="xs">
+              <Skeleton height={32} width={80} />
+              <Skeleton height={32} width={32} />
+              <Skeleton height={32} width={32} />
+            </Group>
+          </Group>
+
+          {/* Calendar Grid */}
+          <Stack gap="xs">
+            <Grid gutter="xs">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <Grid.Col key={i} span={12 / 7}>
+                  <Skeleton height={20} />
+                </Grid.Col>
+              ))}
+            </Grid>
+            <Grid gutter="xs">
+              {Array.from({ length: 42 }).map((_, i) => (
+                <Grid.Col key={i} span={12 / 7}>
+                  <Skeleton height={100} />
+                </Grid.Col>
+              ))}
+            </Grid>
+          </Stack>
+        </Stack>
+      </Card>
+    )
+
+    const dateDetailSkeleton = (
+      <Card withBorder padding="md" radius="md" shadow="sm">
+        <Stack gap="md">
+          <Skeleton height={20} width={150} />
+          <Stack gap="xs">
+            <Skeleton height={16} width="60%" />
+            <Skeleton height={16} width="50%" />
+            <Skeleton height={16} width="70%" />
+          </Stack>
+        </Stack>
+      </Card>
+    )
+
+    const leftPanelContent = (
+      <Stack gap="md">
+        {calendarSkeleton}
+        {dateDetailSkeleton}
+      </Stack>
+    )
+
+    const dashboardContent = (
+      <Stack gap="md">
+        {/* HabitInfoCard Skeleton */}
+        <Card withBorder padding="md" radius="md" shadow="sm">
+          <Stack gap="md">
+            <Group justify="space-between">
+              <Skeleton height={20} width={100} />
+              <Skeleton height={32} width={80} />
+            </Group>
+            <Grid gutter="md">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Grid.Col key={i} span={6}>
+                  <Stack gap={4}>
+                    <Skeleton height={14} width="80%" />
+                    <Skeleton height={20} width="60%" />
+                  </Stack>
+                </Grid.Col>
+              ))}
+            </Grid>
+          </Stack>
+        </Card>
+
+        {/* HabitLevelCard Skeleton */}
+        <Card withBorder padding="md" radius="md" shadow="sm">
+          <Stack gap="md">
+            <Skeleton height={20} width={120} />
+            <Skeleton height={100} />
+            <Grid gutter="md">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Grid.Col key={i} span={4}>
+                  <Stack gap={4}>
+                    <Skeleton height={14} width="70%" />
+                    <Skeleton height={18} width="50%" />
+                  </Stack>
+                </Grid.Col>
+              ))}
+            </Grid>
+          </Stack>
+        </Card>
+
+        {/* HeatmapSection Skeleton */}
+        <Card withBorder padding="md" radius="md" shadow="sm">
+          <Stack gap="md">
+            <Skeleton height={20} width={150} />
+            <Skeleton height={200} />
+          </Stack>
+        </Card>
+      </Stack>
+    )
+
+    const analyticsContent = (
+      <Stack gap="md">
+        {/* TimeUsagePieChart Skeleton */}
+        <Card withBorder padding="lg" radius="md" shadow="sm">
+          <Stack gap="md">
+            <Skeleton height={20} width={200} />
+            <Skeleton height={300} />
+            <Grid gutter="md">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Grid.Col key={i} span={4}>
+                  <Stack gap={4}>
+                    <Skeleton height={16} width="80%" />
+                    <Skeleton height={20} width="60%" />
+                  </Stack>
+                </Grid.Col>
+              ))}
+            </Grid>
+          </Stack>
+        </Card>
+
+        {/* TrendsChart Skeleton */}
+        <Card withBorder padding="lg" radius="md" shadow="sm">
+          <Stack gap="md">
+            <Skeleton height={20} width={180} />
+            <Skeleton height={300} />
+          </Stack>
+        </Card>
+      </Stack>
+    )
+
+    const rightPanelContent = (
+      <Tabs value="dashboard" keepMounted={false}>
+        <Tabs.List grow>
+          <Tabs.Tab value="dashboard" leftSection={<IconDashboard size={16} />} disabled>
+            ダッシュボード
+          </Tabs.Tab>
+          <Tabs.Tab value="analytics" leftSection={<IconChartBar size={16} />} disabled>
+            分析
+          </Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="dashboard" pt="md">
+          {dashboardContent}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="analytics" pt="md">
+          {analyticsContent}
+        </Tabs.Panel>
+      </Tabs>
+    )
+
+    return (
+      <Container size="fluid" px="xl" py="xl">
+        <Stack gap="md">
+          <Group justify="space-between" align="center">
+            <Skeleton height={32} width={200} />
+            <Skeleton height={36} width={200} />
+          </Group>
+
+          {isDesktop ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '1rem' }}>
+              <div>{leftPanelContent}</div>
+              <div>{rightPanelContent}</div>
+            </div>
+          ) : (
+            <Stack gap="md">
+              {leftPanelContent}
+              {rightPanelContent}
+            </Stack>
+          )}
+        </Stack>
+      </Container>
+    )
   },
 })
 

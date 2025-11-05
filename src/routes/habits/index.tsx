@@ -5,6 +5,7 @@ import {
   Grid,
   Group,
   SegmentedControl,
+  Skeleton,
   Stack,
   Text,
   Title,
@@ -101,6 +102,158 @@ export const Route = createFileRoute('/habits/')({
       records: recordsResult,
     }
   },
+  pendingComponent: () => {
+    const isDesktop = useMediaQuery('(min-width: 768px)')
+    const computedColorScheme = useComputedColorScheme('light')
+    const titleColor = computedColorScheme === 'dark' ? 'gray.1' : 'dark.8'
+
+    const habitListSkeleton = (
+      <Stack gap="lg">
+        <Group justify="space-between" align="center">
+          <Title order={1}>習慣一覧</Title>
+          <Button color="habit" disabled>
+            新しい習慣を作成
+          </Button>
+        </Group>
+
+        {/* HabitOrganizer Skeleton */}
+        <Card withBorder padding="md" radius="md">
+          <Group gap="xs" mb="sm">
+            <Skeleton height={20} width={20} />
+            <Skeleton height={20} width={100} />
+          </Group>
+          <Group gap="xs">
+            <Skeleton height={32} width={120} />
+            <Skeleton height={32} width={100} />
+          </Group>
+        </Card>
+
+        {/* HabitList Skeleton */}
+        <Stack gap="md">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} withBorder padding="lg" radius="md" shadow="sm">
+              <Group justify="space-between" wrap="nowrap">
+                <Group gap="md" style={{ flex: 1 }}>
+                  <Skeleton height={40} width={40} circle />
+                  <Stack gap={4} style={{ flex: 1 }}>
+                    <Skeleton height={20} width="60%" />
+                    <Skeleton height={16} width="40%" />
+                  </Stack>
+                </Group>
+                <Skeleton height={36} width={80} />
+              </Group>
+            </Card>
+          ))}
+        </Stack>
+      </Stack>
+    )
+
+    const calendarSkeleton = (
+      <Card withBorder padding="lg" radius="md" shadow="sm" id={CALENDAR_VIEW_HASH_TARGET}>
+        <Stack gap="sm">
+          <Group justify="space-between" align="center">
+            <Group gap="xs" align="center">
+              <IconCalendar size={24} color="var(--mantine-color-blue-6)" />
+              <Text size="lg" fw={600} c={titleColor}>
+                カレンダー
+              </Text>
+            </Group>
+            <SegmentedControl
+              size="xs"
+              value="month"
+              disabled
+              data={[
+                { label: '月', value: 'month' },
+                { label: '週', value: 'week' },
+                { label: '日', value: 'day' },
+              ]}
+            />
+          </Group>
+
+          {/* Calendar Grid Skeleton */}
+          <Stack gap="xs">
+            <Grid gutter="xs">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <Grid.Col key={i} span={12 / 7}>
+                  <Skeleton height={20} />
+                </Grid.Col>
+              ))}
+            </Grid>
+            <Grid gutter="xs">
+              {Array.from({ length: 42 }).map((_, i) => (
+                <Grid.Col key={i} span={12 / 7}>
+                  <Skeleton height={80} />
+                </Grid.Col>
+              ))}
+            </Grid>
+          </Stack>
+        </Stack>
+      </Card>
+    )
+
+    const pieChartSkeleton = (
+      <Stack gap="md">
+        <Group gap="xs" align="center">
+          <IconChartPie size={24} color="var(--mantine-color-blue-6)" />
+          <Text size="lg" fw={600}>
+            時間配分
+          </Text>
+        </Group>
+        <Card withBorder padding="lg" radius="md" shadow="sm">
+          <Stack gap="md">
+            <Skeleton height={20} width="60%" />
+            <Skeleton height={300} />
+            <Grid gutter="md">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Grid.Col key={i} span={4}>
+                  <Stack gap={4}>
+                    <Skeleton height={16} width="80%" />
+                    <Skeleton height={20} width="60%" />
+                    <Skeleton height={14} width="90%" />
+                  </Stack>
+                </Grid.Col>
+              ))}
+            </Grid>
+          </Stack>
+        </Card>
+      </Stack>
+    )
+
+    return (
+      <Container size="fluid" px="xl" py="xl">
+        {isDesktop ? (
+          <PanelGroup direction="horizontal" autoSaveId="habits-list-layout">
+            <Panel defaultSize={60} minSize={40} maxSize={75} style={{ paddingRight: 12 }}>
+              {habitListSkeleton}
+            </Panel>
+
+            <PanelResizeHandle
+              className="habits-list-resize-handle"
+              style={{
+                width: '2px',
+                transition: 'background-color 0.2s ease',
+                cursor: 'col-resize',
+                position: 'relative',
+              }}
+            />
+
+            <Panel minSize={25} style={{ paddingLeft: 12 }}>
+              <Stack gap="lg">
+                {calendarSkeleton}
+                {pieChartSkeleton}
+              </Stack>
+            </Panel>
+          </PanelGroup>
+        ) : (
+          <Grid gutter="lg">
+            <Grid.Col span={12}>{habitListSkeleton}</Grid.Col>
+            <Grid.Col span={12}>{calendarSkeleton}</Grid.Col>
+            <Grid.Col span={12}>{pieChartSkeleton}</Grid.Col>
+          </Grid>
+        )}
+      </Container>
+    )
+  },
 })
 
 function HabitsPage() {
@@ -139,6 +292,8 @@ function HabitsPage() {
       return {
         data: [],
         totalDuration: 0,
+        executionDays: 0,
+        totalRecordCount: 0,
       }
     }
 
@@ -157,6 +312,8 @@ function HabitsPage() {
       totalDuration: aggregated.totalDuration,
       period: aggregated.period,
       dateRange: aggregated.dateRange,
+      executionDays: aggregated.executionDays,
+      totalRecordCount: aggregated.totalRecordCount,
     }
   }, [
     recordsData.data,
@@ -291,6 +448,8 @@ function HabitsPage() {
         totalDuration={pieChartData.totalDuration}
         period={pieChartData.period}
         dateRange={pieChartData.dateRange}
+        executionDays={pieChartData.executionDays}
+        totalRecordCount={pieChartData.totalRecordCount}
       />
     </Stack>
   )

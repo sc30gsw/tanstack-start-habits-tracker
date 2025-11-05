@@ -11,6 +11,8 @@ type TimeUsagePieChartProps = {
   totalDuration: number
   period?: SearchParams['calendarView']
   dateRange?: { from: string; to: string }
+  executionDays?: number
+  totalRecordCount?: number
   onSegmentClick?: (habitId: string) => void
   hideChart?: boolean
 }
@@ -20,6 +22,8 @@ export function TimeUsagePieChart({
   totalDuration,
   period = 'month',
   dateRange,
+  executionDays = 0,
+  totalRecordCount = 0,
   hideChart = false,
 }: TimeUsagePieChartProps) {
   const getPeriodLabel = () => {
@@ -71,20 +75,6 @@ export function TimeUsagePieChart({
 
   const averageDuration = totalDuration > 0 ? Math.round(totalDuration / data.length) : 0
   const maxDuration = data.length > 0 ? Math.max(...data.map((d) => d.value)) : 0
-
-  const getPeriodDays = () => {
-    if (!dateRange) {
-      return 1
-    }
-
-    const fromDate = dayjs(dateRange.from)
-    const toDate = dayjs(dateRange.to)
-    const days = toDate.diff(fromDate, 'day') + 1
-
-    return days
-  }
-
-  const periodDays = getPeriodDays()
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
@@ -197,7 +187,7 @@ export function TimeUsagePieChart({
                   </Text>
                 </Group>
                 <Text size="sm" fw={700}>
-                  {periodDays}日間
+                  {executionDays}日間
                 </Text>
                 <Text size="xs" c="green.6" fw={500}>
                   継続して記録中！
@@ -212,7 +202,7 @@ export function TimeUsagePieChart({
                 </Text>
               </Group>
               <Text size="sm" fw={700}>
-                {data.length}個
+                {totalRecordCount}個
               </Text>
               <Text size="xs" c="green.6" fw={500}>
                 成長を継続中！

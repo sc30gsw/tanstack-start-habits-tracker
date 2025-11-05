@@ -23,6 +23,8 @@ export type PieChartData = {
   totalDuration: number
   period: SearchParams['calendarView']
   dateRange: Record<'from' | 'to', string>
+  executionDays: number
+  totalRecordCount: number
 }
 
 const PIE_CHART_SUPPORTED_COLORS = [
@@ -117,9 +119,16 @@ export function getCalendarDataRange(
 // 統計情報用の期間を取得（実際の月/週/日）
 export function getPeriodDateRange(
   calendarView: SearchParams['calendarView'] = 'month',
+  currentMonth?: SearchParams['currentMonth'],
   selectedDate?: SearchParams['selectedDate'],
 ) {
-  const baseDate = selectedDate ? dayjs.tz(selectedDate, 'Asia/Tokyo') : dayjs().tz('Asia/Tokyo')
+  // monthの場合はcurrentMonthを優先、それ以外はselectedDateを使用
+  const baseDate =
+    calendarView === 'month' && currentMonth
+      ? dayjs.tz(currentMonth, 'Asia/Tokyo')
+      : selectedDate
+        ? dayjs.tz(selectedDate, 'Asia/Tokyo')
+        : dayjs().tz('Asia/Tokyo')
 
   switch (calendarView) {
     case 'month':
@@ -149,13 +158,8 @@ export function aggregateTimeByHabit(
   selectedDate?: string,
   currentMonth?: string,
 ) {
-  // monthの場合はcurrentMonthを優先、それ以外はselectedDateを使用
-  const dateForRange =
-    calendarView === 'month' && currentMonth
-      ? dayjs(currentMonth).format('YYYY-MM-DD')
-      : selectedDate
-
-  const dateRange = getPeriodDateRange(calendarView, dateForRange)
+  // カレンダー表示範囲のデータを取得（統計もカレンダー表示範囲に合わせる）
+  const dateRange = getCalendarDataRange(calendarView, currentMonth, selectedDate)
 
   const filteredRecords = records.filter(
     (record) =>
@@ -193,11 +197,18 @@ export function aggregateTimeByHabit(
 
   const totalDuration = data.reduce((sum: number, item: PieChartDataItem) => sum + item.value, 0)
 
+  const uniqueDates = new Set(filteredRecords.map((record) => record.date))
+  const executionDays = uniqueDates.size
+
+  const totalRecordCount = filteredRecords.length
+
   return {
     data,
     totalDuration,
     period: calendarView,
     dateRange,
+    executionDays,
+    totalRecordCount,
   }
 }
 
