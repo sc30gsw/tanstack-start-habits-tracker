@@ -29,6 +29,7 @@ import utc from 'dayjs/plugin/utc'
 import { useEffect } from 'react'
 import { RichTextEditor } from '~/components/ui/rich-text-editor/rich-text-editor'
 import { RichTextPreview } from '~/components/ui/rich-text-editor/rich-text-preview'
+import { RecoverySwitch } from '~/features/habits/components/form/recovery-switch'
 import {
   type FormValues,
   isEmptyContent,
@@ -153,6 +154,9 @@ export function RecordForm({
             </Group>
           )}
         />
+        {existingRecord?.isRecoveryAttempt && (
+          <RecoverySwitch record={existingRecord} onSuccess={onSuccess} />
+        )}
         {form.values.status !== 'skipped' && (
           <Group gap="md">
             <NumberInput

@@ -24,6 +24,10 @@ const CELL_COLORS = {
     normal: 'var(--mantine-color-cyan-6)',
     selected: 'var(--mantine-color-cyan-7)',
   },
+  recoveryFailed: {
+    normal: 'var(--mantine-color-red-5)',
+    selected: 'var(--mantine-color-red-6)',
+  },
   recoveryScheduled: {
     normal: 'var(--mantine-color-orange-5)',
     selected: 'var(--mantine-color-orange-6)',
@@ -52,6 +56,7 @@ type CellStyleState = {
   isCompleted: boolean
   isSkipped: boolean
   isRecoveryCompleted: boolean
+  isRecoveryFailed: boolean
   isRecoveryScheduled: boolean
   isSelected: boolean
   dateType: ReturnType<typeof getDateType>
@@ -63,6 +68,7 @@ function getCellBackgroundStyle(state: CellStyleState) {
     isCompleted,
     isSkipped,
     isRecoveryCompleted,
+    isRecoveryFailed,
     isRecoveryScheduled,
     isSelected,
     dateType,
@@ -73,12 +79,17 @@ function getCellBackgroundStyle(state: CellStyleState) {
       | typeof CELL_COLORS.incomplete
       | typeof CELL_COLORS.completed
       | typeof CELL_COLORS.recoveryCompleted
+      | typeof CELL_COLORS.recoveryFailed
       | typeof CELL_COLORS.recoveryScheduled
       | typeof CELL_COLORS.skipped = CELL_COLORS.incomplete
 
     switch (true) {
       case isRecoveryCompleted:
         colorSet = CELL_COLORS.recoveryCompleted
+        break
+
+      case isRecoveryFailed:
+        colorSet = CELL_COLORS.recoveryFailed
         break
 
       case isCompleted:
@@ -138,6 +149,11 @@ export function CalendarDateCell({
 
   const isRecoveryCompleted = !!(record && isRecordRecovered(record, allRecords))
 
+  // Check if this is a failed recovery attempt
+  const isRecoveryFailed = !!(
+    record?.isRecoveryAttempt === true && record?.recoverySuccess === false
+  )
+
   const recoveryDate =
     isRecoveryCompleted && record?.recoveryDate ? dayjs(record.recoveryDate) : null
 
@@ -147,7 +163,8 @@ export function CalendarDateCell({
   const isRecoveryScheduled = !!(
     record?.status === 'active' &&
     recoverySourceRecord &&
-    !isRecoveryCompleted
+    !isRecoveryCompleted &&
+    !isRecoveryFailed
   )
 
   const borderWidth: CSSProperties['borderWidth'] = '2px'
@@ -156,6 +173,7 @@ export function CalendarDateCell({
     isCompleted: record?.status === 'completed',
     isSkipped: record?.status === 'skipped',
     isRecoveryCompleted,
+    isRecoveryFailed,
     isRecoveryScheduled,
     isSelected,
     dateType,
@@ -173,28 +191,44 @@ export function CalendarDateCell({
               <Text size="sm" fw={700}>
                 {isRecoveryCompleted
                   ? 'リカバリー完了'
-                  : isRecoveryScheduled
-                    ? 'リカバリー予定'
-                    : record.status === 'completed'
-                      ? '完了'
-                      : record.status === 'skipped'
-                        ? 'スキップ'
-                        : '予定中'}
+                  : isRecoveryFailed
+                    ? 'リカバリー失敗'
+                    : isRecoveryScheduled
+                      ? 'リカバリー予定'
+                      : record.status === 'completed'
+                        ? '完了'
+                        : record.status === 'skipped'
+                          ? 'スキップ'
+                          : '予定中'}
               </Text>
               <Text
                 size="xs"
                 c="dimmed"
                 style={{
                   visibility:
-                    record.status === 'skipped' || isRecoveryScheduled ? 'hidden' : 'visible',
-                  height: record.status === 'skipped' || isRecoveryScheduled ? '0' : '1em',
+                    record.status === 'skipped' ||
+                    isRecoveryScheduled ||
+                    isRecoveryFailed
+                      ? 'hidden'
+                      : 'visible',
+                  height:
+                    record.status === 'skipped' ||
+                    isRecoveryScheduled ||
+                    isRecoveryFailed
+                      ? '0'
+                      : '1em',
                 }}
               >
                 {formatDuration(record.duration_minutes || 0)}
               </Text>
               {isRecoveryCompleted && recoveryDate && (
-                <Text size="xs" c="red.6" fw={700}>
+                <Text size="xs" c="cyan.6" fw={700}>
                   {recoveryDate.format('M月D日')}に実施済み
+                </Text>
+              )}
+              {isRecoveryFailed && (
+                <Text size="xs" c="red.6" fw={700}>
+                  リカバリー失敗として記録
                 </Text>
               )}
               {isRecoveryScheduled && recoverySourceRecord && (
