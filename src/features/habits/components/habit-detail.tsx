@@ -53,6 +53,8 @@ export function HabitDetail() {
       totalDuration: aggregated.totalDuration,
       period: aggregated.period,
       dateRange: aggregated.dateRange,
+      executionDays: aggregated.executionDays,
+      totalRecordCount: aggregated.totalRecordCount,
     }
   }, [
     records.data,
@@ -132,6 +134,8 @@ export function HabitDetail() {
                 totalDuration={pieChartData.totalDuration}
                 period={pieChartData.period}
                 dateRange={pieChartData.dateRange}
+                executionDays={pieChartData.executionDays}
+                totalRecordCount={pieChartData.totalRecordCount}
                 hideChart={true}
               />
               <TrendsChart records={records.data} habitColor={habit.data?.color as HabitColor} />

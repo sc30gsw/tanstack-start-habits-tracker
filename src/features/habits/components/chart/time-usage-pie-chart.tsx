@@ -1,5 +1,16 @@
 import { PieChart } from '@mantine/charts'
-import { Badge, Card, Divider, Group, Paper, SimpleGrid, Stack, Text } from '@mantine/core'
+import {
+  Badge,
+  Box,
+  Card,
+  Divider,
+  Group,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Text,
+  Tooltip,
+} from '@mantine/core'
 import { IconChartPie, IconClock, IconTrophy } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import type { SearchParams } from '~/features/habits/types/schemas/search-params'
@@ -26,6 +37,20 @@ export function TimeUsagePieChart({
   totalRecordCount = 0,
   hideChart = false,
 }: TimeUsagePieChartProps) {
+  // 詳細ページかどうかを判定（hideChart=trueの場合は詳細ページ）
+  const isDetailPage = hideChart
+
+  // 一覧ページ: 1日あたりの平均時間（総実行時間 ÷ 実行日数）
+  // 詳細ページ: 1日あたりの平均時間（総実行時間 ÷ 実行日数）
+  const averageDuration = executionDays > 0 ? Math.round(totalDuration / executionDays) : 0
+
+  // 一覧ページ: 各習慣の最大値（習慣ごとの合計時間の最大）
+  // 詳細ページ: 1日の最大実行時間（その習慣の1日の最大値）
+  const maxDuration = data.length > 0 ? Math.max(...data.map((d) => d.value)) : 0
+
+  // 詳細ページの場合: 1日あたりの平均時間を計算（同じ計算）
+  const dailyAverage = averageDuration
+
   const getPeriodLabel = () => {
     if (!dateRange) {
       return '時間配分'
@@ -72,9 +97,6 @@ export function TimeUsagePieChart({
       </Card>
     )
   }
-
-  const averageDuration = totalDuration > 0 ? Math.round(totalDuration / data.length) : 0
-  const maxDuration = data.length > 0 ? Math.max(...data.map((d) => d.value)) : 0
 
   return (
     <Card withBorder padding="lg" radius="md" shadow="sm">
@@ -163,107 +185,194 @@ export function TimeUsagePieChart({
           <Text size="xs" fw={700} c="dimmed">
             期間全体の統計
           </Text>
-          <SimpleGrid cols={period === 'day' ? 2 : 3} spacing="md">
-            <Stack gap={4}>
-              <Group gap={4}>
-                <IconClock size={16} color="var(--mantine-color-blue-6)" />
-                <Text size="xs" c="dimmed" fw={500}>
-                  総実行時間
-                </Text>
-              </Group>
-              <Text size="sm" fw={700}>
-                {formatDuration(totalDuration)}
-              </Text>
-              <Text size="xs" c="green.6" fw={500}>
-                {totalDuration}分を習慣に投資
-              </Text>
-            </Stack>
-            {period !== 'day' && (
-              <Stack gap={4}>
-                <Group gap={4}>
-                  <IconTrophy size={16} color="var(--mantine-color-green-6)" />
-                  <Text size="xs" c="dimmed" fw={500}>
-                    実行日数
+          <SimpleGrid cols={isDetailPage ? 2 : period === 'day' ? 2 : 3} spacing="md">
+            <Tooltip label="この期間に記録された習慣の合計実行時間です" position="top">
+              <Box style={{ cursor: 'pointer' }}>
+                <Stack gap={4}>
+                  <Group gap={4}>
+                    <IconClock size={16} color="var(--mantine-color-blue-6)" />
+                    <Text size="xs" c="dimmed" fw={500}>
+                      総実行時間
+                    </Text>
+                  </Group>
+                  <Text size="sm" fw={700}>
+                    {formatDuration(totalDuration)}
                   </Text>
-                </Group>
-                <Text size="sm" fw={700}>
-                  {executionDays}日間
-                </Text>
-                <Text size="xs" c="green.6" fw={500}>
-                  継続して記録中！
-                </Text>
-              </Stack>
+                  <Text size="xs" c="dimmed">
+                    {totalDuration}分
+                  </Text>
+                </Stack>
+              </Box>
+            </Tooltip>
+            {!isDetailPage && period !== 'day' && (
+              <Tooltip
+                label={
+                  <>
+                    習慣が1つでも記録されている
+                    <br />
+                    日付の数です
+                  </>
+                }
+                position="top"
+              >
+                <Box style={{ cursor: 'pointer' }}>
+                  <Stack gap={4}>
+                    <Group gap={4}>
+                      <IconTrophy size={16} color="var(--mantine-color-green-6)" />
+                      <Text size="xs" c="dimmed" fw={500}>
+                        実行日数
+                      </Text>
+                    </Group>
+                    <Text size="sm" fw={700}>
+                      {executionDays}日間
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      ユニークな日付数
+                    </Text>
+                  </Stack>
+                </Box>
+              </Tooltip>
             )}
-            <Stack gap={4}>
-              <Group gap={4}>
-                <IconTrophy size={16} color="var(--mantine-color-orange-6)" />
-                <Text size="xs" c="dimmed" fw={500}>
-                  記録した習慣数
-                </Text>
-              </Group>
-              <Text size="sm" fw={700}>
-                {totalRecordCount}個
-              </Text>
-              <Text size="xs" c="green.6" fw={500}>
-                成長を継続中！
-              </Text>
-            </Stack>
+            {!isDetailPage && (
+              <Tooltip
+                label={
+                  <>
+                    この期間に記録された習慣の総数です
+                    <br />
+                    （同じ日に複数の習慣があれば全てカウント）
+                  </>
+                }
+                position="top"
+              >
+                <Box style={{ cursor: 'pointer' }}>
+                  <Stack gap={4}>
+                    <Group gap={4}>
+                      <IconTrophy size={16} color="var(--mantine-color-orange-6)" />
+                      <Text size="xs" c="dimmed" fw={500}>
+                        記録した習慣数
+                      </Text>
+                    </Group>
+                    <Text size="sm" fw={700}>
+                      {totalRecordCount}個
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      全記録数
+                    </Text>
+                  </Stack>
+                </Box>
+              </Tooltip>
+            )}
+            {isDetailPage && (
+              <Tooltip
+                label={
+                  <>
+                    1日あたりの
+                    <br />
+                    平均実行時間です
+                  </>
+                }
+                position="top"
+              >
+                <Box style={{ cursor: 'pointer' }}>
+                  <Stack gap={4}>
+                    <Group gap={4}>
+                      <IconChartPie size={16} color="var(--mantine-color-violet-6)" />
+                      <Text size="xs" c="dimmed" fw={500}>
+                        1日あたり平均
+                      </Text>
+                    </Group>
+                    <Text size="sm" fw={700}>
+                      {formatDuration(dailyAverage)}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      実行日{executionDays}日で割った値
+                    </Text>
+                  </Stack>
+                </Box>
+              </Tooltip>
+            )}
           </SimpleGrid>
         </Stack>
 
         <Divider />
 
-        <SimpleGrid cols={2} spacing="md">
-          <Stack gap={4}>
-            <Group gap={4}>
-              <IconChartPie size={16} color="var(--mantine-color-violet-6)" />
-              <Text size="xs" c="dimmed" fw={500}>
-                習慣あたり平均
-              </Text>
-            </Group>
-            <Text size="sm" fw={700}>
-              {formatDuration(averageDuration)}
-            </Text>
-          </Stack>
-          <Stack gap={4}>
-            <Group gap={4}>
-              <IconTrophy size={16} color="var(--mantine-color-orange-6)" />
-              <Text size="xs" c="dimmed" fw={500}>
-                習慣の最長時間
-              </Text>
-            </Group>
-            <Text size="sm" fw={700}>
-              {formatDuration(maxDuration)}
-            </Text>
-          </Stack>
-        </SimpleGrid>
-
-        <Divider />
-
-        <SimpleGrid cols={2} spacing="md">
-          <Stack gap={4}>
-            <Group gap={4}>
-              <IconChartPie size={14} style={{ opacity: 0.6 }} />
-              <Text size="xs" c="dimmed">
-                習慣あたりの平均実行時間
-              </Text>
-            </Group>
-            <Text size="sm" fw={600}>
-              {formatDuration(averageDuration)}
-            </Text>
-          </Stack>
-          <Stack gap={4}>
-            <Group gap={4}>
-              <IconTrophy size={14} style={{ opacity: 0.6 }} />
-              <Text size="xs" c="dimmed">
-                最長実行時間
-              </Text>
-            </Group>
-            <Text size="sm" fw={600}>
-              {formatDuration(maxDuration)}
-            </Text>
-          </Stack>
-        </SimpleGrid>
+        {isDetailPage ? (
+          <Tooltip
+            label={
+              <>
+                この期間で最も長く
+                <br />
+                実行した日の時間です
+              </>
+            }
+            position="top"
+          >
+            <Box style={{ cursor: 'pointer' }}>
+              <Stack gap={4}>
+                <Group gap={4}>
+                  <IconTrophy size={16} color="var(--mantine-color-orange-6)" />
+                  <Text size="xs" c="dimmed" fw={500}>
+                    最長記録時間
+                  </Text>
+                </Group>
+                <Text size="sm" fw={700}>
+                  {formatDuration(maxDuration)}
+                </Text>
+              </Stack>
+            </Box>
+          </Tooltip>
+        ) : (
+          <SimpleGrid cols={2} spacing="md">
+            <Tooltip
+              label={
+                <>
+                  この期間に記録された習慣の
+                  <br />
+                  平均実行時間です
+                </>
+              }
+              position="top"
+            >
+              <Box style={{ cursor: 'pointer' }}>
+                <Stack gap={4}>
+                  <Group gap={4}>
+                    <IconChartPie size={16} color="var(--mantine-color-violet-6)" />
+                    <Text size="xs" c="dimmed" fw={500}>
+                      習慣あたり平均
+                    </Text>
+                  </Group>
+                  <Text size="sm" fw={700}>
+                    {formatDuration(averageDuration)}
+                  </Text>
+                </Stack>
+              </Box>
+            </Tooltip>
+            <Tooltip
+              label={
+                <>
+                  この期間で最も長く実行された
+                  <br />
+                  習慣の時間です
+                </>
+              }
+              position="top"
+            >
+              <Box style={{ cursor: 'pointer' }}>
+                <Stack gap={4}>
+                  <Group gap={4}>
+                    <IconTrophy size={16} color="var(--mantine-color-orange-6)" />
+                    <Text size="xs" c="dimmed" fw={500}>
+                      習慣の最長時間
+                    </Text>
+                  </Group>
+                  <Text size="sm" fw={700}>
+                    {formatDuration(maxDuration)}
+                  </Text>
+                </Stack>
+              </Box>
+            </Tooltip>
+          </SimpleGrid>
+        )}
 
         <Divider />
 
@@ -284,7 +393,7 @@ export function TimeUsagePieChart({
                   {item.name}
                 </Badge>
                 <Text size="sm" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
-                  {formatDuration(item.value)}/ {percentage}%
+                  {formatDuration(item.value)} {hideChart ? '' : `/ ${percentage}%`}
                 </Text>
               </Group>
             )
