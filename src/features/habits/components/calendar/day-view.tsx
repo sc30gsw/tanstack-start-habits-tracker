@@ -47,7 +47,7 @@ export function DayView({
   navigate,
 }: DayViewProps) {
   const location = useLocation()
-  const isHabitDetailPage = location.pathname.startsWith('/habits/')
+  const isHabitDetailPage = location.pathname.startsWith('/habits')
 
   const currentDate = dayjs(selectedDate)
   const formattedDate = selectedDate ? currentDate.format('YYYY/MM/DD (ddd)') : '日付未選択'
