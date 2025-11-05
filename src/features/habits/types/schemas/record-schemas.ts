@@ -52,6 +52,10 @@ export const createRecordSchema = z
       .optional()
       .nullable()
       .transform((val) => val?.trim() || null),
+    isRecoveryAttempt: z.boolean().default(false).optional(),
+    recoverySuccess: z.boolean().optional().nullable(),
+    originalSkippedRecordId: z.string().optional().nullable(),
+    recoveryAttemptedAt: z.string().optional().nullable(),
   })
   .refine(
     (data) => {
@@ -152,6 +156,10 @@ export const updateRecordSchema = z
       .optional()
       .nullable()
       .transform((val) => val?.trim() || null),
+    isRecoveryAttempt: z.boolean().optional(),
+    recoverySuccess: z.boolean().optional().nullable(),
+    originalSkippedRecordId: z.string().optional().nullable(),
+    recoveryAttemptedAt: z.string().optional().nullable(),
   })
   .refine(
     (data) => {

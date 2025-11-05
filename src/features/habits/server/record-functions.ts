@@ -102,6 +102,10 @@ const createRecord = createServerFn({ method: 'POST' })
             duration_minutes: 0,
             notes: null,
             recoveryDate: null,
+            isRecoveryAttempt: true,
+            recoverySuccess: null,
+            originalSkippedRecordId: recordId,
+            recoveryAttemptedAt: null,
             createdAt: now,
             updatedAt: now,
             userId,
@@ -111,6 +115,10 @@ const createRecord = createServerFn({ method: 'POST' })
             .update(records)
             .set({
               status: 'active',
+              isRecoveryAttempt: true,
+              originalSkippedRecordId: recordId,
+              recoverySuccess: null,
+              recoveryAttemptedAt: null,
               updatedAt: now,
             })
             .where(eq(records.id, existingRecoveryRecord.id))
@@ -232,6 +240,10 @@ const updateRecord = createServerFn({ method: 'POST' })
             duration_minutes: 0,
             notes: null,
             recoveryDate: null,
+            isRecoveryAttempt: true,
+            recoverySuccess: null,
+            originalSkippedRecordId: updatedRecord.id,
+            recoveryAttemptedAt: null,
             createdAt: now,
             updatedAt: now,
             userId,
@@ -242,6 +254,10 @@ const updateRecord = createServerFn({ method: 'POST' })
             .update(records)
             .set({
               status: 'active',
+              isRecoveryAttempt: true,
+              originalSkippedRecordId: updatedRecord.id,
+              recoverySuccess: null,
+              recoveryAttemptedAt: null,
               updatedAt: now,
             })
             .where(eq(records.id, existingRecoveryRecord.id))
@@ -456,16 +472,96 @@ const getRecordById = createServerFn({ method: 'GET' })
     }
   })
 
+const toggleRecoverySuccess = createServerFn({ method: 'POST' })
+  .inputValidator(
+    z.object({
+      recordId: z.string().min(1, 'Record ID is required'),
+      success: z.boolean(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    try {
+      const session = await auth.api.getSession(getRequest())
+
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: 'Unauthorized',
+        }
+      }
+      const userId = session.user.id
+
+      const existingRecord = await db.query.records.findFirst({
+        where: and(eq(records.id, data.recordId), eq(records.userId, userId)),
+      })
+
+      if (!existingRecord) {
+        return {
+          success: false,
+          error: 'Record not found',
+        }
+      }
+
+      if (!existingRecord.isRecoveryAttempt) {
+        return {
+          success: false,
+          error: 'This record is not a recovery attempt',
+        }
+      }
+
+      const now = dayjs().tz('Asia/Tokyo').toISOString()
+      const recoveryAttemptedAt = existingRecord.recoveryAttemptedAt || now
+
+      const [updatedRecord] = await db
+        .update(records)
+        .set({
+          recoverySuccess: data.success,
+          recoveryAttemptedAt,
+          updatedAt: now,
+        })
+        .where(eq(records.id, data.recordId))
+        .returning()
+
+      await updateHabitLevel(existingRecord.habitId)
+
+      const recordEntity = {
+        ...updatedRecord,
+        created_at: new Date(updatedRecord.createdAt!),
+      } as const satisfies RecordEntity
+
+      return {
+        success: true,
+        data: recordEntity,
+      }
+    } catch (error) {
+      console.error('Error toggling recovery success:', error)
+
+      if (error instanceof Error) {
+        return {
+          success: false,
+          error: error.message,
+        }
+      }
+
+      return {
+        success: false,
+        error: 'Failed to toggle recovery success',
+      }
+    }
+  })
+
 export const recordDto = {
   createRecord,
   updateRecord,
   deleteRecord,
   getRecords,
   getRecordById,
+  toggleRecoverySuccess,
 } as const satisfies {
   createRecord: typeof createRecord
   updateRecord: typeof updateRecord
   deleteRecord: typeof deleteRecord
   getRecords: typeof getRecords
   getRecordById: typeof getRecordById
+  toggleRecoverySuccess: typeof toggleRecoverySuccess
 }
