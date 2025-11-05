@@ -30,7 +30,7 @@ export function BottomNavBar() {
   const homeRef = useRef<HTMLButtonElement>(null)
   const habitsRef = useRef<HTMLButtonElement>(null)
   const recordRef = useRef<HTMLButtonElement>(null)
-  const detailsRef = useRef<HTMLButtonElement>(null)
+  const detailsRef = useRef<HTMLDivElement>(null)
 
   const { colorScheme } = useMantineColorScheme()
   const { data: session } = authClient.useSession()
@@ -60,7 +60,7 @@ export function BottomNavBar() {
       return
     }
 
-    const refs: React.RefObject<HTMLButtonElement | null>[] = []
+    const refs: React.RefObject<HTMLButtonElement | HTMLDivElement | null>[] = []
     for (const item of items) {
       switch (item) {
         case 'home':
@@ -327,15 +327,17 @@ export function BottomNavBar() {
             </button>
 
             {/* 詳細 */}
-            <button
-              type="button"
+            <div
+              role="button"
+              tabIndex={0}
               ref={detailsRef}
               onMouseEnter={() => setHoveredItem('details')}
               onMouseLeave={() => setHoveredItem(null)}
               onClick={() => setOpened(true)}
+              onKeyUp={() => {}}
               className="relative z-10 flex min-w-20 flex-1 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-0 bg-transparent px-4 py-2 transition-colors duration-200"
             >
-              <div ref={targetRef}>
+              <button type="button" ref={targetRef}>
                 <IconListDetails
                   size={24}
                   stroke={1.5}
@@ -347,21 +349,22 @@ export function BottomNavBar() {
                         : 'text-black'
                   }
                 />
-              </div>
-              <Text
-                size="11px"
-                fw={isActive('details') ? 600 : 400}
-                c={
-                  isActive('details') || hoveredItem === 'details'
-                    ? 'blue.6'
-                    : isDark
-                      ? 'white'
-                      : 'dark'
-                }
-              >
-                詳細
-              </Text>
-            </button>
+
+                <Text
+                  size="11px"
+                  fw={isActive('details') ? 600 : 400}
+                  c={
+                    isActive('details') || hoveredItem === 'details'
+                      ? 'blue.6'
+                      : isDark
+                        ? 'white'
+                        : 'dark'
+                  }
+                >
+                  詳細
+                </Text>
+              </button>
+            </div>
           </div>
         </LiquidGlass>
       </div>
