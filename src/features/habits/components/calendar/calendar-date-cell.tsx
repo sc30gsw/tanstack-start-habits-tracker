@@ -206,15 +206,11 @@ export function CalendarDateCell({
                 c="dimmed"
                 style={{
                   visibility:
-                    record.status === 'skipped' ||
-                    isRecoveryScheduled ||
-                    isRecoveryFailed
+                    record.status === 'skipped' || isRecoveryScheduled || isRecoveryFailed
                       ? 'hidden'
                       : 'visible',
                   height:
-                    record.status === 'skipped' ||
-                    isRecoveryScheduled ||
-                    isRecoveryFailed
+                    record.status === 'skipped' || isRecoveryScheduled || isRecoveryFailed
                       ? '0'
                       : '1em',
                 }}
@@ -312,15 +308,11 @@ export function CalendarDateCell({
               c="dimmed"
               style={{
                 visibility:
-                  record.status === 'skipped' ||
-                  isRecoveryScheduled ||
-                  isRecoveryFailed
+                  record.status === 'skipped' || isRecoveryScheduled || isRecoveryFailed
                     ? 'hidden'
                     : 'visible',
                 height:
-                  record.status === 'skipped' ||
-                  isRecoveryScheduled ||
-                  isRecoveryFailed
+                  record.status === 'skipped' || isRecoveryScheduled || isRecoveryFailed
                     ? '0'
                     : '1em',
               }}
