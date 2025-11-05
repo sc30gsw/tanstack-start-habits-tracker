@@ -284,6 +284,8 @@ function HabitsPage() {
         totalDuration: 0,
         executionDays: 0,
         totalRecordCount: 0,
+        maxDailyDuration: 0,
+        maxDailyDate: undefined,
       }
     }
 
@@ -304,6 +306,8 @@ function HabitsPage() {
       dateRange: aggregated.dateRange,
       executionDays: aggregated.executionDays,
       totalRecordCount: aggregated.totalRecordCount,
+      maxDailyDuration: aggregated.maxDailyDuration,
+      maxDailyDate: aggregated.maxDailyDate,
     }
   }, [
     recordsData.data,
@@ -440,6 +444,8 @@ function HabitsPage() {
         dateRange={pieChartData.dateRange}
         executionDays={pieChartData.executionDays}
         totalRecordCount={pieChartData.totalRecordCount}
+        maxDailyDuration={pieChartData.maxDailyDuration}
+        maxDailyDate={pieChartData.maxDailyDate}
       />
     </Stack>
   )

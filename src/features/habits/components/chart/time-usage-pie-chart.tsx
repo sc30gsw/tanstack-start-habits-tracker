@@ -24,6 +24,8 @@ type TimeUsagePieChartProps = {
   dateRange?: { from: string; to: string }
   executionDays?: number
   totalRecordCount?: number
+  maxDailyDuration?: number
+  maxDailyDate?: string
   onSegmentClick?: (habitId: string) => void
   hideChart?: boolean
 }
@@ -35,6 +37,8 @@ export function TimeUsagePieChart({
   dateRange,
   executionDays = 0,
   totalRecordCount = 0,
+  maxDailyDuration = 0,
+  maxDailyDate,
   hideChart = false,
 }: TimeUsagePieChartProps) {
   // 詳細ページかどうかを判定（hideChart=trueの場合は詳細ページ）
@@ -43,10 +47,6 @@ export function TimeUsagePieChart({
   // 一覧ページ: 1日あたりの平均時間（総実行時間 ÷ 実行日数）
   // 詳細ページ: 1日あたりの平均時間（総実行時間 ÷ 実行日数）
   const averageDuration = executionDays > 0 ? Math.round(totalDuration / executionDays) : 0
-
-  // 一覧ページ: 各習慣の最大値（習慣ごとの合計時間の最大）
-  // 詳細ページ: 1日の最大実行時間（その習慣の1日の最大値）
-  const maxDuration = data.length > 0 ? Math.max(...data.map((d) => d.value)) : 0
 
   // 詳細ページの場合: 1日あたりの平均時間を計算（同じ計算）
   const dailyAverage = averageDuration
@@ -316,8 +316,13 @@ export function TimeUsagePieChart({
                   </Text>
                 </Group>
                 <Text size="sm" fw={700}>
-                  {formatDuration(maxDuration)}
+                  {formatDuration(maxDailyDuration)}
                 </Text>
+                {maxDailyDate && (
+                  <Text size="xs" c="dimmed">
+                    {dayjs(maxDailyDate).format('M/D (ddd)')}
+                  </Text>
+                )}
               </Stack>
             </Box>
           </Tooltip>
@@ -352,7 +357,7 @@ export function TimeUsagePieChart({
                 <>
                   この期間で最も長く実行された
                   <br />
-                  習慣の時間です
+                  日の合計時間です
                 </>
               }
               position="top"
@@ -362,12 +367,17 @@ export function TimeUsagePieChart({
                   <Group gap={4}>
                     <IconTrophy size={16} color="var(--mantine-color-orange-6)" />
                     <Text size="xs" c="dimmed" fw={500}>
-                      習慣の最長時間
+                      最長時間
                     </Text>
                   </Group>
                   <Text size="sm" fw={700}>
-                    {formatDuration(maxDuration)}
+                    {formatDuration(maxDailyDuration)}
                   </Text>
+                  {maxDailyDate && (
+                    <Text size="xs" c="dimmed">
+                      {dayjs(maxDailyDate).format('M/D (ddd)')}
+                    </Text>
+                  )}
                 </Stack>
               </Box>
             </Tooltip>

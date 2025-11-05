@@ -25,6 +25,8 @@ export type PieChartData = {
   dateRange: Record<'from' | 'to', string>
   executionDays: number
   totalRecordCount: number
+  maxDailyDuration: number
+  maxDailyDate?: string
 }
 
 const PIE_CHART_SUPPORTED_COLORS = [
@@ -156,6 +158,7 @@ export function aggregateTimeByHabit(
   calendarView: SearchParams['calendarView'] = 'month',
   selectedDate?: string,
   currentMonth?: string,
+  filterHabitId?: string, // 特定の習慣でフィルタする場合のID
 ) {
   const dateRange = getPeriodDateRange(calendarView, currentMonth, selectedDate)
 
@@ -165,7 +168,8 @@ export function aggregateTimeByHabit(
       record.duration_minutes &&
       record.duration_minutes > 0 &&
       record.date >= dateRange.from &&
-      record.date <= dateRange.to,
+      record.date <= dateRange.to &&
+      (!filterHabitId || record.habitId === filterHabitId), // 習慣IDでフィルタ
   )
 
   const habitMap = pipe(
@@ -200,6 +204,24 @@ export function aggregateTimeByHabit(
 
   const totalRecordCount = filteredRecords.length
 
+  // 1日ごとの合計時間を計算して、最大値を取得
+  const dailyTotals = filteredRecords.reduce((acc, record) => {
+    const existing = acc.get(record.date)
+    const durationMinutes = record.duration_minutes ?? 0
+    acc.set(record.date, (existing || 0) + durationMinutes)
+    return acc
+  }, new Map<string, number>())
+
+  let maxDailyDuration = 0
+  let maxDailyDate: string | undefined
+
+  for (const [date, duration] of dailyTotals.entries()) {
+    if (duration > maxDailyDuration) {
+      maxDailyDuration = duration
+      maxDailyDate = date
+    }
+  }
+
   return {
     data,
     totalDuration,
@@ -207,6 +229,8 @@ export function aggregateTimeByHabit(
     dateRange,
     executionDays,
     totalRecordCount,
+    maxDailyDuration,
+    maxDailyDate,
   }
 }
 

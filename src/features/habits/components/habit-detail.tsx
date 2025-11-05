@@ -44,6 +44,7 @@ export function HabitDetail() {
       calendarView,
       searchParams?.selectedDate,
       searchParams?.currentMonth,
+      habit.data.id, // 詳細ページでは特定の習慣でフィルタ
     )
 
     const sorted = sortForDetailPage(aggregated.data, habit.data.id)
@@ -55,6 +56,8 @@ export function HabitDetail() {
       dateRange: aggregated.dateRange,
       executionDays: aggregated.executionDays,
       totalRecordCount: aggregated.totalRecordCount,
+      maxDailyDuration: aggregated.maxDailyDuration,
+      maxDailyDate: aggregated.maxDailyDate,
     }
   }, [
     records.data,
@@ -136,6 +139,8 @@ export function HabitDetail() {
                 dateRange={pieChartData.dateRange}
                 executionDays={pieChartData.executionDays}
                 totalRecordCount={pieChartData.totalRecordCount}
+                maxDailyDuration={pieChartData.maxDailyDuration}
+                maxDailyDate={pieChartData.maxDailyDate}
                 hideChart={true}
               />
               <TrendsChart records={records.data} habitColor={habit.data?.color as HabitColor} />
