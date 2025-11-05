@@ -1,4 +1,3 @@
-import type { DayProps } from '@mantine/dates'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
@@ -8,7 +7,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.tz.setDefault('Asia/Tokyo')
 
-export function getDayPropsForJapaneseCalendar(date: Date): Partial<DayProps> {
+export function getDayPropsForJapaneseCalendar(date: string) {
   const dayjsDate = dayjs(date).tz('Asia/Tokyo')
   const dateType = getDateType(dayjsDate)
 
