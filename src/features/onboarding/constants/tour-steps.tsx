@@ -39,7 +39,7 @@ const HOME_STEPS = [
     id: 'welcome',
     title: 'Trackへようこそ!',
     content: (
-      <Stack pr="xl" w={330}>
+      <Stack pr="xl" w={340}>
         <Text size="sm">習慣追跡アプリTrackの使い方をご案内します。</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -568,7 +568,7 @@ const HABITS_STEPS = [
     ),
     focusRevealProps: {
       popoverProps: {
-        position: 'right-start',
+        position: 'right',
         offset: 10,
       },
     },
