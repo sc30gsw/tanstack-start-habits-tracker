@@ -37,6 +37,7 @@ import { MarqueeSection } from '~/features/landing/components/marquee-section'
 import { ProductShowcaseSection } from '~/features/landing/components/product-showcase-section'
 import { TestimonialsSection } from '~/features/landing/components/testimonials-section'
 import { ValuePropositionsSection } from '~/features/landing/components/value-propositions-section'
+import { OnboardingHabitProgressStepper } from '~/features/onboarding/components/onboarding-habit-stepper'
 import { OnboardingTriggerButton } from '~/features/onboarding/components/onboarding-trigger-button'
 import { STEPS } from '~/features/onboarding/constants/tour-steps'
 import { useOnboardingTour } from '~/features/onboarding/hooks/use-onboarding-tour'
@@ -137,14 +138,13 @@ function Home() {
       started={started}
       onOnboardingTourEnd={handlers.onEnd}
       onOnboardingTourClose={handlers.onClose}
+      stepper={OnboardingHabitProgressStepper}
     >
       <Container size="lg" py="xl">
         <Stack gap="xl">
           <Box data-onboarding-tour-id="welcome">
             <Flex align="center" gap="xs" mb="sm">
-              <Title order={1}>
-                Track - 習慣追跡アプリ
-              </Title>
+              <Title order={1}>Track - 習慣追跡アプリ</Title>
               <OnboardingTriggerButton variant="inline" onClick={handlers.onStart} />
             </Flex>
             <Text size="lg" c="gray.7">

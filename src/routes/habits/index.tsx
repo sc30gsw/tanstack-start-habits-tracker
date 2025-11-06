@@ -42,6 +42,7 @@ import {
   sortForListPage,
 } from '~/features/habits/utils/pie-chart-utils'
 import { HabitOrganizer } from '~/features/home/components/habit-organizer'
+import { OnboardingHabitProgressStepper } from '~/features/onboarding/components/onboarding-habit-stepper'
 import { OnboardingTriggerButton } from '~/features/onboarding/components/onboarding-trigger-button'
 import { STEPS } from '~/features/onboarding/constants/tour-steps'
 import { useOnboardingTour } from '~/features/onboarding/hooks/use-onboarding-tour'
@@ -510,6 +511,7 @@ function HabitsPage() {
       started={started}
       onOnboardingTourEnd={handlers.onEnd}
       onOnboardingTourClose={handlers.onClose}
+      stepper={OnboardingHabitProgressStepper}
     >
       <Container size="fluid" px="xl" py="xl">
         {isDesktop ? (
