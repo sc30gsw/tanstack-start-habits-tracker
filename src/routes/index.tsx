@@ -6,6 +6,7 @@ import {
   Card,
   Container,
   Divider,
+  Flex,
   Group,
   Stack,
   Text,
@@ -140,17 +141,15 @@ function Home() {
       <Container size="lg" py="xl">
         <Stack gap="xl">
           <Box data-onboarding-tour-id="welcome">
-            <Group justify="space-between" align="center">
-              <Box>
-                <Title order={1} mb="sm">
-                  Track - 習慣追跡アプリ
-                </Title>
-                <Text size="lg" c="dimmed">
-                  日々の習慣を記録し、継続状況を可視化しましょう
-                </Text>
-              </Box>
+            <Flex align="center" gap="xs" mb="sm">
+              <Title order={1}>
+                Track - 習慣追跡アプリ
+              </Title>
               <OnboardingTriggerButton variant="inline" onClick={handlers.onStart} />
-            </Group>
+            </Flex>
+            <Text size="lg" c="gray.7">
+              日々の習慣を記録し、継続状況を可視化しましょう
+            </Text>
           </Box>
 
           <Group gap="lg" data-onboarding-tour-id="stats-overview">

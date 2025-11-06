@@ -1,5 +1,5 @@
 import { ActionIcon, Tooltip } from '@mantine/core'
-import { IconHelp } from '@tabler/icons-react'
+import { IconQuestionMark } from '@tabler/icons-react'
 
 type OnboardingTriggerButtonProps = {
   variant: 'inline' | 'floating'
@@ -10,26 +10,29 @@ export function OnboardingTriggerButton({ variant, onClick }: OnboardingTriggerB
   const isFloating = variant === 'floating'
 
   return (
-    <Tooltip label="使い方を見る" position={isFloating ? 'left' : undefined}>
+    <Tooltip label="使い方を見る" position={'top'} withArrow>
       <ActionIcon
-        variant={isFloating ? 'filled' : 'light'}
+        variant={isFloating ? 'filled' : 'outline'}
         color="blue"
         size={isFloating ? 'xl' : 'lg'}
+        radius={isFloating ? 'lg' : 99}
         onClick={onClick}
         style={
           isFloating
             ? {
                 position: 'fixed',
-                bottom: '24px',
+                bottom: '16px',
                 right: '24px',
                 zIndex: 1000,
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
               }
-            : undefined
+            : {
+                borderWidth: '1.5px',
+              }
         }
         aria-label="使い方を見る"
       >
-        <IconHelp size={isFloating ? 24 : 20} />
+        <IconQuestionMark stroke={2} size={isFloating ? 24 : 20} />
       </ActionIcon>
     </Tooltip>
   )
