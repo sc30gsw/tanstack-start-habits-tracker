@@ -39,7 +39,7 @@ const HOME_STEPS = [
     id: 'welcome',
     title: 'Trackへようこそ!',
     content: (
-      <Stack>
+      <Stack pr="xl" w={330}>
         <Text size="sm">習慣追跡アプリTrackの使い方をご案内します。</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -74,7 +74,7 @@ const HOME_STEPS = [
     id: 'stats-overview',
     title: '統計情報の確認',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <Text size="sm">ここでは一目で確認できます：</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -118,7 +118,7 @@ const HOME_STEPS = [
     id: 'quick-action',
     title: '習慣一覧へ',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <Text size="sm">このボタンから習慣一覧ページに移動できます。</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -162,7 +162,7 @@ const HOME_STEPS = [
     id: 'calendar-view',
     title: 'カレンダー表示',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <List size="sm" spacing="xs">
           <List.Item
             icon={
@@ -205,7 +205,7 @@ const HOME_STEPS = [
     id: 'daily-habits',
     title: '今日の完了習慣',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <Text size="sm">選択した日付の完了習慣を確認</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -240,7 +240,7 @@ const HOME_STEPS = [
     id: 'heatmap-view',
     title: 'ヒートマップ',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <Text size="sm">GitHubスタイルのヒートマップ</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -278,7 +278,7 @@ const HABITS_STEPS = [
     id: 'create-habit',
     title: '習慣を作成しよう',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <Text size="sm">新しい習慣を作成できます</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -331,7 +331,7 @@ const HABITS_STEPS = [
     id: 'habit-organizer',
     title: '習慣を整理',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <Text size="sm">習慣を見やすく整理</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -384,7 +384,7 @@ const HABITS_STEPS = [
     id: 'habit-card',
     title: '習慣カード',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <Text size="sm">各習慣の詳細を確認</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -446,7 +446,7 @@ const HABITS_STEPS = [
     id: 'calendar-view',
     title: 'カレンダー表示',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <List size="sm" spacing="xs">
           <List.Item
             icon={
@@ -489,7 +489,7 @@ const HABITS_STEPS = [
     id: 'time-usage-chart',
     title: '時間配分グラフ',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <Text size="sm">習慣別の時間配分を可視化</Text>
         <List size="sm" spacing="xs">
           <List.Item
@@ -533,7 +533,7 @@ const HABITS_STEPS = [
     id: 'panel-resize',
     title: 'パネルリサイズ',
     content: (
-      <Stack gap="xs">
+      <Stack gap="xs" w={330}>
         <Text size="sm">レイアウトをカスタマイズ</Text>
         <List size="sm" spacing="xs">
           <List.Item
