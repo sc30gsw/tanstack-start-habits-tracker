@@ -1,17 +1,40 @@
 import type { OnboardingTourStep } from '@gfazioli/mantine-onboarding-tour'
+import { List, Stack, Text, ThemeIcon } from '@mantine/core'
+import {
+  IconCalendar,
+  IconChartPie,
+  IconCheck,
+  IconEdit,
+  IconFilter,
+  IconFlame,
+  IconListCheck,
+  IconPlus,
+  IconResize,
+  IconShare,
+  IconSparkles,
+  IconTrendingUp,
+} from '@tabler/icons-react'
 
 const HOME_STEPS = [
   {
     id: 'welcome',
     title: 'Trackへようこそ!',
     content: (
-      <>
-        習慣追跡アプリTrackの使い方をご案内します。
-        <br />
-        日々の習慣を記録し、
-        <br />
-        継続状況を可視化しましょう。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">習慣追跡アプリTrackの使い方をご案内します。</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="blue" size={20} radius="xl">
+              <IconSparkles size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>日々の習慣を記録</List.Item>
+          <List.Item>継続状況を可視化</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -24,13 +47,22 @@ const HOME_STEPS = [
     id: 'stats-overview',
     title: '統計情報の確認',
     content: (
-      <>
-        ここでは
-        <br />
-        登録習慣数、総記録数、今日の完了数
-        <br />
-        を一目で確認できます。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">ここでは一目で確認できます：</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="teal" size={20} radius="xl">
+              <IconTrendingUp size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>登録習慣数</List.Item>
+          <List.Item>総記録数</List.Item>
+          <List.Item>今日の完了数</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -43,11 +75,22 @@ const HOME_STEPS = [
     id: 'quick-action',
     title: '習慣一覧へ',
     content: (
-      <>
-        このボタンから 習慣一覧ページに移動できます。
-        <br />
-        習慣の作成・編集・記録は すべてここから行えます。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">このボタンから習慣一覧ページに移動できます。</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="grape" size={20} radius="xl">
+              <IconCheck size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>習慣の作成</List.Item>
+          <List.Item>習慣の編集</List.Item>
+          <List.Item>記録の追加</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -60,12 +103,21 @@ const HOME_STEPS = [
     id: 'calendar-view',
     title: 'カレンダー表示',
     content: (
-      <>
-        月・週・日の3つの表示モードで
-        <br /> 習慣の実行状況を確認できます。
-        <br />
-        日付を選択すると、 その日の詳細が表示されます。
-      </>
+      <Stack gap="xs">
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="blue" size={20} radius="xl">
+              <IconCalendar size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>月・週・日の3つの表示モード</List.Item>
+          <List.Item>習慣の実行状況を確認</List.Item>
+          <List.Item>日付をクリックで詳細表示</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -78,13 +130,24 @@ const HOME_STEPS = [
     id: 'daily-habits',
     title: '今日の完了習慣',
     content: (
-      <>
-        選択した日付に完了した習慣を
-        <br />
-        一覧で確認できます。
-        <br />
-        共有ボタンで実績を シェアすることもできます。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">選択した日付の完了習慣を確認</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="green" size={20} radius="xl">
+              <IconListCheck size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>完了習慣の一覧表示</List.Item>
+          <List.Item>
+            <IconShare size={14} style={{ display: 'inline', marginRight: 4 }} />
+            共有ボタンで実績をシェア
+          </List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -97,13 +160,21 @@ const HOME_STEPS = [
     id: 'heatmap-view',
     title: 'ヒートマップ',
     content: (
-      <>
-        GitHubスタイルのヒートマップで
-        <br />
-        年間の継続状況を可視化します。
-        <br />
-        色の濃さで活動量が分かります。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">GitHubスタイルのヒートマップ</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="orange" size={20} radius="xl">
+              <IconFlame size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>年間の継続状況を可視化</List.Item>
+          <List.Item>色の濃さで活動量を表示</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -119,11 +190,23 @@ const HABITS_STEPS = [
     id: 'create-habit',
     title: '習慣を作成しよう',
     content: (
-      <>
-        ここから新しい習慣を作成できます。
-        <br />
-        習慣名、説明、カラー、優先度を 設定しましょう。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">新しい習慣を作成できます</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="blue" size={20} radius="xl">
+              <IconPlus size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>習慣名</List.Item>
+          <List.Item>説明</List.Item>
+          <List.Item>カラー</List.Item>
+          <List.Item>優先度</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -136,11 +219,23 @@ const HABITS_STEPS = [
     id: 'habit-organizer',
     title: '習慣を整理',
     content: (
-      <>
-        検索、並び順、フィルタを使って 習慣を見やすく整理できます。
-        <br />
-        優先度別やキーワードで 絞り込めます。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">習慣を見やすく整理</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="violet" size={20} radius="xl">
+              <IconFilter size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>検索機能</List.Item>
+          <List.Item>並び順の変更</List.Item>
+          <List.Item>優先度フィルター</List.Item>
+          <List.Item>キーワード絞り込み</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -153,15 +248,24 @@ const HABITS_STEPS = [
     id: 'habit-card',
     title: '習慣カード',
     content: (
-      <>
-        各習慣の詳細を確認できます。
-        <br />
-        編集・削除ボタンで習慣を管理し、 「詳細」ボタンでは統計情報、
-        <br />
-        レベル & バッジ、 トレンドチャート、 ヒートマップなどの
-        <br />
-        詳細な分析を表示します。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">各習慣の詳細を確認</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="teal" size={20} radius="xl">
+              <IconEdit size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>編集・削除ボタン</List.Item>
+          <List.Item>統計情報</List.Item>
+          <List.Item>レベル & バッジ</List.Item>
+          <List.Item>トレンドチャート</List.Item>
+          <List.Item>ヒートマップ</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -174,11 +278,21 @@ const HABITS_STEPS = [
     id: 'calendar-view',
     title: 'カレンダー表示',
     content: (
-      <>
-        月・週・日の3つの表示モードで 習慣の実行状況を確認できます。
-        <br />
-        完了済みの習慣のみが 表示されます。
-      </>
+      <Stack gap="xs">
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="blue" size={20} radius="xl">
+              <IconCalendar size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>月・週・日の表示モード</List.Item>
+          <List.Item>習慣の実行状況</List.Item>
+          <List.Item>完了済み習慣のみ表示</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -191,11 +305,22 @@ const HABITS_STEPS = [
     id: 'time-usage-chart',
     title: '時間配分グラフ',
     content: (
-      <>
-        選択した期間の習慣別の 時間配分を円グラフで 確認できます。
-        <br />
-        どの習慣にどれだけ時間を使ったかが 一目でわかります。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">習慣別の時間配分を可視化</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="pink" size={20} radius="xl">
+              <IconChartPie size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>期間別の時間配分</List.Item>
+          <List.Item>円グラフで表示</List.Item>
+          <List.Item>使用時間が一目でわかる</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
@@ -208,15 +333,26 @@ const HABITS_STEPS = [
     id: 'panel-resize',
     title: 'パネルリサイズ',
     content: (
-      <>
-        左右のパネルサイズは 中央のハンドルをドラッグして 調整できます。
-        <br />
-        お好みのレイアウトに 変更しましょう。
-      </>
+      <Stack gap="xs">
+        <Text size="sm">レイアウトをカスタマイズ</Text>
+        <List
+          size="sm"
+          spacing="xs"
+          icon={
+            <ThemeIcon color="cyan" size={20} radius="xl">
+              <IconResize size={12} />
+            </ThemeIcon>
+          }
+        >
+          <List.Item>中央のハンドルをドラッグ</List.Item>
+          <List.Item>左右のパネルサイズを調整</List.Item>
+          <List.Item>お好みのレイアウトに変更</List.Item>
+        </List>
+      </Stack>
     ),
     focusRevealProps: {
       popoverProps: {
-        position: 'top',
+        position: 'right-start',
         offset: 10,
       },
     },
