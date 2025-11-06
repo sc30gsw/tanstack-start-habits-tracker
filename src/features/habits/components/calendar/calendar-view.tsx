@@ -86,6 +86,7 @@ export function CalendarView({
               onChange={(date) => {
                 if (date) {
                   const newDate = dayjs(date)
+
                   navigate({
                     search: (prev) => ({
                       ...prev,

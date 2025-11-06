@@ -1,4 +1,6 @@
+import { OnboardingTour } from '@gfazioli/mantine-onboarding-tour'
 import {
+  Box,
   Button,
   Card,
   Center,
@@ -14,6 +16,7 @@ import {
 } from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { useMediaQuery } from '@mantine/hooks'
+import '@gfazioli/mantine-onboarding-tour/styles.css'
 import { IconCalendar, IconChartPie } from '@tabler/icons-react'
 import { createFileRoute, Outlet, useMatches, useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
@@ -39,6 +42,9 @@ import {
   sortForListPage,
 } from '~/features/habits/utils/pie-chart-utils'
 import { HabitOrganizer } from '~/features/home/components/habit-organizer'
+import { OnboardingTriggerButton } from '~/features/onboarding/components/onboarding-trigger-button'
+import { STEPS } from '~/features/onboarding/constants/tour-steps'
+import { useOnboardingTour } from '~/features/onboarding/hooks/use-onboarding-tour'
 import { getDayPropsForJapaneseCalendar } from '~/utils/date-input-styles'
 
 dayjs.extend(utc)
@@ -254,6 +260,7 @@ function HabitsPage() {
   const navigate = useNavigate()
   const searchParams = Route.useSearch()
   const isDesktop = useMediaQuery('(min-width: 768px)')
+  const { started, handlers } = useOnboardingTour()
 
   const matches = useMatches()
   const last = matches[matches.length - 1]
@@ -328,12 +335,16 @@ function HabitsPage() {
   const habitListContent = (
     <Stack gap="lg">
       <Group justify="space-between" align="center">
-        <Title order={1}>習慣一覧</Title>
+        <Group align="center" gap="md">
+          <Title order={1}>習慣一覧</Title>
+          <OnboardingTriggerButton variant="inline" onClick={handlers.onStart} />
+        </Group>
         <Button
           color="habit"
           onClick={() =>
             navigate({ to: '.', search: { ...searchParams, showForm: !searchParams.showForm } })
           }
+          data-onboarding-tour-id="create-habit"
         >
           {searchParams.showForm ? '作成フォームを閉じる' : '新しい習慣を作成'}
         </Button>
@@ -346,14 +357,25 @@ function HabitsPage() {
         />
       )}
 
-      <HabitOrganizer />
+      <Box data-onboarding-tour-id="habit-organizer">
+        <HabitOrganizer />
+      </Box>
 
-      {habitsData.success ? <HabitList /> : <div>エラー: {habitsData.error}</div>}
+      <Box data-onboarding-tour-id="habit-card">
+        {habitsData.success ? <HabitList /> : <Box>エラー: {habitsData.error}</Box>}
+      </Box>
     </Stack>
   )
 
   const calendarContent = (
-    <Card withBorder padding="lg" radius="md" shadow="sm" id={CALENDAR_VIEW_HASH_TARGET}>
+    <Card
+      withBorder
+      padding="lg"
+      radius="md"
+      shadow="sm"
+      id={CALENDAR_VIEW_HASH_TARGET}
+      data-onboarding-tour-id="calendar-view"
+    >
       <Stack gap="sm">
         <Group justify="space-between" align="center">
           <Group gap="xs" align="center">
@@ -462,7 +484,7 @@ function HabitsPage() {
   )
 
   const pieChartContent = (
-    <Stack gap="md">
+    <Stack gap="md" data-onboarding-tour-id="time-usage-chart">
       <Group gap="xs" align="center">
         <IconChartPie size={24} color="var(--mantine-color-blue-6)" />
         <Text size="lg" fw={600}>
@@ -483,37 +505,47 @@ function HabitsPage() {
   )
 
   return (
-    <Container size="fluid" px="xl" py="xl">
-      {isDesktop ? (
-        <PanelGroup direction="horizontal" autoSaveId="habits-list-layout">
-          <Panel defaultSize={60} minSize={40} maxSize={75} style={{ paddingRight: 12 }}>
-            {habitListContent}
-          </Panel>
+    <OnboardingTour
+      tour={STEPS.HABITS}
+      started={started}
+      onOnboardingTourEnd={handlers.onEnd}
+      onOnboardingTourClose={handlers.onClose}
+    >
+      <Container size="fluid" px="xl" py="xl">
+        {isDesktop ? (
+          <PanelGroup direction="horizontal" autoSaveId="habits-list-layout">
+            <Panel defaultSize={60} minSize={40} maxSize={75} style={{ paddingRight: 12 }}>
+              {habitListContent}
+            </Panel>
 
-          <PanelResizeHandle
-            className="habits-list-resize-handle"
-            style={{
-              width: '2px',
-              transition: 'background-color 0.2s ease',
-              cursor: 'col-resize',
-              position: 'relative',
-            }}
-          />
+            <Box data-onboarding-tour-id="panel-resize">
+              <PanelResizeHandle
+                className="habits-list-resize-handle"
+                style={{
+                  width: '2px',
+                  transition: 'background-color 0.2s ease',
+                  cursor: 'col-resize',
+                  position: 'relative',
+                }}
+              />
+            </Box>
 
-          <Panel minSize={25} style={{ paddingLeft: 12 }}>
-            <Stack gap="lg">
-              {calendarContent}
-              {pieChartContent}
-            </Stack>
-          </Panel>
-        </PanelGroup>
-      ) : (
-        <Grid gutter="lg">
-          <Grid.Col span={12}>{habitListContent}</Grid.Col>
-          <Grid.Col span={12}>{calendarContent}</Grid.Col>
-          <Grid.Col span={12}>{pieChartContent}</Grid.Col>
-        </Grid>
-      )}
-    </Container>
+            <Panel minSize={25} style={{ paddingLeft: 12 }}>
+              <Stack gap="lg">
+                {calendarContent}
+                {pieChartContent}
+              </Stack>
+            </Panel>
+          </PanelGroup>
+        ) : (
+          <Grid gutter="lg">
+            <Grid.Col span={12}>{habitListContent}</Grid.Col>
+            <Grid.Col span={12}>{calendarContent}</Grid.Col>
+            <Grid.Col span={12}>{pieChartContent}</Grid.Col>
+          </Grid>
+        )}
+      </Container>
+      <OnboardingTriggerButton variant="floating" onClick={handlers.onStart} />
+    </OnboardingTour>
   )
 }

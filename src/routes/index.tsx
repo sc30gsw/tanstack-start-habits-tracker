@@ -1,3 +1,4 @@
+import { OnboardingTour } from '@gfazioli/mantine-onboarding-tour'
 import {
   Badge,
   Box,
@@ -10,6 +11,7 @@ import {
   Text,
   Title,
 } from '@mantine/core'
+import '@gfazioli/mantine-onboarding-tour/styles.css'
 import { IconShare } from '@tabler/icons-react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
@@ -34,6 +36,9 @@ import { MarqueeSection } from '~/features/landing/components/marquee-section'
 import { ProductShowcaseSection } from '~/features/landing/components/product-showcase-section'
 import { TestimonialsSection } from '~/features/landing/components/testimonials-section'
 import { ValuePropositionsSection } from '~/features/landing/components/value-propositions-section'
+import { OnboardingTriggerButton } from '~/features/onboarding/components/onboarding-trigger-button'
+import { STEPS } from '~/features/onboarding/constants/tour-steps'
+import { useOnboardingTour } from '~/features/onboarding/hooks/use-onboarding-tour'
 import { auth } from '~/lib/auth'
 
 dayjs.locale('ja')
@@ -95,6 +100,7 @@ function Home() {
   const navigate = Route.useNavigate()
   const searchParams = Route.useSearch()
   const copyId = useId()
+  const { started, handlers } = useOnboardingTour()
 
   if (!loaderData.isAuthenticated) {
     return (
@@ -115,7 +121,6 @@ function Home() {
   const { habits, records } = loaderData
 
   const today = dayjs().format('YYYY-MM-DD')
-  // 選択された日付を取得（未選択の場合は今日）
   const selectedDate = searchParams.selectedDate ?? today
 
   const totalHabits = habits.success ? (habits.data?.length ?? 0) : 0
@@ -126,128 +131,145 @@ function Home() {
     : 0
 
   return (
-    <Container size="lg" py="xl">
-      <Stack gap="xl">
-        <div>
-          <Title order={1} mb="sm">
-            Track - 習慣追跡アプリ
-          </Title>
-          <Text size="lg" c="dimmed">
-            日々の習慣を記録し、継続状況を可視化しましょう
-          </Text>
-        </div>
-
-        <Group gap="lg">
-          <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
-            <Text c="dimmed" size="sm" mb="xs">
-              登録習慣数
-            </Text>
-            <Text size="xl" fw={700}>
-              {totalHabits}
-            </Text>
-          </Card>
-
-          <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
-            <Text c="dimmed" size="sm" mb="xs">
-              総記録数
-            </Text>
-            <Text size="xl" fw={700}>
-              {totalRecords}
-            </Text>
-          </Card>
-
-          <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
-            <Text
-              c="dimmed"
-              size="sm"
-              mb="xs"
-              lineClamp={2}
-              title={
-                selectedDate === today
-                  ? '今日の完了数'
-                  : `${dayjs(selectedDate).format('YYYY年M月D日')}の完了数`
-              }
-            >
-              {selectedDate === today
-                ? '今日の完了数'
-                : `${dayjs(selectedDate).format('YYYY/M/D')}の完了数`}
-            </Text>
-            <Text size="xl" fw={700} c="green">
-              {completedOnSelectedDate}
-            </Text>
-          </Card>
-        </Group>
-
-        <Card withBorder padding="lg">
-          <Stack gap="md">
-            <Text size="lg" fw={500}>
-              今日の習慣を記録しましょう
-            </Text>
-            <Group gap="md">
-              <Button component={Link} to="/habits" size="lg">
-                習慣一覧
-              </Button>
-              {totalHabits > 0 && (
-                <Badge variant="light" color="blue" size="lg">
-                  {totalHabits}つの習慣が登録済み
-                </Badge>
-              )}
-            </Group>
-          </Stack>
-        </Card>
-
-        <HomeCalendarView />
-
-        <Card withBorder padding="lg">
-          <Stack gap="lg">
+    <OnboardingTour
+      tour={STEPS.HOME}
+      started={started}
+      onOnboardingTourEnd={handlers.onEnd}
+      onOnboardingTourClose={handlers.onClose}
+    >
+      <Container size="lg" py="xl">
+        <Stack gap="xl">
+          <Box data-onboarding-tour-id="welcome">
             <Group justify="space-between" align="center">
-              <Box id={copyId}>
-                <Text size="xl" fw={600}>
-                  {selectedDate === today
-                    ? '今日の完了習慣'
-                    : `${dayjs(selectedDate).format('M月D日')}の完了習慣`}
+              <Box>
+                <Title order={1} mb="sm">
+                  Track - 習慣追跡アプリ
+                </Title>
+                <Text size="lg" c="dimmed">
+                  日々の習慣を記録し、継続状況を可視化しましょう
                 </Text>
-                {completedOnSelectedDate > 0 && (
-                  <Text size="xs" c="dimmed" mt={4}>
-                    {completedOnSelectedDate}件の習慣を完了しました
-                  </Text>
-                )}
               </Box>
-              {completedOnSelectedDate > 0 && (
-                <Button
-                  variant="gradient"
-                  gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-                  size="sm"
-                  leftSection={<IconShare size={16} />}
-                  onClick={() => {
-                    navigate({
-                      search: (prev) => ({ ...prev, open: true }),
-                      hash: copyId,
-                    })
-                  }}
-                  styles={{
-                    root: {
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      },
-                    },
-                  }}
-                >
-                  共有
-                </Button>
-              )}
+              <OnboardingTriggerButton variant="inline" onClick={handlers.onStart} />
             </Group>
-            <Divider />
+          </Box>
 
-            <DailyHabitList />
-          </Stack>
-        </Card>
+          <Group gap="lg" data-onboarding-tour-id="stats-overview">
+            <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
+              <Text c="dimmed" size="sm" mb="xs">
+                登録習慣数
+              </Text>
+              <Text size="xl" fw={700}>
+                {totalHabits}
+              </Text>
+            </Card>
 
-        <HomeHeatmapView />
-      </Stack>
-      <ShareHabitsModal copyId={copyId} />
-    </Container>
+            <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
+              <Text c="dimmed" size="sm" mb="xs">
+                総記録数
+              </Text>
+              <Text size="xl" fw={700}>
+                {totalRecords}
+              </Text>
+            </Card>
+
+            <Card withBorder padding="lg" style={{ flex: 1, minHeight: '100px' }}>
+              <Text
+                c="dimmed"
+                size="sm"
+                mb="xs"
+                lineClamp={2}
+                title={
+                  selectedDate === today
+                    ? '今日の完了数'
+                    : `${dayjs(selectedDate).format('YYYY年M月D日')}の完了数`
+                }
+              >
+                {selectedDate === today
+                  ? '今日の完了数'
+                  : `${dayjs(selectedDate).format('YYYY/M/D')}の完了数`}
+              </Text>
+              <Text size="xl" fw={700} c="green">
+                {completedOnSelectedDate}
+              </Text>
+            </Card>
+          </Group>
+
+          <Card withBorder padding="lg" data-onboarding-tour-id="quick-action">
+            <Stack gap="md">
+              <Text size="lg" fw={500}>
+                今日の習慣を記録しましょう
+              </Text>
+              <Group gap="md">
+                <Button component={Link} to="/habits" size="lg">
+                  習慣一覧
+                </Button>
+                {totalHabits > 0 && (
+                  <Badge variant="light" color="blue" size="lg">
+                    {totalHabits}つの習慣が登録済み
+                  </Badge>
+                )}
+              </Group>
+            </Stack>
+          </Card>
+
+          <Box data-onboarding-tour-id="calendar-view">
+            <HomeCalendarView />
+          </Box>
+
+          <Card withBorder padding="lg" data-onboarding-tour-id="daily-habits">
+            <Stack gap="lg">
+              <Group justify="space-between" align="center">
+                <Box id={copyId}>
+                  <Text size="xl" fw={600}>
+                    {selectedDate === today
+                      ? '今日の完了習慣'
+                      : `${dayjs(selectedDate).format('M月D日')}の完了習慣`}
+                  </Text>
+                  {completedOnSelectedDate > 0 && (
+                    <Text size="xs" c="dimmed" mt={4}>
+                      {completedOnSelectedDate}件の習慣を完了しました
+                    </Text>
+                  )}
+                </Box>
+                {completedOnSelectedDate > 0 && (
+                  <Button
+                    variant="gradient"
+                    gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
+                    size="sm"
+                    leftSection={<IconShare size={16} />}
+                    onClick={() => {
+                      navigate({
+                        search: (prev) => ({ ...prev, open: true }),
+                        hash: copyId,
+                      })
+                    }}
+                    styles={{
+                      root: {
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                        },
+                      },
+                    }}
+                  >
+                    共有
+                  </Button>
+                )}
+              </Group>
+              <Divider />
+
+              <DailyHabitList />
+            </Stack>
+          </Card>
+
+          <Box data-onboarding-tour-id="heatmap-view">
+            <HomeHeatmapView />
+          </Box>
+        </Stack>
+        <ShareHabitsModal copyId={copyId} />
+      </Container>
+      <OnboardingTriggerButton variant="floating" onClick={handlers.onStart} />
+    </OnboardingTour>
   )
 }

@@ -26,6 +26,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@gfazioli/mantine-onboarding-tour": "^2.5.3",
     "@holiday-jp/holiday_jp": "^2.5.1",
     "@libsql/client": "^0.15.15",
     "@mantine/charts": "^8.3.1",
