@@ -1,18 +1,37 @@
 import type { OnboardingTourStep } from '@gfazioli/mantine-onboarding-tour'
 import { List, Stack, Text, ThemeIcon } from '@mantine/core'
 import {
-  IconCalendar,
+  IconArrowsHorizontal,
+  IconArrowsSort,
+  IconAward,
+  IconCalendarEvent,
+  IconCalendarTime,
+  IconChartBar,
+  IconChartGridDots,
+  IconChartLine,
   IconChartPie,
-  IconCheck,
+  IconCirclePlus,
+  IconClick,
+  IconClock,
+  IconDatabase,
   IconEdit,
+  IconEye,
+  IconFileText,
   IconFilter,
-  IconFlame,
+  IconFilterCheck,
+  IconGripVertical,
+  IconLayout,
+  IconLetterCase,
+  IconList,
   IconListCheck,
+  IconPalette,
   IconPlus,
-  IconResize,
+  IconProgress,
+  IconSearch,
   IconShare,
-  IconSparkles,
+  IconStar,
   IconTrendingUp,
+  IconZoomQuestion,
 } from '@tabler/icons-react'
 
 const HOME_STEPS = [
@@ -20,19 +39,27 @@ const HOME_STEPS = [
     id: 'welcome',
     title: 'Trackへようこそ!',
     content: (
-      <Stack gap="xs">
+      <Stack>
         <Text size="sm">習慣追跡アプリTrackの使い方をご案内します。</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="blue" size={20} radius="xl">
-              <IconSparkles size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>日々の習慣を記録</List.Item>
-          <List.Item>継続状況を可視化</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="blue" size={18} radius="xl">
+                <IconEdit size={10} />
+              </ThemeIcon>
+            }
+          >
+            日々の習慣を記録
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="cyan" size={18} radius="xl">
+                <IconChartLine size={10} />
+              </ThemeIcon>
+            }
+          >
+            継続状況を可視化
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -49,18 +76,34 @@ const HOME_STEPS = [
     content: (
       <Stack gap="xs">
         <Text size="sm">ここでは一目で確認できます：</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="teal" size={20} radius="xl">
-              <IconTrendingUp size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>登録習慣数</List.Item>
-          <List.Item>総記録数</List.Item>
-          <List.Item>今日の完了数</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="teal" size={18} radius="xl">
+                <IconList size={10} />
+              </ThemeIcon>
+            }
+          >
+            登録習慣数
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="blue" size={18} radius="xl">
+                <IconDatabase size={10} />
+              </ThemeIcon>
+            }
+          >
+            総記録数
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="green" size={18} radius="xl">
+                <IconListCheck size={10} />
+              </ThemeIcon>
+            }
+          >
+            今日の完了数
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -77,18 +120,34 @@ const HOME_STEPS = [
     content: (
       <Stack gap="xs">
         <Text size="sm">このボタンから習慣一覧ページに移動できます。</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="grape" size={20} radius="xl">
-              <IconCheck size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>習慣の作成</List.Item>
-          <List.Item>習慣の編集</List.Item>
-          <List.Item>記録の追加</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="grape" size={18} radius="xl">
+                <IconPlus size={10} />
+              </ThemeIcon>
+            }
+          >
+            習慣の作成
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="violet" size={18} radius="xl">
+                <IconEdit size={10} />
+              </ThemeIcon>
+            }
+          >
+            習慣の編集
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="indigo" size={18} radius="xl">
+                <IconCirclePlus size={10} />
+              </ThemeIcon>
+            }
+          >
+            記録の追加
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -104,18 +163,34 @@ const HOME_STEPS = [
     title: 'カレンダー表示',
     content: (
       <Stack gap="xs">
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="blue" size={20} radius="xl">
-              <IconCalendar size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>月・週・日の3つの表示モード</List.Item>
-          <List.Item>習慣の実行状況を確認</List.Item>
-          <List.Item>日付をクリックで詳細表示</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="blue" size={18} radius="xl">
+                <IconCalendarEvent size={10} />
+              </ThemeIcon>
+            }
+          >
+            月・週・日の3つの表示モード
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="cyan" size={18} radius="xl">
+                <IconEye size={10} />
+              </ThemeIcon>
+            }
+          >
+            習慣の実行状況を確認
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="teal" size={18} radius="xl">
+                <IconClick size={10} />
+              </ThemeIcon>
+            }
+          >
+            日付をクリックで詳細表示
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -132,18 +207,23 @@ const HOME_STEPS = [
     content: (
       <Stack gap="xs">
         <Text size="sm">選択した日付の完了習慣を確認</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="green" size={20} radius="xl">
-              <IconListCheck size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>完了習慣の一覧表示</List.Item>
-          <List.Item>
-            <IconShare size={14} style={{ display: 'inline', marginRight: 4 }} />
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="green" size={18} radius="xl">
+                <IconListCheck size={10} />
+              </ThemeIcon>
+            }
+          >
+            完了習慣の一覧表示
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="blue" size={18} radius="xl">
+                <IconShare size={10} />
+              </ThemeIcon>
+            }
+          >
             共有ボタンで実績をシェア
           </List.Item>
         </List>
@@ -162,17 +242,25 @@ const HOME_STEPS = [
     content: (
       <Stack gap="xs">
         <Text size="sm">GitHubスタイルのヒートマップ</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="orange" size={20} radius="xl">
-              <IconFlame size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>年間の継続状況を可視化</List.Item>
-          <List.Item>色の濃さで活動量を表示</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="orange" size={18} radius="xl">
+                <IconCalendarTime size={10} />
+              </ThemeIcon>
+            }
+          >
+            年間の継続状況を可視化
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="red" size={18} radius="xl">
+                <IconPalette size={10} />
+              </ThemeIcon>
+            }
+          >
+            色の濃さで活動量を表示
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -192,19 +280,43 @@ const HABITS_STEPS = [
     content: (
       <Stack gap="xs">
         <Text size="sm">新しい習慣を作成できます</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="blue" size={20} radius="xl">
-              <IconPlus size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>習慣名</List.Item>
-          <List.Item>説明</List.Item>
-          <List.Item>カラー</List.Item>
-          <List.Item>優先度</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="blue" size={18} radius="xl">
+                <IconLetterCase size={10} />
+              </ThemeIcon>
+            }
+          >
+            習慣名
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="cyan" size={18} radius="xl">
+                <IconFileText size={10} />
+              </ThemeIcon>
+            }
+          >
+            説明
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="pink" size={18} radius="xl">
+                <IconPalette size={10} />
+              </ThemeIcon>
+            }
+          >
+            カラー
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="yellow" size={18} radius="xl">
+                <IconStar size={10} />
+              </ThemeIcon>
+            }
+          >
+            優先度
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -221,19 +333,43 @@ const HABITS_STEPS = [
     content: (
       <Stack gap="xs">
         <Text size="sm">習慣を見やすく整理</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="violet" size={20} radius="xl">
-              <IconFilter size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>検索機能</List.Item>
-          <List.Item>並び順の変更</List.Item>
-          <List.Item>優先度フィルター</List.Item>
-          <List.Item>キーワード絞り込み</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="violet" size={18} radius="xl">
+                <IconSearch size={10} />
+              </ThemeIcon>
+            }
+          >
+            検索機能
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="grape" size={18} radius="xl">
+                <IconArrowsSort size={10} />
+              </ThemeIcon>
+            }
+          >
+            並び順の変更
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="indigo" size={18} radius="xl">
+                <IconFilter size={10} />
+              </ThemeIcon>
+            }
+          >
+            優先度フィルター
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="blue" size={18} radius="xl">
+                <IconZoomQuestion size={10} />
+              </ThemeIcon>
+            }
+          >
+            キーワード絞り込み
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -250,20 +386,52 @@ const HABITS_STEPS = [
     content: (
       <Stack gap="xs">
         <Text size="sm">各習慣の詳細を確認</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="teal" size={20} radius="xl">
-              <IconEdit size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>編集・削除ボタン</List.Item>
-          <List.Item>統計情報</List.Item>
-          <List.Item>レベル & バッジ</List.Item>
-          <List.Item>トレンドチャート</List.Item>
-          <List.Item>ヒートマップ</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="teal" size={18} radius="xl">
+                <IconEdit size={10} />
+              </ThemeIcon>
+            }
+          >
+            編集・削除ボタン
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="blue" size={18} radius="xl">
+                <IconChartBar size={10} />
+              </ThemeIcon>
+            }
+          >
+            統計情報
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="yellow" size={18} radius="xl">
+                <IconAward size={10} />
+              </ThemeIcon>
+            }
+          >
+            レベル & バッジ
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="green" size={18} radius="xl">
+                <IconTrendingUp size={10} />
+              </ThemeIcon>
+            }
+          >
+            トレンドチャート
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="orange" size={18} radius="xl">
+                <IconChartGridDots size={10} />
+              </ThemeIcon>
+            }
+          >
+            ヒートマップ
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -279,18 +447,34 @@ const HABITS_STEPS = [
     title: 'カレンダー表示',
     content: (
       <Stack gap="xs">
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="blue" size={20} radius="xl">
-              <IconCalendar size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>月・週・日の表示モード</List.Item>
-          <List.Item>習慣の実行状況</List.Item>
-          <List.Item>完了済み習慣のみ表示</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="blue" size={18} radius="xl">
+                <IconCalendarEvent size={10} />
+              </ThemeIcon>
+            }
+          >
+            月・週・日の表示モード
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="cyan" size={18} radius="xl">
+                <IconProgress size={10} />
+              </ThemeIcon>
+            }
+          >
+            習慣の実行状況
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="green" size={18} radius="xl">
+                <IconFilterCheck size={10} />
+              </ThemeIcon>
+            }
+          >
+            完了済み習慣のみ表示
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -307,18 +491,34 @@ const HABITS_STEPS = [
     content: (
       <Stack gap="xs">
         <Text size="sm">習慣別の時間配分を可視化</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="pink" size={20} radius="xl">
-              <IconChartPie size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>期間別の時間配分</List.Item>
-          <List.Item>円グラフで表示</List.Item>
-          <List.Item>使用時間が一目でわかる</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="pink" size={18} radius="xl">
+                <IconClock size={10} />
+              </ThemeIcon>
+            }
+          >
+            期間別の時間配分
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="grape" size={18} radius="xl">
+                <IconChartPie size={10} />
+              </ThemeIcon>
+            }
+          >
+            円グラフで表示
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="cyan" size={18} radius="xl">
+                <IconEye size={10} />
+              </ThemeIcon>
+            }
+          >
+            使用時間が一目でわかる
+          </List.Item>
         </List>
       </Stack>
     ),
@@ -335,18 +535,34 @@ const HABITS_STEPS = [
     content: (
       <Stack gap="xs">
         <Text size="sm">レイアウトをカスタマイズ</Text>
-        <List
-          size="sm"
-          spacing="xs"
-          icon={
-            <ThemeIcon color="cyan" size={20} radius="xl">
-              <IconResize size={12} />
-            </ThemeIcon>
-          }
-        >
-          <List.Item>中央のハンドルをドラッグ</List.Item>
-          <List.Item>左右のパネルサイズを調整</List.Item>
-          <List.Item>お好みのレイアウトに変更</List.Item>
+        <List size="sm" spacing="xs">
+          <List.Item
+            icon={
+              <ThemeIcon color="cyan" size={18} radius="xl">
+                <IconGripVertical size={10} />
+              </ThemeIcon>
+            }
+          >
+            中央のハンドルをドラッグ
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="blue" size={18} radius="xl">
+                <IconArrowsHorizontal size={10} />
+              </ThemeIcon>
+            }
+          >
+            左右のパネルサイズを調整
+          </List.Item>
+          <List.Item
+            icon={
+              <ThemeIcon color="violet" size={18} radius="xl">
+                <IconLayout size={10} />
+              </ThemeIcon>
+            }
+          >
+            お好みのレイアウトに変更
+          </List.Item>
         </List>
       </Stack>
     ),
